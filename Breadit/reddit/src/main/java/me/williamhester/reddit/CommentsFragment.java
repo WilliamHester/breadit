@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -81,9 +82,14 @@ public class CommentsFragment extends Fragment {
         protected void onPostExecute(List<Comment> result) {
             if (result != null) {
                 for (Comment comment : result) {
-                    mLinearLayout.addView(new CommentView(getActivity(), comment));
+                    LinearLayout.LayoutParams params =
+                            new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                    ViewGroup.LayoutParams.WRAP_CONTENT);
+                    mLinearLayout.addView(new CommentView(getActivity(), comment), params);
+//                    Log.d("BreaditDebug", comment.getBody());
                     mCommentsList.add(comment);
                 }
+                Toast.makeText(getActivity(), "mLinearLayout child count " + mLinearLayout.getChildCount(), Toast.LENGTH_LONG).show();
             }
         }
     }

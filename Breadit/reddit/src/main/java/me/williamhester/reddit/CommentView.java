@@ -29,7 +29,27 @@ public class CommentView extends View {
         mComment = comment;
         LayoutInflater layoutInflater =
                 (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        layoutInflater.inflate(R.layout.view_comment, mRootView);
+        View v = layoutInflater.inflate(R.layout.view_comment, mRootView);
+        mRootView = (LinearLayout) v.findViewById(R.id.root);
+        mUser = (TextView) v.findViewById(R.id.user);
+        mScore = (TextView) v.findViewById(R.id.score);
+        mTime = (TextView) v.findViewById(R.id.time);
+        mCommentText = (TextView) v.findViewById(R.id.comment_text);
+        mReplies = (LinearLayout) v.findViewById(R.id.replies);
+
+        if (mComment == null)
+            Log.e("BreaditDebug", "You're about to get an NPE");
+
+        mUser.setText(mComment.getAuthor());
+        mScore.setText(mComment.getScore() + "");
+        mTime.setText(calculateTime(mComment.getCreated(), System.currentTimeMillis() / 1000));
+        mCommentText.setText(mComment.getBody());
+
+        for (Comment reply : mComment.getReplies()) {
+            CommentView cv = new CommentView(mContext, reply);
+            mReplies.addView(cv);
+        }
+        Log.d("BreaditDebug", "finished inflation from constructor");
     }
 
     @Override

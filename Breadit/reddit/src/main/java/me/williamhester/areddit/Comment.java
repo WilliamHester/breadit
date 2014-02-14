@@ -69,7 +69,6 @@ public class Comment extends Thing {
     public long getCreatedUtc() {
 //        return Long.parseLong(new Scanner((((JSONObject)_data.get("data")).get("created_utc").toString())).useDelimiter("\\.").next());
         return Long.parseLong(new DecimalFormat("###########").format(Double.parseDouble(((JSONObject)_data.get("data")).get("created_utc").toString())));
-
     }
 
     /**
@@ -79,6 +78,9 @@ public class Comment extends Thing {
         List<Comment> ret = new ArrayList<>();
         
         JSONObject data = (JSONObject)_data.get("data");
+        if (data.get("replies") instanceof String) {
+            return null;
+        }
         JSONObject replies = (JSONObject)data.get("replies");
         JSONObject replyData = (JSONObject)replies.get("data");
         JSONArray children = (JSONArray)replyData.get("children");
@@ -110,23 +112,12 @@ public class Comment extends Thing {
 
         ArrayList<Comment> comments = new ArrayList<Comment>();
 
-        String urlString = "http://www.reddit.com/comments/" + articleId + "/.json";
+        String urlString = "http://www.reddit.com" + articleId + "/.json";
+        Log.i("BreaditDebug", urlString);
         String cookie = user == null ? null : user.getCookie();
 
-        JSONObject rootObject = (JSONObject) Utilities.get("", urlString, cookie);
-        if (rootObject == null) {
-            Log.e("BreaditDebug", "rootObject == null");
-        }
-        JSONObject data = (JSONObject) rootObject.get("data");
-        if (data == null) {
-            Log.e("BreaditDebug", "data == null");
-        }
-        JSONArray array = (JSONArray) data.get("children");
-        if (array == null) {
-            Log.e("BreaditDebug", "array == null");
-        }
-
-        if(array.size() > 0) {
+        JSONArray array = (JSONArray) Utilities.get("", urlString, cookie);
+        if(array != null && array.size() > 0) {
             JSONObject replies = (JSONObject)array.get(1);
             JSONArray children = (JSONArray)((JSONObject)replies.get("data")).get("children");
 
