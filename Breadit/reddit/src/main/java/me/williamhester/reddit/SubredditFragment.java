@@ -55,8 +55,8 @@ public class SubredditFragment extends Fragment {
         mAction = getActivity().getActionBar();
         mAction.setTitle("Front page of Reddit");
         mContext = getActivity();
-        mSubmissionList = new ArrayList<>();
-        mNames = new HashSet<>();
+        mSubmissionList = new ArrayList<Submission>();
+        mNames = new HashSet<String>();
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle bundle) {
@@ -67,7 +67,7 @@ public class SubredditFragment extends Fragment {
     }
 
     private void populateSubmissions() {
-        mUser = new User("Shockwave_", "tanksauce24");
+        mUser = new User("", "");
         SubmissionsListViewHelper list = new SubmissionsListViewHelper(mSubredditName,
                 Submission.HOT, -1, null, null, mUser, mSubmissions);
         mSubmissionsAdapter = new SubmissionArrayAdapter(mContext);
@@ -203,7 +203,7 @@ public class SubredditFragment extends Fragment {
                         user.getCookie());
                 JSONArray array = (JSONArray) ((JSONObject) rootObject.get("data")).get("children");
 
-                submissions = new ArrayList<>();
+                submissions = new ArrayList<Submission>();
                 for (int i = 0; i < array.size(); i++) {
                     JSONObject jsonData = (JSONObject)array.get(i);
                     submissions.add(new Submission(jsonData));

@@ -75,7 +75,7 @@ public class Comment extends Thing {
      * Get the replies to this comment.
      */
     public List<Comment> getReplies() {
-        List<Comment> ret = new ArrayList<>();
+        List<Comment> ret = new ArrayList<Comment>();
         
         JSONObject data = (JSONObject)_data.get("data");
         if (data.get("replies") instanceof String) {

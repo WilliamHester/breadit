@@ -33,7 +33,7 @@ public class CommentsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mCommentsList = new ArrayList<>();
+        mCommentsList = new ArrayList<Comment>();
         Bundle args = getArguments();
         if (args != null) {
             mUrl = args.getString("url", null);

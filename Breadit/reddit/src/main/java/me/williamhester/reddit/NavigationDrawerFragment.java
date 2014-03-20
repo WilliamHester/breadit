@@ -80,7 +80,7 @@ public class NavigationDrawerFragment extends Fragment {
             mFromSavedInstanceState = true;
         }
 
-        mSubredditList = new ArrayList<>();
+        mSubredditList = new ArrayList<Subreddit>();
         // Select either the default item (0) or the last selected item.
         selectItem(mCurrentSelectedPosition);
     }
