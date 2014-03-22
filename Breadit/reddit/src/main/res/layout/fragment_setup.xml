@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <FrameLayout
+        android:layout_weight="1"
+        android:layout_width="match_parent"
+        android:layout_height="0dp">
+        <TextView
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="30sp"
+            android:text="@string/enter_acc_info"
+            android:fontFamily="sans-serif-light" />
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_weight="1"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="vertical">
+
+        <EditText android:id="@+id/username"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center"
+            android:layout_width="240dp"
+            android:layout_height="wrap_content"
+            android:hint="@string/username"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="16dp" />
+
+        <EditText android:id="@+id/password"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:layout_width="240dp"
+            android:layout_height="wrap_content"
+            android:hint="@string/password"
+            android:inputType="textPassword"/>
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -2,14 +2,17 @@ package me.williamhester.areddit;
 
 import android.util.Log;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.ParseException;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.jar.Attributes;
 
 import me.williamhester.areddit.utils.Utilities;
 
@@ -25,11 +28,11 @@ public class Comment extends Thing {
     Comment mParent;
     List<Comment> mReplies;
 
-    public Comment(JSONObject jsonObj) {
+    public Comment(JsonObject jsonObj) {
         this(jsonObj, null);
     }
 
-    public Comment(JSONObject jsonObj, Comment parent) {
+    public Comment(JsonObject jsonObj, Comment parent) {
         super(jsonObj);
         mParent = parent;
         if (!getKind().equals("more")) {
@@ -38,37 +41,35 @@ public class Comment extends Thing {
     }
 
     public String getBody() { 
-        return ((JSONObject)_data.get("data")).get("body").toString();
+        return mData.get("data").getAsJsonObject().get("body").toString();
     }
 
     public long getUpVotes() { 
-        return Long.parseLong(((JSONObject)_data.get("data")).get("ups").toString());
+        return mData.get("data").getAsJsonObject().get("ups").getAsLong();
     }
 
     public long getDownVotes() { 
-        return Long.parseLong(((JSONObject) _data.get("data")).get("downs").toString());
+        return mData.get("data").getAsJsonObject().get("downs").getAsLong();
     }
 
     public long getScore() { 
-        return Long.parseLong((((JSONObject)_data.get("data")).get("score")).toString());
+        return mData.get("data").getAsJsonObject().get("score").getAsLong();
     }
 
     public String getAuthor() { 
-        return ((JSONObject)_data.get("data")).get("author").toString();
+        return mData.get("data").getAsJsonObject().get("author").toString();
     }
 
     public boolean hasReplies() {
         return mReplies != null;
     }
 
-    public long getCreated() {
-//        return Long.parseLong(new Scanner((((JSONObject)_data.get("data")).get("created").toString())).useDelimiter("\\.").next());
-        return Long.parseLong(new DecimalFormat("###########").format(Double.parseDouble(((JSONObject) _data.get("data")).get("created").toString())));
+    public double getCreated() {
+        return mData.get("data").getAsJsonObject().get("created").getAsDouble();
     }
 
-    public long getCreatedUtc() {
-//        return Long.parseLong(new Scanner((((JSONObject)_data.get("data")).get("created_utc").toString())).useDelimiter("\\.").next());
-        return Long.parseLong(new DecimalFormat("###########").format(Double.parseDouble(((JSONObject)_data.get("data")).get("created_utc").toString())));
+    public double getCreatedUtc() {
+        return mData.get("data").getAsJsonObject().get("created_utc").getAsDouble();
     }
 
     /**
@@ -77,16 +78,13 @@ public class Comment extends Thing {
     public List<Comment> getReplies() {
         List<Comment> ret = new ArrayList<Comment>();
         
-        JSONObject data = (JSONObject)_data.get("data");
-        if (data.get("replies") instanceof String) {
-            return null;
-        }
-        JSONObject replies = (JSONObject)data.get("replies");
-        JSONObject replyData = (JSONObject)replies.get("data");
-        JSONArray children = (JSONArray)replyData.get("children");
+        JsonObject data = mData.get("data").getAsJsonObject();
+        JsonObject replies = data.get("replies").getAsJsonObject();
+        JsonObject replyData = replies.get("data").getAsJsonObject();
+        JsonArray children = replyData.get("children").getAsJsonArray();
 
         for (int i = 0; i < children.size(); i++) {
-            JSONObject jsonData = (JSONObject)children.get(i);
+            JsonObject jsonData = (JsonObject)children.get(i);
             Comment comment = new Comment(jsonData);
 
             if(!comment.getKind().equals("more")) {
@@ -105,24 +103,28 @@ public class Comment extends Thing {
      * @return A list containing Comments
      *
      * @throws java.io.IOException      If connection fails
-     * @throws org.json.simple.parser.ParseException   If JSON parsing fails
      */
     public static List<Comment> getComments(String articleId, User user, String after)
-            throws IOException, ParseException {
+            throws IOException {
 
         ArrayList<Comment> comments = new ArrayList<Comment>();
 
         String urlString = "http://www.reddit.com" + articleId + "/.json";
         Log.i("BreaditDebug", urlString);
         String cookie = user == null ? null : user.getCookie();
+        String modhash = user == null ? null : user.getModhash();
 
-        JSONArray array = (JSONArray) Utilities.get("", urlString, cookie);
+        if (after != null)
+            urlString += "?after=" + after;
+
+        JsonArray array = new JsonParser().parse(Utilities.get(null, urlString, cookie, modhash))
+                .getAsJsonArray();
         if(array != null && array.size() > 0) {
-            JSONObject replies = (JSONObject)array.get(1);
-            JSONArray children = (JSONArray)((JSONObject)replies.get("data")).get("children");
+            JsonObject replies = array.get(1).getAsJsonObject();
+            JsonArray children = replies.get("data").getAsJsonObject().get("children").getAsJsonArray();
 
             for (int i = 0; i < children.size(); i++) {
-                JSONObject jsonData = (JSONObject)children.get(i);
+                JsonObject jsonData = (JsonObject)children.get(i);
                 comments.add(new Comment(jsonData));
             }
         }

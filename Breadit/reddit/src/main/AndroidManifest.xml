@@ -18,5 +18,8 @@
         <activity
             android:name="me.williamhester.reddit.ContentActivity" >
         </activity>
+        <activity
+            android:name="me.williamhester.reddit.Setup" >
+        </activity>
     </application>
 </manifest>

@@ -42,7 +42,6 @@ public class SubmissionsListViewHelper {
      * @return The list containing submissions
      *
      * @throws java.io.IOException      If connection fails
-     * @throws org.json.simple.parser.ParseException   If JSON parsing fails
      */
     public SubmissionsListViewHelper(String subredditName, int sortType, int typeArgs, String before,
                                      String after, User user, ListView list) {

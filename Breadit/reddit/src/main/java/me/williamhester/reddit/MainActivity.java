@@ -3,12 +3,15 @@ package me.williamhester.reddit;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.FragmentManager;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-;
+import me.williamhester.areddit.User;
 
 public class MainActivity extends Activity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -17,6 +20,9 @@ public class MainActivity extends Activity
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
     private NavigationDrawerFragment mNavigationDrawerFragment;
+    private SharedPreferences mPrefs;
+    private User mUser;
+
 
     /**
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
@@ -27,6 +33,42 @@ public class MainActivity extends Activity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mPrefs = getSharedPreferences("preferences", MODE_PRIVATE);
+
+        if (getIntent() != null && getIntent().getExtras() != null) { // If the user just completed the setup
+            boolean b = getIntent().getExtras().getBoolean("finishedSetup");
+            mUser = getIntent().getExtras().getParcelable("user");
+            SharedPreferences.Editor edit = mPrefs.edit();
+            edit.putBoolean("finishedSetup", b);
+            if (mUser != null) {
+                edit.putString("username", mUser.getUsername());
+                edit.putString("cookie", mUser.getCookie());
+                edit.putString("modhash", mUser.getModhash());
+            }
+            edit.commit();
+
+            FragmentManager fragmentManager = getFragmentManager();
+            Bundle bundle = new Bundle();
+            bundle.putParcelable("user", mUser);
+            SubredditFragment sf = new SubredditFragment();
+            sf.setArguments(bundle);
+            fragmentManager.beginTransaction()
+                    .replace(R.id.container, sf)
+                    .commit();
+        } else if (!mPrefs.getBoolean("finishedSetup", false)) { // If the user has not completed the setup
+            Intent i = new Intent(this, Setup.class);
+            startActivity(i);
+        } else { // If the user has completed the setup
+            String username = mPrefs.getString("username", "");
+            String cookie = mPrefs.getString("cookie", "");
+            String modhash = mPrefs.getString("modhash", "");
+            if (!username.equals("")) {
+                mUser = new User(username, modhash, cookie);
+            }
+        }
+        if (mUser != null)
+            Log.i("MainActivity", "User is not null");
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getFragmentManager().findFragmentById(R.id.navigation_drawer);
@@ -42,8 +84,17 @@ public class MainActivity extends Activity
     public void onNavigationDrawerItemSelected(int position) {
         // update the main content by replacing fragments
         FragmentManager fragmentManager = getFragmentManager();
+        if (mUser == null) {
+            Log.e("MainActivity", "wat");
+        } else {
+            Log.i("MainActivity", "not wat");
+        }
+        Bundle b = new Bundle();
+        b.putParcelable("user", mUser);
+        SubredditFragment sf = new SubredditFragment();
+        sf.setArguments(b);
         fragmentManager.beginTransaction()
-                .replace(R.id.container, new SubredditFragment())
+                .replace(R.id.container, sf)
                 .commit();
     }
 

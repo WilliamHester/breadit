@@ -1,13 +1,20 @@
 package me.williamhester.areddit;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.ParseException;
+import android.util.Log;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.jar.Attributes;
+
+import me.williamhester.areddit.utils.Utilities;
 
 /**
  * Created with IntelliJ IDEA.
@@ -18,104 +25,104 @@ import java.util.List;
  */
 public class Subreddit extends Thing {
 
-    public Subreddit(JSONObject data) {
+    public Subreddit(JsonObject data) {
         super(data);
     }
 
 //    public HTML getSubmitTextHtml() {
-//        return (HTML) ((JSONObject)_data.get("data")).get("submit_text_html").toString();
+//        return (HTML) mData.get("data").getAsJsonObject().get("submit_text_html").getAsString();
 //    }
 
     public boolean userIsBanned() {
-        return Boolean.parseBoolean(((JSONObject)_data.get("data")).get("user_is_banned").toString());
+        return Boolean.parseBoolean(mData.get("data").getAsJsonObject().get("user_is_banned").getAsString());
     }
 
     public String getDisplayName() {
-        return  ((JSONObject)_data.get("data")).get("display_name").toString();
+        return  mData.get("data").getAsJsonObject().get("display_name").getAsString();
     }
 
     public String getHeaderImgUrl() {
-        return  ((JSONObject)_data.get("data")).get("header_img").toString();
+        return  mData.get("data").getAsJsonObject().get("header_img").getAsString();
     }
 
 //    public HTML getDescripionHtml() {
-//        return new HTML()((JSONObject)_data.get("data")).get("description_html").toString();
+//        return new HTML()mData.get("data").getAsJsonObject().get("description_html").getAsString();
 //    }
 
     public String getTitle() {
-        return  ((JSONObject)_data.get("data")).get("title").toString();
+        return  mData.get("data").getAsJsonObject().get("title").getAsString();
     }
 
     public boolean isNsfw() {
-        return Boolean.parseBoolean(((JSONObject)_data.get("data")).get("over18").toString());
+        return Boolean.parseBoolean(mData.get("data").getAsJsonObject().get("over18").getAsString());
     }
 
     public boolean userIsModerator() {
-        return Boolean.parseBoolean(((JSONObject)_data.get("data")).get("user_is_moderator").toString());
+        return Boolean.parseBoolean(mData.get("data").getAsJsonObject().get("user_is_moderator").getAsString());
     }
 
     public String getHeaderTitle() {
-        return  ((JSONObject)_data.get("data")).get("header_title").toString();
+        return  mData.get("data").getAsJsonObject().get("header_title").getAsString();
     }
 
     public String getDescription() {
-        return  ((JSONObject)_data.get("data")).get("description").toString();
+        return  mData.get("data").getAsJsonObject().get("description").getAsString();
     }
 
     public String getSubmitLinkLabel() {
-        return  ((JSONObject)_data.get("data")).get("submit_link_label").toString();
+        return  mData.get("data").getAsJsonObject().get("submit_link_label").getAsString();
     }
 
     public boolean isPublicTraffic() {
-        return Boolean.parseBoolean( ((JSONObject)_data.get("data")).get("public_traffic").toString());
+        return Boolean.parseBoolean( mData.get("data").getAsJsonObject().get("public_traffic").getAsString());
     }
 
     //Todo add a header_size getter. It is formatted like [160, 64]
 
     public long getSubscriberCount() {
-        return Long.parseLong( ((JSONObject)_data.get("data")).get("subscribers").toString());
+        return Long.parseLong( mData.get("data").getAsJsonObject().get("subscribers").getAsString());
     }
 
     public String getSubmitTextLabel() {
-        return  ((JSONObject)_data.get("data")).get("submit_text_label").toString();
+        return  mData.get("data").getAsJsonObject().get("submit_text_label").getAsString();
     }
 
     public String getUrl() {
-        return  ((JSONObject)_data.get("data")).get("url").toString();
+        return  mData.get("data").getAsJsonObject().get("url").getAsString();
     }
 
     //Todo probably should not be of type String, but I'm not sure if it's a float or what
     public String getCreated() {
-        return  ((JSONObject)_data.get("data")).get("created").toString();
+        return  mData.get("data").getAsJsonObject().get("created").getAsString();
     }
 
     //Todo probably should not be of type String, but I'm not sure if it's a float or what
     public String getCreatedUtc() {
-        return  ((JSONObject)_data.get("data")).get("created_utc").toString();
+        return  mData.get("data").getAsJsonObject().get("created_utc").getAsString();
     }
 
     public boolean userIsContributor() {
-        return Boolean.parseBoolean( ((JSONObject)_data.get("data")).get("user_is_contributor").toString());
+        return Boolean.parseBoolean( mData.get("data").getAsJsonObject().get("user_is_contributor").getAsString());
     }
 
     public String getPublicDescription() {
-        return  ((JSONObject)_data.get("data")).get("public_description").toString();
+        return  mData.get("data").getAsJsonObject().get("public_description").getAsString();
     }
 
     public long getCommentScoreHideMins() {
-        return Long.parseLong( ((JSONObject)_data.get("data")).get("comment_score_hide_mins").toString());
+        return Long.parseLong( mData.get("data").getAsJsonObject().get("comment_score_hide_mins").getAsString());
     }
 
     public String getSubredditType() {
-        return  ((JSONObject)_data.get("data")).get("subreddit_type").toString();
+        return  mData.get("data").getAsJsonObject().get("subreddit_type").getAsString();
     }
 
     public String getSubmissionType() {
-        return  ((JSONObject)_data.get("data")).get("submission_type").toString();
+        return  mData.get("data").getAsJsonObject().get("submission_type").getAsString();
     }
 
     public boolean userIsSubscriber() {
-        return Boolean.parseBoolean( ((JSONObject)_data.get("data")).get("user_is_subscriber").toString());
+        return Boolean.parseBoolean(mData.get("data").getAsJsonObject().get("user_is_subscriber").getAsString());
     }
 
     /**
@@ -127,43 +134,47 @@ public class Subreddit extends Thing {
      * @return                  returns a list of Subreddit
      *
      * @throws java.io.IOException      if connection fails
-     * @throws org.json.simple.parser.ParseException   if JSON parsing fails
      */
 
-    public static List<Subreddit> getMySubreddits(User user) throws IOException, ParseException,
+    public static List<Subreddit> getMySubreddits(User user) throws IOException,
             UserNotConnectedException {
-        if (!user.isConnected()) {
-            throw new UserNotConnectedException("The user is not connected to reddit. You must invoke user.connect()"
-                    + " before calling this method");
+        if (user.getCookie() == null) {
+            throw new UserNotConnectedException("The user is not connected to reddit. " +
+                    "You must invoke user.newUser() before calling this method");
         }
 
         ArrayList<Subreddit> subreddits = new ArrayList<Subreddit>();
 
-        JSONObject object = (JSONObject) Utils.get("", new URL(
-                "http://www.reddit.com/subreddits/mine/subscriber.json"), user.getCookie());
-        JSONObject data = (JSONObject) object.get("data");
-        JSONArray array = (JSONArray)data.get("children");
+        JsonObject object = new JsonParser().parse(Utilities.get(null,
+                "http://www.reddit.com/subreddits/mine/subscriber.json",
+                user.getCookie(), user.getModhash())).getAsJsonObject();
+        JsonObject data = object.get("data").getAsJsonObject();
+        JsonArray array = data.get("children").getAsJsonArray();
 
         for (int i = 0; i < array.size(); i++) {
-            JSONObject jsonData = (JSONObject) array.get(i);
+            JsonObject jsonData = array.get(i).getAsJsonObject();
             subreddits.add(new Subreddit(jsonData));
         }
 
-        String after = (String) data.get("after");
+        String after = data.get("after").getAsString();
 
         while (after != null) {
 
-            object = (JSONObject) Utils.get("", new URL(
-                    "http://www.reddit.com/subreddits/mine/subscriber.json?after=" + after), user.getCookie());
-            data = (JSONObject) object.get("data");
-            array = (JSONArray) data.get("children");
+            // Todo: remove this after testing:
+            Log.i("Subreddit", "after = \"" + after + "\"");
+
+            object = new JsonParser().parse(Utilities.get(null,
+                    "http://www.reddit.com/subreddits/mine/subscriber.json?after=" + after,
+                    user.getCookie(), user.getModhash())).getAsJsonObject();
+            data = object.get("data").getAsJsonObject();
+            array = data.get("children").getAsJsonArray();
 
             for (int i = 0; i < array.size(); i++) {
-                JSONObject jsonData = (JSONObject) array.get(i);
+                JsonObject jsonData = array.get(i).getAsJsonObject();
                 subreddits.add(new Subreddit(jsonData));
             }
 
-            after = (String) data.get("after");
+            after = data.get("after").getAsString();
             System.out.println("after = " + after);
         }
 

@@ -1,67 +1,51 @@
 package me.williamhester.areddit;
 
-import org.json.simple.JSONObject;
+import com.google.gson.JsonObject;
 
 
 /**
  *
  * This class represents a reddit "thing"
- * @see <a href="https://github.com/reddit/reddit/wiki/API">Reddit API Reference</a>
- * @see <a href="https://github.com/reddit/reddit/wiki/JSON#thing-reddit-base-class">thing (reddit base class)</a>
- *
- *
- * @author <a href="http://www.omrlnr.com">Omer Elnour</a>
- * @author <a href="https://github.com/jasonsimpson">Jason Simpson</a>
- *
  */
 public abstract class Thing {
 
     /**
      * this item's identifier, e.g. "8xwlg"
      */
-    protected String _id;
+    protected String mId;
 
 	/**
 	 * The full name of this thing.
 	 */
-	protected String _name;
+	protected String mName;
 
 	/**
 	 * The kind of this thing. (i.e "t2" for users)
 	 */
-	protected String _kind;
+	protected String mKind;
 
     /**
      * A custom data structure used to hold valuable information. 
      * This object's format will follow the data structure respective 
      * of its kind. 
      */
-    protected JSONObject _data;
+    protected JsonObject mData;
 
-    public Thing(JSONObject data) {
-        _data = data;
+    public Thing(JsonObject data) {
+        mData = data;
     }
-
-    /*
-    public Thing(String id, String name, String kind, Object data) {
-        this._id = id;
-        this._name = name;
-        this._kind = kind;
-        this._data = (JSONObject)data;
-    }
-    */
 
     public String getId() {
-        return (String)((JSONObject)(_data.get("data"))).get("id");
+        return mData.getAsJsonObject("data").get("id").getAsString();
     }
 
     public String getName() { 
-        return (String)((JSONObject)(_data.get("data"))).get("name");
+        return mData.getAsJsonObject("data").get("name").getAsString();
     }
 
     public String getKind() {
-        return (String)_data.get("kind");
-        // return (String)((JSONObject)(_data.get("data"))).get("kind");
+        return mData.get("kind").getAsString();
+        // return (String)((JSONObject)(mData.get("data"))).get("kind");
     }
 
     /**
@@ -71,7 +55,7 @@ public abstract class Thing {
      * the required methods, they can obtain all underlying data directly 
      * using this method.
      */
-    public JSONObject getData() { return _data; }
+    public JsonObject getData() { return mData; }
 
     public String toString() {
         return toString("");

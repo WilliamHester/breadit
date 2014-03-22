@@ -1,14 +1,19 @@
 package me.williamhester.areddit;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.ParseException;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 
 import java.io.IOException;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+
+import me.williamhester.areddit.utils.Utilities;
 
 /**
  *
@@ -34,139 +39,126 @@ public class Submission extends Thing {
 
     public static final int FRONTPAGE = 0;
 
-    public Submission(JSONObject data) {
+    public Submission(JsonObject data) {
         super(data);
     }
 
-    public String toString() {
-        String thing = super.toString();
-        return thing +
-                "   Submission: "   + getTitle()        + "\n" +
-                "       author: "   + getAuthor()       + "\n" +
-                "       url:    "   + getUrl()          + "\n" +
-                "       score:  "   + getScore()        + "\n" +
-                "       up:     "   + getUpVotes()      + "\n" +
-                "       down:   "   + getDownVotes()    + "\n";
-                // Utils.getJSONDebugString(_data);
-
-    }
-
     public String getUrl() { 
-        return ((JSONObject)_data.get("data")).get("url").toString();
+        return mData.get("data").getAsJsonObject().get("url").getAsString();
     }
 
     public long getUpVotes() { 
-        return Long.parseLong(((JSONObject)_data.get("data")).get("ups").toString());
+        return Long.parseLong(mData.get("data").getAsJsonObject().get("ups").getAsString());
     }
 
     public long getDownVotes() { 
-        return Long.parseLong(((JSONObject)_data.get("data")).get("downs").toString());
+        return Long.parseLong(mData.get("data").getAsJsonObject().get("downs").getAsString());
     }
 
     public long getScore() { 
-        return Long.parseLong(((JSONObject)_data.get("data")).get("score").toString());
+        return Long.parseLong(mData.get("data").getAsJsonObject().get("score").getAsString());
     }
 
     public String getAuthor() { 
-        return ((JSONObject)_data.get("data")).get("author").toString();
+        return mData.get("data").getAsJsonObject().get("author").getAsString();
     }
 
     public String getTitle() { 
-        return ((JSONObject)_data.get("data")).get("title").toString();
+        return mData.get("data").getAsJsonObject().get("title").getAsString();
     }
 
     public String getDomain() {
-        return ((JSONObject)_data.get("data")).get("domain").toString();
+        return mData.get("data").getAsJsonObject().get("domain").getAsString();
     }
 
     public String getBannedBy() {
-        return ((JSONObject)_data.get("data")).get("banned_by").toString();
+        return mData.get("data").getAsJsonObject().get("banned_by").getAsString();
     }
 
     public String getMediaEmbed() {
-        return ((JSONObject)_data.get("data")).get("media_embed").toString();
+        return mData.get("data").getAsJsonObject().get("media_embed").getAsString();
     }
 
     public String getPermalink() {
-        return ((JSONObject) _data.get("data")).get("permalink").toString();
+        return mData.get("data").getAsJsonObject().get("permalink").getAsString();
     }
 
     public String getSubredditName() {
-        return ((JSONObject)_data.get("data")).get("subreddit").toString();
+        return mData.get("data").getAsJsonObject().get("subreddit").getAsString();
     }
 
     public String getSelfTextHtml() {
-        return (String)((JSONObject)_data.get("data")).get("selftext_html");
+        return mData.get("data").getAsJsonObject().get("selftext_html").getAsString();
     }
 
     public String getSelfText() {
-        return (String)((JSONObject)_data.get("data")).get("selftext");
+        return mData.get("data").getAsJsonObject().get("selftext").getAsString();
     }
 
     public String getLikes() {
-        return ((JSONObject)_data.get("data")).get("likes").toString();
+        return mData.get("data").getAsJsonObject().get("likes").getAsString();
     }
 
     public String getSecureMedia() {
-        return ((JSONObject)_data.get("data")).get("secure_media").toString();
+        return mData.get("data").getAsJsonObject().get("secure_media").getAsString();
     }
 
     public String getLinkFlairText() {
-        return (String)((JSONObject)_data.get("data")).get("link_flair_text");
+        return mData.get("data").getAsJsonObject().get("link_flair_text").getAsString();
     }
 
     public String getSecureMediaEmbed() {
-        return ((JSONObject)_data.get("data")).get("secure_media_embed").toString();
+        return mData.get("data").getAsJsonObject().get("secure_media_embed").getAsString();
     }
 
     public String getMedia() {
-        return ((JSONObject)_data.get("data")).get("media").toString();
+        return mData.get("data").getAsJsonObject().get("media").getAsString();
     }
 
     public String getApprovedBy() {
-        return ((JSONObject)_data.get("data")).get("approved_by").toString();
+        return mData.get("data").getAsJsonObject().get("approved_by").getAsString();
     }
 
     public boolean isNsfw() {
-        return Boolean.parseBoolean(((JSONObject)_data.get("data")).get("over_18").toString());
+        return Boolean.parseBoolean(mData.get("data").getAsJsonObject().get("over_18").getAsString());
     }
 
     public boolean isHidden() {
-        return Boolean.parseBoolean(((JSONObject)_data.get("data")).get("hidden").toString());
+        return Boolean.parseBoolean(mData.get("data").getAsJsonObject().get("hidden").getAsString());
     }
 
     public String getThumbnailUrl() {
-        return ((JSONObject)_data.get("data")).get("thumbnail").toString();
+        return mData.get("data").getAsJsonObject().get("thumbnail").getAsString();
     }
 
     public String getSubredditId() {
-        return ((JSONObject)_data.get("data")).get("subreddit_id").toString();
+        return mData.get("data").getAsJsonObject().get("subreddit_id").getAsString();
     }
 
     public double getEdited() {
-        return Double.parseDouble(((JSONObject)_data.get("data")).get("edited").toString());
+        return Double.parseDouble(mData.get("data").getAsJsonObject().get("edited").getAsString());
     }
 
     public boolean isSaved() {
-        return Boolean.parseBoolean(((JSONObject)_data.get("data")).get("saved").toString());
+        return Boolean.parseBoolean(mData.get("data").getAsJsonObject().get("saved").getAsString());
     }
 
     public boolean isSelf() {
-        return Boolean.parseBoolean(((JSONObject)_data.get("data")).get("is_self").toString());
+        return Boolean.parseBoolean(mData.get("data").getAsJsonObject().get("is_self").getAsString());
     }
 
     public int getNumberOfComments() {
-        return Integer.parseInt(((JSONObject)_data.get("data")).get("num_comments").toString());
+        return Integer.parseInt(mData.get("data").getAsJsonObject().get("num_comments").getAsString());
     }
 
     public long getCreated() {
-//        return Long.parseLong(new Scanner((((JSONObject)_data.get("data")).get("created").toString())).useDelimiter("\\.").next());
-        return Long.parseLong(new DecimalFormat("###########").format(Double.parseDouble(((JSONObject)_data.get("data")).get("created").toString())));
+//        return Long.parseLong(new Scanner((mData.get("data").getAsJsonObject().get("created").getAsString())).useDelimiter("\\.").next());
+        return Long.parseLong(new DecimalFormat("###########").format(Double.parseDouble(mData.get("data").getAsJsonObject().get("created").getAsString())));
     }
 
     public long getCreatedUtc() {
-//        return Long.parseLong(new Scanner((((JSONObject)_data.get("data")).get("created_utc").toString())).useDelimiter("\\.").next());
-        return Long.parseLong(new DecimalFormat("###########").format(Double.parseDouble(((JSONObject)_data.get("data")).get("created_utc").toString())));
+//        return Long.parseLong(new Scanner((mData.get("data").getAsJsonObject().get("created_utc").getAsString())).useDelimiter("\\.").next());
+        return Long.parseLong(new DecimalFormat("###########").format(Double.parseDouble(mData.get("data").getAsJsonObject().get("created_utc").getAsString())));
 
     }
 
@@ -185,7 +177,6 @@ public class Submission extends Thing {
      * @return The list containing submissions
      *
      * @throws java.io.IOException      If connection fails
-     * @throws org.json.simple.parser.ParseException   If JSON parsing fails
      */
     public static List<Submission> getSubmissions(String subredditName,
                                                   int sortType,
@@ -193,7 +184,7 @@ public class Submission extends Thing {
                                                   String before,
                                                   String after,
                                                   User user)
-            throws IOException, ParseException {
+            throws IOException {
 
         String append;
         if (subredditName == null) {
@@ -205,8 +196,9 @@ public class Submission extends Thing {
         }
 
         ArrayList<Submission> submissions = new ArrayList<Submission>();
-        URL url;
         String urlString = "http://www.reddit.com/" + append;
+
+        List<NameValuePair> apiParams = new ArrayList<NameValuePair>();
 
         switch (sortType) {
             case HOT:
@@ -229,22 +221,22 @@ public class Submission extends Thing {
         if (sortType == CONTROVERSIAL || sortType == TOP) {
             switch (typeArgs) {
                 case HOUR:
-                    urlString += "t=hour&";
+                    apiParams.add(new BasicNameValuePair("t", "hour"));
                     break;
                 case DAY:
-                    urlString += "t=day&";
+                    apiParams.add(new BasicNameValuePair("t", "day"));
                     break;
                 case WEEK:
-                    urlString += "t=week&";
+                    apiParams.add(new BasicNameValuePair("t", "week"));
                     break;
                 case MONTH:
-                    urlString += "t=month&";
+                    apiParams.add(new BasicNameValuePair("t", "month"));
                     break;
                 case YEAR:
-                    urlString += "t=year&";
+                    apiParams.add(new BasicNameValuePair("t", "year"));
                     break;
                 case ALL:
-                    urlString += "t=all&";
+                    apiParams.add(new BasicNameValuePair("t", "all"));
                     break;
                 default: break;
             }
@@ -256,14 +248,13 @@ public class Submission extends Thing {
             urlString += "before=" + before;
         }
 
-        url = new URL(urlString);
-
-        JSONObject object = (JSONObject) Utils.get("", url, user.getCookie());
-        JSONObject data = (JSONObject) object.get("data");
-        JSONArray array = (JSONArray)data.get("children");
+        JsonObject object = new JsonParser().parse(Utilities.get(null, urlString, user.getCookie(), user.getModhash()))
+                .getAsJsonObject();
+        JsonObject data = object.get("data").getAsJsonObject();
+        JsonArray array = data.get("children").getAsJsonArray();
 
         for (int i = 0; i < array.size(); i++) {
-            JSONObject jsonData = (JSONObject)array.get(i);
+            JsonObject jsonData = (JsonObject)array.get(i);
             submissions.add(new Submission(jsonData));
         }
 

@@ -23,7 +23,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
-;
+;import me.williamhester.areddit.Subreddit;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
@@ -80,7 +80,7 @@ public class NavigationDrawerFragment extends Fragment {
             mFromSavedInstanceState = true;
         }
 
-        mSubredditList = new ArrayList<Subreddit>();
+        mSubredditList = new ArrayList<String>();
         // Select either the default item (0) or the last selected item.
         selectItem(mCurrentSelectedPosition);
     }

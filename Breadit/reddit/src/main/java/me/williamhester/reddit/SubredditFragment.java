@@ -22,12 +22,15 @@ import com.koushikdutta.urlimageviewhelper.UrlImageViewHelper;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import me.williamhester.areddit.Submission;
 import me.williamhester.areddit.SubmissionsListViewHelper;
@@ -35,7 +38,8 @@ import me.williamhester.areddit.User;
 import me.williamhester.areddit.utils.Utilities;
 
 /**
- * Created by William on 1/3/14.
+ * Created by William Hester on 1/3/14.
+ * This class is the Fragment that contains the list of Submissions for that specific Subreddit.
  */
 public class SubredditFragment extends Fragment {
 
@@ -52,8 +56,15 @@ public class SubredditFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mAction = getActivity().getActionBar();
-        mAction.setTitle("Front page of Reddit");
+        if (getActivity() != null) {
+            mAction = getActivity().getActionBar();
+        }
+        if (getArguments() != null) {
+            mUser = getArguments().getParcelable("user");
+        }
+        if (mAction != null) {
+            mAction.setTitle("Front page of Reddit");
+        }
         mContext = getActivity();
         mSubmissionList = new ArrayList<Submission>();
         mNames = new HashSet<String>();
@@ -67,7 +78,6 @@ public class SubredditFragment extends Fragment {
     }
 
     private void populateSubmissions() {
-        mUser = new User("", "");
         SubmissionsListViewHelper list = new SubmissionsListViewHelper(mSubredditName,
                 Submission.HOT, -1, null, null, mUser, mSubmissions);
         mSubmissionsAdapter = new SubmissionArrayAdapter(mContext);
@@ -188,19 +198,15 @@ public class SubredditFragment extends Fragment {
     private class RetrieveSubmissionsTask extends AsyncTask<SubmissionsListViewHelper, Void,
             List<Submission>> {
 
-        String otherText;
         String exceptionText;
 
         @Override
         protected List<Submission> doInBackground(SubmissionsListViewHelper... submissionsList) {
             List<Submission> submissions;
             try {
-                User user = submissionsList[0].getUser();
-
-                user.connect();
-
-                JSONObject rootObject = (JSONObject) Utilities.get("", submissionsList[0].getUrl(),
-                        user.getCookie());
+                Log.i("SubredditFragment", "cookie is " + mUser.getCookie());
+                String data = Utilities.get("", submissionsList[0].getUrl(), mUser.getCookie());
+                JSONObject rootObject = (JSONObject) new JSONParser().parse(data);
                 JSONArray array = (JSONArray) ((JSONObject) rootObject.get("data")).get("children");
 
                 submissions = new ArrayList<Submission>();
@@ -215,6 +221,9 @@ public class SubredditFragment extends Fragment {
                 exceptionText = e.toString();
                 return null;
             } catch (org.json.simple.parser.ParseException e) {
+                exceptionText = e.toString();
+                return null;
+            } catch (NullPointerException e) {
                 exceptionText = e.toString();
                 return null;
             }
