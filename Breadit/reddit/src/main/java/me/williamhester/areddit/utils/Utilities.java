@@ -54,7 +54,7 @@ public class Utilities {
         if (modhash != null)
             httpPost.addHeader("X-Modhash", modhash);
         httpPost.addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-        httpPost.addHeader("Content-Length", String.valueOf(getLength(apiParams)));
+//        httpPost.setHeader("Content-Length", String.valueOf(getLength(apiParams)));
 
         try {
             httpPost.setEntity(new UrlEncodedFormEntity(apiParams));

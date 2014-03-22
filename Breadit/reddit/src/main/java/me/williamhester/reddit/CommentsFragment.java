@@ -72,9 +72,6 @@ public class CommentsFragment extends Fragment {
             } catch (IOException e) {
                 Log.e("me.williamhester.reddit", e.toString());
                 return null;
-            } catch (org.json.simple.parser.ParseException e) {
-                Log.e("me.williamhester.reddit", e.toString());
-                return null;
             }
         }
 

@@ -18,19 +18,16 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.koushikdutta.urlimageviewhelper.UrlImageViewHelper;
-
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import me.williamhester.areddit.Submission;
 import me.williamhester.areddit.SubmissionsListViewHelper;
@@ -205,22 +202,20 @@ public class SubredditFragment extends Fragment {
             List<Submission> submissions;
             try {
                 Log.i("SubredditFragment", "cookie is " + mUser.getCookie());
-                String data = Utilities.get("", submissionsList[0].getUrl(), mUser.getCookie());
-                JSONObject rootObject = (JSONObject) new JSONParser().parse(data);
-                JSONArray array = (JSONArray) ((JSONObject) rootObject.get("data")).get("children");
+                String data = Utilities.get("", submissionsList[0].getUrl(),
+                        mUser.getCookie(), mUser.getModhash());
+                JsonObject rootObject = new JsonParser().parse(data).getAsJsonObject();
+                JsonArray array = rootObject.get("data").getAsJsonObject().get("children").getAsJsonArray();
 
                 submissions = new ArrayList<Submission>();
                 for (int i = 0; i < array.size(); i++) {
-                    JSONObject jsonData = (JSONObject)array.get(i);
+                    JsonObject jsonData = array.get(i).getAsJsonObject();
                     submissions.add(new Submission(jsonData));
                 }
             } catch (MalformedURLException e) {
                 exceptionText = e.toString();
                 return null;
             } catch (IOException e) {
-                exceptionText = e.toString();
-                return null;
-            } catch (org.json.simple.parser.ParseException e) {
                 exceptionText = e.toString();
                 return null;
             } catch (NullPointerException e) {

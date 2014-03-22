@@ -25,7 +25,6 @@ import me.williamhester.areddit.utils.Utilities;
  * @author <a hred="https://github.com/jasonsimpson">Jason Simpson</a>
  *
  */
-// Todo: implement parcelable so that the user can be passed between Activities
 public class User implements Parcelable {
 
     public static String USERNAME = "username";
@@ -284,11 +283,12 @@ public class User implements Parcelable {
         apiParams.add(new BasicNameValuePair("rem", "true"));
 
         String data = Utilities.post(apiParams, "http://www.reddit.com/api/login/" + username, null, null);
+        Log.i("User", "data = " + data);
         JsonObject jsObject = new JsonParser().parse(data).getAsJsonObject();
 
 		JsonElement valuePair = jsObject.get("json");
         if (valuePair.isJsonObject()) {
-            JsonObject object = valuePair.getAsJsonObject();
+            JsonObject object = valuePair.getAsJsonObject().get("data").getAsJsonObject();
             values.add(object.get("modhash").toString());
             values.add(object.get("cookie").toString());
         }

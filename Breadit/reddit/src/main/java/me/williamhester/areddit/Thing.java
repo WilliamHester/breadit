@@ -9,6 +9,10 @@ import com.google.gson.JsonObject;
  */
 public abstract class Thing {
 
+    public Thing(JsonObject data) {
+        mData = data;
+    }
+
     /**
      * this item's identifier, e.g. "8xwlg"
      */
@@ -30,10 +34,6 @@ public abstract class Thing {
      * of its kind. 
      */
     protected JsonObject mData;
-
-    public Thing(JsonObject data) {
-        mData = data;
-    }
 
     public String getId() {
         return mData.getAsJsonObject("data").get("id").getAsString();

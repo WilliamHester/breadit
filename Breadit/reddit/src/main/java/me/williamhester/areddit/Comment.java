@@ -79,6 +79,8 @@ public class Comment extends Thing {
         List<Comment> ret = new ArrayList<Comment>();
         
         JsonObject data = mData.get("data").getAsJsonObject();
+        if (!data.get("replies").isJsonObject())
+            return  null;
         JsonObject replies = data.get("replies").getAsJsonObject();
         JsonObject replyData = replies.get("data").getAsJsonObject();
         JsonArray children = replyData.get("children").getAsJsonArray();

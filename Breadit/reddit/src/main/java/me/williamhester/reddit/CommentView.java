@@ -42,7 +42,7 @@ public class CommentView extends View {
 
         mUser.setText(mComment.getAuthor());
         mScore.setText(mComment.getScore() + "");
-        mTime.setText(calculateTime(mComment.getCreated(), System.currentTimeMillis() / 1000));
+        mTime.setText(calculateTime(mComment.getCreated(), (double) System.currentTimeMillis() / 1000));
         mCommentText.setText(mComment.getBody());
 
         for (Comment reply : mComment.getReplies()) {
@@ -67,7 +67,7 @@ public class CommentView extends View {
 
         mUser.setText(mComment.getAuthor());
         mScore.setText(mComment.getScore() + "");
-        mTime.setText(calculateTime(mComment.getCreated(), System.currentTimeMillis() / 1000));
+        mTime.setText(calculateTime(mComment.getCreated(), (double) System.currentTimeMillis() / 1000));
         mCommentText.setText(mComment.getBody());
 
         for (Comment reply : mComment.getReplies()) {
@@ -76,8 +76,8 @@ public class CommentView extends View {
         }
     }
 
-    private String calculateTime(long postTime, long currentTime) {
-        long difference = currentTime - postTime;
+    private String calculateTime(double postTime, double currentTime) {
+        double difference = currentTime - postTime;
         String time;
         if (difference / 31536000 > 0) {
             if (difference / 3156000 == 1)
