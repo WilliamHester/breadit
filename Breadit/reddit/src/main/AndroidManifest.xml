@@ -16,7 +16,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="me.williamhester.reddit.ContentActivity" >
+            android:name=".SubmissionActivity" >
         </activity>
         <activity
             android:name="me.williamhester.reddit.Setup" >

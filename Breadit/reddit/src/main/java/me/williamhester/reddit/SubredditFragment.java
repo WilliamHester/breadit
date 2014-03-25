@@ -45,7 +45,7 @@ public class SubredditFragment extends Fragment {
     ListView mSubmissions;
     String mSubredditName;
     SubmissionArrayAdapter mSubmissionsAdapter;
-    List<Submission> mSubmissionList;
+    List<me.williamhester.areddit.Submission> mSubmissionList;
     HashSet<String> mNames;
     User mUser;
 
@@ -63,7 +63,7 @@ public class SubredditFragment extends Fragment {
             mAction.setTitle("Front page of Reddit");
         }
         mContext = getActivity();
-        mSubmissionList = new ArrayList<Submission>();
+        mSubmissionList = new ArrayList<me.williamhester.areddit.Submission>();
         mNames = new HashSet<String>();
     }
 
@@ -81,7 +81,7 @@ public class SubredditFragment extends Fragment {
         mSubmissions.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent i = new Intent(getActivity(), ContentActivity.class);
+                Intent i = new Intent(getActivity(), SubmissionActivity.class);
                 Bundle b = new Bundle();
                 b.putString("permalink", mSubmissionList.get(position).getPermalink());
                 b.putString("url", mSubmissionList.get(position).getUrl());
@@ -95,7 +95,7 @@ public class SubredditFragment extends Fragment {
         new RefreshUserClass().execute();
     }
 
-    private class SubmissionArrayAdapter extends ArrayAdapter<Submission> {
+    private class SubmissionArrayAdapter extends ArrayAdapter<me.williamhester.areddit.Submission> {
         Context mContext;
 
         private Typeface slabBold = Typeface.createFromAsset(getActivity().getAssets(),
@@ -199,20 +199,20 @@ public class SubredditFragment extends Fragment {
             }
 
             SubmissionsListViewHelper list = new SubmissionsListViewHelper(mSubredditName,
-                    Submission.HOT, -1, null, null, mUser, mSubmissions);
+                    me.williamhester.areddit.Submission.HOT, -1, null, null, mUser, mSubmissions);
             new RetrieveSubmissionsTask().execute(list);
             return null;
         }
     }
 
     private class RetrieveSubmissionsTask extends AsyncTask<SubmissionsListViewHelper, Void,
-            List<Submission>> {
+            List<me.williamhester.areddit.Submission>> {
 
         String exceptionText;
 
         @Override
-        protected List<Submission> doInBackground(SubmissionsListViewHelper... submissionsList) {
-            List<Submission> submissions;
+        protected List<me.williamhester.areddit.Submission> doInBackground(SubmissionsListViewHelper... submissionsList) {
+            List<me.williamhester.areddit.Submission> submissions;
             try {
                 Log.i("SubredditFragment", "cookie is " + mUser.getCookie());
                 String data = Utilities.get("", submissionsList[0].getUrl(),
@@ -220,10 +220,10 @@ public class SubredditFragment extends Fragment {
                 JsonObject rootObject = new JsonParser().parse(data).getAsJsonObject();
                 JsonArray array = rootObject.get("data").getAsJsonObject().get("children").getAsJsonArray();
 
-                submissions = new ArrayList<Submission>();
+                submissions = new ArrayList<me.williamhester.areddit.Submission>();
                 for (int i = 0; i < array.size(); i++) {
                     JsonObject jsonData = array.get(i).getAsJsonObject();
-                    submissions.add(new Submission(jsonData));
+                    submissions.add(new me.williamhester.areddit.Submission(jsonData));
                 }
             } catch (MalformedURLException e) {
                 exceptionText = e.toString();
@@ -239,14 +239,14 @@ public class SubredditFragment extends Fragment {
         }
 
         @Override
-        protected void onPostExecute(List<Submission> result) {
+        protected void onPostExecute(List<me.williamhester.areddit.Submission> result) {
             if (result != null) {
                 // If result has a size of 0, then we need to tell the user that they must start from
                 //     the beginning because there are no more submissions that can be loaded.
                 if (result.size() == 0) {
 //                mSubmissions.addFooterView(v);
                 }
-                for (Submission s : result) {
+                for (me.williamhester.areddit.Submission s : result) {
                     if (!mNames.contains(s.getName())) {
                         mSubmissionList.add(s);
                         mNames.add(s.getName());
@@ -282,7 +282,7 @@ public class SubredditFragment extends Fragment {
             }
             if (!loading && (totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleThreshold)) {
                 SubmissionsListViewHelper list = new SubmissionsListViewHelper(mSubredditName,
-                        Submission.HOT, -1, null,
+                        me.williamhester.areddit.Submission.HOT, -1, null,
                         mSubmissionList.get(mSubmissionList.size() - 1).getName(),
                         mUser, mSubmissions);
                 new RetrieveSubmissionsTask().execute(list);

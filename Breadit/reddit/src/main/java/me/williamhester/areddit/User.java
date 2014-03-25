@@ -20,13 +20,6 @@ import java.util.List;
 
 import me.williamhester.areddit.utils.Utilities;
 
-/**
- * This class represents a reddit user.
- * 
- * @author <a href="http://www.omrlnr.com">Omer Elnour</a>
- * @author <a hred="https://github.com/jasonsimpson">Jason Simpson</a>
- *
- */
 public class User implements Parcelable {
 
     public static String USERNAME = "username";

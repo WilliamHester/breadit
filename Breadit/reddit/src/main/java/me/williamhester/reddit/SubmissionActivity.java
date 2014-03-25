@@ -1,5 +1,6 @@
 package me.williamhester.reddit;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.os.Bundle;
 
@@ -8,7 +9,9 @@ import me.williamhester.areddit.User;
 /**
  * Created by William on 2/11/14.
  */
-public class ContentActivity extends Activity {
+public class SubmissionActivity extends Activity {
+
+    private ActionBar mAction;
 
     private String mPermalink;
     private String mUrl;
@@ -19,6 +22,11 @@ public class ContentActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_content);
+
+        mAction = getActionBar();
+        if (mAction != null) {
+            mAction.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+        }
 
         CommentsFragment cf = new CommentsFragment();
         if (getIntent().getExtras() != null) {

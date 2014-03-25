@@ -1,6 +1,11 @@
 package me.williamhester.areddit;
 
+import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -10,27 +15,33 @@ import java.util.List;
 
 import me.williamhester.areddit.utils.Utilities;
 
-/**
- *
- * This class represents a reddit comment
- *
- * @author <a href="https://github.com/jasonsimpson">Jason Simpson</a>
- * 
- */
-public class Comment extends Thing {
+public class Comment extends Thing implements Parcelable {
 
-    Comment mParent;
-    List<Comment> mReplies;
+    public static int UPVOTED = 1;
+    public static int NEUTRAL = 0;
+    public static int DOWNVOTED = -1;
+
+    private List<Comment> mReplies;
 
     public Comment(JsonObject jsonObj) {
-        this(jsonObj, null);
-    }
-
-    public Comment(JsonObject jsonObj, Comment parent) {
         super(jsonObj);
-        mParent = parent;
         if (!getKind().equals("more")) {
             mReplies = getReplies();
+        }
+    }
+
+    public Comment(Parcel in) {
+        this(new JsonParser().parse(in.readBundle().getString("jsonData")).getAsJsonObject());
+    }
+
+    public int getVotedStatus() {
+        JsonElement o = mData.get("data").getAsJsonObject().get("likes");
+        if (o == null) {
+            return NEUTRAL;
+        } else if (o.getAsBoolean()) {
+            return UPVOTED;
+        } else {
+            return DOWNVOTED;
         }
     }
 
@@ -48,7 +59,6 @@ public class Comment extends Thing {
 
     public long getScore() {
         return getUpVotes() - getDownVotes();
-//        return mData.get("data").getAsJsonObject().get("score").getAsLong();
     }
 
     public String getAuthor() { 
@@ -59,12 +69,12 @@ public class Comment extends Thing {
         return mReplies != null;
     }
 
-    public double getCreated() {
-        return mData.get("data").getAsJsonObject().get("created").getAsDouble();
+    public long getCreated() {
+        return mData.get("data").getAsJsonObject().get("created").getAsLong();
     }
 
-    public double getCreatedUtc() {
-        return mData.get("data").getAsJsonObject().get("created_utc").getAsDouble();
+    public long getCreatedUtc() {
+        return mData.get("data").getAsJsonObject().get("created_utc").getAsLong();
     }
 
     /**
@@ -86,7 +96,7 @@ public class Comment extends Thing {
             Comment comment = new Comment(jsonData);
 
             if(!comment.getKind().equals("more")) {
-                ret.add(new Comment(jsonData, this));
+                ret.add(new Comment(jsonData));
             }
         }
         return ret;
@@ -128,4 +138,27 @@ public class Comment extends Thing {
 
         return comments;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        Bundle b = new Bundle();
+        b.putString("jsonData", mData.toString());
+        parcel.writeBundle(b);
+    }
+
+    public static final Parcelable.Creator<Comment> CREATOR
+            = new Parcelable.Creator<Comment>() {
+        public Comment createFromParcel(Parcel in) {
+            return new Comment(in);
+        }
+
+        public Comment[] newArray(int size) {
+            return new Comment[size];
+        }
+    };
 }

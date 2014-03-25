@@ -1,5 +1,9 @@
 package me.williamhester.areddit;
 
+import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -15,14 +19,7 @@ import java.util.List;
 
 import me.williamhester.areddit.utils.Utilities;
 
-/**
- *
- * This class represents a reddit Submission or "Article"
- *
- * @author <a href="https://github.com/jasonsimpson">Jason Simpson</a>
- * 
- */
-public class Submission extends Thing {
+public class Submission extends Thing implements Parcelable {
 
     public static final int HOT = 0;
     public static final int NEW = 1;
@@ -41,6 +38,10 @@ public class Submission extends Thing {
 
     public Submission(JsonObject data) {
         super(data);
+    }
+
+    public Submission(Parcel in) {
+        this(new JsonParser().parse(in.readBundle().getString("jsonData")).getAsJsonObject());
     }
 
     public String getUrl() { 
@@ -152,14 +153,11 @@ public class Submission extends Thing {
     }
 
     public long getCreated() {
-//        return Long.parseLong(new Scanner((mData.get("data").getAsJsonObject().get("created").getAsString())).useDelimiter("\\.").next());
-        return Long.parseLong(new DecimalFormat("###########").format(Double.parseDouble(mData.get("data").getAsJsonObject().get("created").getAsString())));
+        return mData.get("data").getAsJsonObject().get("created").getAsLong();
     }
 
     public long getCreatedUtc() {
-//        return Long.parseLong(new Scanner((mData.get("data").getAsJsonObject().get("created_utc").getAsString())).useDelimiter("\\.").next());
-        return Long.parseLong(new DecimalFormat("###########").format(Double.parseDouble(mData.get("data").getAsJsonObject().get("created_utc").getAsString())));
-
+        return mData.get("data").getAsJsonObject().get("created_utc").getAsLong();
     }
 
     /**
@@ -260,5 +258,28 @@ public class Submission extends Thing {
 
         return submissions;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        Bundle b = new Bundle();
+        b.putString("jsonData", mData.toString());
+        parcel.writeBundle(b);
+    }
+
+    public static final Parcelable.Creator<Submission> CREATOR
+            = new Parcelable.Creator<Submission>() {
+        public Submission createFromParcel(Parcel in) {
+            return new Submission(in);
+        }
+
+        public Submission[] newArray(int size) {
+            return new Submission[size];
+        }
+    };
 
 }

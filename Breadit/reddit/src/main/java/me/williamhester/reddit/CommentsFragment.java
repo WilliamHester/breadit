@@ -8,8 +8,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -17,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import me.williamhester.areddit.Comment;
+import me.williamhester.areddit.User;
 
 /**
  * Created by William on 2/11/14.
@@ -29,7 +28,7 @@ public class CommentsFragment extends Fragment {
     private LinearLayout mLinearLayout;
     private String mUrl;
     private String mPermalink;
-//    private User mUser;
+    private User mUser;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -40,7 +39,7 @@ public class CommentsFragment extends Fragment {
             mUrl = args.getString("url", null);
             mPermalink = args.getString("permalink", null);
             mIsSelf = args.getBoolean("isSelf", false);
-//            mUser = args.getParcelable("user");
+            mUser = args.getParcelable("user");
         }
     }
 
@@ -48,13 +47,13 @@ public class CommentsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle bundle) {
         View v = inflater.inflate(R.layout.fragment_comments, null);
         mLinearLayout = (LinearLayout) v.findViewById(R.id.linear_container);
+        new CommentLoaderTask().execute();
         return v;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        new CommentLoaderTask().execute();
     }
 
     private class CommentLoaderTask extends AsyncTask<Void, Void, List<Comment>> {
@@ -65,7 +64,7 @@ public class CommentsFragment extends Fragment {
                 String lastComment = null;
                 if (mCommentsList.size() > 0)
                     lastComment = mCommentsList.get(mCommentsList.size() - 1).getName();
-                List<Comment> comments = Comment.getComments(mPermalink, null, lastComment);
+                List<Comment> comments = Comment.getComments(mPermalink, mUser, lastComment);
                 return comments;
             } catch (MalformedURLException e) {
                 Log.e("me.williamhester.reddit", e.toString());
@@ -89,7 +88,7 @@ public class CommentsFragment extends Fragment {
                 }
                 mLinearLayout.requestLayout();
                 Log.d("CommentsFragment", "mLinearLayout.height() == " + mLinearLayout.getMeasuredHeight());
-                Toast.makeText(getActivity(), "mLinearLayout child count " + mLinearLayout.getChildCount(), Toast.LENGTH_LONG).show();
+                Log.d("CommentsFragment", "mLinearLayout child count " + mLinearLayout.getChildCount());
             }
         }
     }

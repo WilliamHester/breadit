@@ -2,21 +2,25 @@ package me.williamhester.reddit;
 
 import android.content.Context;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import me.williamhester.areddit.Comment;
 
-/**
- * Created by William on 1/4/14.
- */
 public class CommentView extends LinearLayout {
+
+    private boolean mHidden = false;
 
     private Comment mComment;
     private Context mContext;
-    private LinearLayout mInfo;
     private LinearLayout mReplies;
+    private List<CommentView> mChildren;
     private TextView mAuthor;
     private TextView mScore;
     private TextView mTime;
@@ -24,48 +28,67 @@ public class CommentView extends LinearLayout {
 
     public CommentView(Context context, Comment comment) {
         super(context);
+        mChildren = new ArrayList<CommentView>();
         mContext = context;
         mComment = comment;
-
-        setOrientation(VERTICAL);
+        LayoutInflater layoutInflater =
+                (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View v = layoutInflater.inflate(R.layout.view_comment, null);
+        mAuthor = (TextView) v.findViewById(R.id.author);
+        mScore = (TextView) v.findViewById(R.id.score);
+        mTime = (TextView) v.findViewById(R.id.time);
+        mCommentText = (TextView) v.findViewById(R.id.comment_text);
+        mReplies = (LinearLayout) v.findViewById(R.id.replies);
         LinearLayout.LayoutParams params =
                 new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT);
-        mInfo = new LinearLayout(mContext);
-        addView(mInfo, params);
-
-        LinearLayout.LayoutParams infoParams =
-                new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, 0, 1);
-        mAuthor = new TextView(mContext);
-        mInfo.addView(mAuthor, infoParams);
-        mScore = new TextView(mContext);
-        mInfo.addView(mScore, infoParams);
-        mTime = new TextView(mContext);
-        mInfo.addView(mTime, infoParams);
-
-        mCommentText = new TextView(mContext);
-        addView(mCommentText, params);
-        mReplies = new LinearLayout(mContext);
-        addView(mReplies, params);
 
         try {
-            mAuthor.setText(mComment.getAuthor());
+            mAuthor.setText(removeEndQuotes(mComment.getAuthor()));
             mScore.setText(mComment.getScore() + "");
-            mTime.setText(calculateTime(mComment.getCreated(), (double) System.currentTimeMillis() / 1000));
-            mCommentText.setText(mComment.getBody());
+            mTime.setText(calculateTime(mComment.getCreated(), System.currentTimeMillis() / 1000));
+            mCommentText.setText(removeEscapeSequences(removeEndQuotes(mComment.getBody())));
 
             if (mComment.getReplies() != null)
                 for (Comment reply : mComment.getReplies()) {
                     CommentView cv = new CommentView(mContext, reply);
                     mReplies.addView(cv, params);
+                    mChildren.add(cv);
                 }
+            else
+                mReplies.addView(new View(context),
+                        new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                (int) getResources().getDisplayMetrics().density * 8));
         } catch (NullPointerException e) {
             Log.i("CommentView", "Caught a NullPointerException");
         }
+        addView(v, params);
+        setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mHidden) {
+                    mCommentText.setVisibility(VISIBLE);
+                    if (mComment.getReplies() != null) {
+                        for (CommentView c : mChildren) {
+                            c.setVisibility(VISIBLE);
+                        }
+                    }
+                    mHidden = false;
+                } else {
+                    mCommentText.setVisibility(GONE);
+                    if (mComment.getReplies() != null) {
+                        for (CommentView c : mChildren) {
+                            c.setVisibility(GONE);
+                        }
+                    }
+                    mHidden = true;
+                }
+            }
+        });
     }
 
-    private String calculateTime(double postTime, double currentTime) {
-        double difference = currentTime - postTime;
+    private String calculateTime(long postTime, long currentTime) {
+        long difference = currentTime - postTime;
         String time;
         if (difference / 31536000 > 0) {
             if (difference / 3156000 == 1)
@@ -104,6 +127,17 @@ public class CommentView extends LinearLayout {
                 time = difference + " Seconds Ago";
         }
         return time;
+    }
+
+    private String removeEndQuotes(String s) {
+        if (s.charAt(0) == '\"' && s.charAt(s.length() - 1) == '\"') {
+            return s.substring(1, s.length() - 1);
+        }
+        return s;
+    }
+
+    private String removeEscapeSequences(String s) {
+        return s.replace("\\", "");
     }
 
 }

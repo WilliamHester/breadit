@@ -1,5 +1,8 @@
 package me.williamhester.areddit;
 
+import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 
 import com.google.gson.JsonArray;
@@ -16,17 +19,14 @@ import java.util.jar.Attributes;
 
 import me.williamhester.areddit.utils.Utilities;
 
-/**
- * Created with IntelliJ IDEA.
- * User: William
- * Date: 1/3/14
- * Time: 2:52 PM
- * To change this template use File | Settings | File Templates.
- */
-public class Subreddit extends Thing {
+public class Subreddit extends Thing implements Parcelable {
 
     public Subreddit(JsonObject data) {
         super(data);
+    }
+
+    public Subreddit(Parcel in) {
+        this(new JsonParser().parse(in.readBundle().getString("jsonData")).getAsJsonObject());
     }
 
 //    public HTML getSubmitTextHtml() {
@@ -80,7 +80,7 @@ public class Subreddit extends Thing {
     //Todo add a header_size getter. It is formatted like [160, 64]
 
     public long getSubscriberCount() {
-        return Long.parseLong( mData.get("data").getAsJsonObject().get("subscribers").getAsString());
+        return Long.parseLong(mData.get("data").getAsJsonObject().get("subscribers").getAsString());
     }
 
     public String getSubmitTextLabel() {
@@ -102,7 +102,7 @@ public class Subreddit extends Thing {
     }
 
     public boolean userIsContributor() {
-        return Boolean.parseBoolean( mData.get("data").getAsJsonObject().get("user_is_contributor").getAsString());
+        return Boolean.parseBoolean(mData.get("data").getAsJsonObject().get("user_is_contributor").getAsString());
     }
 
     public String getPublicDescription() {
@@ -110,7 +110,7 @@ public class Subreddit extends Thing {
     }
 
     public long getCommentScoreHideMins() {
-        return Long.parseLong( mData.get("data").getAsJsonObject().get("comment_score_hide_mins").getAsString());
+        return Long.parseLong(mData.get("data").getAsJsonObject().get("comment_score_hide_mins").getAsString());
     }
 
     public String getSubredditType() {
@@ -124,5 +124,28 @@ public class Subreddit extends Thing {
     public boolean userIsSubscriber() {
         return Boolean.parseBoolean(mData.get("data").getAsJsonObject().get("user_is_subscriber").getAsString());
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        Bundle b = new Bundle();
+        b.putString("jsonData", mData.toString());
+        parcel.writeBundle(b);
+    }
+
+    public static final Parcelable.Creator<Subreddit> CREATOR
+            = new Parcelable.Creator<Subreddit>() {
+        public Subreddit createFromParcel(Parcel in) {
+            return new Subreddit(in);
+        }
+
+        public Subreddit[] newArray(int size) {
+            return new Subreddit[size];
+        }
+    };
 
 }
