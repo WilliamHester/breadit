@@ -6,6 +6,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -14,6 +15,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import me.williamhester.areddit.utils.Utilities;
@@ -47,7 +49,7 @@ public class User implements Parcelable {
         mModhash = b.getString(MODHASH);
         mCookie = b.getString(COOKIE);
         mDataString = b.getString(JS_STRING);
-        if (mData != null) {
+        if (mDataString != null) {
             mData = new JsonParser().parse(mDataString).getAsJsonObject();
         }
     }
@@ -83,16 +85,17 @@ public class User implements Parcelable {
      *
      * @param username the username of the user
      * @param password the password of the user
-     * @return returns a usre object with all of its data
+     * @return returns a User object with all of its data
      * @throws IOException if the connection fails
+     * @return returns a new User object.
      */
     public static User newUser(String username, String password)
             throws IOException{
         User u = new User();
         u.mUsername = username;
-        ArrayList<String> hashCookiePair = hashCookiePair(username, password);
-        u.mCookie = hashCookiePair.get(0);
-        u.mModhash = hashCookiePair.get(1);
+        HashMap<String, String> hashCookiePair = hashCookiePair(username, password);
+        u.mCookie = hashCookiePair.get("cookie");
+        u.mModhash = hashCookiePair.get("modhash");
         try {
             u.mDataString = u.getUserData().toString();
         } catch (NullPointerException e) {
@@ -110,21 +113,23 @@ public class User implements Parcelable {
 	 * @param link The link to the submission
 	 * @param subreddit The subreddit to submit to
 	 * @throws java.io.IOException If connection fails
+     *
+     * @return returns a boolean value representing the success of the submission
 	 */
-	public void submitLink(String title, String link, String subreddit)
+	public JsonObject submitLink(String title, String link, String subreddit)
 			throws IOException {
 		JsonObject object = new JsonParser().parse(submit(title, link, false, subreddit)).getAsJsonObject();
 		if (object.toString().contains(".error.USER_REQUIRED")) {
-			Log.e("BreaditError", "User not logged in");
+//			User not logged in
+            return null;
 		} else if (object.toString().contains(".error.RATELIMIT.field-ratelimit")) {
-			Log.e("BreaditError", "User hit ratelimit");
+//			User hit ratelimit
+            return null;
 		} else if (object.toString().contains(".error.ALREADY_SUB.field-url")) {
-			Log.e("BreaditError", "That link has already been submitted.");
-		} else {
-//			Log.i("Link submitted to "
-//                    + ((JSONArray) ((JSONArray) ((JSONArray) object
-//                    .get("jquery")).get(16)).get(3)).get(0));
+//			That link has already been submitted.
+            return null;
 		}
+        return object;
 	}
 
 	/**
@@ -134,122 +139,58 @@ public class User implements Parcelable {
 	 * @param text The text of the submission
 	 * @param subreddit The subreddit to submit to
 	 * @throws java.io.IOException If connection fails
+     * @return returns the JsonObject of the submission that was created.
 	 */
-	public void submitSelfPost(String title, String text, String subreddit)
+	public JsonObject submitSelfPost(String title, String text, String subreddit)
 			throws IOException {
-        JsonElement element = new JsonParser().parse(submit(title, text, true, subreddit));
-        JsonObject object;
-        if (element.isJsonObject()) {
-            object = element.getAsJsonObject();
-            if (object.toString().contains(".error.USER_REQUIRED")) {
-                Log.e("BreaditError", "User not logged in");
-            } else if (object.toString().contains(".error.RATELIMIT.field-ratelimit")) {
-                Log.e("BreaditError", "User hit ratelimit");
-            } else if (object.toString().contains(".error.ALREADY_SUB.field-url")) {
-                Log.e("BreaditError", "That link has already been submitted.");
-            } else {
-                //			System.out.println("Self post submitted to "
-                //					+ ((JSONArray) ((JSONArray) ((JSONArray) object
-                //							.get("jquery")).get(10)).get(3)).get(0));
-            }
+        JsonObject object = new JsonParser().parse(submit(title, text, true, subreddit)).getAsJsonObject();
+        if (object.toString().contains(".error.USER_REQUIRED")) {
+//			User not logged in
+            return null;
+        } else if (object.toString().contains(".error.RATELIMIT.field-ratelimit")) {
+//			User hit ratelimit
+            return null;
+        } else if (object.toString().contains(".error.ALREADY_SUB.field-url")) {
+//			That link has already been submitted.
+            return null;
         }
+        return object;
 	}
 
-	/**
-	 * This functions returns true if this user has unread mail.
-	 * 
-	 * @return This user has mail or not
-	 * @throws java.io.IOException
-	 *             If connection fails
-	 */
-	public boolean hasMail() throws IOException {
-		return Boolean.parseBoolean(mData.get("has_mail").toString());
+	public boolean hasMail() {
+		return mData.get("has_mail").getAsBoolean();
 	}
 
-	/**
-	 * This function returns the Unix time that the user's account was created.
-	 * 
-	 * @return Unix time that the user's account was created
-	 * @throws NumberFormatException
-	 *             If the "created" property isn't a double
-	 */
-	public double created() throws IOException {
-		return Double.parseDouble(mData.get("created").toString());
+	public double created() {
+		return mData.get("created").getAsDouble();
 	}
 
-	/**
-	 * This function returns the Unix time (in UTC/Coordinated Universal Time)
-	 * that the user's account was created.
-	 * 
-	 * @return Unix time that the user's account was created in UTC
-	 * @throws NumberFormatException If the "created_utc" property isn't a double
-	 */
-	public double createdUTC() throws IOException {
-		return Double.parseDouble(mData.get("created_utc").toString());
+	public double createdUTC() {
+		return mData.get("created_utc").getAsDouble();
 	}
 
-	/**
-	 * This function returns the amount of link karma this user has. <br />
-	 * Returns int because I doubt anyone has more than 2,147,483,647 link
-	 * karma.
-	 * 
-	 * @return Link Karma
-	 * @throws NumberFormatException If the "link_karma" property isn't an integer
-	 */
-	public int linkKarma() throws IOException {
-		return Integer.parseInt(mData.get("link_karma").toString());
+	public long linkKarma() {
+		return mData.get("link_karma").getAsLong();
 	}
 
-	/**
-	 * This function returns the amount of comment karma this user has. <br />
-	 * Returns int because I doubt anyone has more than 2,147,483,647 comment
-	 * karma.
-	 * 
-	 * @return Comment Karma
-	 * @throws NumberFormatException If the "link_karma" property isn't an integer
-	 */
-	public int commentKarma() throws IOException {
-		return Integer.parseInt(mData.get("comment_karma").toString());
+	public long commentKarma() {
+		return mData.get("comment_karma").getAsLong();
 	}
 
-	/**
-	 * This functions returns true if this user has a gold account.
-	 * 
-	 * @return This user has a gold account or not
-	 */
-	public boolean isGold() throws IOException {
-		return Boolean.parseBoolean(mData.get("is_gold").toString());
+	public boolean isGold() {
+		return mData.get("is_gold").getAsBoolean();
 	}
 
-	/**
-	 * This functions returns true if this user is a reddit moderator
-	 * (apparently this means a moderator of any subreddit).
-	 * 
-	 * @return This user is a moderator or not
-	 * @throws java.io.IOException
-	 *             If connection fails
-	 */
-	public boolean isMod() throws IOException {
-		return Boolean.parseBoolean(mData.get("is_mod").toString());
+	public boolean isMod() {
+		return mData.get("is_mod").getAsBoolean();
 	}
 
-	/**
-	 * This function returns the user's ID. <br />
-	 * The user's ID. This is only used internally, <b>right</b>?
-	 * 
-	 * @return This user's ID
-	 */
-	public String id() throws IOException {
+	public String id() {
 		return mData.get("id").toString();
 	}
 
-	/**
-	 * This functions returns true if this user has unread moderator mail.
-	 * 
-	 * @return This user has unread moderator mail or not
-	 */
-	public boolean hasModMail() throws IOException {
-		return Boolean.parseBoolean(mData.get("has_mod_mail").toString());
+	public boolean hasModMail() {
+		return mData.get("has_mod_mail").getAsBoolean();
 	}
 
 	public String getUsername() {
@@ -273,27 +214,27 @@ public class User implements Parcelable {
 	 * @return An array containing a modhash and cookie
 	 * @throws java.io.IOException If connection fails
 	 */
-	private static ArrayList<String> hashCookiePair(String username, String password)
-			throws IOException {
-		ArrayList<String> values = new ArrayList<String>();
+    private static HashMap<String, String> hashCookiePair(String username, String password)
+            throws IOException {
+        HashMap<String, String> values = new HashMap<String, String>();
         ArrayList<NameValuePair> apiParams = new ArrayList<NameValuePair>();
         apiParams.add(new BasicNameValuePair("api_type", "json"));
         apiParams.add(new BasicNameValuePair("user", username));
         apiParams.add(new BasicNameValuePair("passwd", password));
-        apiParams.add(new BasicNameValuePair("rem", "true"));
+        apiParams.add(new BasicNameValuePair("rem", "True"));
 
         String data = Utilities.post(apiParams, "http://www.reddit.com/api/login/" + username, null, null);
-        Log.i("User", "data = " + data);
+//        System.out.println("data = " + data);
         JsonObject jsObject = new JsonParser().parse(data).getAsJsonObject();
 
-		JsonElement valuePair = jsObject.get("json");
+        JsonElement valuePair = jsObject.get("json");
         if (valuePair.isJsonObject()) {
             JsonObject object = valuePair.getAsJsonObject().get("data").getAsJsonObject();
-            values.add(object.get("modhash").toString());
-            values.add(object.get("cookie").toString());
+            values.put("modhash", object.get("modhash").toString());
+            values.put("cookie", object.get("cookie").toString());
         }
-		return values;
-	}
+        return values;
+    }
 
 	/**
 	 * This function returns a "response" (me.json) JSON data containing getUserData
@@ -308,16 +249,22 @@ public class User implements Parcelable {
                 "Please invoke the \"newUser\" method before attempting " +
                 "to call any other User API functions.");
 		}
+        String s = Utilities.get("", "http://www.reddit.com/api/me.json", mCookie, mModhash);
 
-		JsonObject jsonObject = new JsonParser().parse(Utilities.get("", "http://www.reddit.com/api/me.json",
-                mCookie, mModhash)).getAsJsonObject();
+		JsonObject jsonObject = new JsonParser().parse(s).getAsJsonObject();
 
 		return jsonObject.getAsJsonObject("data");
 	}
 
-    public void refreshUserData() throws IOException {
-        mData = getUserData();
+    public boolean refreshUserData() {
+        try {
+            mData = getUserData();
+        } catch (IOException e) {
+            return false;
+        }
+        mModhash = mData.get("modhash").getAsString();
         mDataString = mData.toString();
+        return true;
     }
 
 	/**
@@ -347,6 +294,53 @@ public class User implements Parcelable {
 		return Utilities.post(apiParams, "http://www.reddit.com/api/submit", mCookie, mModhash);
 	}
 
+
+
+    /**
+     * This loads in all of the subreddits for a user, but due to the fact that Reddit limits the number that can be
+     * loaded at one time to 25, it must be iterative.
+     *
+     * @return returns a List of type Subreddit
+     *
+     * @throws java.io.IOException if connection fails
+     */
+
+    public List<Subreddit> getSubscrbedSubreddits() throws IOException {
+
+        ArrayList<Subreddit> subreddits = new ArrayList<Subreddit>();
+
+        JsonObject object = new JsonParser().parse(Utilities.get(null,
+                "http://www.reddit.com/subreddits/mine/subscriber.json",
+                getCookie(), getModhash())).getAsJsonObject();
+        JsonObject data = object.get("data").getAsJsonObject();
+        JsonArray array = data.get("children").getAsJsonArray();
+
+        for (int i = 0; i < array.size(); i++) {
+            JsonObject jsonData = array.get(i).getAsJsonObject();
+            subreddits.add(new Subreddit(jsonData));
+        }
+
+        String after = data.get("after").getAsString();
+
+        while (after != null) {
+
+            object = new JsonParser().parse(Utilities.get(null,
+                    "http://www.reddit.com/subreddits/mine/subscriber.json?after=" + after,
+                    getCookie(), getModhash())).getAsJsonObject();
+            data = object.get("data").getAsJsonObject();
+            array = data.get("children").getAsJsonArray();
+
+            for (int i = 0; i < array.size(); i++) {
+                JsonObject jsonData = array.get(i).getAsJsonObject();
+                subreddits.add(new Subreddit(jsonData));
+            }
+
+            after = data.get("after").getAsString();
+        }
+
+        return subreddits;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -375,5 +369,9 @@ public class User implements Parcelable {
             }
             return null;
         }
+    }
+
+    public class FailedLoginException extends Exception {
+
     }
 }

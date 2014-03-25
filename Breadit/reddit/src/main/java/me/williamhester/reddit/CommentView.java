@@ -2,8 +2,7 @@ package me.williamhester.reddit;
 
 import android.content.Context;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -12,13 +11,13 @@ import me.williamhester.areddit.Comment;
 /**
  * Created by William on 1/4/14.
  */
-public class CommentView extends View {
+public class CommentView extends LinearLayout {
 
     private Comment mComment;
     private Context mContext;
+    private LinearLayout mInfo;
     private LinearLayout mReplies;
-    private LinearLayout mRootView;
-    private TextView mUser;
+    private TextView mAuthor;
     private TextView mScore;
     private TextView mTime;
     private TextView mCommentText;
@@ -27,52 +26,41 @@ public class CommentView extends View {
         super(context);
         mContext = context;
         mComment = comment;
-        LayoutInflater layoutInflater =
-                (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View v = layoutInflater.inflate(R.layout.view_comment, mRootView);
-        mRootView = (LinearLayout) v.findViewById(R.id.root);
-        mUser = (TextView) v.findViewById(R.id.user);
-        mScore = (TextView) v.findViewById(R.id.score);
-        mTime = (TextView) v.findViewById(R.id.time);
-        mCommentText = (TextView) v.findViewById(R.id.comment_text);
-        mReplies = (LinearLayout) v.findViewById(R.id.replies);
 
-        if (mComment == null)
-            Log.e("BreaditDebug", "You're about to get an NPE");
+        setOrientation(VERTICAL);
+        LinearLayout.LayoutParams params =
+                new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT);
+        mInfo = new LinearLayout(mContext);
+        addView(mInfo, params);
 
-        mUser.setText(mComment.getAuthor());
-        mScore.setText(mComment.getScore() + "");
-        mTime.setText(calculateTime(mComment.getCreated(), (double) System.currentTimeMillis() / 1000));
-        mCommentText.setText(mComment.getBody());
+        LinearLayout.LayoutParams infoParams =
+                new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, 0, 1);
+        mAuthor = new TextView(mContext);
+        mInfo.addView(mAuthor, infoParams);
+        mScore = new TextView(mContext);
+        mInfo.addView(mScore, infoParams);
+        mTime = new TextView(mContext);
+        mInfo.addView(mTime, infoParams);
 
-        for (Comment reply : mComment.getReplies()) {
-            CommentView cv = new CommentView(mContext, reply);
-            mReplies.addView(cv);
-        }
-        Log.d("BreaditDebug", "finished inflation from constructor");
-    }
+        mCommentText = new TextView(mContext);
+        addView(mCommentText, params);
+        mReplies = new LinearLayout(mContext);
+        addView(mReplies, params);
 
-    @Override
-    protected void onFinishInflate() {
-        super.onFinishInflate();
-        mRootView = (LinearLayout) findViewById(R.id.root);
-        mUser = (TextView) findViewById(R.id.user);
-        mScore = (TextView) findViewById(R.id.score);
-        mTime = (TextView) findViewById(R.id.time);
-        mCommentText = (TextView) findViewById(R.id.comment_text);
-        mReplies = (LinearLayout) findViewById(R.id.replies);
+        try {
+            mAuthor.setText(mComment.getAuthor());
+            mScore.setText(mComment.getScore() + "");
+            mTime.setText(calculateTime(mComment.getCreated(), (double) System.currentTimeMillis() / 1000));
+            mCommentText.setText(mComment.getBody());
 
-        if (mComment == null)
-            Log.e("BreaditDebug", "You're about to get an NPE");
-
-        mUser.setText(mComment.getAuthor());
-        mScore.setText(mComment.getScore() + "");
-        mTime.setText(calculateTime(mComment.getCreated(), (double) System.currentTimeMillis() / 1000));
-        mCommentText.setText(mComment.getBody());
-
-        for (Comment reply : mComment.getReplies()) {
-            CommentView cv = new CommentView(mContext, reply);
-            mReplies.addView(cv);
+            if (mComment.getReplies() != null)
+                for (Comment reply : mComment.getReplies()) {
+                    CommentView cv = new CommentView(mContext, reply);
+                    mReplies.addView(cv, params);
+                }
+        } catch (NullPointerException e) {
+            Log.i("CommentView", "Caught a NullPointerException");
         }
     }
 

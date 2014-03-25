@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -79,13 +80,15 @@ public class CommentsFragment extends Fragment {
         protected void onPostExecute(List<Comment> result) {
             if (result != null) {
                 for (Comment comment : result) {
-                    LinearLayout.LayoutParams params =
-                            new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                                    ViewGroup.LayoutParams.WRAP_CONTENT);
-                    mLinearLayout.addView(new CommentView(getActivity(), comment), params);
-//                    Log.d("BreaditDebug", comment.getBody());
-                    mCommentsList.add(comment);
+                    if (comment != null) {
+                        LinearLayout.LayoutParams params =
+                                new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                        ViewGroup.LayoutParams.WRAP_CONTENT);
+                        mLinearLayout.addView(new CommentView(getActivity(), comment), params);
+                    }
                 }
+                mLinearLayout.requestLayout();
+                Log.d("CommentsFragment", "mLinearLayout.height() == " + mLinearLayout.getMeasuredHeight());
                 Toast.makeText(getActivity(), "mLinearLayout child count " + mLinearLayout.getChildCount(), Toast.LENGTH_LONG).show();
             }
         }

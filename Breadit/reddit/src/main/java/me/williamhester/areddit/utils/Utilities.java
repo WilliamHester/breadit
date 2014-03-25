@@ -5,15 +5,10 @@ import android.util.Log;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicHttpResponse;
-import org.apache.http.params.HttpParams;
-import org.apache.http.util.EntityUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -37,7 +32,7 @@ public class Utilities {
         httpGet = new HttpGet(url);
         httpGet.addHeader("User-Agent", USER_AGENT);
         if (cookie != null)
-            httpGet.addHeader("cookie", "reddit_session=" + cookie);
+            httpGet.setHeader("Cookie", "reddit_session=" + cookie);
         if (modhash != null)
             httpGet.addHeader("X-Modhash", modhash);
         HttpResponse httpResponse = httpClient.execute(httpGet);
@@ -50,11 +45,10 @@ public class Utilities {
         HttpPost httpPost = new HttpPost(url);
         httpPost.addHeader("User-Agent", USER_AGENT);
         if (cookie != null)
-            httpPost.addHeader("cookie", "reddit_session=" + cookie);
+            httpPost.addHeader("Cookie", "reddit_session=" + cookie);
         if (modhash != null)
             httpPost.addHeader("X-Modhash", modhash);
         httpPost.addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-//        httpPost.setHeader("Content-Length", String.valueOf(getLength(apiParams)));
 
         try {
             httpPost.setEntity(new UrlEncodedFormEntity(apiParams));
@@ -88,35 +82,9 @@ public class Utilities {
             try {
                 reader.close();
             } catch (IOException e) {
-                System.out.println(e.toString());
+                Log.e("Utilities", e.toString());
             }
         }
         return sb.toString();
     }
-
-    private static int getLength(List<NameValuePair> apiParams) {
-        StringBuilder sb = new StringBuilder();
-        String params;
-        if (apiParams.size() == 0) {
-            params = "";
-        } else if (apiParams.size() == 1) {
-            params = sb.append(apiParams.get(0).getName())
-                    .append('=')
-                    .append(apiParams.get(0).getValue())
-                    .toString();
-        } else {
-            sb.append(apiParams.get(0).getName())
-                    .append('=')
-                    .append(apiParams.get(0).getValue());
-            for (int i = 1; i < apiParams.size(); i++) {
-                sb.append('&')
-                        .append(apiParams.get(i).getName())
-                        .append('=')
-                        .append(apiParams.get(i).getValue());
-            }
-            params = sb.toString();
-        }
-        return params.length();
-    }
-
 }

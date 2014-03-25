@@ -1,18 +1,12 @@
 package me.williamhester.areddit;
 
-import android.util.Log;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.jar.Attributes;
 
 import me.williamhester.areddit.utils.Utilities;
 
@@ -52,8 +46,9 @@ public class Comment extends Thing {
         return mData.get("data").getAsJsonObject().get("downs").getAsLong();
     }
 
-    public long getScore() { 
-        return mData.get("data").getAsJsonObject().get("score").getAsLong();
+    public long getScore() {
+        return getUpVotes() - getDownVotes();
+//        return mData.get("data").getAsJsonObject().get("score").getAsLong();
     }
 
     public String getAuthor() { 
@@ -79,8 +74,9 @@ public class Comment extends Thing {
         List<Comment> ret = new ArrayList<Comment>();
         
         JsonObject data = mData.get("data").getAsJsonObject();
-        if (!data.get("replies").isJsonObject())
-            return  null;
+        if (data == null || data.get("replies") == null || !data.get("replies").isJsonObject()) {
+            return null;
+        }
         JsonObject replies = data.get("replies").getAsJsonObject();
         JsonObject replyData = replies.get("data").getAsJsonObject();
         JsonArray children = replyData.get("children").getAsJsonArray();
@@ -111,8 +107,7 @@ public class Comment extends Thing {
 
         ArrayList<Comment> comments = new ArrayList<Comment>();
 
-        String urlString = "http://www.reddit.com" + articleId + "/.json";
-        Log.i("BreaditDebug", urlString);
+        String urlString = "http://www.reddit.com" + articleId + ".json";
         String cookie = user == null ? null : user.getCookie();
         String modhash = user == null ? null : user.getModhash();
 

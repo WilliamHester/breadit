@@ -84,11 +84,6 @@ public class MainActivity extends Activity
     public void onNavigationDrawerItemSelected(int position) {
         // update the main content by replacing fragments
         FragmentManager fragmentManager = getFragmentManager();
-        if (mUser == null) {
-            Log.e("MainActivity", "wat");
-        } else {
-            Log.i("MainActivity", "not wat");
-        }
         Bundle b = new Bundle();
         b.putParcelable("user", mUser);
         SubredditFragment sf = new SubredditFragment();

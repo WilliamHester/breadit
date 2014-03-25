@@ -75,8 +75,6 @@ public class SubredditFragment extends Fragment {
     }
 
     private void populateSubmissions() {
-        SubmissionsListViewHelper list = new SubmissionsListViewHelper(mSubredditName,
-                Submission.HOT, -1, null, null, mUser, mSubmissions);
         mSubmissionsAdapter = new SubmissionArrayAdapter(mContext);
         mSubmissions.setAdapter(mSubmissionsAdapter);
         mSubmissions.setOnScrollListener(new InfiniteLoadingScrollListener());
@@ -94,7 +92,7 @@ public class SubredditFragment extends Fragment {
                 mContext.startActivity(i);
             }
         });
-        new RetrieveSubmissionsTask().execute(list);
+        new RefreshUserClass().execute();
     }
 
     private class SubmissionArrayAdapter extends ArrayAdapter<Submission> {
@@ -190,6 +188,21 @@ public class SubredditFragment extends Fragment {
                 time = difference + " Seconds Ago";
         }
         return time;
+    }
+
+    private class RefreshUserClass extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... voids) {
+            if (mUser != null) {
+                mUser.refreshUserData();
+                Log.i("SubredditFragment", "new modhash is " + mUser.getModhash());
+            }
+
+            SubmissionsListViewHelper list = new SubmissionsListViewHelper(mSubredditName,
+                    Submission.HOT, -1, null, null, mUser, mSubmissions);
+            new RetrieveSubmissionsTask().execute(list);
+            return null;
+        }
     }
 
     private class RetrieveSubmissionsTask extends AsyncTask<SubmissionsListViewHelper, Void,
