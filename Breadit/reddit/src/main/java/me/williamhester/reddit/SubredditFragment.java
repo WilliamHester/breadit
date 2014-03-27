@@ -40,14 +40,14 @@ import me.williamhester.areddit.utils.Utilities;
  */
 public class SubredditFragment extends Fragment {
 
-    ActionBar mAction;
-    Context mContext;
-    ListView mSubmissions;
-    String mSubredditName;
-    SubmissionArrayAdapter mSubmissionsAdapter;
-    List<me.williamhester.areddit.Submission> mSubmissionList;
-    HashSet<String> mNames;
-    User mUser;
+    private ActionBar mAction;
+    private Context mContext;
+    private ListView mSubmissions;
+    private String mSubredditName;
+    private SubmissionArrayAdapter mSubmissionsAdapter;
+    private List<Submission> mSubmissionList;
+    private HashSet<String> mNames;
+    private User mUser;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -195,7 +195,6 @@ public class SubredditFragment extends Fragment {
         protected Void doInBackground(Void... voids) {
             if (mUser != null) {
                 mUser.refreshUserData();
-                Log.i("SubredditFragment", "new modhash is " + mUser.getModhash());
             }
 
             SubmissionsListViewHelper list = new SubmissionsListViewHelper(mSubredditName,

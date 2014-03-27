@@ -4,10 +4,12 @@ import android.app.Fragment;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -26,6 +28,7 @@ public class CommentsFragment extends Fragment {
 
     private List<Comment> mCommentsList;
     private LinearLayout mLinearLayout;
+    private ScrollView mScrollView;
     private String mUrl;
     private String mPermalink;
     private User mUser;
@@ -46,14 +49,11 @@ public class CommentsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle bundle) {
         View v = inflater.inflate(R.layout.fragment_comments, null);
+        mScrollView = (ScrollView) v.findViewById(R.id.scroll_view);
         mLinearLayout = (LinearLayout) v.findViewById(R.id.linear_container);
         new CommentLoaderTask().execute();
-        return v;
-    }
 
-    @Override
-    public void onResume() {
-        super.onResume();
+        return v;
     }
 
     private class CommentLoaderTask extends AsyncTask<Void, Void, List<Comment>> {
