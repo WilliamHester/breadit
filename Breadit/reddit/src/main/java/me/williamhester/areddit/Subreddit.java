@@ -3,21 +3,9 @@ package me.williamhester.areddit;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.jar.Attributes;
-
-import me.williamhester.areddit.utils.Utilities;
 
 public class Subreddit extends Thing implements Parcelable {
 

@@ -57,7 +57,7 @@ public class MainActivity extends Activity
                     .replace(R.id.container, sf)
                     .commit();
         } else if (!mPrefs.getBoolean("finishedSetup", false)) { // If the user has not completed the setup
-            Intent i = new Intent(this, Setup.class);
+            Intent i = new Intent(this, SetupActivity.class);
             startActivity(i);
         } else { // If the user has completed the setup
             String username = mPrefs.getString("username", "");

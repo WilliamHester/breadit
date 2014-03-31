@@ -19,7 +19,7 @@
             android:name=".SubmissionActivity" >
         </activity>
         <activity
-            android:name="me.williamhester.reddit.Setup" >
+            android:name=".SetupActivity" >
         </activity>
     </application>
 </manifest>

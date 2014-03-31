@@ -26,7 +26,7 @@ public class Comment extends Thing implements Parcelable {
     public Comment(JsonObject jsonObj) {
         super(jsonObj);
         if (!getKind().equals("more")) {
-            mReplies = getReplies();
+            mReplies = generateReplies();
         }
     }
 
@@ -43,6 +43,10 @@ public class Comment extends Thing implements Parcelable {
         } else {
             return DOWNVOTED;
         }
+    }
+
+    public List<Comment> getReplies() {
+        return mReplies;
     }
 
     public String getBody() { 
@@ -80,7 +84,7 @@ public class Comment extends Thing implements Parcelable {
     /**
      * Get the replies to this comment.
      */
-    public List<Comment> getReplies() {
+    public List<Comment> generateReplies() {
         List<Comment> ret = new ArrayList<Comment>();
         
         JsonObject data = mData.get("data").getAsJsonObject();

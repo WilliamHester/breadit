@@ -31,17 +31,15 @@ public class SubmissionsListViewHelper {
      * Creates a list of submissions with the specified attributes. This should be used with
      * RetrieveSubmissionsTask in order to retrieve the submissions.
      *
-     * @param subredditName     The subreddit's name; null if frontpage
-     * @param sortType          A constant for the type of the sorting of the top
-     * @param typeArgs          If the sortType is TOP or CONTROVERSIAL, then this must be specified. Specifies how long
+     * @param subredditName The subreddit's name; null if frontpage
+     * @param sortType A constant for the type of the sorting of the top
+     * @param typeArgs If the sortType is TOP or CONTROVERSIAL, then this must be specified. Specifies how long
      *                              since the current date back the subreddits should go.
-     * @param before            The before= argument
-     * @param after             The after= argument
-     * @param user              The user. If the user is not connected, it will throw an exception.
+     * @param before the before= argument
+     * @param after the after= argument
+     * @param user the user. If the user is not connected, it will throw an exception.
      *
      * @return The list containing submissions
-     *
-     * @throws java.io.IOException      If connection fails
      */
     public SubmissionsListViewHelper(String subredditName, int sortType, int typeArgs, String before,
                                      String after, User user, ListView list) {

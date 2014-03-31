@@ -26,7 +26,7 @@ import me.williamhester.areddit.User;
  * Created by William Hester on 3/20/14.
  * This class allows the user to sign in upon the first opening of the app.
  */
-public class Setup extends FragmentActivity {
+public class SetupActivity extends FragmentActivity {
 
     private Context mContext = this;
 
@@ -41,6 +41,7 @@ public class Setup extends FragmentActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome);
+        getActionBar().hide();
 
         mViewPager = (ViewPager) findViewById(R.id.view_pager);
         mSave = (Button) findViewById(R.id.save);
@@ -111,9 +112,9 @@ public class Setup extends FragmentActivity {
         public Fragment getItem(int position) {
             switch (position) {
                 case 0:
-                    return Fragment.instantiate(mContext, Setup.SetupWelcomeFragment.class.getName());
+                    return Fragment.instantiate(mContext, SetupActivity.SetupWelcomeFragment.class.getName());
                 case 1:
-                    return Fragment.instantiate(mContext, Setup.SetupFragment.class.getName());
+                    return Fragment.instantiate(mContext, SetupActivity.SetupFragment.class.getName());
             }
             return null;
         }

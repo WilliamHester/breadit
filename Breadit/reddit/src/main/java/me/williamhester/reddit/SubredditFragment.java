@@ -63,7 +63,7 @@ public class SubredditFragment extends Fragment {
             mAction.setTitle("Front page of Reddit");
         }
         mContext = getActivity();
-        mSubmissionList = new ArrayList<me.williamhester.areddit.Submission>();
+        mSubmissionList = new ArrayList<Submission>();
         mNames = new HashSet<String>();
     }
 
@@ -95,7 +95,7 @@ public class SubredditFragment extends Fragment {
         new RefreshUserClass().execute();
     }
 
-    private class SubmissionArrayAdapter extends ArrayAdapter<me.williamhester.areddit.Submission> {
+    private class SubmissionArrayAdapter extends ArrayAdapter<Submission> {
         Context mContext;
 
         private Typeface slabBold = Typeface.createFromAsset(getActivity().getAssets(),
@@ -198,20 +198,20 @@ public class SubredditFragment extends Fragment {
             }
 
             SubmissionsListViewHelper list = new SubmissionsListViewHelper(mSubredditName,
-                    me.williamhester.areddit.Submission.HOT, -1, null, null, mUser, mSubmissions);
+                    Submission.HOT, -1, null, null, mUser, mSubmissions);
             new RetrieveSubmissionsTask().execute(list);
             return null;
         }
     }
 
     private class RetrieveSubmissionsTask extends AsyncTask<SubmissionsListViewHelper, Void,
-            List<me.williamhester.areddit.Submission>> {
+            List<Submission>> {
 
         String exceptionText;
 
         @Override
-        protected List<me.williamhester.areddit.Submission> doInBackground(SubmissionsListViewHelper... submissionsList) {
-            List<me.williamhester.areddit.Submission> submissions;
+        protected List<Submission> doInBackground(SubmissionsListViewHelper... submissionsList) {
+            List<Submission> submissions;
             try {
                 Log.i("SubredditFragment", "cookie is " + mUser.getCookie());
                 String data = Utilities.get("", submissionsList[0].getUrl(),
@@ -219,10 +219,10 @@ public class SubredditFragment extends Fragment {
                 JsonObject rootObject = new JsonParser().parse(data).getAsJsonObject();
                 JsonArray array = rootObject.get("data").getAsJsonObject().get("children").getAsJsonArray();
 
-                submissions = new ArrayList<me.williamhester.areddit.Submission>();
+                submissions = new ArrayList<Submission>();
                 for (int i = 0; i < array.size(); i++) {
                     JsonObject jsonData = array.get(i).getAsJsonObject();
-                    submissions.add(new me.williamhester.areddit.Submission(jsonData));
+                    submissions.add(new Submission(jsonData));
                 }
             } catch (MalformedURLException e) {
                 exceptionText = e.toString();
@@ -238,14 +238,14 @@ public class SubredditFragment extends Fragment {
         }
 
         @Override
-        protected void onPostExecute(List<me.williamhester.areddit.Submission> result) {
+        protected void onPostExecute(List<Submission> result) {
             if (result != null) {
                 // If result has a size of 0, then we need to tell the user that they must start from
                 //     the beginning because there are no more submissions that can be loaded.
                 if (result.size() == 0) {
 //                mSubmissions.addFooterView(v);
                 }
-                for (me.williamhester.areddit.Submission s : result) {
+                for (Submission s : result) {
                     if (!mNames.contains(s.getName())) {
                         mSubmissionList.add(s);
                         mNames.add(s.getName());
@@ -281,7 +281,7 @@ public class SubredditFragment extends Fragment {
             }
             if (!loading && (totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleThreshold)) {
                 SubmissionsListViewHelper list = new SubmissionsListViewHelper(mSubredditName,
-                        me.williamhester.areddit.Submission.HOT, -1, null,
+                        Submission.HOT, -1, null,
                         mSubmissionList.get(mSubmissionList.size() - 1).getName(),
                         mUser, mSubmissions);
                 new RetrieveSubmissionsTask().execute(list);

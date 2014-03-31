@@ -217,7 +217,6 @@ public class User implements Parcelable {
         apiParams.add(new BasicNameValuePair("rem", "True"));
 
         String data = Utilities.post(apiParams, "http://www.reddit.com/api/login/" + username, null, null);
-//        System.out.println("data = " + data);
         JsonObject jsObject = new JsonParser().parse(data).getAsJsonObject();
 
         JsonElement valuePair = jsObject.get("json");

@@ -29,7 +29,9 @@
             android:gravity="center"
             android:layout_width="240dp"
             android:layout_height="wrap_content"
-            android:hint="@string/username"/>
+            android:hint="@string/username"
+            android:imeOptions="actionNext"
+            android:inputType="textNoSuggestions"/>
 
         <View
             android:layout_width="match_parent"

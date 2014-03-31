@@ -46,7 +46,7 @@ public class CommentView extends LinearLayout {
         try {
             mAuthor.setText(removeEndQuotes(mComment.getAuthor()));
             mScore.setText(mComment.getScore() + "");
-            mTime.setText(calculateTime(mComment.getCreated(), System.currentTimeMillis() / 1000));
+            mTime.setText(calculateTime(mComment.getCreatedUtc(), System.currentTimeMillis() / 1000));
             mCommentText.setText(removeEscapeSequences(removeEndQuotes(mComment.getBody())));
 
             if (mComment.getReplies() != null)

@@ -1,11 +1,12 @@
 package me.williamhester.reddit;
 
+import android.app.Fragment;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 /**
  * Created by William on 3/25/14.
@@ -20,10 +21,13 @@ public class WebViewFragment extends Fragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         if (savedInstanceState != null) {
             mUri = savedInstanceState.getString(URI);
         } else if (getArguments() != null) {
-            mUri = getArguments().getString(URI);
+            mUri = getArguments().getString("url", null);
+//            mIsSelf = getIntent().getExtras().getBoolean("isSelf", false);
+//            mUser = getIntent().getExtras().getParcelable("user");
         }
     }
 
@@ -31,6 +35,9 @@ public class WebViewFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_webview, null);
         mWebView = (WebView) v.findViewById(R.id.content);
+        mWebView.setWebViewClient(new WebViewClient());
+        mWebView.getSettings().setBuiltInZoomControls(true);
+        mWebView.getSettings().setDisplayZoomControls(false);
 
         if (savedInstanceState != null)
             mWebView.restoreState(savedInstanceState);

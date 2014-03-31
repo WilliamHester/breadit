@@ -23,6 +23,7 @@ public abstract class Thing implements Parcelable {
     public String getKind() {
         return mData.get("kind").getAsString();
     }
+
     public JsonObject getData() {
         return mData;
     }
