@@ -83,7 +83,8 @@ public class CommentsFragment extends Fragment {
                         LinearLayout.LayoutParams params =
                                 new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                                         ViewGroup.LayoutParams.WRAP_CONTENT);
-                        mLinearLayout.addView(new CommentView(getActivity(), comment), params);
+                        if (mLinearLayout != null)
+                            mLinearLayout.addView(new CommentView(getActivity(), comment), params);
                     }
                 }
                 mLinearLayout.requestLayout();

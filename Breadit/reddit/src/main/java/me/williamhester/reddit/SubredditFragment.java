@@ -1,12 +1,14 @@
 package me.williamhester.reddit;
 
 import android.app.ActionBar;
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,6 +47,7 @@ public class SubredditFragment extends Fragment {
     private ListView mSubmissions;
     private String mSubredditName;
     private SubmissionArrayAdapter mSubmissionsAdapter;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
     private List<Submission> mSubmissionList;
     private HashSet<String> mNames;
     private User mUser;
@@ -70,6 +73,19 @@ public class SubredditFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle bundle) {
         View v = inflater.inflate(R.layout.fragment_subreddit, null);
         mSubmissions = (ListView) v.findViewById(R.id.submissions);
+        mSwipeRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.swipe_refresh);
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                populateSubmissions();
+            }
+        });
+//        mSwipeRefreshLayout.setColorScheme(android.R.color.holo_blue_bright,
+//                android.R.color.holo_green_light, android.R.color.holo_orange_light,
+//                android.R.color.holo_red_light);
+        mSwipeRefreshLayout.setColorScheme(android.R.color.holo_orange_dark,
+                android.R.color.holo_blue_dark, android.R.color.holo_orange_dark,
+                android.R.color.holo_blue_dark);
         populateSubmissions();
         return v;
     }
@@ -213,9 +229,13 @@ public class SubredditFragment extends Fragment {
         protected List<Submission> doInBackground(SubmissionsListViewHelper... submissionsList) {
             List<Submission> submissions;
             try {
-                Log.i("SubredditFragment", "cookie is " + mUser.getCookie());
-                String data = Utilities.get("", submissionsList[0].getUrl(),
+                mSwipeRefreshLayout.setRefreshing(true);
+                String data;
+                if (mUser != null)
+                    data = Utilities.get("", submissionsList[0].getUrl(),
                         mUser.getCookie(), mUser.getModhash());
+                else
+                    data = Utilities.get("", submissionsList[0].getUrl(), null, null);
                 JsonObject rootObject = new JsonParser().parse(data).getAsJsonObject();
                 JsonArray array = rootObject.get("data").getAsJsonObject().get("children").getAsJsonArray();
 
@@ -253,6 +273,7 @@ public class SubredditFragment extends Fragment {
                 }
                 mSubmissionsAdapter.notifyDataSetChanged();
             }
+            mSwipeRefreshLayout.setRefreshing(false);
         }
     }
 
@@ -293,5 +314,4 @@ public class SubredditFragment extends Fragment {
         public void onScrollStateChanged(AbsListView view, int scrollState) {
         }
     }
-
 }
