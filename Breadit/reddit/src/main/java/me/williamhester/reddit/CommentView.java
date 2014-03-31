@@ -16,7 +16,7 @@ import me.williamhester.areddit.Comment;
 public class CommentView extends LinearLayout {
 
     private boolean mHidden = false;
-
+    // 
     private Comment mComment;
     private Context mContext;
     private LinearLayout mReplies;
