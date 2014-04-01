@@ -11,27 +11,33 @@ import com.google.gson.JsonParser;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Stack;
 
 import me.williamhester.areddit.utils.Utilities;
 
 public class Comment extends Thing implements Parcelable {
 
-    public static int UPVOTED = 1;
-    public static int NEUTRAL = 0;
-    public static int DOWNVOTED = -1;
+    public static final int UPVOTED = 1;
+    public static final int NEUTRAL = 0;
+    public static final int DOWNVOTED = -1;
 
     private List<Comment> mReplies;
 
-    public Comment(JsonObject jsonObj) {
+    private int mLevel = 0;
+
+    public Comment(JsonObject jsonObj, int level) {
         super(jsonObj);
+        mLevel = level;
         if (!getKind().equals("more")) {
             mReplies = generateReplies();
         }
     }
 
     public Comment(Parcel in) {
-        this(new JsonParser().parse(in.readBundle().getString("jsonData")).getAsJsonObject());
+        this(new JsonParser().parse(in.readBundle().getString("jsonData")).getAsJsonObject(),
+                in.readBundle().getInt("level"));
     }
 
     public int getVotedStatus() {
@@ -81,6 +87,14 @@ public class Comment extends Thing implements Parcelable {
         return mData.get("data").getAsJsonObject().get("created_utc").getAsLong();
     }
 
+    public int getLevel() {
+        return mLevel;
+    }
+
+    public CommentIterator getCommentIterator() {
+        return new CommentIterator(this);
+    }
+
     /**
      * Get the replies to this comment.
      */
@@ -97,10 +111,10 @@ public class Comment extends Thing implements Parcelable {
 
         for (int i = 0; i < children.size(); i++) {
             JsonObject jsonData = (JsonObject)children.get(i);
-            Comment comment = new Comment(jsonData);
+            Comment comment = new Comment(jsonData, mLevel + 1);
 
             if(!comment.getKind().equals("more")) {
-                ret.add(new Comment(jsonData));
+                ret.add(comment);
             }
         }
         return ret;
@@ -136,7 +150,7 @@ public class Comment extends Thing implements Parcelable {
 
             for (int i = 0; i < children.size(); i++) {
                 JsonObject jsonData = (JsonObject)children.get(i);
-                comments.add(new Comment(jsonData));
+                comments.add(new Comment(jsonData, 0));
             }
         }
 
@@ -152,6 +166,7 @@ public class Comment extends Thing implements Parcelable {
     public void writeToParcel(Parcel parcel, int i) {
         Bundle b = new Bundle();
         b.putString("jsonData", mData.toString());
+        b.putInt("level", mLevel);
         parcel.writeBundle(b);
     }
 
@@ -165,4 +180,37 @@ public class Comment extends Thing implements Parcelable {
             return new Comment[size];
         }
     };
+
+    public class CommentIterator implements Iterator<Comment> {
+
+        private Stack<Comment> mStack;
+
+        public CommentIterator(Comment root) {
+            mStack = new Stack<Comment>();
+            mStack.add(root);
+        }
+
+        @Override
+        public boolean hasNext() {
+            return !mStack.isEmpty();
+        }
+
+        @Override
+        public Comment next() {
+            if (mStack.peek().mReplies == null || mStack.peek().mReplies.size() == 0) {
+                return mStack.pop();
+            } else {
+                Comment c = mStack.pop();
+                for (int i = c.mReplies.size() - 1; i >= 0; i--) {
+                    mStack.add(c.mReplies.get(i));
+                }
+                return c;
+            }
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+    }
 }

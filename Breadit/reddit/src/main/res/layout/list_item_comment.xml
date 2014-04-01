@@ -1,38 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+    android:id="@+id/root"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:orientation="vertical"
+        android:background="@color/ghostwhite">
 
-        <!--Stuff for the top part of the comment-->
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <!--The upvote/downvote view that should slide in from the left, and the text-->
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <View
-            android:layout_width="16dp"
-            android:layout_height="match_parent" />
-
-        <me.williamhester.reddit.CommentView
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
-        </me.williamhester.reddit.CommentView>
+            <TextView
+                android:gravity="left"
+                android:id="@+id/score"
+                android:text="1234"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-thin"/>
+
+            <TextView
+                android:gravity="center"
+                android:id="@+id/author"
+                android:text="Shockwave_"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-thin"/>
+
+            <TextView
+                android:gravity="right"
+                android:id="@+id/time"
+                android:text="9 hours ago"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-thin"/>
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/comment_text"
+            android:text="This is some dummy text that can be used temporarily to test out the commentView xml file."
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
 
     </LinearLayout>
 

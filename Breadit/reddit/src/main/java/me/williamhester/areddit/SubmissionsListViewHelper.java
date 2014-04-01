@@ -53,8 +53,6 @@ public class SubmissionsListViewHelper {
             append = "r/" + subredditName;
         }
 
-        ArrayList<Submission> submissions = new ArrayList<Submission>();
-        URL url;
         String urlString = "http://www.reddit.com/" + append;
 
         switch (sortType) {
@@ -95,7 +93,8 @@ public class SubmissionsListViewHelper {
                 case ALL:
                     urlString += "t=all&";
                     break;
-                default: break;
+                default:
+                    break;
             }
         }
 

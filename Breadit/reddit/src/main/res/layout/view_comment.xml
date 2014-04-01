@@ -19,27 +19,37 @@
             android:orientation="horizontal">
 
             <TextView
+                android:gravity="left"
                 android:id="@+id/score"
+                android:text="1234"
                 android:layout_weight="1"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-thin"/>
 
             <TextView
+                android:gravity="center"
                 android:id="@+id/author"
+                android:text="Shockwave_"
                 android:layout_weight="1"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-thin"/>
 
             <TextView
+                android:gravity="right"
                 android:id="@+id/time"
+                android:text="9 hours ago"
                 android:layout_weight="1"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-thin"/>
 
         </LinearLayout>
 
         <TextView
             android:id="@+id/comment_text"
+            android:text="This is some dummy text that can be used temporarily to test out the commentView xml file."
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 

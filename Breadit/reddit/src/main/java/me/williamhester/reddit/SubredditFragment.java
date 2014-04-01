@@ -1,11 +1,9 @@
 package me.williamhester.reddit;
 
 import android.app.ActionBar;
-import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -18,6 +16,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.gson.JsonArray;
@@ -66,8 +65,6 @@ public class SubredditFragment extends Fragment {
             mAction.setTitle("Front page of Reddit");
         }
         mContext = getActivity();
-        mSubmissionList = new ArrayList<Submission>();
-        mNames = new HashSet<String>();
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle bundle) {
@@ -90,7 +87,13 @@ public class SubredditFragment extends Fragment {
         return v;
     }
 
+    /**
+     * This method is called to begin the list of submissions. It is called during onCreate and
+     *     when the SwipeRefreshLayout's onRefresh method is called.
+     */
     private void populateSubmissions() {
+        mNames = new HashSet<String>();
+        mSubmissionList = new ArrayList<Submission>();
         mSubmissionsAdapter = new SubmissionArrayAdapter(mContext);
         mSubmissions.setAdapter(mSubmissionsAdapter);
         mSubmissions.setOnScrollListener(new InfiniteLoadingScrollListener());
@@ -102,9 +105,8 @@ public class SubredditFragment extends Fragment {
                 b.putString("permalink", mSubmissionList.get(position).getPermalink());
                 b.putString("url", mSubmissionList.get(position).getUrl());
                 b.putBoolean("isSelf", mSubmissionList.get(position).isSelf());
-//                b.putParcelable("user", mUser);
+                b.putParcelable("user", mUser);
                 i.putExtras(b);
-                Log.i("BreaditDebug", "Should be starting activity");
                 mContext.startActivity(i);
             }
         });
@@ -113,13 +115,6 @@ public class SubredditFragment extends Fragment {
 
     private class SubmissionArrayAdapter extends ArrayAdapter<Submission> {
         Context mContext;
-
-        private Typeface slabBold = Typeface.createFromAsset(getActivity().getAssets(),
-                "fonts/RobotoSlab-Bold.ttf");
-        private Typeface slabThin = Typeface.createFromAsset(getActivity().getAssets(),
-                "fonts/RobotoSlab-Thin.ttf");
-        private Typeface slabReg = Typeface.createFromAsset(getActivity().getAssets(),
-                "fonts/RobotoSlab-Regular.ttf");
 
         public SubmissionArrayAdapter(Context context) {
             super(context, R.layout.list_item_link_post, mSubmissionList);
@@ -131,13 +126,15 @@ public class SubredditFragment extends Fragment {
                     mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             Submission s = (Submission) mSubmissions.getItemAtPosition(position);
 
-            View v = inflater.inflate(R.layout.list_item_link_post, parent, false);
-            TextView subredditName = (TextView) v.findViewById(R.id.subreddit_name);
-            TextView time = (TextView) v.findViewById(R.id.time);
-            TextView score = (TextView) v.findViewById(R.id.score);
-            ImageView image = (ImageView) v.findViewById(R.id.thumbnail);
-            TextView title = (TextView) v.findViewById(R.id.title);
-            View spacer = v.findViewById(R.id.spacer);
+            if (convertView == null)
+                convertView = inflater.inflate(R.layout.list_item_link_post, parent, false);
+
+            TextView subredditName = (TextView) convertView.findViewById(R.id.subreddit_name);
+            TextView time = (TextView) convertView.findViewById(R.id.time);
+            TextView score = (TextView) convertView.findViewById(R.id.score);
+            ImageView image = (ImageView) convertView.findViewById(R.id.thumbnail);
+            TextView title = (TextView) convertView.findViewById(R.id.title);
+            View spacer = convertView.findViewById(R.id.spacer);
 
             // if the submission is a self post, we need to hide the thumbnail
             if (s.isSelf()) {
@@ -155,12 +152,8 @@ public class SubredditFragment extends Fragment {
             time.setText(calculateTime(s.getCreatedUtc(), System.currentTimeMillis() / 1000));
             score.setText(s.getScore() + "");
             title.setText(s.getTitle());
-
-            subredditName.setTypeface(slabBold);
-            time.setTypeface(slabBold);
-            score.setTypeface(slabBold);
-
-            return v;
+            
+            return convertView;
         }
     }
 
@@ -169,39 +162,39 @@ public class SubredditFragment extends Fragment {
         String time;
         if (difference / 31536000 > 0) {
             if (difference / 3156000 == 1)
-                time = "1 Year Ago";
+                time = "1 year ago";
             else
-                time = difference / 3156000 + " Years Ago";
+                time = difference / 3156000 + " years ago";
         } else if (difference / 2592000 > 0) {
             if (difference / 2592000 == 1)
-                time = "1 Month Ago";
+                time = "1 month ago";
             else
-                time = difference / 2592000 + " Months Ago";
+                time = difference / 2592000 + " months ago";
         } else if (difference / 604800 > 0) {
             if (difference / 604800 == 1)
-                time = "1 Week Ago";
+                time = "1 week ago";
             else
-                time = difference / 604800 + " Weeks Ago";
+                time = difference / 604800 + " Weeks ago";
         } else if (difference / 86400 > 0) {
             if (difference / 86400 == 1)
-                time = "1 Day Ago";
+                time = "1 day ago";
             else
-                time = difference / 86400 + " Day Ago";
+                time = difference / 86400 + " day ago";
         } else if (difference / 3600 > 0) {
             if (difference / 3600 == 1)
-                time = "1 Hour Ago";
+                time = "1 hour ago";
             else
-                time = difference / 3600 + " Hours Ago";
+                time = difference / 3600 + " hours ago";
         } else if (difference / 60 > 0) {
             if (difference / 60 == 1)
-                time = "1 Minute Ago";
+                time = "1 minute ago";
             else
-                time = difference / 60 + " Minutes Ago";
+                time = difference / 60 + " minutes ago";
         } else {
             if (difference == 1)
-                time = "1 Second Ago";
+                time = "1 second ago";
             else
-                time = difference + " Seconds Ago";
+                time = difference + " seconds ago";
         }
         return time;
     }
@@ -245,13 +238,13 @@ public class SubredditFragment extends Fragment {
                     submissions.add(new Submission(jsonData));
                 }
             } catch (MalformedURLException e) {
-                exceptionText = e.toString();
+                e.printStackTrace();
                 return null;
             } catch (IOException e) {
-                exceptionText = e.toString();
+                e.printStackTrace();
                 return null;
             } catch (NullPointerException e) {
-                exceptionText = e.toString();
+                e.printStackTrace();
                 return null;
             }
             return submissions;
@@ -269,6 +262,7 @@ public class SubredditFragment extends Fragment {
                     if (!mNames.contains(s.getName())) {
                         mSubmissionList.add(s);
                         mNames.add(s.getName());
+//                        Log.i("SubredditFragment", "Submission added");
                     }
                 }
                 mSubmissionsAdapter.notifyDataSetChanged();

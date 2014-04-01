@@ -2,11 +2,7 @@ package me.williamhester.reddit;
 
 import android.app.ActionBar;
 import android.app.Activity;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
-
-import java.util.Map;
 
 import me.williamhester.areddit.User;
 
@@ -33,8 +29,8 @@ public class SubmissionActivity extends Activity {
         }
 
         ActionBar.Tab tab = mAction.newTab().setText(R.string.comments)
-                .setTabListener(new TabListener<CommentsFragment>(this, "commentsFragment",
-                        CommentsFragment.class, getIntent().getExtras()));
+                .setTabListener(new TabListener<CommentFragment>(this, "commentsFragment",
+                        CommentFragment.class, getIntent().getExtras()));
 
         mAction.addTab(tab);
 
@@ -44,17 +40,12 @@ public class SubmissionActivity extends Activity {
 
         mAction.addTab(tab);
 
-//        CommentsFragment cf = new CommentsFragment();
         if (getIntent().getExtras() != null) {
             mPermalink = getIntent().getExtras().getString("permalink", null);
             mUrl = getIntent().getExtras().getString("url", null);
             mIsSelf = getIntent().getExtras().getBoolean("isSelf", false);
             mUser = getIntent().getExtras().getParcelable("user");
-//            cf.setArguments(getIntent().getExtras());
         }
-//        getFragmentManager().beginTransaction()
-//                .replace(R.id.container, cf)
-//                .commit();
     }
 
 }
