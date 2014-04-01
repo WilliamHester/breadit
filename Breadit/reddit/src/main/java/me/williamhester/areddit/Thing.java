@@ -1,27 +1,39 @@
 package me.williamhester.areddit;
 
-import android.os.Parcelable;
-
 import com.google.gson.JsonObject;
 
-public abstract class Thing implements Parcelable {
+public class Thing {
 
-    public Thing(JsonObject data) {
+    protected String mId;
+    protected String mName;
+    protected String mKind;
+
+    protected Thing() { }
+
+    protected Thing(JsonObject data) {
         mData = data;
     }
 
     protected JsonObject mData;
 
+    public static Thing fromJsonString(JsonObject data) {
+        Thing thing = new Thing();
+        thing.mId = data.getAsJsonObject("data").get("id").getAsString();
+        thing.mName = data.getAsJsonObject("data").get("name").getAsString();
+        thing.mKind = data.get("kind").getAsString();
+        return thing;
+    }
+
     public String getId() {
-        return mData.getAsJsonObject("data").get("id").getAsString();
+        return mId;
     }
 
     public String getName() { 
-        return mData.getAsJsonObject("data").get("name").getAsString();
+        return mName;
     }
 
     public String getKind() {
-        return mData.get("kind").getAsString();
+        return mKind;
     }
 
     public JsonObject getData() {

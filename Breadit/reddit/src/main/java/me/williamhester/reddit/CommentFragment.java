@@ -5,13 +5,16 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -67,7 +70,7 @@ public class CommentFragment extends Fragment {
             mContext = context;
         }
 
-        public View getView(int position, View convertView, ViewGroup parent) {
+        public View getView(final int position, View convertView, ViewGroup parent) {
             LayoutInflater inflater = (LayoutInflater)
                     mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
@@ -100,7 +103,7 @@ public class CommentFragment extends Fragment {
         }
 
         private String removeEscapeSequences(String s) {
-            return s.replace("\\", "");
+            return s.replace("\\n", "\n");
         }
 
         private String calculateTime(long postTime, long currentTime) {
@@ -157,10 +160,10 @@ public class CommentFragment extends Fragment {
                 List<Comment> comments = Comment.getComments(mPermalink, mUser, lastComment);
                 return comments;
             } catch (MalformedURLException e) {
-                Log.e("me.williamhester.reddit", e.toString());
+                e.printStackTrace();
                 return null;
             } catch (IOException e) {
-                Log.e("me.williamhester.reddit", e.toString());
+                e.printStackTrace();
                 return null;
             }
         }
@@ -183,6 +186,31 @@ public class CommentFragment extends Fragment {
                 }
                 mCommentAdapter.notifyDataSetChanged();
             }
+        }
+    }
+
+    private class SwipeListener extends GestureDetector.SimpleOnGestureListener {
+        private static final int SWIPE_MIN_DISTANCE = 120;
+        private static final int SWIPE_THRESHOLD_VELOCITY = 200;
+
+        private String mName;
+
+        public SwipeListener(String name) {
+            mName = name;
+        }
+
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            if(e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE
+                    && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+                Toast.makeText(getActivity(), "Right to Left swipe", Toast.LENGTH_SHORT).show();
+                return false; // Right to left
+            }  else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE
+                    && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+                Toast.makeText(getActivity(), "Left to right swipe", Toast.LENGTH_SHORT).show();
+                return false; // Left to right
+            }
+            return false;
         }
     }
 

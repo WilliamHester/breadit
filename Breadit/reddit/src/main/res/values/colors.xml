@@ -5,4 +5,8 @@
     <color name="ghostwhite">#F8F8FF</color>
     <color name="gainsboro">#DCDCDC</color>
 
+    <!--Reddit Colors-->
+    <color name="orangered">#FF8B24</color>
+    <color name="periwinkle">#9494FF</color>
+
 </resources>

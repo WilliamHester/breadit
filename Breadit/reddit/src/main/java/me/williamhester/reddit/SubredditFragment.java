@@ -14,10 +14,13 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -121,20 +124,37 @@ public class SubredditFragment extends Fragment {
             mContext = context;
         }
 
-        public View getView(int position, View convertView, ViewGroup parent) {
+        public View getView(final int position, View convertView, ViewGroup parent) {
             LayoutInflater inflater = (LayoutInflater)
                     mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            Submission s = (Submission) mSubmissions.getItemAtPosition(position);
+            final Submission s = (Submission) mSubmissions.getItemAtPosition(position);
 
             if (convertView == null)
                 convertView = inflater.inflate(R.layout.list_item_link_post, parent, false);
 
+            Button ups = (Button) convertView.findViewById(R.id.ups);
+            Button downs = (Button) convertView.findViewById(R.id.downs);
+//            LinearLayout background = (LinearLayout) convertView.findViewById(R.id.background);
             TextView subredditName = (TextView) convertView.findViewById(R.id.subreddit_name);
             TextView time = (TextView) convertView.findViewById(R.id.time);
-            TextView score = (TextView) convertView.findViewById(R.id.score);
+//            TextView score = (TextView) convertView.findViewById(R.id.score);
             ImageView image = (ImageView) convertView.findViewById(R.id.thumbnail);
             TextView title = (TextView) convertView.findViewById(R.id.title);
             View spacer = convertView.findViewById(R.id.spacer);
+
+            ups.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    new VoteAsyncTask(getItem(position).getName(), mUser, VoteAsyncTask.UPVOTE).execute();
+                    Toast.makeText(mContext, getItem(position).getName(), Toast.LENGTH_SHORT).show();
+                }
+            });
+            downs.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    new VoteAsyncTask(getItem(position).getName(), mUser, VoteAsyncTask.DOWNVOTE).execute();
+                }
+            });
 
             // if the submission is a self post, we need to hide the thumbnail
             if (s.isSelf()) {
@@ -150,8 +170,10 @@ public class SubredditFragment extends Fragment {
                 subredditName.setText(s.getAuthor());
             }
             time.setText(calculateTime(s.getCreatedUtc(), System.currentTimeMillis() / 1000));
-            score.setText(s.getScore() + "");
+//            score.setText(s.getScore() + "");
             title.setText(s.getTitle());
+            ups.setText(s.getUpVotes() + "");
+            downs.setText(s.getDownVotes() + "");
             
             return convertView;
         }

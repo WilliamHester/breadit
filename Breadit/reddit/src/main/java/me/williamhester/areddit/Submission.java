@@ -96,8 +96,8 @@ public class Submission extends Thing implements Parcelable {
         return mData.get("data").getAsJsonObject().get("selftext").getAsString();
     }
 
-    public String getLikes() {
-        return mData.get("data").getAsJsonObject().get("likes").getAsString();
+    public boolean getLikes() {
+        return mData.get("data").getAsJsonObject().get("likes").getAsBoolean();
     }
 
     public String getSecureMedia() {

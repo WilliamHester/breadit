@@ -38,6 +38,8 @@ public class WebViewFragment extends Fragment {
         mWebView.setWebViewClient(new WebViewClient());
         mWebView.getSettings().setBuiltInZoomControls(true);
         mWebView.getSettings().setDisplayZoomControls(false);
+        mWebView.getSettings().setJavaScriptEnabled(true);
+        mWebView.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
 
         if (savedInstanceState != null)
             mWebView.restoreState(savedInstanceState);
