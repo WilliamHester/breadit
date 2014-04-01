@@ -11,18 +11,12 @@ public class Thing {
     protected Thing() { }
 
     protected Thing(JsonObject data) {
-        mData = data;
+        mId = data.getAsJsonObject("data").get("id").getAsString();
+        mName = data.getAsJsonObject("data").get("name").getAsString();
+        mKind = data.get("kind").getAsString();
     }
 
     protected JsonObject mData;
-
-    public static Thing fromJsonString(JsonObject data) {
-        Thing thing = new Thing();
-        thing.mId = data.getAsJsonObject("data").get("id").getAsString();
-        thing.mName = data.getAsJsonObject("data").get("name").getAsString();
-        thing.mKind = data.get("kind").getAsString();
-        return thing;
-    }
 
     public String getId() {
         return mId;
@@ -34,9 +28,5 @@ public class Thing {
 
     public String getKind() {
         return mKind;
-    }
-
-    public JsonObject getData() {
-        return mData;
     }
 }

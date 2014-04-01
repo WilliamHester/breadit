@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Html;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
@@ -15,6 +16,8 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.apache.commons.lang3.StringEscapeUtils;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -55,7 +58,7 @@ public class CommentFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_comments_2, null);
+        View v = inflater.inflate(R.layout.fragment_comment, null);
         mCommentsListView = (ListView) v.findViewById(R.id.comments);
         mCommentAdapter = new CommentArrayAdapter(mContext);
         mCommentsListView.setAdapter(mCommentAdapter);
@@ -88,9 +91,7 @@ public class CommentFragment extends Fragment {
             author.setText(removeEndQuotes(getItem(position).getAuthor()));
             score.setText(getItem(position).getScore() + "");
             time.setText(calculateTime(getItem(position).getCreatedUtc(), System.currentTimeMillis() / 1000));
-            body.setText(removeEscapeSequences(removeEndQuotes(getItem(position).getBody())));
-
-            Log.i("CommentFragment", "Created comment " + getItem(position).getLevel());
+            body.setText(Html.fromHtml(StringEscapeUtils.unescapeHtml4(getItem(position).getBodyHtml())));
 
             return convertView;
         }
@@ -176,11 +177,6 @@ public class CommentFragment extends Fragment {
                         Comment.CommentIterator iterator = comment.getCommentIterator();
                         while (iterator.hasNext()) {
                             mCommentsList.add(iterator.next());
-                            try {
-                                Log.i("CommentFragment", mCommentsList.get(mCommentsList.size() - 1).getBody());
-                            } catch (NullPointerException e) {
-                                Log.i("NPE tag", mCommentsList.get(mCommentsList.size() - 1).getData().toString());
-                            }
                         }
                     }
                 }

@@ -3,6 +3,7 @@ package me.williamhester.areddit;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -24,14 +25,37 @@ public class Comment extends Thing implements Parcelable {
     public static final int DOWNVOTED = -1;
 
     private List<Comment> mReplies;
+    private List<String> mMore;
+
+    private String mApprovedBy;
+    private String mAuthor;
+    private String mAuthorFlairCss;
+    private String mAuthorFlairText;
+    private String mBannedBy;
+    private String mBody;
+    private String mBodyHtml;
+    private String mSubreddit;
+    private String mSubredditId;
+    private String mLinkAuthor;
+    private String mLinkId;
+    private String mLinkTitle;
+    private String mLinkUrl;
+    private String mDistinguished;
+    private boolean mSaved;
+    private int mVoteStatus;
+    private long mCreated;
+    private long mCreatedUtc;
+    private long mUps;
+    private long mDowns;
+    private long mEdited;
 
     private int mLevel = 0;
 
-    public Comment(JsonObject jsonObj, int level) {
+    private Comment(JsonObject jsonObj, int level) {
         super(jsonObj);
         mLevel = level;
         if (!getKind().equals("more")) {
-            mReplies = generateReplies();
+            mReplies = generateReplies(jsonObj);
         }
     }
 
@@ -40,9 +64,72 @@ public class Comment extends Thing implements Parcelable {
                 in.readBundle().getInt("level"));
     }
 
+    public static Comment fromJsonString(JsonObject data, int level) {
+        Comment comment = new Comment(data, level);
+        comment.mLevel = level;
+        if (!comment.mKind.equals("more")) {
+            if (!data.get("data").getAsJsonObject().get("approved_by").isJsonNull())
+                comment.mApprovedBy = data.get("data").getAsJsonObject().get("approved_by").getAsString();
+            if (!data.get("data").getAsJsonObject().get("author").isJsonNull())
+                comment.mAuthor = data.get("data").getAsJsonObject().get("author").getAsString();
+            if (!data.get("data").getAsJsonObject().get("author_flair_css_class").isJsonNull())
+                comment.mAuthorFlairCss = data.get("data").getAsJsonObject().get("author_flair_css_class").getAsString();
+            if (!data.get("data").getAsJsonObject().get("author_flair_text").isJsonNull())
+                comment.mAuthorFlairText = data.get("data").getAsJsonObject().get("author_flair_text").getAsString();
+            if (!data.get("data").getAsJsonObject().get("banned_by").isJsonNull())
+                comment.mBannedBy = data.get("data").getAsJsonObject().get("banned_by").getAsString();
+            comment.mBody = data.get("data").getAsJsonObject().get("body").getAsString();
+            comment.mBodyHtml = data.get("data").getAsJsonObject().get("body_html").getAsString();
+            if (data.get("data").getAsJsonObject().get("link_author") != null) {
+                if (!data.get("data").getAsJsonObject().get("link_author").isJsonNull())
+                    comment.mLinkAuthor = data.get("data").getAsJsonObject().get("link_author").getAsString();
+                if (!data.get("data").getAsJsonObject().get("link_title").isJsonNull())
+                    comment.mLinkTitle = data.get("data").getAsJsonObject().get("link_title").getAsString();
+                if (!data.get("data").getAsJsonObject().get("link_id").isJsonNull())
+                    comment.mLinkId = data.get("data").getAsJsonObject().get("link_id").getAsString();
+                if (!data.get("data").getAsJsonObject().get("link_url").isJsonNull())
+                    comment.mLinkUrl = data.get("data").getAsJsonObject().get("link_url").getAsString();
+            }
+            comment.mSubreddit = data.get("data").getAsJsonObject().get("subreddit").getAsString();
+            comment.mSubredditId = data.get("data").getAsJsonObject().get("subreddit_id").getAsString();
+            if (!data.get("data").getAsJsonObject().get("distinguished").isJsonNull())
+                comment.mDistinguished = data.get("data").getAsJsonObject().get("distinguished").getAsString();
+            comment.mSaved = data.get("data").getAsJsonObject().get("saved").getAsBoolean();
+            comment.mCreated = data.get("data").getAsJsonObject().get("created").getAsLong();
+            comment.mCreatedUtc = data.get("data").getAsJsonObject().get("created_utc").getAsLong();
+            comment.mUps = data.get("data").getAsJsonObject().get("ups").getAsLong();
+            comment.mDowns = data.get("data").getAsJsonObject().get("downs").getAsLong();
+            JsonElement je = data.get("data").getAsJsonObject().get("likes");
+            if (je.isJsonNull()) {
+                comment.mVoteStatus = NEUTRAL;
+            } else if (je.getAsBoolean()) {
+                comment.mVoteStatus = UPVOTED;
+            } else {
+                comment.mVoteStatus = DOWNVOTED;
+            }
+            je = data.get("data").getAsJsonObject().get("edited");
+            if (je.isJsonNull()) {
+                comment.mEdited = -1;
+            } else {
+                try {
+                    comment.mEdited = je.getAsLong();
+                } catch (NumberFormatException e) {
+                    comment.mEdited = -1;
+                }
+            }
+        } else {
+            comment.mMore = new ArrayList<String>();
+            JsonArray array = data.get("data").getAsJsonObject().get("children").getAsJsonArray();
+            for (JsonElement e : array) {
+                comment.mMore.add(e.getAsString());
+            }
+        }
+        return comment;
+    }
+
     public int getVotedStatus() {
         JsonElement o = mData.get("data").getAsJsonObject().get("likes");
-        if (o == null) {
+        if (o.isJsonNull()) {
             return NEUTRAL;
         } else if (o.getAsBoolean()) {
             return UPVOTED;
@@ -55,24 +142,52 @@ public class Comment extends Thing implements Parcelable {
         return mReplies;
     }
 
+    public String getBodyHtml() {
+        return mBodyHtml;
+    }
+
     public String getBody() { 
-        return mData.get("data").getAsJsonObject().get("body").toString();
+        return mBody;
+    }
+
+    public String getSubreddit() {
+        return mSubreddit;
+    }
+
+    public String getSubredditId() {
+        return mSubredditId;
+    }
+
+    public String getLinkAuthor() {
+        return mLinkAuthor;
+    }
+
+    public String getLinkId() {
+        return mLinkId;
+    }
+
+    public String getLinkTitle() {
+        return mLinkTitle;
+    }
+
+    public String getLinkUrl() {
+        return mLinkUrl;
     }
 
     public long getUpVotes() { 
-        return mData.get("data").getAsJsonObject().get("ups").getAsLong();
+        return mUps;
     }
 
     public long getDownVotes() { 
-        return mData.get("data").getAsJsonObject().get("downs").getAsLong();
+        return mDowns;
     }
 
     public long getScore() {
-        return getUpVotes() - getDownVotes();
+        return mUps - mDowns;
     }
 
     public String getAuthor() { 
-        return mData.get("data").getAsJsonObject().get("author").toString();
+        return mAuthor;
     }
 
     public boolean hasReplies() {
@@ -80,11 +195,11 @@ public class Comment extends Thing implements Parcelable {
     }
 
     public long getCreated() {
-        return mData.get("data").getAsJsonObject().get("created").getAsLong();
+        return mCreated;
     }
 
     public long getCreatedUtc() {
-        return mData.get("data").getAsJsonObject().get("created_utc").getAsLong();
+        return mCreatedUtc;
     }
 
     public int getLevel() {
@@ -98,10 +213,10 @@ public class Comment extends Thing implements Parcelable {
     /**
      * Get the replies to this comment.
      */
-    public List<Comment> generateReplies() {
+    public List<Comment> generateReplies(JsonObject data) {
         List<Comment> ret = new ArrayList<Comment>();
         
-        JsonObject data = mData.get("data").getAsJsonObject();
+        data = data.get("data").getAsJsonObject();
         if (data == null || data.get("replies") == null || !data.get("replies").isJsonObject()) {
             return null;
         }
@@ -111,10 +226,11 @@ public class Comment extends Thing implements Parcelable {
 
         for (int i = 0; i < children.size(); i++) {
             JsonObject jsonData = (JsonObject)children.get(i);
-            Comment comment = new Comment(jsonData, mLevel + 1);
+            Comment comment = fromJsonString(jsonData, mLevel + 1);
 
-            if(!comment.getKind().equals("more")) {
+            if(comment != null && !comment.getKind().equals("more")) {
                 ret.add(comment);
+                Log.i("Comment", comment.getBody());
             }
         }
         return ret;
@@ -150,7 +266,7 @@ public class Comment extends Thing implements Parcelable {
 
             for (int i = 0; i < children.size(); i++) {
                 JsonObject jsonData = (JsonObject)children.get(i);
-                comments.add(new Comment(jsonData, 0));
+                comments.add(fromJsonString(jsonData, 0));
             }
         }
 

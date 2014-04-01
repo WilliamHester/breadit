@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,9 +15,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -120,7 +117,7 @@ public class SubredditFragment extends Fragment {
         Context mContext;
 
         public SubmissionArrayAdapter(Context context) {
-            super(context, R.layout.list_item_link_post, mSubmissionList);
+            super(context, R.layout.list_item_post, mSubmissionList);
             mContext = context;
         }
 
@@ -130,7 +127,7 @@ public class SubredditFragment extends Fragment {
             final Submission s = (Submission) mSubmissions.getItemAtPosition(position);
 
             if (convertView == null)
-                convertView = inflater.inflate(R.layout.list_item_link_post, parent, false);
+                convertView = inflater.inflate(R.layout.list_item_post, parent, false);
 
             Button ups = (Button) convertView.findViewById(R.id.ups);
             Button downs = (Button) convertView.findViewById(R.id.downs);
@@ -153,6 +150,19 @@ public class SubredditFragment extends Fragment {
                 @Override
                 public void onClick(View view) {
                     new VoteAsyncTask(getItem(position).getName(), mUser, VoteAsyncTask.DOWNVOTE).execute();
+                }
+            });
+            title.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent i = new Intent(getActivity(), SubmissionActivity.class);
+                    Bundle b = new Bundle();
+                    b.putString("permalink", mSubmissionList.get(position).getPermalink());
+                    b.putString("url", mSubmissionList.get(position).getUrl());
+                    b.putBoolean("isSelf", mSubmissionList.get(position).isSelf());
+                    b.putParcelable("user", mUser);
+                    i.putExtras(b);
+                    mContext.startActivity(i);
                 }
             });
 
@@ -257,7 +267,7 @@ public class SubredditFragment extends Fragment {
                 submissions = new ArrayList<Submission>();
                 for (int i = 0; i < array.size(); i++) {
                     JsonObject jsonData = array.get(i).getAsJsonObject();
-                    submissions.add(new Submission(jsonData));
+                    submissions.add(Submission.fromJsonString(jsonData));
                 }
             } catch (MalformedURLException e) {
                 e.printStackTrace();
@@ -277,14 +287,13 @@ public class SubredditFragment extends Fragment {
             if (result != null) {
                 // If result has a size of 0, then we need to tell the user that they must start from
                 //     the beginning because there are no more submissions that can be loaded.
-                if (result.size() == 0) {
+//                if (result.size() == 0) {
 //                mSubmissions.addFooterView(v);
-                }
+//                }
                 for (Submission s : result) {
                     if (!mNames.contains(s.getName())) {
                         mSubmissionList.add(s);
                         mNames.add(s.getName());
-//                        Log.i("SubredditFragment", "Submission added");
                     }
                 }
                 mSubmissionsAdapter.notifyDataSetChanged();
