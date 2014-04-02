@@ -153,7 +153,7 @@ public class NavigationDrawerFragment extends Fragment {
         mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Toast.makeText(getActionBar().getThemedContext(), "Clicked on " +  mSubredditList.get(i), Toast.LENGTH_SHORT).show();
+                mCallbacks.onNavigationDrawerItemSelected(mSubredditList.get(i));
             }
         });
         return v;

@@ -78,14 +78,25 @@ public class SubredditFragment extends Fragment {
                 populateSubmissions();
             }
         });
-//        mSwipeRefreshLayout.setColorScheme(android.R.color.holo_blue_bright,
-//                android.R.color.holo_green_light, android.R.color.holo_orange_light,
-//                android.R.color.holo_red_light);
         mSwipeRefreshLayout.setColorScheme(android.R.color.holo_orange_dark,
                 android.R.color.holo_blue_dark, android.R.color.holo_orange_dark,
                 android.R.color.holo_blue_dark);
         populateSubmissions();
         return v;
+    }
+
+    public void setSubreddit(String subreddit) {
+        mSubredditName = subreddit;
+        populateSubmissions();
+    }
+
+    public static SubredditFragment newInstance(User user, String subredditName) {
+        SubredditFragment sf = new SubredditFragment();
+        Bundle b = new Bundle();
+        b.putString("subreddit", subredditName);
+        b.putParcelable("user", user);
+        sf.setArguments(b);
+        return sf;
     }
 
     /**

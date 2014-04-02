@@ -26,9 +26,10 @@ public class MainActivity extends Activity
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
     private NavigationDrawerFragment mNavigationDrawerFragment;
+    private SubredditFragment mSubredditFragment;
     private SharedPreferences mPrefs;
     private User mUser;
-
+    private String mSubreddit;
 
     /**
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
@@ -85,6 +86,7 @@ public class MainActivity extends Activity
 //        catch (NullPointerException e) {
 //            Log.i("MainActivity", "mUser is null");
 //        }
+        mSubredditFragment = SubredditFragment.newInstance(mUser, mSubreddit);
         mNavigationDrawerFragment = NavigationDrawerFragment.newInstance(mUser);
         mTitle = getTitle();
 
@@ -92,39 +94,18 @@ public class MainActivity extends Activity
 //                R.id.navigation_drawer_container,
 //                (DrawerLayout) findViewById(R.id.drawer_layout));
         FragmentManager fm = getFragmentManager();
-        fm.beginTransaction().replace(R.id.navigation_drawer_container, mNavigationDrawerFragment).commit();
+        fm.beginTransaction().replace(R.id.navigation_drawer_container,
+                mNavigationDrawerFragment)
+                .commit();
+        getFragmentManager().beginTransaction()
+                .replace(R.id.container, mSubredditFragment)
+                .commit();
     }
 
     @Override
     public void onNavigationDrawerItemSelected(String subreddit) {
-        // update the main content by replacing fragments
-        FragmentManager fragmentManager = getFragmentManager();
-        Bundle b = new Bundle();
-        if (mUser != null)
-            Log.i("MainActivity", mUser.getCookie());
-        else
-            // Log.i("MainActivity", "user is null");
-        b.putParcelable("user", mUser);
-        b.putString("subreddit", subreddit);
-        SubredditFragment sf = new SubredditFragment();
-        sf.setArguments(b);
-        fragmentManager.beginTransaction()
-                .replace(R.id.container, sf)
-                .commit();
-    }
-
-    public void onSectionAttached(int number) {
-        switch (number) {
-            case 1:
-                mTitle = getString(R.string.title_section1);
-                break;
-            case 2:
-                mTitle = getString(R.string.title_section2);
-                break;
-            case 3:
-                mTitle = getString(R.string.title_section3);
-                break;
-        }
+        mSubreddit = subreddit;
+        mSubredditFragment.setSubreddit(mSubreddit);
     }
 
     public void restoreActionBar() {
