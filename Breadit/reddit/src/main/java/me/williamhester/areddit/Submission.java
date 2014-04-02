@@ -198,9 +198,8 @@ public class Submission extends Thing implements Parcelable {
         return mSelftext;
     }
 
-    public boolean getLikes() {
-        return false;
-//        return data.get("data").getAsJsonObject().get("likes").getAsBoolean();
+    public int getVoteStatus() {
+        return mVoteStatus;
     }
 
     public String getLinkFlairText() {

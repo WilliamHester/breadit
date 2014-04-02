@@ -1,80 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/ghostwhite" >
+    android:background="@color/blackish" >
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
-
-        <Button android:id="@+id/ups"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            style="?android:buttonBarButtonStyle"
-            android:fontFamily="sans-serif-light"
-            android:textColor="@color/orangered"/>
-
-        <Button android:id="@+id/downs"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            style="?android:buttonBarButtonStyle"
-            android:fontFamily="sans-serif-light"
-            android:textColor="@color/periwinkle"/>
-
-    </LinearLayout>
+    <View android:id="@+id/vote_status"
+        android:layout_width="6dp"
+        android:layout_height="match_parent" />
 
     <LinearLayout
         android:orientation="vertical"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="match_parent"
-        android:background="@color/ghostwhite"
-        android:padding="8dp" >
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/blackish"
+        android:padding="8dp">
 
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+        <!--<LinearLayout-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:orientation="vertical">-->
 
-            <!--<TextView-->
-                <!--android:id="@+id/score"-->
-                <!--android:layout_width="0dp"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:textSize="14sp"-->
+            <!--<Button android:id="@+id/ups"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="0dp"-->
                 <!--android:layout_weight="1"-->
-                <!--android:fontFamily="sans-serif-thin"/>-->
+                <!--style="?android:buttonBarButtonStyle"-->
+                <!--android:fontFamily="sans-serif-light"/>-->
+                <!--&lt;!&ndash;android:textColor="@color/orangered"/>&ndash;&gt;-->
 
-            <TextView
-                android:id="@+id/subreddit_name"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:textSize="14sp"
-                android:gravity="center"
-                android:layout_weight="1"
-                android:fontFamily="sans-serif-thin"/>
+            <!--<Button android:id="@+id/downs"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="0dp"-->
+                <!--android:layout_weight="1"-->
+                <!--style="?android:buttonBarButtonStyle"-->
+                <!--android:fontFamily="sans-serif-light"/>-->
+                <!--&lt;!&ndash;android:textColor="@color/periwinkle"/>&ndash;&gt;-->
 
-            <TextView
-                android:id="@+id/time"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:textSize="14sp"
-                android:gravity="right"
-                android:layout_weight="1"
-                android:fontFamily="sans-serif-thin"/>
-
-        </LinearLayout>
+        <!--</LinearLayout>-->
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="horizontal"
-            android:paddingTop="8dp" >
+            android:paddingBottom="8dp" >
 
             <TextView
                 android:id="@+id/title"
@@ -83,7 +51,8 @@
                 android:layout_height="match_parent"
                 android:textSize="16sp"
                 android:ellipsize="end"
-                android:fontFamily="sans-serif-light"/>
+                android:fontFamily="sans-serif-light"
+                android:textColor="@color/mid_gray"/>
 
             <View
                 android:id="@+id/spacer"
@@ -97,9 +66,37 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:contentDescription="@string/thumbnail_description"
-                android:background="@color/ghostwhite"
                 android:cropToPadding="true"/>
         </LinearLayout>
 
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:fontFamily="sans-serif-condensed"
+                android:textColor="@color/auburn"/>
+
+            <!--Todo: chnage this TextView to a DistinguishedTextView to denote if the author is a mod, OP, etc-->
+            <TextView android:id="@+id/author"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:fontFamily="sans-serif-condensed"
+                android:textColor="@color/auburn"/>
+
+            <TextView android:id="@+id/subreddit_name_and_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:fontFamily="sans-serif-condensed"
+                android:textColor="@color/auburn"/>
+
+        </LinearLayout>
     </LinearLayout>
 </LinearLayout>

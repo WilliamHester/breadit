@@ -4,13 +4,15 @@
     android:id="@+id/swipe_refresh"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
-    android:background="@color/gainsboro">
+    android:background="@android:color/black">
 
     <ListView
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
         android:id="@+id/submissions"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:dividerHeight="8dp"
-        android:divider="@color/gainsboro"/>
+        android:dividerHeight="4dp"
+        android:divider="@android:color/black"/>
 
 </android.support.v4.widget.SwipeRefreshLayout>

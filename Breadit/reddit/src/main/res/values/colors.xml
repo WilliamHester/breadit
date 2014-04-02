@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!--Dark color scheme colors-->
+    <color name="blackish">#ff1c1e20</color>
+    <color name="dark_gray">#545454</color>
+    <color name="darker_gray">#ff2e2e2e</color>
+    <color name="mid_gray">#A8A8A8</color>
+    <color name="auburn">#f68026</color>
+
     <color name="white">#ffffff</color>
     <color name="ghostwhite">#F8F8FF</color>
     <color name="gainsboro">#DCDCDC</color>

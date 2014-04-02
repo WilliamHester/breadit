@@ -24,6 +24,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.koushikdutta.urlimageviewhelper.UrlImageViewHelper;
 
+import org.w3c.dom.Text;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -136,34 +138,34 @@ public class SubredditFragment extends Fragment {
         public View getView(final int position, View convertView, ViewGroup parent) {
             LayoutInflater inflater = (LayoutInflater)
                     mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            final Submission s = (Submission) mSubmissions.getItemAtPosition(position);
+            Submission s = (Submission) mSubmissions.getItemAtPosition(position);
 
             if (convertView == null)
                 convertView = inflater.inflate(R.layout.list_item_post, parent, false);
-
-            Button ups = (Button) convertView.findViewById(R.id.ups);
-            Button downs = (Button) convertView.findViewById(R.id.downs);
-//            LinearLayout background = (LinearLayout) convertView.findViewById(R.id.background);
-            TextView subredditName = (TextView) convertView.findViewById(R.id.subreddit_name);
-            TextView time = (TextView) convertView.findViewById(R.id.time);
-//            TextView score = (TextView) convertView.findViewById(R.id.score);
+//
+//            Button ups = (Button) convertView.findViewById(R.id.ups);
+//            Button downs = (Button) convertView.findViewById(R.id.downs);
+            View voteStatus = convertView.findViewById(R.id.vote_status);
+            TextView nameAndTime
+                    = (TextView) convertView.findViewById(R.id.subreddit_name_and_time);
+            TextView author = (TextView) convertView.findViewById(R.id.author);
             ImageView image = (ImageView) convertView.findViewById(R.id.thumbnail);
             TextView title = (TextView) convertView.findViewById(R.id.title);
             View spacer = convertView.findViewById(R.id.spacer);
-
-            ups.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    new VoteAsyncTask(getItem(position).getName(), mUser, VoteAsyncTask.UPVOTE).execute();
-                    Toast.makeText(mContext, getItem(position).getName(), Toast.LENGTH_SHORT).show();
-                }
-            });
-            downs.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    new VoteAsyncTask(getItem(position).getName(), mUser, VoteAsyncTask.DOWNVOTE).execute();
-                }
-            });
+//
+//            ups.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View view) {
+//                    new VoteAsyncTask(getItem(position).getName(), mUser, VoteAsyncTask.UPVOTE).execute();
+//                    Toast.makeText(mContext, getItem(position).getName(), Toast.LENGTH_SHORT).show();
+//                }
+//            });
+//            downs.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View view) {
+//                    new VoteAsyncTask(getItem(position).getName(), mUser, VoteAsyncTask.DOWNVOTE).execute();
+//                }
+//            });
             title.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -187,21 +189,31 @@ public class SubredditFragment extends Fragment {
             }
 
             if (mSubredditName == null || mSubredditName.equals("")) {
-                subredditName.setText(s.getSubredditName());
-            } else {
-                subredditName.setText(s.getAuthor());
+                nameAndTime.setText(" submitted to " + s.getSubredditName() + " " + calculateTime(s.getCreatedUtc()));
             }
-            time.setText(calculateTime(s.getCreatedUtc(), System.currentTimeMillis() / 1000));
+            switch (s.getVoteStatus()) {
+                case Submission.DOWNVOTED:
+                    voteStatus.setBackgroundColor(getResources().getColor(R.color.periwinkle));
+                    break;
+                case Submission.UPVOTED:
+                    voteStatus.setBackgroundColor(getResources().getColor(R.color.orangered));
+                    break;
+                default:
+                    voteStatus.setVisibility(View.GONE);
+                    break;
+            }
 //            score.setText(s.getScore() + "");
             title.setText(s.getTitle());
-            ups.setText(s.getUpVotes() + "");
-            downs.setText(s.getDownVotes() + "");
+//            ups.setText(s.getUpVotes() + "");
+//            downs.setText(s.getDownVotes() + "");
+            author.setText(s.getAuthor());
             
             return convertView;
         }
     }
 
-    private String calculateTime(long postTime, long currentTime) {
+    private String calculateTime(long postTime) {
+        long currentTime = System.currentTimeMillis() / 1000;
         long difference = currentTime - postTime;
         String time;
         if (difference / 31536000 > 0) {
