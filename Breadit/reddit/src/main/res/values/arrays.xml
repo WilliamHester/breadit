@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="default_subreddits">
+        <item>Random</item>
+        <item>Pics</item>
+        <item>Funny</item>
+        <item>Gaming</item>
+        <item>AskReddit</item>
+        <item>WorldNews</item>
+        <item>News</item>
+        <item>Videos</item>
+        <item>IAMA</item>
+        <item>TodayILearn</item>
+    </string-array>
+
+</resources>
