@@ -297,7 +297,7 @@ public class User implements Parcelable {
      * @throws java.io.IOException if connection fails
      */
 
-    public List<Subreddit> getSubscrbedSubreddits() throws IOException {
+    public ArrayList<Subreddit> getSubscribedSubreddits() throws IOException {
 
         ArrayList<Subreddit> subreddits = new ArrayList<Subreddit>();
 
@@ -312,7 +312,10 @@ public class User implements Parcelable {
             subreddits.add(new Subreddit(jsonData));
         }
 
-        String after = data.get("after").getAsString();
+        String after = null;
+        JsonElement je = data.get("after");
+        if (!je.isJsonNull())
+            after = je.getAsString();
 
         while (after != null) {
 
@@ -327,7 +330,9 @@ public class User implements Parcelable {
                 subreddits.add(new Subreddit(jsonData));
             }
 
-            after = data.get("after").getAsString();
+            je = data.get("after");
+            if (!je.isJsonNull())
+                after = je.getAsString();
         }
 
         return subreddits;

@@ -5,11 +5,13 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -21,9 +23,12 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 ;import me.williamhester.areddit.Subreddit;
+import me.williamhester.areddit.User;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
@@ -62,6 +67,7 @@ public class NavigationDrawerFragment extends Fragment {
     private int mCurrentSelectedPosition = 0;
     private boolean mFromSavedInstanceState;
     private boolean mUserLearnedDrawer;
+    private User mUser;
 
     public NavigationDrawerFragment() {
     }
@@ -69,7 +75,9 @@ public class NavigationDrawerFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        if (getArguments() != null) {
+            mUser = getArguments().getParcelable("user");
+        }
         // Read in the flag indicating whether or not the user has demonstrated awareness of the
         // drawer. See PREF_USER_LEARNED_DRAWER for details.
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -80,6 +88,7 @@ public class NavigationDrawerFragment extends Fragment {
             mFromSavedInstanceState = true;
         }
 
+        // sub list not used yet!
         mSubredditList = new ArrayList<String>();
         // Select either the default item (0) or the last selected item.
         selectItem(mCurrentSelectedPosition);
@@ -97,25 +106,33 @@ public class NavigationDrawerFragment extends Fragment {
             Bundle savedInstanceState) {
         mDrawerListView = (ListView) inflater.inflate(
                 R.layout.fragment_navigation_drawer, container, false);
+
+        // Default onclick
+//        mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                selectItem(position);
+//            }
+//        });
+
+
+        if (mUser != null) {
+            new GetUserSubreddits().execute();
+        }
+        else {
+            mDrawerListView.setAdapter(new ArrayAdapter<String>(
+                    getActionBar().getThemedContext(),
+                    android.R.layout.simple_list_item_activated_1,
+                    android.R.id.text1, mSubredditList
+            ));
+        }
+        mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
         mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                selectItem(position);
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Toast.makeText(getActionBar().getThemedContext(), "Clicked on " +  mSubredditList.get(i), Toast.LENGTH_SHORT).show();
             }
         });
-        mDrawerArrayAdapter = new ArrayAdapter<String>(getActionBar().getThemedContext(),
-                android.R.layout.simple_list_item_activated_1,
-                android.R.id.text1, mSubredditList);
-        mDrawerListView.setAdapter(new ArrayAdapter<String>(
-                getActionBar().getThemedContext(),
-                android.R.layout.simple_list_item_activated_1,
-                android.R.id.text1,
-                new String[]{
-                        getString(R.string.title_section1),
-                        getString(R.string.title_section2),
-                        getString(R.string.title_section3),
-                }));
-        mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
         return mDrawerListView;
     }
 
@@ -130,6 +147,13 @@ public class NavigationDrawerFragment extends Fragment {
      * @param drawerLayout The DrawerLayout containing this fragment's UI.
      */
     public void setUp(int fragmentId, DrawerLayout drawerLayout) {
+
+//        // TW -
+//        mSubredditList = new ArrayList<String>();
+//        for (int i = 0; i < userSubreddits.size(); i++) {
+//            mSubredditList.add(userSubreddits.get(i).getTitle());
+//        }
+//        // - TW
         mFragmentContainerView = getActivity().findViewById(fragmentId);
         mDrawerLayout = drawerLayout;
 
@@ -287,5 +311,36 @@ public class NavigationDrawerFragment extends Fragment {
          * Called when an item in the navigation drawer is selected.
          */
         void onNavigationDrawerItemSelected(int position);
+    }
+
+
+    private class GetUserSubreddits extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+
+                ArrayList<Subreddit> subreddits = mUser.getSubscribedSubreddits();
+                mSubredditList = new ArrayList<String>();
+                for (Subreddit s : subreddits) {
+                    mSubredditList.add(s.getDisplayName());
+                    Log.i("NavigationDrawerFragment", s.getDisplayName());
+                }
+                mDrawerListView.setAdapter(new ArrayAdapter<String>(
+                        getActionBar().getThemedContext(),
+                        android.R.layout.simple_list_item_activated_1,
+                        android.R.id.text1, mSubredditList));
+            } catch (IOException e) {
+                Log.e("BreaditDebug", "IOException was thrown when getting getSubreddits");
+            }
+            return null;
+        }
+    }
+
+    public static NavigationDrawerFragment newInstance(User user) {
+        Bundle args = new Bundle();
+        args.putParcelable("user", user);
+        NavigationDrawerFragment fragment = new NavigationDrawerFragment();
+        fragment.setArguments(args);
+        return fragment;
     }
 }

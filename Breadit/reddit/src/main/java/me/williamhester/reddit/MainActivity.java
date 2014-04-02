@@ -12,6 +12,11 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import me.williamhester.areddit.Subreddit;
 import me.williamhester.areddit.User;
 
 public class MainActivity extends Activity
@@ -71,13 +76,23 @@ public class MainActivity extends Activity
         if (mUser != null)
             Log.i("MainActivity", "User is not null");
 
-        mNavigationDrawerFragment = (NavigationDrawerFragment)
-                getFragmentManager().findFragmentById(R.id.navigation_drawer);
+        // TW
+//        ArrayList<Subreddit> userSubreddits = new ArrayList();
+//        try {
+//             userSubreddits = mUser.getSubscribedSubreddits();
+//        } catch (IOException ioexception) {
+//        }
+//        catch (NullPointerException e) {
+//            Log.i("MainActivity", "mUser is null");
+//        }
+        mNavigationDrawerFragment = NavigationDrawerFragment.newInstance(mUser);
         mTitle = getTitle();
 
-        mNavigationDrawerFragment.setUp(
-                R.id.navigation_drawer,
-                (DrawerLayout) findViewById(R.id.drawer_layout));
+//        mNavigationDrawerFragment.setUp(
+//                R.id.navigation_drawer_container,
+//                (DrawerLayout) findViewById(R.id.drawer_layout));
+        FragmentManager fm = getFragmentManager();
+        fm.beginTransaction().replace(R.id.navigation_drawer_container, mNavigationDrawerFragment).commit();
     }
 
     @Override
@@ -88,7 +103,7 @@ public class MainActivity extends Activity
         if (mUser != null)
             Log.i("MainActivity", mUser.getCookie());
         else
-            Log.i("MainActivity", "user is null");
+            // Log.i("MainActivity", "user is null");
         b.putParcelable("user", mUser);
         SubredditFragment sf = new SubredditFragment();
         sf.setArguments(b);
