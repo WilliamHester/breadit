@@ -96,7 +96,7 @@ public class MainActivity extends Activity
     }
 
     @Override
-    public void onNavigationDrawerItemSelected(int position) {
+    public void onNavigationDrawerItemSelected(String subreddit) {
         // update the main content by replacing fragments
         FragmentManager fragmentManager = getFragmentManager();
         Bundle b = new Bundle();
@@ -105,6 +105,7 @@ public class MainActivity extends Activity
         else
             // Log.i("MainActivity", "user is null");
         b.putParcelable("user", mUser);
+        b.putString("subreddit", subreddit);
         SubredditFragment sf = new SubredditFragment();
         sf.setArguments(b);
         fragmentManager.beginTransaction()

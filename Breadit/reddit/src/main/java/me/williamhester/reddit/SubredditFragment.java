@@ -60,6 +60,7 @@ public class SubredditFragment extends Fragment {
         }
         if (getArguments() != null) {
             mUser = getArguments().getParcelable("user");
+            mSubredditName = getArguments().getString("subreddit");
         }
         if (mAction != null) {
             mAction.setTitle("Front page of Reddit");

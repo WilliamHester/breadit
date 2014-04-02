@@ -333,6 +333,8 @@ public class User implements Parcelable {
             je = data.get("after");
             if (!je.isJsonNull())
                 after = je.getAsString();
+            else
+                after = null;
         }
 
         return subreddits;

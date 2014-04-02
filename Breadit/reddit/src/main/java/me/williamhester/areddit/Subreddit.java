@@ -11,6 +11,7 @@ public class Subreddit extends Thing implements Parcelable {
 
     public Subreddit(JsonObject data) {
         super(data);
+        mData = data;
     }
 
     public Subreddit(Parcel in) {

@@ -3,7 +3,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="120dp"
+    android:layout_height="wrap_content"
     android:background="@color/ghostwhite" >
 
     <LinearLayout
@@ -75,6 +75,21 @@
             android:layout_height="match_parent"
             android:orientation="horizontal"
             android:paddingTop="8dp" >
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:textSize="16sp"
+                android:ellipsize="end"
+                android:fontFamily="sans-serif-light"/>
+
+            <View
+                android:id="@+id/spacer"
+                android:layout_width="8dp"
+                android:layout_height="match_parent"/>
+
             <me.williamhester.reddit.SquareImageView
                 android:id="@+id/thumbnail"
                 android:adjustViewBounds="false"
@@ -84,17 +99,6 @@
                 android:contentDescription="@string/thumbnail_description"
                 android:background="@color/ghostwhite"
                 android:cropToPadding="true"/>
-            <View
-                android:id="@+id/spacer"
-                android:layout_width="8dp"
-                android:layout_height="match_parent"/>
-            <TextView
-                android:id="@+id/title"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:textSize="16sp"
-                android:ellipsize="end"
-                android:fontFamily="sans-serif-light"/>
         </LinearLayout>
 
     </LinearLayout>
