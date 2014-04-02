@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -91,6 +92,7 @@ public class CommentFragment extends Fragment {
             score.setText(getItem(position).getScore() + "");
             time.setText(calculateTime(getItem(position).getCreatedUtc(), System.currentTimeMillis() / 1000));
             body.setText(Html.fromHtml(StringEscapeUtils.unescapeHtml4(getItem(position).getBodyHtml())));
+            body.setMovementMethod(LinkMovementMethod.getInstance());
 
             return convertView;
         }
@@ -100,10 +102,6 @@ public class CommentFragment extends Fragment {
                 return s.substring(1, s.length() - 1);
             }
             return s;
-        }
-
-        private String removeEscapeSequences(String s) {
-            return s.replace("\\n", "\n");
         }
 
         private String calculateTime(long postTime, long currentTime) {

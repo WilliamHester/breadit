@@ -1,17 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <string-array name="default_subreddits">
-        <item>Random</item>
-        <item>Pics</item>
+        <item>AdviceAnimals</item>
+        <item>AskReddit</item>
+        <item>AskScience</item>
+        <item>Aww</item>
+        <item>BestOf</item>
+        <item>Books</item>
+        <item>EarthPorn</item>
+        <item>ExplainLikeImFive</item>
         <item>Funny</item>
         <item>Gaming</item>
-        <item>AskReddit</item>
-        <item>WorldNews</item>
+        <item>Gifs</item>
+        <item>IAmA</item>
+        <item>Movies</item>
+        <item>Music</item>
         <item>News</item>
+        <item>Pics</item>
+        <item>Science</item>
+        <item>Sports</item>
+        <item>Technology</item>
+        <item>Television</item>
+        <item>TodayILearned</item>
         <item>Videos</item>
-        <item>IAMA</item>
-        <item>TodayILearn</item>
+        <item>WorldNews</item>
     </string-array>
-
 </resources>

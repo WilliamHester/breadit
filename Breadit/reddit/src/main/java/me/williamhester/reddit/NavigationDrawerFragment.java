@@ -143,6 +143,11 @@ public class NavigationDrawerFragment extends Fragment {
             mDrawerListView.setAdapter(mSubredditArrayAdapter);
             new GetUserSubreddits().execute();
         } else {
+            mSubredditList = new ArrayList<String>();
+            String[] subs = getResources().getStringArray(R.array.default_subreddits);
+            for (String s : subs) {
+                mSubredditList.add(s);
+            }
             mDrawerListView.setAdapter(new ArrayAdapter<String>(
                     getActionBar().getThemedContext(),
                     android.R.layout.simple_list_item_activated_1,
