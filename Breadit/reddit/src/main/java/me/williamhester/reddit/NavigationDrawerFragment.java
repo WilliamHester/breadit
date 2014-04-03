@@ -26,6 +26,8 @@ import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 ;import me.williamhester.areddit.Subreddit;
@@ -90,6 +92,8 @@ public class NavigationDrawerFragment extends Fragment {
             mFromSavedInstanceState = true;
         }
 
+
+
         // sub list not used yet!
         // Select either the default item (0) or the last selected item.
 //        selectItem(mSubredditList.get(mCurrentSelectedPosition), mCurrentSelectedPosition);
@@ -107,21 +111,21 @@ public class NavigationDrawerFragment extends Fragment {
             Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_navigation_drawer, container, false);
         mDrawerListView = (ListView) v.findViewById(R.id.list);
-        Button b = (Button) v.findViewById(R.id.button);
-        b.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.i("NDF", "clicked the button");
-                if (mUser != null) {
-                    mSubredditList = new ArrayList<String>();
-                    mSubredditArrayAdapter = new ArrayAdapter<String>(
-                            getActionBar().getThemedContext(),
-                            android.R.layout.simple_list_item_activated_1,
-                            android.R.id.text1, mSubredditList);
-                    new GetUserSubreddits().execute();
-                }
-            }
-        });
+//        Button b = (Button) v.findViewById(R.id.button);
+//        b.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Log.i("NDF", "clicked the button");
+//                if (mUser != null) {
+//                    mSubredditList = new ArrayList<String>();
+//                    mSubredditArrayAdapter = new ArrayAdapter<String>(
+//                            getActionBar().getThemedContext(),
+//                            android.R.layout.simple_list_item_activated_1,
+//                            android.R.id.text1, mSubredditList);
+//                    new GetUserSubreddits().execute();
+//                }
+//            }
+//        });
 //        mDrawerListView = (ListView) inflater.inflate(
 //                R.layout.fragment_navigation_drawer, container, false);
         Log.i("NavigationDrawerFragment", "Drawer onCreateView");
@@ -135,6 +139,7 @@ public class NavigationDrawerFragment extends Fragment {
 
 
         if (mUser != null) {
+            Log.i("test", "User not null sublist executed");
             mSubredditList = new ArrayList<String>();
             mSubredditArrayAdapter = new ArrayAdapter<String>(
                     getActionBar().getThemedContext(),
@@ -142,7 +147,12 @@ public class NavigationDrawerFragment extends Fragment {
                     android.R.id.text1, mSubredditList);
             mDrawerListView.setAdapter(mSubredditArrayAdapter);
             new GetUserSubreddits().execute();
+            for (int i = 0; i < mSubredditList.size(); i++) {
+                Log.i("test", mSubredditList.get(i));
+            }
+            Log.i("test", "Sub list is size " + mSubredditList.size());
         } else {
+            Log.i("test", "User null sublist executed");
             mSubredditList = new ArrayList<String>();
             String[] subs = getResources().getStringArray(R.array.default_subreddits);
             for (String s : subs) {
@@ -154,111 +164,113 @@ public class NavigationDrawerFragment extends Fragment {
                     android.R.id.text1, mSubredditList
             ));
         }
+        Log.i("test", "" + mDrawerLayout + "is mDrawlayout value");
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
         mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                mCallbacks.onNavigationDrawerItemSelected(mSubredditList.get(i));
+                selectItem(mSubredditList.get(i));
             }
         });
         return v;
     }
 
-    public boolean isDrawerOpen() {
-        return mDrawerLayout != null && mDrawerLayout.isDrawerOpen(mFragmentContainerView);
-    }
+//    public boolean isDrawerOpen() {
+//        return mDrawerLayout != null && mDrawerLayout.isDrawerOpen(mFragmentContainerView);
+//    }
 
     /**
      * Users of this fragment must call this method to set up the navigation drawer interactions.
      *
-     * @param fragmentId   The android:id of this fragment in its activity's layout.
      * @param drawerLayout The DrawerLayout containing this fragment's UI.
      */
-    public void setUp(int fragmentId, DrawerLayout drawerLayout) {
+    public void setUp(DrawerLayout drawerLayout) {
 
-//        // TW -
-//        mSubredditList = new ArrayList<String>();
-//        for (int i = 0; i < userSubreddits.size(); i++) {
-//            mSubredditList.add(userSubreddits.get(i).getTitle());
-//        }
-//        // - TW
-        mFragmentContainerView = getActivity().findViewById(fragmentId);
+
+//        mFragmentContainerView = getActivity().findViewById(fragmentId);
         mDrawerLayout = drawerLayout;
 
         // set a custom shadow that overlays the main content when the drawer opens
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
         // set up the drawer's list view with items and click listener
 
-        ActionBar actionBar = getActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setHomeButtonEnabled(true);
-
+//        ActionBar actionBar = getActionBar();
+//        ActionBar actionBar = actionbar;
+//        actionBar.setDisplayHomeAsUpEnabled(true);
+//        actionBar.setHomeButtonEnabled(true);
+//
         // ActionBarDrawerToggle ties together the the proper interactions
         // between the navigation drawer and the action bar app icon.
-        mDrawerToggle = new ActionBarDrawerToggle(
-                getActivity(),                    /* host Activity */
-                mDrawerLayout,                    /* DrawerLayout object */
-                R.drawable.ic_drawer,             /* nav drawer image to replace 'Up' caret */
-                R.string.navigation_drawer_open,  /* "open drawer" description for accessibility */
-                R.string.navigation_drawer_close  /* "close drawer" description for accessibility */
-        ) {
-            @Override
-            public void onDrawerClosed(View drawerView) {
-                super.onDrawerClosed(drawerView);
-                if (!isAdded()) {
-                    return;
-                }
-
-                getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
-            }
-
-            @Override
-            public void onDrawerOpened(View drawerView) {
-                super.onDrawerOpened(drawerView);
-                if (!isAdded()) {
-                    return;
-                }
-
-                if (!mUserLearnedDrawer) {
-                    // The user manually opened the drawer; store this flag to prevent auto-showing
-                    // the navigation drawer automatically in the future.
-                    mUserLearnedDrawer = true;
-                    SharedPreferences sp = PreferenceManager
-                            .getDefaultSharedPreferences(getActivity());
-                    sp.edit().putBoolean(PREF_USER_LEARNED_DRAWER, true).apply();
-                }
-
-                getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
-            }
-        };
-
-        // If the user hasn't 'learned' about the drawer, open it to introduce them to the drawer,
-        // per the navigation drawer design guidelines.
-        if (!mUserLearnedDrawer && !mFromSavedInstanceState) {
-            mDrawerLayout.openDrawer(mFragmentContainerView);
-        }
-
-        // Defer code dependent on restoration of previous instance state.
-        mDrawerLayout.post(new Runnable() {
-            @Override
-            public void run() {
-                mDrawerToggle.syncState();
-            }
-        });
-
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
+//        mDrawerToggle = new ActionBarDrawerToggle(
+//                getActivity(),                    /* host Activity */
+//                mDrawerLayout,                    /* DrawerLayout object */
+//                R.drawable.ic_drawer,             /* nav drawer image to replace 'Up' caret */
+//                R.string.navigation_drawer_open,  /* "open drawer" description for accessibility */
+//                R.string.navigation_drawer_close  /* "close drawer" description for accessibility */
+//        ) {
+//            @Override
+//            public void onDrawerClosed(View drawerView) {
+//                super.onDrawerClosed(drawerView);
+//                if (!isAdded()) {
+//                    return;
+//                }
+//
+//                getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
+//            }
+//
+//            @Override
+//            public void onDrawerOpened(View drawerView) {
+//                super.onDrawerOpened(drawerView);
+//                if (!isAdded()) {
+//                    return;
+//                }
+//
+////                if (!mUserLearnedDrawer) {
+////                    // The user manually opened the drawer; store this flag to prevent auto-showing
+////                    // the navigation drawer automatically in the future.
+////                    mUserLearnedDrawer = true;
+////                    SharedPreferences sp = PreferenceManager
+////                            .getDefaultSharedPreferences(getActivity());
+////                    sp.edit().putBoolean(PREF_USER_LEARNED_DRAWER, true).apply();
+////                }
+//
+//                getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
+//            }
+//        };
+//
+//        // If the user hasn't 'learned' about the drawer, open it to introduce them to the drawer,
+//        // per the navigation drawer design guidelines.
+//        if (!mUserLearnedDrawer && !mFromSavedInstanceState) {
+//            mDrawerLayout.openDrawer(mFragmentContainerView);
+//        }
+//
+//        // Defer code dependent on restoration of previous instance state.
+//        mDrawerLayout.post(new Runnable() {
+//            @Override
+//            public void run() {
+//                mDrawerToggle.syncState();
+//            }
+//        });
+//
+//        mDrawerLayout.setDrawerListener(mDrawerToggle);
     }
 
-    private void selectItem(String subreddit, int position) {
-        mCurrentSelectedPosition = position;
-        if (mDrawerListView != null) {
-            mDrawerListView.setItemChecked(position, true);
-        }
+    private void selectItem(String subreddit) {
+//        mCurrentSelectedPosition = position;
+//        if (mDrawerListView != null) {
+//            mDrawerListView.setItemChecked(position, true);
+//        }
         if (mDrawerLayout != null) {
-            mDrawerLayout.closeDrawer(mFragmentContainerView);
+            mDrawerLayout.closeDrawers();
+        }
+        if (mDrawerLayout == null) {
+            Log.i("test", "DrawerLayout null");
         }
         if (mCallbacks != null) {
-            mCallbacks.onNavigationDrawerItemSelected(subreddit);
+            if (subreddit.compareTo("FrontPage") == 0)
+                mCallbacks.onNavigationDrawerItemSelected(null);
+            else
+                mCallbacks.onNavigationDrawerItemSelected(subreddit);
         }
     }
 
@@ -291,16 +303,16 @@ public class NavigationDrawerFragment extends Fragment {
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        // If the drawer is open, show the global app actions in the action bar. See also
-        // showGlobalContextActionBar, which controls the top-left area of the action bar.
-        if (mDrawerLayout != null && isDrawerOpen()) {
-            inflater.inflate(R.menu.global, menu);
-            showGlobalContextActionBar();
-        }
-        super.onCreateOptionsMenu(menu, inflater);
-    }
+//    @Override
+//    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+//        // If the drawer is open, show the global app actions in the action bar. See also
+//        // showGlobalContextActionBar, which controls the top-left area of the action bar.
+//        if (mDrawerLayout != null && isDrawerOpen()) {
+//            inflater.inflate(R.menu.global, menu);
+//            showGlobalContextActionBar();
+//        }
+//        super.onCreateOptionsMenu(menu, inflater);
+//    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -320,14 +332,17 @@ public class NavigationDrawerFragment extends Fragment {
      * Per the navigation drawer design guidelines, updates the action bar to show the global app
      * 'context', rather than just what's in the current screen.
      */
-    private void showGlobalContextActionBar() {
-        ActionBar actionBar = getActionBar();
-        actionBar.setDisplayShowTitleEnabled(true);
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        actionBar.setTitle(R.string.app_name);
-    }
+//    private void showGlobalContextActionBar() {
+//        ActionBar actionBar = getActionBar();
+//        actionBar.setDisplayShowTitleEnabled(true);
+//        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+//        actionBar.setTitle(R.string.app_name);
+//    }
 
     private ActionBar getActionBar() {
+        if (getActivity() == null) {
+            Log.i("test", "Activity null");
+        }
         return getActivity().getActionBar();
     }
 
@@ -352,6 +367,9 @@ public class NavigationDrawerFragment extends Fragment {
                     mSubredditList.add(s.getDisplayName());
                     Log.i("NavigationDrawerFragment", s.getDisplayName());
                 }
+                // Sort mSubredditList
+                Collections.sort(mSubredditList, orderList);
+                mSubredditList.add(0,"FrontPage");
                 for (String s : mSubredditList) {
                     Log.i("NDF", "/r/" + s);
                 }
@@ -365,6 +383,7 @@ public class NavigationDrawerFragment extends Fragment {
         @Override
         protected void onPostExecute(Void result) {
             mSubredditArrayAdapter.notifyDataSetChanged();
+            Log.i("test", "Sub list is size " + mSubredditList.size());
         }
     }
 
@@ -375,4 +394,11 @@ public class NavigationDrawerFragment extends Fragment {
         fragment.setArguments(args);
         return fragment;
     }
+
+    private static Comparator<String> orderList = new Comparator<String>() {
+        public int compare(String one, String two) {
+            int result = String.CASE_INSENSITIVE_ORDER.compare(one, two);
+            return (result != 0) ? result : one.compareTo(two);
+        }
+    };
 }

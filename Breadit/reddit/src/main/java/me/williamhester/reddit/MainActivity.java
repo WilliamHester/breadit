@@ -77,22 +77,11 @@ public class MainActivity extends Activity
         if (mUser != null)
             Log.i("MainActivity", "User is not null");
 
-        // TW
-//        ArrayList<Subreddit> userSubreddits = new ArrayList();
-//        try {
-//             userSubreddits = mUser.getSubscribedSubreddits();
-//        } catch (IOException ioexception) {
-//        }
-//        catch (NullPointerException e) {
-//            Log.i("MainActivity", "mUser is null");
-//        }
         mSubredditFragment = SubredditFragment.newInstance(mUser, mSubreddit);
         mNavigationDrawerFragment = NavigationDrawerFragment.newInstance(mUser);
         mTitle = getTitle();
 
-//        mNavigationDrawerFragment.setUp(
-//                R.id.navigation_drawer_container,
-//                (DrawerLayout) findViewById(R.id.drawer_layout));
+        mNavigationDrawerFragment.setUp((DrawerLayout) findViewById(R.id.drawer_layout));
         FragmentManager fm = getFragmentManager();
         fm.beginTransaction().replace(R.id.navigation_drawer_container,
                 mNavigationDrawerFragment)
@@ -106,27 +95,37 @@ public class MainActivity extends Activity
     public void onNavigationDrawerItemSelected(String subreddit) {
         mSubreddit = subreddit;
         mSubredditFragment.setSubreddit(mSubreddit);
+        updateActionBar(subreddit);
     }
 
     public void restoreActionBar() {
         ActionBar actionBar = getActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
         actionBar.setDisplayShowTitleEnabled(true);
-        actionBar.setTitle(mTitle);
+        actionBar.setTitle("r/FrontPage");
+    }
+    private void updateActionBar(String sub) {
+        ActionBar actionBar = getActionBar();
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+        actionBar.setDisplayShowTitleEnabled(true);
+        if (sub == null)
+            actionBar.setTitle("r/FrontPage");
+        else
+            actionBar.setTitle("r/" + sub);
     }
 
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (!mNavigationDrawerFragment.isDrawerOpen()) {
+//        if (!mNavigationDrawerFragment.isDrawerOpen()) {
             // Only show items in the action bar relevant to this screen
             // if the drawer is not showing. Otherwise, let the drawer
             // decide what to show in the action bar.
             getMenuInflater().inflate(R.menu.main, menu);
             restoreActionBar();
             return true;
-        }
-        return super.onCreateOptionsMenu(menu);
+//        }
+//        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
