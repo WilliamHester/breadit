@@ -6,16 +6,17 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 
@@ -62,6 +63,49 @@ public class CommentFragment extends Fragment {
         mCommentsListView = (ListView) v.findViewById(R.id.comments);
         mCommentAdapter = new CommentArrayAdapter(mContext);
         mCommentsListView.setAdapter(mCommentAdapter);
+        final SwipeDetector swipeDetector = new SwipeDetector();
+        mCommentsListView.setOnTouchListener(swipeDetector);
+        mCommentsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                Log.i("CommentFragment", "Entered onItemClick");
+                if (swipeDetector.swipeDetected()) {
+                    Log.i("CommentFragment", "Swipe Detected");
+                    Comment c = mCommentsList.get(position);
+                    View voteStatus = view.findViewById(R.id.vote_status);
+                    if (swipeDetector.getAction() == SwipeDetector.Action.RL) {
+                        if (mCommentsList.get(position).getVoteStatus() == Comment.DOWNVOTED) {
+                            new VoteAsyncTask(c.getName(), mUser, VoteAsyncTask.NEUTRAL).execute();
+                            c.setVoteStatus(Comment.NEUTRAL);
+                        } else {
+                            new VoteAsyncTask(c.getName(), mUser, VoteAsyncTask.DOWNVOTE).execute();
+                            c.setVoteStatus(Comment.DOWNVOTED);
+                        }
+                    } else if (swipeDetector.getAction() == SwipeDetector.Action.LR) {
+                        if (mCommentsList.get(position).getVoteStatus() == Comment.UPVOTED) {
+                            new VoteAsyncTask(c.getName(), mUser, VoteAsyncTask.NEUTRAL).execute();
+                            c.setVoteStatus(Comment.NEUTRAL);
+                        } else {
+                            new VoteAsyncTask(c.getName(), mUser, VoteAsyncTask.UPVOTE).execute();
+                            c.setVoteStatus(Comment.UPVOTED);
+                        }
+                    }
+                    switch (c.getVoteStatus()) {
+                        case Comment.DOWNVOTED:
+                            voteStatus.setVisibility(View.VISIBLE);
+                            voteStatus.setBackgroundColor(getResources().getColor(R.color.periwinkle));
+                            break;
+                        case Comment.UPVOTED:
+                            voteStatus.setVisibility(View.VISIBLE);
+                            voteStatus.setBackgroundColor(getResources().getColor(R.color.orangered));
+                            break;
+                        default:
+                            voteStatus.setVisibility(View.GONE);
+                            break;
+                    }
+                }
+            }
+        });
         new CommentLoaderTask().execute();
         return v;
     }
@@ -85,14 +129,30 @@ public class CommentFragment extends Fragment {
             TextView score = (TextView) convertView.findViewById(R.id.score);
             TextView time = (TextView) convertView.findViewById(R.id.time);
             TextView body = (TextView) convertView.findViewById(R.id.comment_text);
+            View voteStatus = convertView.findViewById(R.id.vote_status);
 
             root.setPadding((int) (getResources().getDisplayMetrics().density
                     * 16 * getItem(position).getLevel()), 0, 0, 0);
             author.setText(removeEndQuotes(getItem(position).getAuthor()));
-            score.setText(getItem(position).getScore() + "");
-            time.setText(calculateTime(getItem(position).getCreatedUtc(), System.currentTimeMillis() / 1000));
+            score.setText(getItem(position).getScore() + " points by ");
+            time.setText(" " + calculateTimeShort(getItem(position).getCreatedUtc()));
             body.setText(Html.fromHtml(StringEscapeUtils.unescapeHtml4(getItem(position).getBodyHtml())));
             body.setMovementMethod(LinkMovementMethod.getInstance());
+
+            switch (getItem(position).getVoteStatus()) {
+                case Comment.DOWNVOTED:
+                    voteStatus.setVisibility(View.VISIBLE);
+                    voteStatus.setBackgroundColor(getResources().getColor(R.color.periwinkle));
+                    break;
+                case Comment.UPVOTED:
+                    voteStatus.setVisibility(View.VISIBLE);
+                    voteStatus.setBackgroundColor(getResources().getColor(R.color.orangered));
+                    break;
+                default:
+                    voteStatus.setVisibility(View.GONE);
+                    break;
+            }
+
 
             return convertView;
         }
@@ -102,6 +162,28 @@ public class CommentFragment extends Fragment {
                 return s.substring(1, s.length() - 1);
             }
             return s;
+        }
+
+        private String calculateTimeShort(long postTime) {
+            long currentTime = System.currentTimeMillis() / 1000;
+            long difference = currentTime - postTime;
+            String time;
+            if (difference / 31536000 > 0) {
+                time = difference / 3156000 + "y";
+            } else if (difference / 2592000 > 0) {
+                time = difference / 2592000 + "m";
+            } else if (difference / 604800 > 0) {
+                time = difference / 604800 + "w";
+            } else if (difference / 86400 > 0) {
+                time = difference / 86400 + "d";
+            } else if (difference / 3600 > 0) {
+                time = difference / 3600 + "h";
+            } else if (difference / 60 > 0) {
+                time = difference / 60 + "m";
+            } else {
+                time = difference + "s";
+            }
+            return time;
         }
 
         private String calculateTime(long postTime, long currentTime) {
@@ -179,31 +261,6 @@ public class CommentFragment extends Fragment {
                 }
                 mCommentAdapter.notifyDataSetChanged();
             }
-        }
-    }
-
-    private class SwipeListener extends GestureDetector.SimpleOnGestureListener {
-        private static final int SWIPE_MIN_DISTANCE = 120;
-        private static final int SWIPE_THRESHOLD_VELOCITY = 200;
-
-        private String mName;
-
-        public SwipeListener(String name) {
-            mName = name;
-        }
-
-        @Override
-        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            if(e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE
-                    && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
-                Toast.makeText(getActivity(), "Right to Left swipe", Toast.LENGTH_SHORT).show();
-                return false; // Right to left
-            }  else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE
-                    && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
-                Toast.makeText(getActivity(), "Left to right swipe", Toast.LENGTH_SHORT).show();
-                return false; // Left to right
-            }
-            return false;
         }
     }
 

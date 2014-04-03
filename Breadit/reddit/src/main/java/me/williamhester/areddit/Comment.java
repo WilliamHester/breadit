@@ -127,15 +127,12 @@ public class Comment extends Thing implements Parcelable {
         return comment;
     }
 
-    public int getVotedStatus() {
-        JsonElement o = mData.get("data").getAsJsonObject().get("likes");
-        if (o.isJsonNull()) {
-            return NEUTRAL;
-        } else if (o.getAsBoolean()) {
-            return UPVOTED;
-        } else {
-            return DOWNVOTED;
-        }
+    public int getVoteStatus() {
+        return mVoteStatus;
+    }
+
+    public void setVoteStatus(int status) {
+        mVoteStatus = status;
     }
 
     public List<Comment> getReplies() {

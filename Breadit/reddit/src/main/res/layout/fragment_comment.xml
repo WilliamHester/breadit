@@ -2,10 +2,16 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@android:color/black">
 
-    <ListView android:id="@+id/comments"
+    <ListView
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:id="@+id/comments"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:dividerHeight="4dp"
+        android:divider="@android:color/black"/>
 
 </LinearLayout>
