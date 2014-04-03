@@ -2,6 +2,7 @@ package me.williamhester.reddit;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 
 /**

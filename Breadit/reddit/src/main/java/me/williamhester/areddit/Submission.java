@@ -3,6 +3,7 @@ package me.williamhester.areddit;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.view.View;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -68,6 +69,9 @@ public class Submission extends Thing implements Parcelable {
     private long mCreatedUtc;
     private long mUps;
     private long mDowns;
+
+    // There's probably a better way to do this
+    private View mTargetView;
 
     private Submission(JsonObject data) {
         super(data);
@@ -203,6 +207,7 @@ public class Submission extends Thing implements Parcelable {
     }
 
     public void setVoteStatus(int status) {
+        mScore -= mVoteStatus - status;
         mVoteStatus = status;
     }
 
@@ -248,6 +253,14 @@ public class Submission extends Thing implements Parcelable {
 
     public long getCreatedUtc() {
         return mCreatedUtc;
+    }
+
+    public void setTargetView(View v) {
+        mTargetView = v;
+    }
+
+    public View getTargetView() {
+        return mTargetView;
     }
 
     /**

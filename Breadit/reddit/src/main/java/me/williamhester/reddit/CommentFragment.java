@@ -63,47 +63,47 @@ public class CommentFragment extends Fragment {
         mCommentsListView = (ListView) v.findViewById(R.id.comments);
         mCommentAdapter = new CommentArrayAdapter(mContext);
         mCommentsListView.setAdapter(mCommentAdapter);
-        final SwipeDetector swipeDetector = new SwipeDetector();
-        mCommentsListView.setOnTouchListener(swipeDetector);
+//        final SwipeDetector swipeDetector = new SwipeDetector();
+//        mCommentsListView.setOnTouchListener(swipeDetector);
         mCommentsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
                 Log.i("CommentFragment", "Entered onItemClick");
-                if (swipeDetector.swipeDetected()) {
-                    Log.i("CommentFragment", "Swipe Detected");
-                    Comment c = mCommentsList.get(position);
-                    View voteStatus = view.findViewById(R.id.vote_status);
-                    if (swipeDetector.getAction() == SwipeDetector.Action.RL) {
-                        if (mCommentsList.get(position).getVoteStatus() == Comment.DOWNVOTED) {
-                            new VoteAsyncTask(c.getName(), mUser, VoteAsyncTask.NEUTRAL).execute();
-                            c.setVoteStatus(Comment.NEUTRAL);
-                        } else {
-                            new VoteAsyncTask(c.getName(), mUser, VoteAsyncTask.DOWNVOTE).execute();
-                            c.setVoteStatus(Comment.DOWNVOTED);
-                        }
-                    } else if (swipeDetector.getAction() == SwipeDetector.Action.LR) {
-                        if (mCommentsList.get(position).getVoteStatus() == Comment.UPVOTED) {
-                            new VoteAsyncTask(c.getName(), mUser, VoteAsyncTask.NEUTRAL).execute();
-                            c.setVoteStatus(Comment.NEUTRAL);
-                        } else {
-                            new VoteAsyncTask(c.getName(), mUser, VoteAsyncTask.UPVOTE).execute();
-                            c.setVoteStatus(Comment.UPVOTED);
-                        }
-                    }
-                    switch (c.getVoteStatus()) {
-                        case Comment.DOWNVOTED:
-                            voteStatus.setVisibility(View.VISIBLE);
-                            voteStatus.setBackgroundColor(getResources().getColor(R.color.periwinkle));
-                            break;
-                        case Comment.UPVOTED:
-                            voteStatus.setVisibility(View.VISIBLE);
-                            voteStatus.setBackgroundColor(getResources().getColor(R.color.orangered));
-                            break;
-                        default:
-                            voteStatus.setVisibility(View.GONE);
-                            break;
-                    }
-                }
+//                if (swipeDetector.swipeDetected()) {
+//                    Log.i("CommentFragment", "Swipe Detected");
+//                    Comment c = mCommentsList.get(position);
+//                    View voteStatus = view.findViewById(R.id.vote_status);
+//                    if (swipeDetector.getAction() == SwipeDetector.Action.RL) {
+//                        if (mCommentsList.get(position).getVoteStatus() == Comment.DOWNVOTED) {
+//                            new VoteAsyncTask(c.getName(), mUser, VoteAsyncTask.NEUTRAL).execute();
+//                            c.setVoteStatus(Comment.NEUTRAL);
+//                        } else {
+//                            new VoteAsyncTask(c.getName(), mUser, VoteAsyncTask.DOWNVOTE).execute();
+//                            c.setVoteStatus(Comment.DOWNVOTED);
+//                        }
+//                    } else if (swipeDetector.getAction() == SwipeDetector.Action.LR) {
+//                        if (mCommentsList.get(position).getVoteStatus() == Comment.UPVOTED) {
+//                            new VoteAsyncTask(c.getName(), mUser, VoteAsyncTask.NEUTRAL).execute();
+//                            c.setVoteStatus(Comment.NEUTRAL);
+//                        } else {
+//                            new VoteAsyncTask(c.getName(), mUser, VoteAsyncTask.UPVOTE).execute();
+//                            c.setVoteStatus(Comment.UPVOTED);
+//                        }
+//                    }
+//                    switch (c.getVoteStatus()) {
+//                        case Comment.DOWNVOTED:
+//                            voteStatus.setVisibility(View.VISIBLE);
+//                            voteStatus.setBackgroundColor(getResources().getColor(R.color.periwinkle));
+//                            break;
+//                        case Comment.UPVOTED:
+//                            voteStatus.setVisibility(View.VISIBLE);
+//                            voteStatus.setBackgroundColor(getResources().getColor(R.color.orangered));
+//                            break;
+//                        default:
+//                            voteStatus.setVisibility(View.GONE);
+//                            break;
+//                    }
+//                }
             }
         });
         new CommentLoaderTask().execute();

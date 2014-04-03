@@ -102,16 +102,17 @@ public class MainActivity extends Activity
         ActionBar actionBar = getActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
         actionBar.setDisplayShowTitleEnabled(true);
-        actionBar.setTitle("r/FrontPage");
+        actionBar.setTitle("FrontPage");
     }
+
     private void updateActionBar(String sub) {
         ActionBar actionBar = getActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
         actionBar.setDisplayShowTitleEnabled(true);
         if (sub == null)
-            actionBar.setTitle("r/FrontPage");
+            actionBar.setTitle("FrontPage");
         else
-            actionBar.setTitle("r/" + sub);
+            actionBar.setTitle("/r/" + sub);
     }
 
 

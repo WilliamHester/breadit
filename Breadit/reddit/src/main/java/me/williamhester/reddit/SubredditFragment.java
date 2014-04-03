@@ -9,13 +9,16 @@ import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.Layout;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -55,6 +58,9 @@ public class SubredditFragment extends Fragment {
     private HashSet<String> mNames;
     private User mUser;
 
+    private GestureDetector mGestureDetector;
+    private View.OnTouchListener mGestureListener;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,6 +80,14 @@ public class SubredditFragment extends Fragment {
 
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle bundle) {
         View v = inflater.inflate(R.layout.fragment_subreddit, null);
+        mGestureDetector = new GestureDetector(mContext, new SwipeDetector2());
+        mGestureListener = new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                return mGestureDetector.onTouchEvent(motionEvent);
+            }
+        };
+
         mSubmissions = (ListView) v.findViewById(R.id.submissions);
         mSwipeRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.swipe_refresh);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -108,58 +122,13 @@ public class SubredditFragment extends Fragment {
      *     when the SwipeRefreshLayout's onRefresh method is called.
      */
     private void populateSubmissions() {
-        final SwipeDetector swipeDetector = new SwipeDetector();
         mNames = new HashSet<String>();
         mSubmissionList = new ArrayList<Submission>();
 //        mSubmissions.addHeaderView(createHeaderView());
         mSubmissionsAdapter = new SubmissionArrayAdapter(mContext);
         mSubmissions.setAdapter(mSubmissionsAdapter);
-        mSubmissions.setOnTouchListener(swipeDetector);
+        mSubmissions.setOnTouchListener(mGestureListener);
         mSubmissions.setOnScrollListener(new InfiniteLoadingScrollListener());
-        mSubmissions.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (swipeDetector.swipeDetected()) {
-                    Submission s = mSubmissionList.get(position);
-                    if (swipeDetector.getAction() == SwipeDetector.Action.RL) {
-                        if (mSubmissionList.get(position).getVoteStatus() == Submission.DOWNVOTED) {
-                            new VoteAsyncTask(s.getName(), mUser, VoteAsyncTask.NEUTRAL);
-                        } else {
-                            new VoteAsyncTask(s.getName(), mUser, VoteAsyncTask.DOWNVOTE);
-                        }
-                    } else if (swipeDetector.getAction() == SwipeDetector.Action.LR) {
-                        if (mSubmissionList.get(position).getVoteStatus() == Submission.UPVOTED) {
-                            new VoteAsyncTask(s.getName(), mUser, VoteAsyncTask.NEUTRAL);
-                        } else {
-                            new VoteAsyncTask(s.getName(), mUser, VoteAsyncTask.UPVOTE);
-                        }
-                    }
-                    View voteStatus = view.findViewById(R.id.vote_status);
-                    switch (s.getVoteStatus()) {
-                        case Submission.DOWNVOTED:
-                            voteStatus.setVisibility(View.VISIBLE);
-                            voteStatus.setBackgroundColor(getResources().getColor(R.color.periwinkle));
-                            break;
-                        case Submission.UPVOTED:
-                            voteStatus.setVisibility(View.VISIBLE);
-                            voteStatus.setBackgroundColor(getResources().getColor(R.color.orangered));
-                            break;
-                        default:
-                            voteStatus.setVisibility(View.GONE);
-                            break;
-                    }
-                } else {
-                    Intent i = new Intent(getActivity(), SubmissionActivity.class);
-                    Bundle b = new Bundle();
-                    b.putString("permalink", mSubmissionList.get(position).getPermalink());
-                    b.putString("url", mSubmissionList.get(position).getUrl());
-                    b.putBoolean("isSelf", mSubmissionList.get(position).isSelf());
-                    b.putParcelable("user", mUser);
-                    i.putExtras(b);
-                    mContext.startActivity(i);
-                }
-            }
-        });
         new RefreshUserClass().execute();
     }
 
@@ -173,7 +142,6 @@ public class SubredditFragment extends Fragment {
     }
 
     private class SubmissionArrayAdapter extends ArrayAdapter<Submission> {
-        final SwipeDetector swipeDetector = new SwipeDetector();
         Context mContext;
 
         public SubmissionArrayAdapter(Context context) {
@@ -190,74 +158,27 @@ public class SubredditFragment extends Fragment {
                 convertView = inflater.inflate(R.layout.list_item_post, parent, false);
             else
                 convertView.invalidate();
+            if (s != null)
+                s.setTargetView(convertView);
 
             final View voteStatus = convertView.findViewById(R.id.vote_status);
             TextView nameAndTime
                     = (TextView) convertView.findViewById(R.id.subreddit_name_and_time);
             TextView author = (TextView) convertView.findViewById(R.id.author);
-            ImageView image = (ImageView) convertView.findViewById(R.id.thumbnail);
+            ImageView thumbnail = (ImageView) convertView.findViewById(R.id.thumbnail);
             TextView title = (TextView) convertView.findViewById(R.id.title);
             TextView domain = (TextView) convertView.findViewById(R.id.domain);
-            TextView points = (TextView) convertView.findViewById(R.id.points);
+            final TextView points = (TextView) convertView.findViewById(R.id.points);
             View spacer = convertView.findViewById(R.id.spacer);
-
-            title.setOnTouchListener(swipeDetector);
-            title.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (swipeDetector.swipeDetected()) {
-                        Submission s = mSubmissionList.get(position);
-                        if (swipeDetector.getAction() == SwipeDetector.Action.RL) {
-                            if (mSubmissionList.get(position).getVoteStatus() == Submission.DOWNVOTED) {
-                                new VoteAsyncTask(s.getName(), mUser, VoteAsyncTask.NEUTRAL).execute();
-                                s.setVoteStatus(Submission.NEUTRAL);
-                            } else {
-                                new VoteAsyncTask(s.getName(), mUser, VoteAsyncTask.DOWNVOTE).execute();
-                                s.setVoteStatus(Submission.DOWNVOTED);
-                            }
-                        } else if (swipeDetector.getAction() == SwipeDetector.Action.LR) {
-                            if (mSubmissionList.get(position).getVoteStatus() == Submission.UPVOTED) {
-                                new VoteAsyncTask(s.getName(), mUser, VoteAsyncTask.NEUTRAL).execute();
-                                s.setVoteStatus(Submission.NEUTRAL);
-                            } else {
-                                new VoteAsyncTask(s.getName(), mUser, VoteAsyncTask.UPVOTE).execute();
-                                s.setVoteStatus(Submission.UPVOTED);
-                            }
-                        }
-                        switch (s.getVoteStatus()) {
-                            case Submission.DOWNVOTED:
-                                voteStatus.setVisibility(View.VISIBLE);
-                                voteStatus.setBackgroundColor(getResources().getColor(R.color.periwinkle));
-                                break;
-                            case Submission.UPVOTED:
-                                voteStatus.setVisibility(View.VISIBLE);
-                                voteStatus.setBackgroundColor(getResources().getColor(R.color.orangered));
-                                break;
-                            default:
-                                voteStatus.setVisibility(View.GONE);
-                                break;
-                        }
-                    } else {
-                        Intent i = new Intent(getActivity(), SubmissionActivity.class);
-                        Bundle b = new Bundle();
-                        b.putString("permalink", mSubmissionList.get(position).getPermalink());
-                        b.putString("url", mSubmissionList.get(position).getUrl());
-                        b.putBoolean("isSelf", mSubmissionList.get(position).isSelf());
-                        b.putParcelable("user", mUser);
-                        i.putExtras(b);
-                        mContext.startActivity(i);
-                    }
-                }
-            });
 
             // if the submission is a self post, we need to hide the thumbnail
             if (s.isSelf()) {
-                image.setVisibility(View.GONE);
+                thumbnail.setVisibility(View.GONE);
                 spacer.setVisibility(View.GONE);
             } else {
-                image.setVisibility(View.VISIBLE);
+                thumbnail.setVisibility(View.VISIBLE);
                 spacer.setVisibility(View.VISIBLE);
-                UrlImageViewHelper.setUrlDrawable(image, s.getThumbnailUrl());
+                UrlImageViewHelper.setUrlDrawable(thumbnail, s.getThumbnailUrl());
             }
 
             if (mSubredditName == null || mSubredditName.equals("")) {
@@ -458,5 +379,110 @@ public class SubredditFragment extends Fragment {
         @Override
         public void onScrollStateChanged(AbsListView view, int scrollState) {
         }
+    }
+
+    public class SwipeDetector2 extends GestureDetector.SimpleOnGestureListener {
+
+        private static final int SWIPE_MIN_DISTANCE = 120;
+        private static final int SWIPE_MAX_OFF_PATH = 250;
+        private static final int SWIPE_THRESHOLD_VELOCITY = 200;
+
+        @Override
+        public boolean onSingleTapUp(MotionEvent ev) {
+            int x = (int) ev.getX();
+            int y = (int) ev.getY();
+            int position = mSubmissions.pointToPosition(x, y);
+            Submission s = mSubmissionsAdapter.getItem(position);
+            ImageView iv = (ImageView) s.getTargetView().findViewById(R.id.thumbnail);
+            // Clicked on the image side
+            if (x >= iv.getLeft() + mSubmissions.getLeft()) {
+                Intent i = new Intent(getActivity(), SubmissionActivity.class);
+                Bundle b = new Bundle();
+                b.putString("permalink", mSubmissionList.get(position).getPermalink());
+                b.putString("url", mSubmissionList.get(position).getUrl());
+                b.putBoolean("isSelf", mSubmissionList.get(position).isSelf());
+                b.putParcelable("user", mUser);
+                b.putInt("tab", SubmissionActivity.CONTENT_TAB);
+                i.putExtras(b);
+                mContext.startActivity(i);
+            } else { // Clicked on the text side
+                Intent i = new Intent(getActivity(), SubmissionActivity.class);
+                Bundle b = new Bundle();
+                b.putString("permalink", mSubmissionList.get(position).getPermalink());
+                b.putString("url", mSubmissionList.get(position).getUrl());
+                b.putBoolean("isSelf", mSubmissionList.get(position).isSelf());
+                b.putParcelable("user", mUser);
+                b.putInt("tab", SubmissionActivity.COMMENT_TAB);
+                i.putExtras(b);
+                mContext.startActivity(i);
+            }
+            return false;
+        }
+
+
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            try {
+                if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH)
+                    return false;
+                // right to left swipe
+                if (e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+                    int position = mSubmissions.pointToPosition((int) e1.getX(), (int) e1.getY());
+                    Submission s = mSubmissionsAdapter.getItem(position);
+                    if (s.getVoteStatus() == Submission.DOWNVOTED) {
+                        new VoteAsyncTask(s.getName(), mUser, VoteAsyncTask.NEUTRAL).execute();
+                        s.setVoteStatus(Submission.NEUTRAL);
+                    } else {
+                        new VoteAsyncTask(s.getName(), mUser, VoteAsyncTask.DOWNVOTE).execute();
+                        s.setVoteStatus(Submission.DOWNVOTED);
+                    }
+                    View voteStatus = s.getTargetView().findViewById(R.id.vote_status);
+                    TextView points = (TextView) s.getTargetView().findViewById(R.id.points);
+                    switch (s.getVoteStatus()) {
+                        case Submission.DOWNVOTED:
+                            voteStatus.setVisibility(View.VISIBLE);
+                            voteStatus.setBackgroundColor(getResources().getColor(R.color.periwinkle));
+                            points.setText(s.getScore() + " points by ");
+                            break;
+                        default:
+                            voteStatus.setVisibility(View.GONE);
+                            points.setText(s.getScore() + " points by ");
+                            break;
+                    }
+                } else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+                    int position = mSubmissions.pointToPosition((int) e1.getX(), (int) e1.getY());
+                    Submission s = mSubmissionsAdapter.getItem(position);
+                    if (s.getVoteStatus() == Submission.UPVOTED) {
+                        new VoteAsyncTask(s.getName(), mUser, VoteAsyncTask.NEUTRAL).execute();
+                        s.setVoteStatus(Submission.NEUTRAL);
+                    } else {
+                        new VoteAsyncTask(s.getName(), mUser, VoteAsyncTask.UPVOTE).execute();
+                        s.setVoteStatus(Submission.UPVOTED);
+                    }
+                    View voteStatus = s.getTargetView().findViewById(R.id.vote_status);
+                    TextView points = (TextView) s.getTargetView().findViewById(R.id.points);
+                    switch (s.getVoteStatus()) {
+                        case Submission.UPVOTED:
+                            voteStatus.setVisibility(View.VISIBLE);
+                            voteStatus.setBackgroundColor(getResources().getColor(R.color.orangered));
+                            points.setText(s.getScore() + " points by ");
+                            break;
+                        default:
+                            voteStatus.setVisibility(View.GONE);
+                            points.setText(s.getScore() + " points by ");
+                            break;
+                    }
+                }
+            } catch (Exception e) {
+                // nothing
+            }
+            return false;
+        }
+
+        @Override
+        public boolean onDown(MotionEvent e) {
+            return true;
+        }
+
     }
 }
