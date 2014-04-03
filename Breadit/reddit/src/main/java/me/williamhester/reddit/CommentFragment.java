@@ -43,6 +43,9 @@ public class CommentFragment extends Fragment {
     private String mPermalink;
     private User mUser;
 
+    private GestureDetector mGestureDetector;
+    private View.OnTouchListener mGestureListener;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,15 +63,22 @@ public class CommentFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_comment, null);
+        mGestureDetector = new GestureDetector(mContext, new SwipeDetector());
+        mGestureListener = new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                return mGestureDetector.onTouchEvent(motionEvent);
+            }
+        };
         mCommentsListView = (ListView) v.findViewById(R.id.comments);
         mCommentAdapter = new CommentArrayAdapter(mContext);
         mCommentsListView.setAdapter(mCommentAdapter);
 //        final SwipeDetector swipeDetector = new SwipeDetector();
-//        mCommentsListView.setOnTouchListener(swipeDetector);
-        mCommentsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                Log.i("CommentFragment", "Entered onItemClick");
+        mCommentsListView.setOnTouchListener(mGestureListener);
+//        mCommentsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+//                Log.i("CommentFragment", "Entered onItemClick");
 //                if (swipeDetector.swipeDetected()) {
 //                    Log.i("CommentFragment", "Swipe Detected");
 //                    Comment c = mCommentsList.get(position);
@@ -104,8 +114,8 @@ public class CommentFragment extends Fragment {
 //                            break;
 //                    }
 //                }
-            }
-        });
+//            }
+//        });
         new CommentLoaderTask().execute();
         return v;
     }
@@ -123,10 +133,12 @@ public class CommentFragment extends Fragment {
 
             if (convertView == null)
                 convertView = inflater.inflate(R.layout.list_item_comment, parent, false);
+            
+            getItem(position).setTargetView(convertView);
 
             LinearLayout root = (LinearLayout) convertView.findViewById(R.id.root);
             TextView author = (TextView) convertView.findViewById(R.id.author);
-            TextView score = (TextView) convertView.findViewById(R.id.score);
+            TextView score = (TextView) convertView.findViewById(R.id.points);
             TextView time = (TextView) convertView.findViewById(R.id.time);
             TextView body = (TextView) convertView.findViewById(R.id.comment_text);
             View voteStatus = convertView.findViewById(R.id.vote_status);
@@ -137,7 +149,7 @@ public class CommentFragment extends Fragment {
             score.setText(getItem(position).getScore() + " points by ");
             time.setText(" " + calculateTimeShort(getItem(position).getCreatedUtc()));
             body.setText(Html.fromHtml(StringEscapeUtils.unescapeHtml4(getItem(position).getBodyHtml())));
-            body.setMovementMethod(LinkMovementMethod.getInstance());
+//            body.setMovementMethod(LinkMovementMethod.getInstance());
 
             switch (getItem(position).getVoteStatus()) {
                 case Comment.DOWNVOTED:
@@ -262,6 +274,81 @@ public class CommentFragment extends Fragment {
                 mCommentAdapter.notifyDataSetChanged();
             }
         }
+    }
+
+    private class SwipeDetector extends GestureDetector.SimpleOnGestureListener {
+
+        private static final int SWIPE_MIN_DISTANCE = 120;
+        private static final int SWIPE_MAX_OFF_PATH = 250;
+        private static final int SWIPE_THRESHOLD_VELOCITY = 200;
+
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            Log.i("CommentFragment", "Entered onFling()");
+            try {
+                if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH)
+                    return false;
+                // right to left swipe
+                if (e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+                    Log.i("CommentFragment", "Down Voting");
+                    int position = mCommentsListView.pointToPosition((int) e1.getX(), (int) e1.getY());
+                    Comment c = mCommentAdapter.getItem(position);
+                    if (c.getVoteStatus() == Comment.DOWNVOTED) {
+                        new VoteAsyncTask(c.getName(), mUser, VoteAsyncTask.NEUTRAL).execute();
+                        c.setVoteStatus(Comment.NEUTRAL);
+                    } else {
+                        new VoteAsyncTask(c.getName(), mUser, VoteAsyncTask.DOWNVOTE).execute();
+                        c.setVoteStatus(Comment.DOWNVOTED);
+                    }
+                    View voteStatus = c.getTargetView().findViewById(R.id.vote_status);
+                    TextView points = (TextView) c.getTargetView().findViewById(R.id.points);
+                    switch (c.getVoteStatus()) {
+                        case Comment.DOWNVOTED:
+                            voteStatus.setVisibility(View.VISIBLE);
+                            voteStatus.setBackgroundColor(getResources().getColor(R.color.periwinkle));
+                            points.setText(c.getScore() + " points by ");
+                            break;
+                        default:
+                            voteStatus.setVisibility(View.GONE);
+                            points.setText(c.getScore() + " points by ");
+                            break;
+                    }
+                } else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+                    Log.i("CommentFragment", "Up Voting");
+                    int position = mCommentsListView.pointToPosition((int) e1.getX(), (int) e1.getY());
+                    Comment c = mCommentAdapter.getItem(position);
+                    if (c.getVoteStatus() == Comment.UPVOTED) {
+                        new VoteAsyncTask(c.getName(), mUser, VoteAsyncTask.NEUTRAL).execute();
+                        c.setVoteStatus(Comment.NEUTRAL);
+                    } else {
+                        new VoteAsyncTask(c.getName(), mUser, VoteAsyncTask.UPVOTE).execute();
+                        c.setVoteStatus(Comment.UPVOTED);
+                    }
+                    View voteStatus = c.getTargetView().findViewById(R.id.vote_status);
+                    TextView points = (TextView) c.getTargetView().findViewById(R.id.points);
+                    switch (c.getVoteStatus()) {
+                        case Comment.UPVOTED:
+                            voteStatus.setVisibility(View.VISIBLE);
+                            voteStatus.setBackgroundColor(getResources().getColor(R.color.orangered));
+                            points.setText(c.getScore() + " points by ");
+                            break;
+                        default:
+                            voteStatus.setVisibility(View.GONE);
+                            points.setText(c.getScore() + " points by ");
+                            break;
+                    }
+                }
+            } catch (Exception e) {
+                // nothing
+            }
+            return false;
+        }
+
+        @Override
+        public boolean onDown(MotionEvent e) {
+            return super.onDown(e);
+        }
+
     }
 
 }

@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
+import android.view.View;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -48,6 +49,8 @@ public class Comment extends Thing implements Parcelable {
     private long mUps;
     private long mDowns;
     private long mEdited;
+
+    private View mTargetView;
 
     private int mLevel = 0;
 
@@ -201,6 +204,14 @@ public class Comment extends Thing implements Parcelable {
 
     public int getLevel() {
         return mLevel;
+    }
+
+    public void setTargetView(View v) {
+        mTargetView = v;
+    }
+
+    public View getTargetView() {
+        return mTargetView;
     }
 
     public CommentIterator getCommentIterator() {
