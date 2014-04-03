@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.text.Layout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -106,28 +108,72 @@ public class SubredditFragment extends Fragment {
      *     when the SwipeRefreshLayout's onRefresh method is called.
      */
     private void populateSubmissions() {
+        final SwipeDetector swipeDetector = new SwipeDetector();
         mNames = new HashSet<String>();
         mSubmissionList = new ArrayList<Submission>();
+//        mSubmissions.addHeaderView(createHeaderView());
         mSubmissionsAdapter = new SubmissionArrayAdapter(mContext);
         mSubmissions.setAdapter(mSubmissionsAdapter);
+        mSubmissions.setOnTouchListener(swipeDetector);
         mSubmissions.setOnScrollListener(new InfiniteLoadingScrollListener());
         mSubmissions.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent i = new Intent(getActivity(), SubmissionActivity.class);
-                Bundle b = new Bundle();
-                b.putString("permalink", mSubmissionList.get(position).getPermalink());
-                b.putString("url", mSubmissionList.get(position).getUrl());
-                b.putBoolean("isSelf", mSubmissionList.get(position).isSelf());
-                b.putParcelable("user", mUser);
-                i.putExtras(b);
-                mContext.startActivity(i);
+                if (swipeDetector.swipeDetected()) {
+                    Submission s = mSubmissionList.get(position);
+                    if (swipeDetector.getAction() == SwipeDetector.Action.RL) {
+                        if (mSubmissionList.get(position).getVoteStatus() == Submission.DOWNVOTED) {
+                            new VoteAsyncTask(s.getName(), mUser, VoteAsyncTask.NEUTRAL);
+                        } else {
+                            new VoteAsyncTask(s.getName(), mUser, VoteAsyncTask.DOWNVOTE);
+                        }
+                    } else if (swipeDetector.getAction() == SwipeDetector.Action.LR) {
+                        if (mSubmissionList.get(position).getVoteStatus() == Submission.UPVOTED) {
+                            new VoteAsyncTask(s.getName(), mUser, VoteAsyncTask.NEUTRAL);
+                        } else {
+                            new VoteAsyncTask(s.getName(), mUser, VoteAsyncTask.UPVOTE);
+                        }
+                    }
+                    View voteStatus = view.findViewById(R.id.vote_status);
+                    switch (s.getVoteStatus()) {
+                        case Submission.DOWNVOTED:
+                            voteStatus.setVisibility(View.VISIBLE);
+                            voteStatus.setBackgroundColor(getResources().getColor(R.color.periwinkle));
+                            break;
+                        case Submission.UPVOTED:
+                            voteStatus.setVisibility(View.VISIBLE);
+                            voteStatus.setBackgroundColor(getResources().getColor(R.color.orangered));
+                            break;
+                        default:
+                            voteStatus.setVisibility(View.GONE);
+                            break;
+                    }
+                } else {
+                    Intent i = new Intent(getActivity(), SubmissionActivity.class);
+                    Bundle b = new Bundle();
+                    b.putString("permalink", mSubmissionList.get(position).getPermalink());
+                    b.putString("url", mSubmissionList.get(position).getUrl());
+                    b.putBoolean("isSelf", mSubmissionList.get(position).isSelf());
+                    b.putParcelable("user", mUser);
+                    i.putExtras(b);
+                    mContext.startActivity(i);
+                }
             }
         });
         new RefreshUserClass().execute();
     }
 
+    private View createHeaderView() {
+        LayoutInflater inflater
+                = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View v = inflater.inflate(R.layout.header_subreddit, null);
+        TextView title = (TextView) v.findViewById(R.id.subreddit);
+        title.setText("/r/" + mSubredditName);
+        return v;
+    }
+
     private class SubmissionArrayAdapter extends ArrayAdapter<Submission> {
+        final SwipeDetector swipeDetector = new SwipeDetector();
         Context mContext;
 
         public SubmissionArrayAdapter(Context context) {
@@ -142,41 +188,65 @@ public class SubredditFragment extends Fragment {
 
             if (convertView == null)
                 convertView = inflater.inflate(R.layout.list_item_post, parent, false);
-//
-//            Button ups = (Button) convertView.findViewById(R.id.ups);
-//            Button downs = (Button) convertView.findViewById(R.id.downs);
-            View voteStatus = convertView.findViewById(R.id.vote_status);
+            else
+                convertView.invalidate();
+
+            final View voteStatus = convertView.findViewById(R.id.vote_status);
             TextView nameAndTime
                     = (TextView) convertView.findViewById(R.id.subreddit_name_and_time);
             TextView author = (TextView) convertView.findViewById(R.id.author);
             ImageView image = (ImageView) convertView.findViewById(R.id.thumbnail);
             TextView title = (TextView) convertView.findViewById(R.id.title);
+            TextView domain = (TextView) convertView.findViewById(R.id.domain);
+            TextView points = (TextView) convertView.findViewById(R.id.points);
             View spacer = convertView.findViewById(R.id.spacer);
-//
-//            ups.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View view) {
-//                    new VoteAsyncTask(getItem(position).getName(), mUser, VoteAsyncTask.UPVOTE).execute();
-//                    Toast.makeText(mContext, getItem(position).getName(), Toast.LENGTH_SHORT).show();
-//                }
-//            });
-//            downs.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View view) {
-//                    new VoteAsyncTask(getItem(position).getName(), mUser, VoteAsyncTask.DOWNVOTE).execute();
-//                }
-//            });
+
+            title.setOnTouchListener(swipeDetector);
             title.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Intent i = new Intent(getActivity(), SubmissionActivity.class);
-                    Bundle b = new Bundle();
-                    b.putString("permalink", mSubmissionList.get(position).getPermalink());
-                    b.putString("url", mSubmissionList.get(position).getUrl());
-                    b.putBoolean("isSelf", mSubmissionList.get(position).isSelf());
-                    b.putParcelable("user", mUser);
-                    i.putExtras(b);
-                    mContext.startActivity(i);
+                    if (swipeDetector.swipeDetected()) {
+                        Submission s = mSubmissionList.get(position);
+                        if (swipeDetector.getAction() == SwipeDetector.Action.RL) {
+                            if (mSubmissionList.get(position).getVoteStatus() == Submission.DOWNVOTED) {
+                                new VoteAsyncTask(s.getName(), mUser, VoteAsyncTask.NEUTRAL).execute();
+                                s.setVoteStatus(Submission.NEUTRAL);
+                            } else {
+                                new VoteAsyncTask(s.getName(), mUser, VoteAsyncTask.DOWNVOTE).execute();
+                                s.setVoteStatus(Submission.DOWNVOTED);
+                            }
+                        } else if (swipeDetector.getAction() == SwipeDetector.Action.LR) {
+                            if (mSubmissionList.get(position).getVoteStatus() == Submission.UPVOTED) {
+                                new VoteAsyncTask(s.getName(), mUser, VoteAsyncTask.NEUTRAL).execute();
+                                s.setVoteStatus(Submission.NEUTRAL);
+                            } else {
+                                new VoteAsyncTask(s.getName(), mUser, VoteAsyncTask.UPVOTE).execute();
+                                s.setVoteStatus(Submission.UPVOTED);
+                            }
+                        }
+                        switch (s.getVoteStatus()) {
+                            case Submission.DOWNVOTED:
+                                voteStatus.setVisibility(View.VISIBLE);
+                                voteStatus.setBackgroundColor(getResources().getColor(R.color.periwinkle));
+                                break;
+                            case Submission.UPVOTED:
+                                voteStatus.setVisibility(View.VISIBLE);
+                                voteStatus.setBackgroundColor(getResources().getColor(R.color.orangered));
+                                break;
+                            default:
+                                voteStatus.setVisibility(View.GONE);
+                                break;
+                        }
+                    } else {
+                        Intent i = new Intent(getActivity(), SubmissionActivity.class);
+                        Bundle b = new Bundle();
+                        b.putString("permalink", mSubmissionList.get(position).getPermalink());
+                        b.putString("url", mSubmissionList.get(position).getUrl());
+                        b.putBoolean("isSelf", mSubmissionList.get(position).isSelf());
+                        b.putParcelable("user", mUser);
+                        i.putExtras(b);
+                        mContext.startActivity(i);
+                    }
                 }
             });
 
@@ -185,31 +255,57 @@ public class SubredditFragment extends Fragment {
                 image.setVisibility(View.GONE);
                 spacer.setVisibility(View.GONE);
             } else {
+                image.setVisibility(View.VISIBLE);
+                spacer.setVisibility(View.VISIBLE);
                 UrlImageViewHelper.setUrlDrawable(image, s.getThumbnailUrl());
             }
 
             if (mSubredditName == null || mSubredditName.equals("")) {
-                nameAndTime.setText(" submitted to " + s.getSubredditName() + " " + calculateTime(s.getCreatedUtc()));
+                nameAndTime.setText(" in " + s.getSubredditName() + " " + calculateTimeShort(s.getCreatedUtc()));
             }
             switch (s.getVoteStatus()) {
                 case Submission.DOWNVOTED:
+                    voteStatus.setVisibility(View.VISIBLE);
                     voteStatus.setBackgroundColor(getResources().getColor(R.color.periwinkle));
                     break;
                 case Submission.UPVOTED:
+                    voteStatus.setVisibility(View.VISIBLE);
                     voteStatus.setBackgroundColor(getResources().getColor(R.color.orangered));
                     break;
                 default:
                     voteStatus.setVisibility(View.GONE);
                     break;
             }
-//            score.setText(s.getScore() + "");
+
             title.setText(s.getTitle());
-//            ups.setText(s.getUpVotes() + "");
-//            downs.setText(s.getDownVotes() + "");
             author.setText(s.getAuthor());
+            domain.setText("(" + s.getDomain() + ")");
+            points.setText(s.getScore() + " points by ");
             
             return convertView;
         }
+    }
+
+    private String calculateTimeShort(long postTime) {
+        long currentTime = System.currentTimeMillis() / 1000;
+        long difference = currentTime - postTime;
+        String time;
+        if (difference / 31536000 > 0) {
+            time = difference / 3156000 + "y";
+        } else if (difference / 2592000 > 0) {
+            time = difference / 2592000 + "m";
+        } else if (difference / 604800 > 0) {
+            time = difference / 604800 + "w";
+        } else if (difference / 86400 > 0) {
+            time = difference / 86400 + "d";
+        } else if (difference / 3600 > 0) {
+            time = difference / 3600 + "h";
+        } else if (difference / 60 > 0) {
+            time = difference / 60 + "m";
+        } else {
+            time = difference + "s";
+        }
+        return time;
     }
 
     private String calculateTime(long postTime) {

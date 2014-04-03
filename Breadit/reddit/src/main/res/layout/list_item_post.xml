@@ -15,29 +15,6 @@
         android:background="@color/blackish"
         android:padding="8dp">
 
-        <!--<LinearLayout-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="match_parent"-->
-            <!--android:orientation="vertical">-->
-
-            <!--<Button android:id="@+id/ups"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="0dp"-->
-                <!--android:layout_weight="1"-->
-                <!--style="?android:buttonBarButtonStyle"-->
-                <!--android:fontFamily="sans-serif-light"/>-->
-                <!--&lt;!&ndash;android:textColor="@color/orangered"/>&ndash;&gt;-->
-
-            <!--<Button android:id="@+id/downs"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="0dp"-->
-                <!--android:layout_weight="1"-->
-                <!--style="?android:buttonBarButtonStyle"-->
-                <!--android:fontFamily="sans-serif-light"/>-->
-                <!--&lt;!&ndash;android:textColor="@color/periwinkle"/>&ndash;&gt;-->
-
-        <!--</LinearLayout>-->
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -67,6 +44,7 @@
                 android:layout_height="match_parent"
                 android:contentDescription="@string/thumbnail_description"
                 android:cropToPadding="true"/>
+
         </LinearLayout>
 
 
@@ -75,7 +53,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" >
 
-            <TextView
+            <TextView android:id="@+id/points"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="12sp"
@@ -96,6 +74,14 @@
                 android:textSize="12sp"
                 android:fontFamily="sans-serif-condensed"
                 android:textColor="@color/auburn"/>
+
+            <TextView android:id="@+id/domain"
+                android:paddingLeft="8dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:fontFamily="sans-serif-condensed"
+                android:textColor="@color/mid_gray"/>
 
         </LinearLayout>
     </LinearLayout>

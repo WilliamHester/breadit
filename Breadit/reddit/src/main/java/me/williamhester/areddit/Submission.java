@@ -202,6 +202,10 @@ public class Submission extends Thing implements Parcelable {
         return mVoteStatus;
     }
 
+    public void setVoteStatus(int status) {
+        mVoteStatus = status;
+    }
+
     public String getLinkFlairText() {
         return mLinkFlairText;
     }

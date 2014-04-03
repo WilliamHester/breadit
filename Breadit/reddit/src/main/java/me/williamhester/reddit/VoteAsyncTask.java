@@ -33,8 +33,10 @@ public class VoteAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
     @Override
     protected Boolean doInBackground(Void... voids) {
-        if (mUser == null)
+        if (mUser == null) {
+            Log.i("VoteAsyncTask", "User is null");
             return false; // Can't vote if the user is not logged in.
+        }
         List<NameValuePair> apiParams = new ArrayList<NameValuePair>();
         apiParams.add(new BasicNameValuePair("dir", mDir + ""));
         apiParams.add(new BasicNameValuePair("id", mFullname));
