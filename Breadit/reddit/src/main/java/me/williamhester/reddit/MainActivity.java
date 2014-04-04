@@ -6,11 +6,13 @@ import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,6 +27,7 @@ public class MainActivity extends Activity
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
+    private DrawerLayout mDrawerLayout;
     private NavigationDrawerFragment mNavigationDrawerFragment;
     private SubredditFragment mSubredditFragment;
     private SharedPreferences mPrefs;
@@ -81,7 +84,9 @@ public class MainActivity extends Activity
         mNavigationDrawerFragment = NavigationDrawerFragment.newInstance(mUser);
         mTitle = getTitle();
 
-        mNavigationDrawerFragment.setUp((DrawerLayout) findViewById(R.id.drawer_layout));
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setHomeButtonEnabled(true);
+
         FragmentManager fm = getFragmentManager();
         fm.beginTransaction().replace(R.id.navigation_drawer_container,
                 mNavigationDrawerFragment)

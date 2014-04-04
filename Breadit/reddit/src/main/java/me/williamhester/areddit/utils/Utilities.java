@@ -23,7 +23,7 @@ import java.util.List;
  */
 public class Utilities {
 
-    private static final String USER_AGENT = "William's Reddit API wrapper";
+    private static final String USER_AGENT = "Breadit_Android_App";
 
     public static String get(String apiParams, String url, String cookie, String modhash)
             throws IOException {

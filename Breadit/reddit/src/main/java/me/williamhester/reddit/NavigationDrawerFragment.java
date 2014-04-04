@@ -3,6 +3,7 @@ package me.williamhester.reddit;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
@@ -110,24 +111,8 @@ public class NavigationDrawerFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_navigation_drawer, container, false);
+        mDrawerLayout = (DrawerLayout) container.getRootView().findViewById(R.id.drawer_layout);
         mDrawerListView = (ListView) v.findViewById(R.id.list);
-//        Button b = (Button) v.findViewById(R.id.button);
-//        b.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Log.i("NDF", "clicked the button");
-//                if (mUser != null) {
-//                    mSubredditList = new ArrayList<String>();
-//                    mSubredditArrayAdapter = new ArrayAdapter<String>(
-//                            getActionBar().getThemedContext(),
-//                            android.R.layout.simple_list_item_activated_1,
-//                            android.R.id.text1, mSubredditList);
-//                    new GetUserSubreddits().execute();
-//                }
-//            }
-//        });
-//        mDrawerListView = (ListView) inflater.inflate(
-//                R.layout.fragment_navigation_drawer, container, false);
         Log.i("NavigationDrawerFragment", "Drawer onCreateView");
         // Default onclick
 //        mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -142,7 +127,7 @@ public class NavigationDrawerFragment extends Fragment {
             Log.i("test", "User not null sublist executed");
             mSubredditList = new ArrayList<String>();
             mSubredditArrayAdapter = new ArrayAdapter<String>(
-                    getActionBar().getThemedContext(),
+                    getActivity().getActionBar().getThemedContext(),
                     android.R.layout.simple_list_item_activated_1,
                     android.R.id.text1, mSubredditList);
             mDrawerListView.setAdapter(mSubredditArrayAdapter);
@@ -159,7 +144,7 @@ public class NavigationDrawerFragment extends Fragment {
                 mSubredditList.add(s);
             }
             mDrawerListView.setAdapter(new ArrayAdapter<String>(
-                    getActionBar().getThemedContext(),
+                    getActivity().getActionBar().getThemedContext(),
                     android.R.layout.simple_list_item_activated_1,
                     android.R.id.text1, mSubredditList
             ));
@@ -172,6 +157,60 @@ public class NavigationDrawerFragment extends Fragment {
                 selectItem(mSubredditList.get(i));
             }
         });
+
+        ActionBar actionBar = getActivity().getActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setHomeButtonEnabled(true);
+//
+        // ActionBarDrawerToggle ties together the the proper interactions
+        // between the navigation drawer and the action bar app icon.
+        mDrawerToggle = new ActionBarDrawerToggle(
+                getActivity(),                    /* host Activity */
+                mDrawerLayout,                    /* DrawerLayout object */
+                R.drawable.ic_drawer,             /* nav drawer image to replace 'Up' caret */
+                R.string.navigation_drawer_open,  /* "open drawer" description for accessibility */
+                R.string.navigation_drawer_close  /* "close drawer" description for accessibility */
+        ) {
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+                if (!isAdded()) {
+                    return;
+                }
+
+                getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
+            }
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                if (!isAdded()) {
+                    return;
+                }
+
+//                if (!mUserLearnedDrawer) {
+//                    // The user manually opened the drawer; store this flag to prevent auto-showing
+//                    // the navigation drawer automatically in the future.
+//                    mUserLearnedDrawer = true;
+//                    SharedPreferences sp = PreferenceManager
+//                            .getDefaultSharedPreferences(getActivity());
+//                    sp.edit().putBoolean(PREF_USER_LEARNED_DRAWER, true).apply();
+//                }
+
+                getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
+            }
+        };
+
+        // Defer code dependent on restoration of previous instance state.
+        mDrawerLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                mDrawerToggle.syncState();
+            }
+        });
+
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
+
         return v;
     }
 
@@ -184,8 +223,9 @@ public class NavigationDrawerFragment extends Fragment {
      *
      * @param drawerLayout The DrawerLayout containing this fragment's UI.
      */
-    public void setUp(DrawerLayout drawerLayout) {
+    public void setUp(DrawerLayout drawerLayout, Activity host) {
 
+        final Activity c = host;
 
 //        mFragmentContainerView = getActivity().findViewById(fragmentId);
         mDrawerLayout = drawerLayout;
@@ -194,65 +234,58 @@ public class NavigationDrawerFragment extends Fragment {
         mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
         // set up the drawer's list view with items and click listener
 
-//        ActionBar actionBar = getActionBar();
-//        ActionBar actionBar = actionbar;
-//        actionBar.setDisplayHomeAsUpEnabled(true);
-//        actionBar.setHomeButtonEnabled(true);
+        ActionBar actionBar = host.getActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setHomeButtonEnabled(true);
 //
         // ActionBarDrawerToggle ties together the the proper interactions
         // between the navigation drawer and the action bar app icon.
-//        mDrawerToggle = new ActionBarDrawerToggle(
-//                getActivity(),                    /* host Activity */
-//                mDrawerLayout,                    /* DrawerLayout object */
-//                R.drawable.ic_drawer,             /* nav drawer image to replace 'Up' caret */
-//                R.string.navigation_drawer_open,  /* "open drawer" description for accessibility */
-//                R.string.navigation_drawer_close  /* "close drawer" description for accessibility */
-//        ) {
-//            @Override
-//            public void onDrawerClosed(View drawerView) {
-//                super.onDrawerClosed(drawerView);
-//                if (!isAdded()) {
-//                    return;
+        mDrawerToggle = new ActionBarDrawerToggle(
+                host,                             /* host Activity */
+                mDrawerLayout,                    /* DrawerLayout object */
+                R.drawable.ic_drawer,             /* nav drawer image to replace 'Up' caret */
+                R.string.navigation_drawer_open,  /* "open drawer" description for accessibility */
+                R.string.navigation_drawer_close  /* "close drawer" description for accessibility */
+        ) {
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+                if (!isAdded()) {
+                    return;
+                }
+
+                getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
+            }
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                if (!isAdded()) {
+                    return;
+                }
+
+//                if (!mUserLearnedDrawer) {
+//                    // The user manually opened the drawer; store this flag to prevent auto-showing
+//                    // the navigation drawer automatically in the future.
+//                    mUserLearnedDrawer = true;
+//                    SharedPreferences sp = PreferenceManager
+//                            .getDefaultSharedPreferences(getActivity());
+//                    sp.edit().putBoolean(PREF_USER_LEARNED_DRAWER, true).apply();
 //                }
-//
-//                getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
-//            }
-//
-//            @Override
-//            public void onDrawerOpened(View drawerView) {
-//                super.onDrawerOpened(drawerView);
-//                if (!isAdded()) {
-//                    return;
-//                }
-//
-////                if (!mUserLearnedDrawer) {
-////                    // The user manually opened the drawer; store this flag to prevent auto-showing
-////                    // the navigation drawer automatically in the future.
-////                    mUserLearnedDrawer = true;
-////                    SharedPreferences sp = PreferenceManager
-////                            .getDefaultSharedPreferences(getActivity());
-////                    sp.edit().putBoolean(PREF_USER_LEARNED_DRAWER, true).apply();
-////                }
-//
-//                getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
-//            }
-//        };
-//
-//        // If the user hasn't 'learned' about the drawer, open it to introduce them to the drawer,
-//        // per the navigation drawer design guidelines.
-//        if (!mUserLearnedDrawer && !mFromSavedInstanceState) {
-//            mDrawerLayout.openDrawer(mFragmentContainerView);
-//        }
-//
-//        // Defer code dependent on restoration of previous instance state.
-//        mDrawerLayout.post(new Runnable() {
-//            @Override
-//            public void run() {
-//                mDrawerToggle.syncState();
-//            }
-//        });
-//
-//        mDrawerLayout.setDrawerListener(mDrawerToggle);
+
+                c.invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
+            }
+        };
+
+        // Defer code dependent on restoration of previous instance state.
+        mDrawerLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                mDrawerToggle.syncState();
+            }
+        });
+
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
     }
 
     private void selectItem(String subreddit) {
@@ -319,12 +352,6 @@ public class NavigationDrawerFragment extends Fragment {
         if (mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
-
-        if (item.getItemId() == R.id.action_example) {
-            Toast.makeText(getActivity(), "Example action.", Toast.LENGTH_SHORT).show();
-            return true;
-        }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -338,13 +365,6 @@ public class NavigationDrawerFragment extends Fragment {
 //        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
 //        actionBar.setTitle(R.string.app_name);
 //    }
-
-    private ActionBar getActionBar() {
-        if (getActivity() == null) {
-            Log.i("test", "Activity null");
-        }
-        return getActivity().getActionBar();
-    }
 
     /**
      * Callbacks interface that all activities using this fragment must implement.

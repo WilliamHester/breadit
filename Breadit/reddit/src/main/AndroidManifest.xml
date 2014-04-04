@@ -16,7 +16,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".SubmissionActivity" >
+            android:name=".SubmissionActivity"
+            android:parentActivityName="me.williamhester.reddit.MainActivity">
         </activity>
         <activity
             android:name=".SetupActivity" >

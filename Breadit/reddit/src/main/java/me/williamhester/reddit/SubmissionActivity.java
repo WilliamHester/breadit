@@ -55,6 +55,8 @@ public class SubmissionActivity extends Activity {
         }
 
         mAction.selectTab(tabs[selectedTab]);
+
+        mAction.setDisplayHomeAsUpEnabled(true);
     }
 
 }

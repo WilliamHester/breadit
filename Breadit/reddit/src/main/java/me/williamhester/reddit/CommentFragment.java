@@ -237,63 +237,73 @@ public class CommentFragment extends Fragment {
         private static final int SWIPE_THRESHOLD_VELOCITY = 200;
 
         @Override
+        public boolean onSingleTapConfirmed(MotionEvent ev) {
+
+            return false;
+        }
+
+        @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
             Log.i("CommentFragment", "Entered onFling()");
-            try {
-                if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH)
-                    return false;
-                // right to left swipe
-                if (e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
-                    Log.i("CommentFragment", "Down Voting");
-                    int position = mCommentsListView.pointToPosition((int) e1.getX(), (int) e1.getY());
-                    Comment c = mCommentAdapter.getItem(position);
-                    if (c.getVoteStatus() == Comment.DOWNVOTED) {
-                        new VoteAsyncTask(c.getName(), mUser, VoteAsyncTask.NEUTRAL).execute();
-                        c.setVoteStatus(Comment.NEUTRAL);
-                    } else {
-                        new VoteAsyncTask(c.getName(), mUser, VoteAsyncTask.DOWNVOTE).execute();
-                        c.setVoteStatus(Comment.DOWNVOTED);
+            if (mUser != null) {
+                try {
+                    if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH)
+                        return false;
+                    // right to left swipe
+                    if (e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+                        Log.i("CommentFragment", "Down Voting");
+                        int position = mCommentsListView.pointToPosition((int) e1.getX(), (int) e1.getY());
+                        Comment c = mCommentAdapter.getItem(position);
+                        if (c.getVoteStatus() == Comment.DOWNVOTED) {
+                            new VoteAsyncTask(c.getName(), mUser, VoteAsyncTask.NEUTRAL).execute();
+                            c.setVoteStatus(Comment.NEUTRAL);
+                        } else {
+                            new VoteAsyncTask(c.getName(), mUser, VoteAsyncTask.DOWNVOTE).execute();
+                            c.setVoteStatus(Comment.DOWNVOTED);
+                        }
+                        View v = mCommentsListView.getChildAt(position - mCommentsListView.getFirstVisiblePosition());
+                        View voteStatus = v.findViewById(R.id.vote_status);
+                        TextView points = (TextView) v.findViewById(R.id.points);
+                        switch (c.getVoteStatus()) {
+                            case Comment.DOWNVOTED:
+                                voteStatus.setVisibility(View.VISIBLE);
+                                voteStatus.setBackgroundColor(getResources().getColor(R.color.periwinkle));
+                                points.setText(c.getScore() + " points by ");
+                                break;
+                            default:
+                                voteStatus.setVisibility(View.GONE);
+                                points.setText(c.getScore() + " points by ");
+                                break;
+                        }
+                    } else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+                        Log.i("CommentFragment", "Up Voting");
+                        int position = mCommentsListView.pointToPosition((int) e1.getX(), (int) e1.getY());
+                        Comment c = mCommentAdapter.getItem(position);
+                        if (c.getVoteStatus() == Comment.UPVOTED) {
+                            new VoteAsyncTask(c.getName(), mUser, VoteAsyncTask.NEUTRAL).execute();
+                            c.setVoteStatus(Comment.NEUTRAL);
+                        } else {
+                            new VoteAsyncTask(c.getName(), mUser, VoteAsyncTask.UPVOTE).execute();
+                            c.setVoteStatus(Comment.UPVOTED);
+                        }
+                        View v = mCommentsListView.getChildAt(position - mCommentsListView.getFirstVisiblePosition());
+                        View voteStatus = v.findViewById(R.id.vote_status);
+                        TextView points = (TextView) v.findViewById(R.id.points);
+                        switch (c.getVoteStatus()) {
+                            case Comment.UPVOTED:
+                                voteStatus.setVisibility(View.VISIBLE);
+                                voteStatus.setBackgroundColor(getResources().getColor(R.color.orangered));
+                                points.setText(c.getScore() + " points by ");
+                                break;
+                            default:
+                                voteStatus.setVisibility(View.GONE);
+                                points.setText(c.getScore() + " points by ");
+                                break;
+                        }
                     }
-                    View voteStatus = mCommentsListView.getChildAt(position).findViewById(R.id.vote_status);
-                    TextView points = (TextView) mCommentsListView.getChildAt(position).findViewById(R.id.points);
-                    switch (c.getVoteStatus()) {
-                        case Comment.DOWNVOTED:
-                            voteStatus.setVisibility(View.VISIBLE);
-                            voteStatus.setBackgroundColor(getResources().getColor(R.color.periwinkle));
-                            points.setText(c.getScore() + " points by ");
-                            break;
-                        default:
-                            voteStatus.setVisibility(View.GONE);
-                            points.setText(c.getScore() + " points by ");
-                            break;
-                    }
-                } else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
-                    Log.i("CommentFragment", "Up Voting");
-                    int position = mCommentsListView.pointToPosition((int) e1.getX(), (int) e1.getY());
-                    Comment c = mCommentAdapter.getItem(position);
-                    if (c.getVoteStatus() == Comment.UPVOTED) {
-                        new VoteAsyncTask(c.getName(), mUser, VoteAsyncTask.NEUTRAL).execute();
-                        c.setVoteStatus(Comment.NEUTRAL);
-                    } else {
-                        new VoteAsyncTask(c.getName(), mUser, VoteAsyncTask.UPVOTE).execute();
-                        c.setVoteStatus(Comment.UPVOTED);
-                    }
-                    View voteStatus = mCommentsListView.getChildAt(position).findViewById(R.id.vote_status);
-                    TextView points = (TextView) mCommentsListView.getChildAt(position).findViewById(R.id.points);
-                    switch (c.getVoteStatus()) {
-                        case Comment.UPVOTED:
-                            voteStatus.setVisibility(View.VISIBLE);
-                            voteStatus.setBackgroundColor(getResources().getColor(R.color.orangered));
-                            points.setText(c.getScore() + " points by ");
-                            break;
-                        default:
-                            voteStatus.setVisibility(View.GONE);
-                            points.setText(c.getScore() + " points by ");
-                            break;
-                    }
+                } catch (Exception e) {
+                    // nothing
                 }
-            } catch (Exception e) {
-                // nothing
             }
             return false;
         }
@@ -302,6 +312,10 @@ public class CommentFragment extends Fragment {
         public boolean onDown(MotionEvent e) {
             return super.onDown(e);
         }
+
+    }
+
+    private class HiddenComments {
 
     }
 
