@@ -70,9 +70,6 @@ public class Submission extends Thing implements Parcelable {
     private long mUps;
     private long mDowns;
 
-    // There's probably a better way to do this
-    private View mTargetView;
-
     private Submission(JsonObject data) {
         super(data);
     }
@@ -253,14 +250,6 @@ public class Submission extends Thing implements Parcelable {
 
     public long getCreatedUtc() {
         return mCreatedUtc;
-    }
-
-    public void setTargetView(View v) {
-        mTargetView = v;
-    }
-
-    public View getTargetView() {
-        return mTargetView;
     }
 
     /**

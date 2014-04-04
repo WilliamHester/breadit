@@ -5,14 +5,12 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
-import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -73,49 +71,7 @@ public class CommentFragment extends Fragment {
         mCommentsListView = (ListView) v.findViewById(R.id.comments);
         mCommentAdapter = new CommentArrayAdapter(mContext);
         mCommentsListView.setAdapter(mCommentAdapter);
-//        final SwipeDetector swipeDetector = new SwipeDetector();
         mCommentsListView.setOnTouchListener(mGestureListener);
-//        mCommentsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-//                Log.i("CommentFragment", "Entered onItemClick");
-//                if (swipeDetector.swipeDetected()) {
-//                    Log.i("CommentFragment", "Swipe Detected");
-//                    Comment c = mCommentsList.get(position);
-//                    View voteStatus = view.findViewById(R.id.vote_status);
-//                    if (swipeDetector.getAction() == SwipeDetector.Action.RL) {
-//                        if (mCommentsList.get(position).getVoteStatus() == Comment.DOWNVOTED) {
-//                            new VoteAsyncTask(c.getName(), mUser, VoteAsyncTask.NEUTRAL).execute();
-//                            c.setVoteStatus(Comment.NEUTRAL);
-//                        } else {
-//                            new VoteAsyncTask(c.getName(), mUser, VoteAsyncTask.DOWNVOTE).execute();
-//                            c.setVoteStatus(Comment.DOWNVOTED);
-//                        }
-//                    } else if (swipeDetector.getAction() == SwipeDetector.Action.LR) {
-//                        if (mCommentsList.get(position).getVoteStatus() == Comment.UPVOTED) {
-//                            new VoteAsyncTask(c.getName(), mUser, VoteAsyncTask.NEUTRAL).execute();
-//                            c.setVoteStatus(Comment.NEUTRAL);
-//                        } else {
-//                            new VoteAsyncTask(c.getName(), mUser, VoteAsyncTask.UPVOTE).execute();
-//                            c.setVoteStatus(Comment.UPVOTED);
-//                        }
-//                    }
-//                    switch (c.getVoteStatus()) {
-//                        case Comment.DOWNVOTED:
-//                            voteStatus.setVisibility(View.VISIBLE);
-//                            voteStatus.setBackgroundColor(getResources().getColor(R.color.periwinkle));
-//                            break;
-//                        case Comment.UPVOTED:
-//                            voteStatus.setVisibility(View.VISIBLE);
-//                            voteStatus.setBackgroundColor(getResources().getColor(R.color.orangered));
-//                            break;
-//                        default:
-//                            voteStatus.setVisibility(View.GONE);
-//                            break;
-//                    }
-//                }
-//            }
-//        });
         new CommentLoaderTask().execute();
         return v;
     }
@@ -133,8 +89,6 @@ public class CommentFragment extends Fragment {
 
             if (convertView == null)
                 convertView = inflater.inflate(R.layout.list_item_comment, parent, false);
-            
-            getItem(position).setTargetView(convertView);
 
             LinearLayout root = (LinearLayout) convertView.findViewById(R.id.root);
             TextView author = (TextView) convertView.findViewById(R.id.author);
@@ -300,8 +254,8 @@ public class CommentFragment extends Fragment {
                         new VoteAsyncTask(c.getName(), mUser, VoteAsyncTask.DOWNVOTE).execute();
                         c.setVoteStatus(Comment.DOWNVOTED);
                     }
-                    View voteStatus = c.getTargetView().findViewById(R.id.vote_status);
-                    TextView points = (TextView) c.getTargetView().findViewById(R.id.points);
+                    View voteStatus = mCommentsListView.getChildAt(position).findViewById(R.id.vote_status);
+                    TextView points = (TextView) mCommentsListView.getChildAt(position).findViewById(R.id.points);
                     switch (c.getVoteStatus()) {
                         case Comment.DOWNVOTED:
                             voteStatus.setVisibility(View.VISIBLE);
@@ -324,8 +278,8 @@ public class CommentFragment extends Fragment {
                         new VoteAsyncTask(c.getName(), mUser, VoteAsyncTask.UPVOTE).execute();
                         c.setVoteStatus(Comment.UPVOTED);
                     }
-                    View voteStatus = c.getTargetView().findViewById(R.id.vote_status);
-                    TextView points = (TextView) c.getTargetView().findViewById(R.id.points);
+                    View voteStatus = mCommentsListView.getChildAt(position).findViewById(R.id.vote_status);
+                    TextView points = (TextView) mCommentsListView.getChildAt(position).findViewById(R.id.points);
                     switch (c.getVoteStatus()) {
                         case Comment.UPVOTED:
                             voteStatus.setVisibility(View.VISIBLE);

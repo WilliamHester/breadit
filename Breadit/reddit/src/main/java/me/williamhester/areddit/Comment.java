@@ -50,8 +50,6 @@ public class Comment extends Thing implements Parcelable {
     private long mDowns;
     private long mEdited;
 
-    private View mTargetView;
-
     private int mLevel = 0;
 
     private Comment(JsonObject jsonObj, int level) {
@@ -204,14 +202,6 @@ public class Comment extends Thing implements Parcelable {
 
     public int getLevel() {
         return mLevel;
-    }
-
-    public void setTargetView(View v) {
-        mTargetView = v;
-    }
-
-    public View getTargetView() {
-        return mTargetView;
     }
 
     public CommentIterator getCommentIterator() {

@@ -150,8 +150,6 @@ public class SubredditFragment extends Fragment {
                 convertView = inflater.inflate(R.layout.list_item_post, parent, false);
             else
                 convertView.invalidate();
-            if (s != null)
-                s.setTargetView(convertView);
 
             final View voteStatus = convertView.findViewById(R.id.vote_status);
             TextView nameAndTime
@@ -384,30 +382,21 @@ public class SubredditFragment extends Fragment {
             int x = (int) ev.getX();
             int y = (int) ev.getY();
             int position = mSubmissions.pointToPosition(x, y);
-            Submission s = mSubmissionsAdapter.getItem(position);
-            ImageView iv = (ImageView) s.getTargetView().findViewById(R.id.thumbnail);
+            ImageView iv = (ImageView) mSubmissions.getChildAt(position).findViewById(R.id.thumbnail);
+            Intent i = new Intent(getActivity(), SubmissionActivity.class);
+            Bundle b = new Bundle();
+            b.putString("permalink", mSubmissionList.get(position).getPermalink());
+            b.putString("url", mSubmissionList.get(position).getUrl());
+            b.putBoolean("isSelf", mSubmissionList.get(position).isSelf());
+            b.putParcelable("user", mUser);
             // Clicked on the image side
             if (x >= iv.getLeft() + mSubmissions.getLeft()) {
-                Intent i = new Intent(getActivity(), SubmissionActivity.class);
-                Bundle b = new Bundle();
-                b.putString("permalink", mSubmissionList.get(position).getPermalink());
-                b.putString("url", mSubmissionList.get(position).getUrl());
-                b.putBoolean("isSelf", mSubmissionList.get(position).isSelf());
-                b.putParcelable("user", mUser);
                 b.putInt("tab", SubmissionActivity.CONTENT_TAB);
-                i.putExtras(b);
-                mContext.startActivity(i);
             } else { // Clicked on the text side
-                Intent i = new Intent(getActivity(), SubmissionActivity.class);
-                Bundle b = new Bundle();
-                b.putString("permalink", mSubmissionList.get(position).getPermalink());
-                b.putString("url", mSubmissionList.get(position).getUrl());
-                b.putBoolean("isSelf", mSubmissionList.get(position).isSelf());
-                b.putParcelable("user", mUser);
                 b.putInt("tab", SubmissionActivity.COMMENT_TAB);
-                i.putExtras(b);
-                mContext.startActivity(i);
             }
+            i.putExtras(b);
+            mContext.startActivity(i);
             return false;
         }
 
@@ -428,8 +417,8 @@ public class SubredditFragment extends Fragment {
                         new VoteAsyncTask(s.getName(), mUser, VoteAsyncTask.DOWNVOTE).execute();
                         s.setVoteStatus(Submission.DOWNVOTED);
                     }
-                    View voteStatus = s.getTargetView().findViewById(R.id.vote_status);
-                    TextView points = (TextView) s.getTargetView().findViewById(R.id.points);
+                    View voteStatus = mSubmissions.getChildAt(position).findViewById(R.id.vote_status);
+                    TextView points = (TextView) mSubmissions.getChildAt(position).findViewById(R.id.points);
                     switch (s.getVoteStatus()) {
                         case Submission.DOWNVOTED:
                             voteStatus.setVisibility(View.VISIBLE);
@@ -451,8 +440,8 @@ public class SubredditFragment extends Fragment {
                         new VoteAsyncTask(s.getName(), mUser, VoteAsyncTask.UPVOTE).execute();
                         s.setVoteStatus(Submission.UPVOTED);
                     }
-                    View voteStatus = s.getTargetView().findViewById(R.id.vote_status);
-                    TextView points = (TextView) s.getTargetView().findViewById(R.id.points);
+                    View voteStatus = mSubmissions.getChildAt(position).findViewById(R.id.vote_status);
+                    TextView points = (TextView) mSubmissions.getChildAt(position).findViewById(R.id.points);
                     switch (s.getVoteStatus()) {
                         case Submission.UPVOTED:
                             voteStatus.setVisibility(View.VISIBLE);
