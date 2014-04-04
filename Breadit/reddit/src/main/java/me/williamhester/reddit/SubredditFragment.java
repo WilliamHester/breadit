@@ -468,11 +468,5 @@ public class SubredditFragment extends Fragment {
             }
             return false;
         }
-
-        @Override
-        public boolean onDown(MotionEvent e) {
-            return super.onDown(e);
-        }
-
     }
 }

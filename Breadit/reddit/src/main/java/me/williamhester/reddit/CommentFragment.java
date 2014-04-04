@@ -5,6 +5,8 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
+import android.text.Spannable;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
@@ -103,7 +105,7 @@ public class CommentFragment extends Fragment {
             score.setText(getItem(position).getScore() + " points by ");
             time.setText(" " + calculateTimeShort(getItem(position).getCreatedUtc()));
             body.setText(Html.fromHtml(StringEscapeUtils.unescapeHtml4(getItem(position).getBodyHtml())));
-//            body.setMovementMethod(LinkMovementMethod.getInstance());
+            body.setMovementMethod(new CommentLinkMovementMethod(position));
 
             switch (getItem(position).getVoteStatus()) {
                 case Comment.DOWNVOTED:
@@ -315,8 +317,23 @@ public class CommentFragment extends Fragment {
 
     }
 
-    private class HiddenComments {
+    private class CommentLinkMovementMethod extends LinkMovementMethod {
 
+        private int mPosition;
+
+        public CommentLinkMovementMethod(int position) {
+            mPosition = position;
+        }
+
+        @Override
+        public boolean onTouchEvent(TextView widget, Spannable buffer, MotionEvent event) {
+            Log.i("CommentLinkMovementMethod", "x = " + event.getX() + " y = " + event.getY());
+            View v = mCommentsListView.getChildAt(mPosition - mCommentsListView.getFirstVisiblePosition());
+            boolean returnValue = super.onTouchEvent(widget, buffer, event);
+            event.setLocation(event.getX(), event.getY() + v.getY());
+            mGestureDetector.onTouchEvent(event);
+            return returnValue;
+        }
     }
 
 }
