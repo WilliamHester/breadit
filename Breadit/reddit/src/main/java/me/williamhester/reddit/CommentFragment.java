@@ -21,9 +21,12 @@ import android.widget.TextView;
 import org.apache.commons.lang3.StringEscapeUtils;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 import me.williamhester.areddit.Comment;
 import me.williamhester.areddit.User;
@@ -42,6 +45,7 @@ public class CommentFragment extends Fragment {
     private String mUrl;
     private String mPermalink;
     private User mUser;
+    private HashMap<Integer, HiddenComments> mHiddenComments = new HashMap<Integer, HiddenComments>();
 
     private GestureDetector mGestureDetector;
     private View.OnTouchListener mGestureListener;
@@ -240,20 +244,33 @@ public class CommentFragment extends Fragment {
 
         @Override
         public boolean onSingleTapConfirmed(MotionEvent ev) {
-
+            int position = mCommentsListView.pointToPosition((int) ev.getX(), (int) ev.getY());
+            if (position != -1) {
+                View v = mCommentsListView.getChildAt(position - mCommentsListView.getFirstVisiblePosition());
+                TextView commentText = (TextView) v.findViewById(R.id.comment_text);
+                if (commentText.getVisibility() == View.VISIBLE) {
+                    commentText.setVisibility(View.GONE);
+                    mHiddenComments.put(position, new HiddenComments(position));
+                } else {
+                    commentText.setVisibility(View.VISIBLE);
+                    ArrayList<Comment> hc = mHiddenComments.get(position).getHiddenComments();
+                    for (Comment c : hc) {
+                        mCommentsList.add(++position, c);
+                    }
+                }
+                mCommentAdapter.notifyDataSetChanged();
+            }
             return false;
         }
 
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            Log.i("CommentFragment", "Entered onFling()");
             if (mUser != null) {
                 try {
                     if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH)
                         return false;
                     // right to left swipe
                     if (e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
-                        Log.i("CommentFragment", "Down Voting");
                         int position = mCommentsListView.pointToPosition((int) e1.getX(), (int) e1.getY());
                         Comment c = mCommentAdapter.getItem(position);
                         if (c.getVoteStatus() == Comment.DOWNVOTED) {
@@ -334,6 +351,35 @@ public class CommentFragment extends Fragment {
             mGestureDetector.onTouchEvent(event);
             return returnValue;
         }
+    }
+
+    private class HiddenComments {
+
+        private int mBelowPosition; // The position of the comment that is being collapsed
+        private ArrayList<Comment> mHiddenCommentsList = new ArrayList<Comment>();
+
+        public HiddenComments(int position) {
+            mBelowPosition = position;
+            int level = mCommentsList.get(position).getLevel();
+            position++;
+            while (mCommentsList.get(position).getLevel() > level) {
+                mHiddenCommentsList.add(mCommentsList.remove(position));
+            }
+        }
+
+        public ArrayList<Comment> getHiddenComments() {
+            return mHiddenCommentsList;
+        }
+
+        public int getBelowPosition() {
+            return mBelowPosition;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return ((HiddenComments)o).getBelowPosition() == mBelowPosition;
+        }
+
     }
 
 }
