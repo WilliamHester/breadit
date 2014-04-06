@@ -124,7 +124,10 @@ public class CommentFragment extends Fragment {
                     voteStatus.setVisibility(View.GONE);
                     break;
             }
-
+            if (getItem(position).isHidden())
+                body.setVisibility(View.GONE);
+            else
+                body.setVisibility(View.VISIBLE);
 
             return convertView;
         }
@@ -250,9 +253,12 @@ public class CommentFragment extends Fragment {
                 TextView commentText = (TextView) v.findViewById(R.id.comment_text);
                 if (commentText.getVisibility() == View.VISIBLE) {
                     commentText.setVisibility(View.GONE);
+                    Log.i("CommentFragment", "position = " + position);
+                    mCommentAdapter.getItem(position).setHidden(true);
                     mHiddenComments.put(position, new HiddenComments(position));
                 } else {
                     commentText.setVisibility(View.VISIBLE);
+                    mCommentAdapter.getItem(position).setHidden(false);
                     ArrayList<Comment> hc = mHiddenComments.get(position).getHiddenComments();
                     for (Comment c : hc) {
                         mCommentsList.add(++position, c);
@@ -344,12 +350,24 @@ public class CommentFragment extends Fragment {
 
         @Override
         public boolean onTouchEvent(TextView widget, Spannable buffer, MotionEvent event) {
-            Log.i("CommentLinkMovementMethod", "x = " + event.getX() + " y = " + event.getY());
-            View v = mCommentsListView.getChildAt(mPosition - mCommentsListView.getFirstVisiblePosition());
-            boolean returnValue = super.onTouchEvent(widget, buffer, event);
-            event.setLocation(event.getX(), event.getY() + v.getY());
-            mGestureDetector.onTouchEvent(event);
-            return returnValue;
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                if (super.onTouchEvent(widget, buffer, event))
+                    return true;
+                View v = mCommentsListView.getChildAt(mPosition - mCommentsListView.getFirstVisiblePosition());
+                event.setLocation(event.getX(), event.getY() + v.getY());
+                return mGestureDetector.onTouchEvent(event);
+            } else if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                boolean ret = super.onTouchEvent(widget, buffer, event);
+                View v = mCommentsListView.getChildAt(mPosition - mCommentsListView.getFirstVisiblePosition());
+                event.setLocation(event.getX(), event.getY() + v.getY());
+                mGestureDetector.onTouchEvent(event);
+                return ret;
+            } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                View v = mCommentsListView.getChildAt(mPosition - mCommentsListView.getFirstVisiblePosition());
+                event.setLocation(event.getX(), event.getY() + v.getY());
+                mGestureDetector.onTouchEvent(event);
+            }
+            return false;
         }
     }
 

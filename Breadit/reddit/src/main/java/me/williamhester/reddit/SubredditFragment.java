@@ -23,6 +23,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.koushikdutta.urlimageviewhelper.UrlImageViewHelper;
 
+import org.apache.commons.lang3.StringEscapeUtils;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -63,9 +65,6 @@ public class SubredditFragment extends Fragment {
         if (getArguments() != null) {
             mUser = getArguments().getParcelable("user");
             mSubredditName = getArguments().getString("subreddit");
-        }
-        if (mAction != null) {
-            mAction.setTitle("Front page of Reddit");
         }
         mContext = getActivity();
     }
@@ -187,7 +186,7 @@ public class SubredditFragment extends Fragment {
                     break;
             }
 
-            title.setText(s.getTitle());
+            title.setText(StringEscapeUtils.unescapeHtml4(s.getTitle()));
             author.setText(s.getAuthor());
             domain.setText("(" + s.getDomain() + ")");
             points.setText(s.getScore() + " points by ");
@@ -277,8 +276,6 @@ public class SubredditFragment extends Fragment {
 
     private class RetrieveSubmissionsTask extends AsyncTask<SubmissionsListViewHelper, Void,
             List<Submission>> {
-
-        String exceptionText;
 
         @Override
         protected List<Submission> doInBackground(SubmissionsListViewHelper... submissionsList) {
@@ -409,61 +406,57 @@ public class SubredditFragment extends Fragment {
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
             if (mUser != null) {
-                try {
-                    if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH)
-                        return false;
-                    // right to left swipe
-                    if (e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
-                        int position = mSubmissions.pointToPosition((int) e1.getX(), (int) e1.getY());
-                        Submission s = mSubmissionsAdapter.getItem(position);
-                        if (s.getVoteStatus() == Submission.DOWNVOTED) {
-                            new VoteAsyncTask(s.getName(), mUser, VoteAsyncTask.NEUTRAL).execute();
-                            s.setVoteStatus(Submission.NEUTRAL);
-                        } else {
-                            new VoteAsyncTask(s.getName(), mUser, VoteAsyncTask.DOWNVOTE).execute();
-                            s.setVoteStatus(Submission.DOWNVOTED);
-                        }
-                        View v = mSubmissions.getChildAt(position - mSubmissions.getFirstVisiblePosition());
-                        View voteStatus = v.findViewById(R.id.vote_status);
-                        TextView points = (TextView) v.findViewById(R.id.points);
-                        switch (s.getVoteStatus()) {
-                            case Submission.DOWNVOTED:
-                                voteStatus.setVisibility(View.VISIBLE);
-                                voteStatus.setBackgroundColor(getResources().getColor(R.color.periwinkle));
-                                points.setText(s.getScore() + " points by ");
-                                break;
-                            default:
-                                voteStatus.setVisibility(View.GONE);
-                                points.setText(s.getScore() + " points by ");
-                                break;
-                        }
-                    } else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
-                        int position = mSubmissions.pointToPosition((int) e1.getX(), (int) e1.getY());
-                        Submission s = mSubmissionsAdapter.getItem(position);
-                        if (s.getVoteStatus() == Submission.UPVOTED) {
-                            new VoteAsyncTask(s.getName(), mUser, VoteAsyncTask.NEUTRAL).execute();
-                            s.setVoteStatus(Submission.NEUTRAL);
-                        } else {
-                            new VoteAsyncTask(s.getName(), mUser, VoteAsyncTask.UPVOTE).execute();
-                            s.setVoteStatus(Submission.UPVOTED);
-                        }
-                        View v = mSubmissions.getChildAt(position - mSubmissions.getFirstVisiblePosition());
-                        View voteStatus = v.findViewById(R.id.vote_status);
-                        TextView points = (TextView) v.findViewById(R.id.points);
-                        switch (s.getVoteStatus()) {
-                            case Submission.UPVOTED:
-                                voteStatus.setVisibility(View.VISIBLE);
-                                voteStatus.setBackgroundColor(getResources().getColor(R.color.orangered));
-                                points.setText(s.getScore() + " points by ");
-                                break;
-                            default:
-                                voteStatus.setVisibility(View.GONE);
-                                points.setText(s.getScore() + " points by ");
-                                break;
-                        }
+                if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH)
+                    return false;
+                // right to left swipe
+                if (e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+                    int position = mSubmissions.pointToPosition((int) e1.getX(), (int) e1.getY());
+                    Submission s = mSubmissionsAdapter.getItem(position);
+                    if (s.getVoteStatus() == Submission.DOWNVOTED) {
+                        new VoteAsyncTask(s.getName(), mUser, VoteAsyncTask.NEUTRAL).execute();
+                        s.setVoteStatus(Submission.NEUTRAL);
+                    } else {
+                        new VoteAsyncTask(s.getName(), mUser, VoteAsyncTask.DOWNVOTE).execute();
+                        s.setVoteStatus(Submission.DOWNVOTED);
                     }
-                } catch (Exception e) {
-                    // nothing
+                    View v = mSubmissions.getChildAt(position - mSubmissions.getFirstVisiblePosition());
+                    View voteStatus = v.findViewById(R.id.vote_status);
+                    TextView points = (TextView) v.findViewById(R.id.points);
+                    switch (s.getVoteStatus()) {
+                        case Submission.DOWNVOTED:
+                            voteStatus.setVisibility(View.VISIBLE);
+                            voteStatus.setBackgroundColor(getResources().getColor(R.color.periwinkle));
+                            points.setText(s.getScore() + " points by ");
+                            break;
+                        default:
+                            voteStatus.setVisibility(View.GONE);
+                            points.setText(s.getScore() + " points by ");
+                            break;
+                    }
+                } else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+                    int position = mSubmissions.pointToPosition((int) e1.getX(), (int) e1.getY());
+                    Submission s = mSubmissionsAdapter.getItem(position);
+                    if (s.getVoteStatus() == Submission.UPVOTED) {
+                        new VoteAsyncTask(s.getName(), mUser, VoteAsyncTask.NEUTRAL).execute();
+                        s.setVoteStatus(Submission.NEUTRAL);
+                    } else {
+                        new VoteAsyncTask(s.getName(), mUser, VoteAsyncTask.UPVOTE).execute();
+                        s.setVoteStatus(Submission.UPVOTED);
+                    }
+                    View v = mSubmissions.getChildAt(position - mSubmissions.getFirstVisiblePosition());
+                    View voteStatus = v.findViewById(R.id.vote_status);
+                    TextView points = (TextView) v.findViewById(R.id.points);
+                    switch (s.getVoteStatus()) {
+                        case Submission.UPVOTED:
+                            voteStatus.setVisibility(View.VISIBLE);
+                            voteStatus.setBackgroundColor(getResources().getColor(R.color.orangered));
+                            points.setText(s.getScore() + " points by ");
+                            break;
+                        default:
+                            voteStatus.setVisibility(View.GONE);
+                            points.setText(s.getScore() + " points by ");
+                            break;
+                    }
                 }
             }
             return false;

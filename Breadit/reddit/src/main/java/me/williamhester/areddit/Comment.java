@@ -51,6 +51,7 @@ public class Comment extends Thing implements Parcelable {
     private long mEdited;
 
     private int mLevel = 0;
+    private boolean mIsHidden = false;
 
     private Comment(JsonObject jsonObj, int level) {
         super(jsonObj);
@@ -204,6 +205,14 @@ public class Comment extends Thing implements Parcelable {
         return mLevel;
     }
 
+    public void setHidden(boolean hidden) {
+        mIsHidden = hidden;
+    }
+
+    public boolean isHidden() {
+        return mIsHidden;
+    }
+
     public CommentIterator getCommentIterator() {
         return new CommentIterator(this);
     }
@@ -228,7 +237,6 @@ public class Comment extends Thing implements Parcelable {
 
             if(comment != null && !comment.getKind().equals("more")) {
                 ret.add(comment);
-                Log.i("Comment", comment.getBody());
             }
         }
         return ret;
