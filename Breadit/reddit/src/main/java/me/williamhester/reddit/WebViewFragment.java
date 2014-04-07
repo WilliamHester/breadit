@@ -1,12 +1,17 @@
 package me.williamhester.reddit;
 
 import android.app.Fragment;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+
+import me.williamhester.areddit.Submission;
 
 /**
  * Created by William on 3/25/14.
@@ -18,6 +23,7 @@ public class WebViewFragment extends Fragment {
     private WebView mWebView;
 
     private String mUri;
+    private Submission mSubmission;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -26,8 +32,7 @@ public class WebViewFragment extends Fragment {
             mUri = savedInstanceState.getString(URI);
         } else if (getArguments() != null) {
             mUri = getArguments().getString("url", null);
-//            mIsSelf = getIntent().getExtras().getBoolean("isSelf", false);
-//            mUser = getIntent().getExtras().getParcelable("user");
+            mSubmission = getArguments().getParcelable("submission");
         }
     }
 
@@ -43,8 +48,13 @@ public class WebViewFragment extends Fragment {
 
         if (savedInstanceState != null)
             mWebView.restoreState(savedInstanceState);
-        else if (mUri != null)
-            mWebView.loadUrl(mUri);
+        else if (mSubmission.getUrl() != null)
+            if (isYoutubeLink(mSubmission.getUrl())) {
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(mSubmission.getUrl()));
+                startActivity(browserIntent);
+            } else {
+                mWebView.loadUrl(imgurOptimize(mSubmission.getUrl()));
+            }
 
         return v;
     }
@@ -55,6 +65,18 @@ public class WebViewFragment extends Fragment {
         outState.putString(URI, mUri);
         if (mWebView != null)
             mWebView.saveState(outState);
+    }
+
+    private String imgurOptimize(String s) {
+        if (s.contains("imgur.com") && !s.contains("imgur.com/a/")) {
+            s += ".png";
+        }
+        return s;
+    }
+
+    private boolean isYoutubeLink(String s) {
+        s = s.toLowerCase();
+        return s.contains("youtu.be") || s.contains("youtube.com");
     }
 
 }

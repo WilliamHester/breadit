@@ -144,7 +144,7 @@ public class CommentFragment extends Fragment {
         domain.setText("(" + mSubmission.getDomain() + ")");
         points.setText(mSubmission.getScore() + " points by ");
 
-        if (mSubmission.isSelf() && mSubmission.getSelfText() != null) {
+        if (mSubmission.isSelf() && mSubmission.getSelfTextHtml() != null) {
             selfText.setText(Html.fromHtml(StringEscapeUtils.unescapeHtml4(mSubmission.getSelfTextHtml())));
             selfText.setMovementMethod(new CommentLinkMovementMethod(0));
         } else {
