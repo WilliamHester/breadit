@@ -8,47 +8,58 @@ import android.text.Html;
 import android.text.Spannable;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.SimpleAdapter;
+import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
+import com.koushikdutta.urlimageviewhelper.UrlImageViewHelper;
+
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.w3c.dom.Text;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 
 import me.williamhester.areddit.Comment;
+import me.williamhester.areddit.Submission;
 import me.williamhester.areddit.User;
 
-/**
- * Created by William on 3/31/14.
- */
 public class CommentFragment extends Fragment {
 
-    private boolean mIsSelf;
+    private final int HEADER_VIEW_COUNT = 1;
 
-    private Context mContext;
+    private ArrayList<Comment> mCommentsList;
     private CommentArrayAdapter mCommentAdapter;
+    private Context mContext;
     private ListView mCommentsListView;
-    private ArrayList<Comment> mCommentsList = new ArrayList<Comment>();
+    private SparseArray<HiddenComments> mHiddenComments;
     private String mUrl;
     private String mPermalink;
+    private Submission mSubmission;
+    private TextView mNumComments;
     private User mUser;
-    private HashMap<Integer, HiddenComments> mHiddenComments = new HashMap<Integer, HiddenComments>();
+    private View mHeaderView;
 
     private GestureDetector mGestureDetector;
     private View.OnTouchListener mGestureListener;
+
+    private int mSortType;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -56,12 +67,15 @@ public class CommentFragment extends Fragment {
         Bundle args = getArguments();
         mContext = getActivity();
         if (args != null) {
-            mUrl = args.getString("url", null);
-            mPermalink = args.getString("permalink", null);
-            mIsSelf = args.getBoolean("isSelf", false);
             mUser = args.getParcelable("user");
+            mSubmission = args.getParcelable("submission");
+            if (mSubmission != null) {
+                mUrl = mSubmission.getUrl();
+                mPermalink = mSubmission.getPermalink();
+            }
         }
         mCommentsList = new ArrayList<Comment>();
+        mHiddenComments = new SparseArray<HiddenComments>();
     }
 
     @Override
@@ -74,12 +88,139 @@ public class CommentFragment extends Fragment {
                 return mGestureDetector.onTouchEvent(motionEvent);
             }
         };
+        if (mHeaderView == null) {
+            mHeaderView = createHeaderView(inflater);
+        }
         mCommentsListView = (ListView) v.findViewById(R.id.comments);
+        mCommentsListView.addHeaderView(mHeaderView);
         mCommentAdapter = new CommentArrayAdapter(mContext);
         mCommentsListView.setAdapter(mCommentAdapter);
         mCommentsListView.setOnTouchListener(mGestureListener);
-        new CommentLoaderTask().execute();
         return v;
+    }
+
+    public View createHeaderView(LayoutInflater inflater) {
+        View v = inflater.inflate(R.layout.view_comments_header, null);
+
+        TextView selfText = (TextView) v.findViewById(R.id.self_text);
+
+        View subView = v.findViewById(R.id.submission);
+
+        final View voteStatus = v.findViewById(R.id.vote_status);
+        TextView nameAndTime
+                = (TextView) subView.findViewById(R.id.subreddit_name_and_time);
+        TextView author = (TextView) subView.findViewById(R.id.author);
+        ImageView thumbnail = (ImageView) subView.findViewById(R.id.thumbnail);
+        TextView title = (TextView) subView.findViewById(R.id.title);
+        TextView domain = (TextView) subView.findViewById(R.id.domain);
+        final TextView points = (TextView) subView.findViewById(R.id.points);
+        View spacer = subView.findViewById(R.id.spacer);
+        mNumComments = (TextView) v.findViewById(R.id.num_comments);
+        Spinner sortBy = (Spinner) v.findViewById(R.id.sort_by);
+
+        // if the submission is a self post, we need to hide the thumbnail
+        if (mSubmission.isSelf()) {
+            thumbnail.setVisibility(View.GONE);
+            spacer.setVisibility(View.GONE);
+        } else {
+            thumbnail.setVisibility(View.VISIBLE);
+            spacer.setVisibility(View.VISIBLE);
+            UrlImageViewHelper.setUrlDrawable(thumbnail, mSubmission.getThumbnailUrl());
+        }
+
+        nameAndTime.setText(" in " + mSubmission.getSubredditName() + " "
+                + calculateTimeShort(mSubmission.getCreatedUtc()));
+
+        switch (mSubmission.getVoteStatus()) {
+            case Submission.DOWNVOTED:
+                voteStatus.setVisibility(View.VISIBLE);
+                voteStatus.setBackgroundColor(getResources().getColor(R.color.periwinkle));
+                break;
+            case Submission.UPVOTED:
+                voteStatus.setVisibility(View.VISIBLE);
+                voteStatus.setBackgroundColor(getResources().getColor(R.color.orangered));
+                break;
+            default:
+                voteStatus.setVisibility(View.GONE);
+                break;
+        }
+
+        title.setText(StringEscapeUtils.unescapeHtml4(mSubmission.getTitle()));
+        author.setText(mSubmission.getAuthor());
+        domain.setText("(" + mSubmission.getDomain() + ")");
+        points.setText(mSubmission.getScore() + " points by ");
+
+        if (mSubmission.isSelf() && mSubmission.getSelfText() != null) {
+            selfText.setText(Html.fromHtml(StringEscapeUtils.unescapeHtml4(mSubmission.getSelfTextHtml())));
+        } else {
+            selfText.setVisibility(View.GONE);
+        }
+
+        final String[] sortTypes = getResources().getStringArray(R.array.sort_types);
+
+        mNumComments.setText("Top " + mCommentsList.size() + " comments. Sorted by");
+        SpinnerAdapter adapter = new ArrayAdapter<String>(mContext,
+                android.R.layout.simple_spinner_item, sortTypes);
+        sortBy.setAdapter(adapter);
+        sortBy.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                switch (i) {
+                    case 0:
+                        mSortType = Comment.TOP;
+                        break;
+                    case 1:
+                        mSortType = Comment.BEST;
+                        break;
+                    case 2:
+                        mSortType = Comment.NEW;
+                        break;
+                    case 3:
+                        mSortType = Comment.HOT;
+                        break;
+                    case 4:
+                        mSortType = Comment.CONTROVERSIAL;
+                        break;
+                    case 5:
+                        mSortType = Comment.OLD;
+                        break;
+                };
+                mCommentsList = new ArrayList<Comment>();
+                mCommentAdapter = new CommentArrayAdapter(mContext);
+                mCommentsListView.setAdapter(mCommentAdapter);
+                mCommentsListView.setOnTouchListener(mGestureListener);
+                new CommentLoaderTask().execute();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+                // Do nothing
+            }
+        });
+
+        return v;
+    }
+
+    private String calculateTimeShort(long postTime) {
+        long currentTime = System.currentTimeMillis() / 1000;
+        long difference = currentTime - postTime;
+        String time;
+        if (difference / 31536000 > 0) {
+            time = difference / 3156000 + "y";
+        } else if (difference / 2592000 > 0) {
+            time = difference / 2592000 + "m";
+        } else if (difference / 604800 > 0) {
+            time = difference / 604800 + "w";
+        } else if (difference / 86400 > 0) {
+            time = difference / 86400 + "d";
+        } else if (difference / 3600 > 0) {
+            time = difference / 3600 + "h";
+        } else if (difference / 60 > 0) {
+            time = difference / 60 + "m";
+        } else {
+            time = difference + "s";
+        }
+        return time;
     }
 
     private class CommentArrayAdapter extends ArrayAdapter<Comment> {
@@ -104,12 +245,12 @@ public class CommentFragment extends Fragment {
             View voteStatus = convertView.findViewById(R.id.vote_status);
 
             root.setPadding((int) (getResources().getDisplayMetrics().density
-                    * 16 * getItem(position).getLevel()), 0, 0, 0);
+                    * 12 * getItem(position).getLevel()), 0, 0, 0);
             author.setText(removeEndQuotes(getItem(position).getAuthor()));
             score.setText(getItem(position).getScore() + " points by ");
             time.setText(" " + calculateTimeShort(getItem(position).getCreatedUtc()));
             body.setText(Html.fromHtml(StringEscapeUtils.unescapeHtml4(getItem(position).getBodyHtml())));
-            body.setMovementMethod(new CommentLinkMovementMethod(position));
+            body.setMovementMethod(new CommentLinkMovementMethod(position + HEADER_VIEW_COUNT));
 
             switch (getItem(position).getVoteStatus()) {
                 case Comment.DOWNVOTED:
@@ -137,28 +278,6 @@ public class CommentFragment extends Fragment {
                 return s.substring(1, s.length() - 1);
             }
             return s;
-        }
-
-        private String calculateTimeShort(long postTime) {
-            long currentTime = System.currentTimeMillis() / 1000;
-            long difference = currentTime - postTime;
-            String time;
-            if (difference / 31536000 > 0) {
-                time = difference / 3156000 + "y";
-            } else if (difference / 2592000 > 0) {
-                time = difference / 2592000 + "m";
-            } else if (difference / 604800 > 0) {
-                time = difference / 604800 + "w";
-            } else if (difference / 86400 > 0) {
-                time = difference / 86400 + "d";
-            } else if (difference / 3600 > 0) {
-                time = difference / 3600 + "h";
-            } else if (difference / 60 > 0) {
-                time = difference / 60 + "m";
-            } else {
-                time = difference + "s";
-            }
-            return time;
         }
 
         private String calculateTime(long postTime, long currentTime) {
@@ -212,7 +331,8 @@ public class CommentFragment extends Fragment {
                 String lastComment = null;
                 if (mCommentsList.size() > 0)
                     lastComment = mCommentsList.get(mCommentsList.size() - 1).getName();
-                List<Comment> comments = Comment.getComments(mPermalink, mUser, lastComment);
+                List<Comment> comments = Comment.getComments(mPermalink, mUser, lastComment,
+                        mSortType);
                 return comments;
             } catch (MalformedURLException e) {
                 e.printStackTrace();
@@ -235,6 +355,7 @@ public class CommentFragment extends Fragment {
                     }
                 }
                 mCommentAdapter.notifyDataSetChanged();
+                mNumComments.setText("Top " + mCommentsList.size() + " comments. Sorted by");
             }
         }
     }
@@ -248,24 +369,41 @@ public class CommentFragment extends Fragment {
         @Override
         public boolean onSingleTapConfirmed(MotionEvent ev) {
             int position = mCommentsListView.pointToPosition((int) ev.getX(), (int) ev.getY());
-            if (position != -1) {
+            Log.i("CommentFragment", "pos = " + position);
+            if (position > 0) {
                 View v = mCommentsListView.getChildAt(position - mCommentsListView.getFirstVisiblePosition());
                 TextView commentText = (TextView) v.findViewById(R.id.comment_text);
+                Log.i("CommentFragment", "Position = " + position);
                 if (commentText.getVisibility() == View.VISIBLE) {
                     commentText.setVisibility(View.GONE);
-                    Log.i("CommentFragment", "position = " + position);
-                    mCommentAdapter.getItem(position).setHidden(true);
+                    mCommentAdapter.getItem(position - HEADER_VIEW_COUNT).setHidden(true);
                     mHiddenComments.put(position, new HiddenComments(position));
                 } else {
                     commentText.setVisibility(View.VISIBLE);
-                    mCommentAdapter.getItem(position).setHidden(false);
+                    mCommentAdapter.getItem(position - HEADER_VIEW_COUNT).setHidden(false);
                     ArrayList<Comment> hc = mHiddenComments.get(position).getHiddenComments();
+                    mHiddenComments.remove(position);
                     for (Comment c : hc) {
-                        mCommentsList.add(++position, c);
+                        Log.i("CommentFragment", "Added back to " + (position));
+                        mCommentsList.add(position++, c);
                     }
                 }
                 mCommentAdapter.notifyDataSetChanged();
             }
+            return false;
+        }
+
+        @Override
+        public boolean onDoubleTap(MotionEvent event) {
+            int position = mCommentsListView.pointToPosition((int) event.getX(), (int) event.getY());
+            View childView = mCommentsListView.getChildAt(position - HEADER_VIEW_COUNT - mCommentsListView.getFirstVisiblePosition());
+            final int y = childView == null ? 0 : (int) childView.getY();
+            mCommentsListView.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mCommentsListView.smoothScrollBy(y, 300);
+                }
+            }, 320);
             return false;
         }
 
@@ -278,7 +416,7 @@ public class CommentFragment extends Fragment {
                     // right to left swipe
                     if (e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
                         int position = mCommentsListView.pointToPosition((int) e1.getX(), (int) e1.getY());
-                        Comment c = mCommentAdapter.getItem(position);
+                        Comment c = mCommentAdapter.getItem(position - HEADER_VIEW_COUNT);
                         if (c.getVoteStatus() == Comment.DOWNVOTED) {
                             new VoteAsyncTask(c.getName(), mUser, VoteAsyncTask.NEUTRAL).execute();
                             c.setVoteStatus(Comment.NEUTRAL);
@@ -301,9 +439,8 @@ public class CommentFragment extends Fragment {
                                 break;
                         }
                     } else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
-                        Log.i("CommentFragment", "Up Voting");
                         int position = mCommentsListView.pointToPosition((int) e1.getX(), (int) e1.getY());
-                        Comment c = mCommentAdapter.getItem(position);
+                        Comment c = mCommentAdapter.getItem(position - HEADER_VIEW_COUNT);
                         if (c.getVoteStatus() == Comment.UPVOTED) {
                             new VoteAsyncTask(c.getName(), mUser, VoteAsyncTask.NEUTRAL).execute();
                             c.setVoteStatus(Comment.NEUTRAL);
@@ -350,6 +487,7 @@ public class CommentFragment extends Fragment {
 
         @Override
         public boolean onTouchEvent(TextView widget, Spannable buffer, MotionEvent event) {
+            Log.i("CommentFragment", "CommentLinkMovementMethod position = " + mPosition);
             if (event.getAction() == MotionEvent.ACTION_UP) {
                 if (super.onTouchEvent(widget, buffer, event))
                     return true;
@@ -378,10 +516,10 @@ public class CommentFragment extends Fragment {
 
         public HiddenComments(int position) {
             mBelowPosition = position;
-            int level = mCommentsList.get(position).getLevel();
+            int level = mCommentsList.get(position - HEADER_VIEW_COUNT).getLevel();
             position++;
-            while (mCommentsList.get(position).getLevel() > level) {
-                mHiddenCommentsList.add(mCommentsList.remove(position));
+            while (mCommentsList.get(position - HEADER_VIEW_COUNT).getLevel() > level) {
+                mHiddenCommentsList.add(mCommentsList.remove(position - HEADER_VIEW_COUNT));
             }
         }
 
@@ -399,5 +537,4 @@ public class CommentFragment extends Fragment {
         }
 
     }
-
 }

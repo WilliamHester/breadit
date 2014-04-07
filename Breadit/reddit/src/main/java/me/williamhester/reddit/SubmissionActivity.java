@@ -4,6 +4,7 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.os.Bundle;
 
+import me.williamhester.areddit.Submission;
 import me.williamhester.areddit.User;
 
 /**
@@ -18,6 +19,7 @@ public class SubmissionActivity extends Activity {
 
     private String mPermalink;
     private String mUrl;
+    private Submission mSubmission;
     private boolean mIsSelf;
     private User mUser;
 
@@ -25,6 +27,16 @@ public class SubmissionActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_content);
+
+        int selectedTab = 0;
+        if (getIntent().getExtras() != null) {
+            mSubmission = getIntent().getExtras().getParcelable("submission");
+            mPermalink = getIntent().getExtras().getString("permalink", null);
+            mUrl = getIntent().getExtras().getString("url", null);
+            mIsSelf = getIntent().getExtras().getBoolean("isSelf", false);
+            mUser = getIntent().getExtras().getParcelable("user");
+            selectedTab = getIntent().getExtras().getInt("tab");
+        }
 
         mAction = getActionBar();
         if (mAction != null) {
@@ -36,22 +48,13 @@ public class SubmissionActivity extends Activity {
         tabs[0] = mAction.newTab().setText(R.string.comments)
                 .setTabListener(new TabListener<CommentFragment>(this, "commentsFragment",
                         CommentFragment.class, getIntent().getExtras()));
-
         mAction.addTab(tabs[0]);
 
-        tabs[1] = mAction.newTab().setText(R.string.content)
-                .setTabListener(new TabListener<WebViewFragment>(this, "webViewFragment",
-                        WebViewFragment.class, getIntent().getExtras()));
-
-        mAction.addTab(tabs[1]);
-
-        int selectedTab = 0;
-        if (getIntent().getExtras() != null) {
-            mPermalink = getIntent().getExtras().getString("permalink", null);
-            mUrl = getIntent().getExtras().getString("url", null);
-            mIsSelf = getIntent().getExtras().getBoolean("isSelf", false);
-            mUser = getIntent().getExtras().getParcelable("user");
-            selectedTab = getIntent().getExtras().getInt("tab");
+        if (!mSubmission.isSelf()) {
+            tabs[1] = mAction.newTab().setText(R.string.content)
+                    .setTabListener(new TabListener<WebViewFragment>(this, "webViewFragment",
+                            WebViewFragment.class, getIntent().getExtras()));
+            mAction.addTab(tabs[1]);
         }
 
         mAction.selectTab(tabs[selectedTab]);

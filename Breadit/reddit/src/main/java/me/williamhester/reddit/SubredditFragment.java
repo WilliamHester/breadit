@@ -84,6 +84,9 @@ public class SubredditFragment extends Fragment {
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                if (mSubmissionList != null && mSubmissionList.size() != 0) {
+
+                }
                 populateSubmissions();
             }
         });
@@ -386,9 +389,7 @@ public class SubredditFragment extends Fragment {
                             - mSubmissions.getFirstVisiblePosition()).findViewById(R.id.thumbnail);
                 Intent i = new Intent(getActivity(), SubmissionActivity.class);
                 Bundle b = new Bundle();
-                b.putString("permalink", mSubmissionList.get(position).getPermalink());
-                b.putString("url", mSubmissionList.get(position).getUrl());
-                b.putBoolean("isSelf", mSubmissionList.get(position).isSelf());
+                b.putParcelable("submission", mSubmissionList.get(position));
                 b.putParcelable("user", mUser);
                 // Clicked on the image side
                 if (iv != null && x >= iv.getLeft() + mSubmissions.getLeft()) {

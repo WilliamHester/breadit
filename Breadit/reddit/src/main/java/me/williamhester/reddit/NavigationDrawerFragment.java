@@ -62,12 +62,10 @@ public class NavigationDrawerFragment extends Fragment {
      */
     private ActionBarDrawerToggle mDrawerToggle;
 
-    private ArrayAdapter<String> mDrawerArrayAdapter;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerListView;
     private ArrayList<String> mSubredditList;
     private ArrayAdapter<String> mSubredditArrayAdapter;
-    private View mFragmentContainerView;
 
     private int mCurrentSelectedPosition = 0;
     private boolean mFromSavedInstanceState;
@@ -92,12 +90,6 @@ public class NavigationDrawerFragment extends Fragment {
             mCurrentSelectedPosition = savedInstanceState.getInt(STATE_SELECTED_POSITION);
             mFromSavedInstanceState = true;
         }
-
-
-
-        // sub list not used yet!
-        // Select either the default item (0) or the last selected item.
-//        selectItem(mSubredditList.get(mCurrentSelectedPosition), mCurrentSelectedPosition);
     }
 
     @Override
@@ -113,18 +105,8 @@ public class NavigationDrawerFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_navigation_drawer, container, false);
         mDrawerLayout = (DrawerLayout) container.getRootView().findViewById(R.id.drawer_layout);
         mDrawerListView = (ListView) v.findViewById(R.id.list);
-        Log.i("NavigationDrawerFragment", "Drawer onCreateView");
-        // Default onclick
-//        mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                selectItem(position);
-//            }
-//        });
-
 
         if (mUser != null) {
-            Log.i("test", "User not null sublist executed");
             mSubredditList = new ArrayList<String>();
             mSubredditArrayAdapter = new ArrayAdapter<String>(
                     getActivity().getActionBar().getThemedContext(),
@@ -132,12 +114,7 @@ public class NavigationDrawerFragment extends Fragment {
                     android.R.id.text1, mSubredditList);
             mDrawerListView.setAdapter(mSubredditArrayAdapter);
             new GetUserSubreddits().execute();
-            for (int i = 0; i < mSubredditList.size(); i++) {
-                Log.i("test", mSubredditList.get(i));
-            }
-            Log.i("test", "Sub list is size " + mSubredditList.size());
         } else {
-            Log.i("test", "User null sublist executed");
             mSubredditList = new ArrayList<String>();
             String[] subs = getResources().getStringArray(R.array.default_subreddits);
             for (String s : subs) {
@@ -149,7 +126,6 @@ public class NavigationDrawerFragment extends Fragment {
                     android.R.id.text1, mSubredditList
             ));
         }
-        Log.i("test", "" + mDrawerLayout + "is mDrawlayout value");
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
         mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -187,16 +163,6 @@ public class NavigationDrawerFragment extends Fragment {
                 if (!isAdded()) {
                     return;
                 }
-
-//                if (!mUserLearnedDrawer) {
-//                    // The user manually opened the drawer; store this flag to prevent auto-showing
-//                    // the navigation drawer automatically in the future.
-//                    mUserLearnedDrawer = true;
-//                    SharedPreferences sp = PreferenceManager
-//                            .getDefaultSharedPreferences(getActivity());
-//                    sp.edit().putBoolean(PREF_USER_LEARNED_DRAWER, true).apply();
-//                }
-
                 getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
             }
         };
@@ -213,10 +179,6 @@ public class NavigationDrawerFragment extends Fragment {
 
         return v;
     }
-
-//    public boolean isDrawerOpen() {
-//        return mDrawerLayout != null && mDrawerLayout.isDrawerOpen(mFragmentContainerView);
-//    }
 
     /**
      * Users of this fragment must call this method to set up the navigation drawer interactions.
@@ -263,16 +225,6 @@ public class NavigationDrawerFragment extends Fragment {
                 if (!isAdded()) {
                     return;
                 }
-
-//                if (!mUserLearnedDrawer) {
-//                    // The user manually opened the drawer; store this flag to prevent auto-showing
-//                    // the navigation drawer automatically in the future.
-//                    mUserLearnedDrawer = true;
-//                    SharedPreferences sp = PreferenceManager
-//                            .getDefaultSharedPreferences(getActivity());
-//                    sp.edit().putBoolean(PREF_USER_LEARNED_DRAWER, true).apply();
-//                }
-
                 c.invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
             }
         };
@@ -289,15 +241,8 @@ public class NavigationDrawerFragment extends Fragment {
     }
 
     private void selectItem(String subreddit) {
-//        mCurrentSelectedPosition = position;
-//        if (mDrawerListView != null) {
-//            mDrawerListView.setItemChecked(position, true);
-//        }
         if (mDrawerLayout != null) {
             mDrawerLayout.closeDrawers();
-        }
-        if (mDrawerLayout == null) {
-            Log.i("test", "DrawerLayout null");
         }
         if (mCallbacks != null) {
             if (subreddit.compareTo("FrontPage") == 0)
@@ -381,18 +326,13 @@ public class NavigationDrawerFragment extends Fragment {
         @Override
         protected Void doInBackground(Void... voids) {
             try {
-                Log.e("NDF","Executing");
                 ArrayList<Subreddit> subreddits = mUser.getSubscribedSubreddits();
                 for (Subreddit s : subreddits) {
                     mSubredditList.add(s.getDisplayName());
-                    Log.i("NavigationDrawerFragment", s.getDisplayName());
                 }
                 // Sort mSubredditList
                 Collections.sort(mSubredditList, orderList);
                 mSubredditList.add(0,"FrontPage");
-                for (String s : mSubredditList) {
-                    Log.i("NDF", "/r/" + s);
-                }
             } catch (IOException e) {
                 e.printStackTrace();
                 Log.e("NDF", "IOException was thrown when getting getSubreddits");
@@ -403,7 +343,6 @@ public class NavigationDrawerFragment extends Fragment {
         @Override
         protected void onPostExecute(Void result) {
             mSubredditArrayAdapter.notifyDataSetChanged();
-            Log.i("test", "Sub list is size " + mSubredditList.size());
         }
     }
 

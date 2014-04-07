@@ -25,4 +25,22 @@
         <item>Videos</item>
         <item>WorldNews</item>
     </string-array>
+
+    <string-array name="sort_types">
+        <item>Top</item>
+        <item>Best</item>
+        <item>New</item>
+        <item>Hot</item>
+        <item>Controversial</item>
+        <item>Old</item>
+    </string-array>
+
+    <string-array name="sub_sort_types">
+        <item>This hour</item>
+        <item>Today</item>
+        <item>This week</item>
+        <item>This month</item>
+        <item>This year</item>
+        <item>All time</item>
+    </string-array>
 </resources>

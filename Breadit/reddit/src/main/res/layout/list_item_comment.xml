@@ -60,5 +60,8 @@
             android:layout_height="wrap_content"
             android:textColor="@color/mid_gray"/>
 
+        <!--<include layout="@layout/view_reply"-->
+            <!--android:id="@+id/reply" />-->
+
     </LinearLayout>
 </LinearLayout>

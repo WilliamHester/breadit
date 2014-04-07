@@ -21,6 +21,13 @@ import me.williamhester.areddit.utils.Utilities;
 
 public class Comment extends Thing implements Parcelable {
 
+    public static final int BEST = 0;
+    public static final int TOP = 1;
+    public static final int HOT = 2;
+    public static final int CONTROVERSIAL = 3;
+    public static final int NEW = 4;
+    public static final int OLD = 5;
+
     public static final int UPVOTED = 1;
     public static final int NEUTRAL = 0;
     public static final int DOWNVOTED = -1;
@@ -52,6 +59,7 @@ public class Comment extends Thing implements Parcelable {
 
     private int mLevel = 0;
     private boolean mIsHidden = false;
+    private String mReplyText;
 
     private Comment(JsonObject jsonObj, int level) {
         super(jsonObj);
@@ -217,6 +225,10 @@ public class Comment extends Thing implements Parcelable {
         return new CommentIterator(this);
     }
 
+//    public void setReplyText(String mReplyText) {
+//
+//    }
+
     /**
      * Get the replies to this comment.
      */
@@ -245,24 +257,47 @@ public class Comment extends Thing implements Parcelable {
     /**
      * This function returns a list of comments
      *
-     * @param articleId         The id of the link/article/submission
-     * @param user              The user
+     * @param articleId The id of the link/article/submission
+     * @param user The user
+     * @param after the last listing that is loaded
+     * @param sortType the type of sorting
      *
      * @return A list containing Comments
      *
      * @throws java.io.IOException      If connection fails
      */
-    public static List<Comment> getComments(String articleId, User user, String after)
+    public static List<Comment> getComments(String articleId, User user, String after, int sortType)
             throws IOException {
 
         ArrayList<Comment> comments = new ArrayList<Comment>();
 
-        String urlString = "http://www.reddit.com" + articleId + ".json";
+        String urlString = "http://www.reddit.com" + articleId + ".json?";
         String cookie = user == null ? null : user.getCookie();
         String modhash = user == null ? null : user.getModhash();
 
+        switch (sortType) {
+            case BEST:
+                urlString += "sort=confidence&";
+                break;
+            case TOP:
+                urlString += "sort=top&";
+                break;
+            case HOT:
+                urlString += "sort=hot&";
+                break;
+            case CONTROVERSIAL:
+                urlString += "sort=controversial&";
+                break;
+            case NEW:
+                urlString += "sort=new&";
+                break;
+            case OLD:
+                urlString += "sort=old&";
+                break;
+        }
+
         if (after != null)
-            urlString += "?after=" + after;
+            urlString += "after=" + after;
 
         JsonArray array = new JsonParser().parse(Utilities.get(null, urlString, cookie, modhash))
                 .getAsJsonArray();

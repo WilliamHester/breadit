@@ -268,14 +268,9 @@ public class Submission extends Thing implements Parcelable {
      *
      * @throws java.io.IOException      If connection fails
      */
-    public static List<Submission> getSubmissions(String subredditName,
-                                                  int sortType,
-                                                  int typeArgs,
-                                                  String before,
-                                                  String after,
-                                                  User user)
-            throws IOException {
-
+    public static List<Submission> getSubmissions(String subredditName, int sortType,
+                                                  int typeArgs, String before, String after,
+                                                  User user) throws IOException {
         String append;
         if (subredditName == null) {
             append = "";
