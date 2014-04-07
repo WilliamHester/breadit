@@ -3,11 +3,14 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="8dp">
+    android:background="@color/blackish">
+
+    <include android:id="@+id/root_comment"
+        layout="@layout/list_item_comment" />
     
     <EditText android:id="@+id/reply_body"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="100dp"
         android:gravity="top"
         android:hint="@string/reply_hint"/>
 
@@ -25,7 +28,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/cancel"
-            style="?android:buttonBarButtonStyle"/>
+            style="?android:buttonBarButtonStyle"
+            android:textColor="@color/mid_gray"/>
 
         <View
             android:layout_height="match_parent"
@@ -34,12 +38,13 @@
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"/>
 
-        <Button android:id="@+id/reply"
+        <Button android:id="@+id/confirm_reply"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/reply"
-            style="?android:buttonBarButtonStyle"/>
+            style="?android:buttonBarButtonStyle"
+            android:textColor="@color/mid_gray"/>
 
     </LinearLayout>
 </LinearLayout>

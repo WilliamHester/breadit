@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <EditText android:id="@+id/reply"
+    <EditText android:id="@+id/confirm_reply"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="8dp"/>

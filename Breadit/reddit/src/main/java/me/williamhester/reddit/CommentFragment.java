@@ -355,6 +355,12 @@ public class CommentFragment extends Fragment {
                     mCommentsListView.smoothScrollBy(y, 300);
                 }
             }, 320);
+            if (position > 0) {
+                ReplyDialogFragment rf = ReplyDialogFragment.newInstance(mUser,
+                        mCommentsList.get(position - HEADER_VIEW_COUNT).getName(),
+                        mCommentsList.get(position - HEADER_VIEW_COUNT));
+                rf.show(getFragmentManager(), "reply_fragment");
+            }
             return false;
         }
 
@@ -463,7 +469,7 @@ public class CommentFragment extends Fragment {
             mBelowPosition = position;
             int level = mCommentsList.get(position - HEADER_VIEW_COUNT).getLevel();
             position++;
-            while (mCommentsList.get(position - HEADER_VIEW_COUNT).getLevel() > level) {
+            while (position < mCommentsList.size() && mCommentsList.get(position - HEADER_VIEW_COUNT).getLevel() > level) {
                 mHiddenCommentsList.add(mCommentsList.remove(position - HEADER_VIEW_COUNT));
             }
         }
