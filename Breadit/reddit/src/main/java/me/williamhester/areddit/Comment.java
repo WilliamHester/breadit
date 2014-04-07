@@ -19,7 +19,7 @@ import java.util.Stack;
 
 import me.williamhester.areddit.utils.Utilities;
 
-public class Comment extends Thing implements Parcelable {
+public class Comment extends Thing implements Parcelable, Votable {
 
     public static final int BEST = 0;
     public static final int TOP = 1;
@@ -27,10 +27,6 @@ public class Comment extends Thing implements Parcelable {
     public static final int CONTROVERSIAL = 3;
     public static final int NEW = 4;
     public static final int OLD = 5;
-
-    public static final int UPVOTED = 1;
-    public static final int NEUTRAL = 0;
-    public static final int DOWNVOTED = -1;
 
     private List<Comment> mReplies;
     private List<String> mMore;
@@ -299,7 +295,9 @@ public class Comment extends Thing implements Parcelable {
         if (after != null)
             urlString += "after=" + after;
 
-        JsonArray array = new JsonParser().parse(Utilities.get(null, urlString, cookie, modhash))
+        String s = Utilities.get(null, urlString, cookie, modhash);
+        Log.i("Comment", s);
+        JsonArray array = new JsonParser().parse(s)
                 .getAsJsonArray();
         if(array != null && array.size() > 0) {
             JsonObject replies = array.get(1).getAsJsonObject();

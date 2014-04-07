@@ -9,4 +9,6 @@
 
     <dimen name="clear_button_font_size">20sp</dimen>
 
+    <dimen name="tab_host_default_height">48dp</dimen>
+
 </resources>

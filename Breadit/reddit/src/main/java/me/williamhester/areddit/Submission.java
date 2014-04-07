@@ -19,11 +19,7 @@ import java.util.List;
 
 import me.williamhester.areddit.utils.Utilities;
 
-public class Submission extends Thing implements Parcelable {
-
-    public static final int UPVOTED = 1;
-    public static final int NEUTRAL = 0;
-    public static final int DOWNVOTED = -1;
+public class Submission extends Thing implements Parcelable, Votable {
 
     public static final int HOT = 0;
     public static final int NEW = 1;

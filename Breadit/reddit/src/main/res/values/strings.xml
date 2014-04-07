@@ -26,6 +26,7 @@
     <string name="comments">Comments</string>
     <string name="content">Content</string>
 
+    <string name="reply_hint">Enter reply</string>
     <string name="cancel">Cancel</string>
     <string name="reply">Reply</string>
 

@@ -1,16 +1,122 @@
 <resources>
 
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="android:Theme.Holo.Light.DarkActionBar">
-        <item name="android:activatedBackgroundIndicator">@color/auburn</item>
-        <!-- Customize your theme here. -->
-    </style>
-
     <style name="clear_button">
         <item name="android:textSize">@dimen/clear_button_font_size</item>
         <item name="android:textAllCaps">true</item>
         <item name="android:textColor">@color/white</item>
         <!--<item name="android:background">@drawable/item_background_orange</item>-->
+    </style>
+
+    <!--Below this is stuff that was auto-generated-->
+    <style name="AppTheme" parent="@style/_Breadit"/>
+
+    <style name="_Breadit" parent="android:Theme.Holo.Light.DarkActionBar">
+
+        <item name="android:editTextBackground">@drawable/breadit_edit_text_holo_light</item>
+
+        <item name="android:textColorHighlight">#99f68026</item>
+        <item name="android:textSelectHandleLeft">@drawable/breadit_text_select_handle_left</item>
+        <item name="android:textSelectHandleRight">@drawable/breadit_text_select_handle_right</item>
+        <item name="android:textSelectHandle">@drawable/breadit_text_select_handle_middle</item>
+
+        <item name="android:autoCompleteTextViewStyle">@style/AutoCompleteTextViewBreadit</item>
+
+        <item name="android:listChoiceIndicatorMultiple">@drawable/breadit_btn_check_holo_light</item>
+
+        <item name="android:listChoiceIndicatorSingle">@drawable/breadit_btn_radio_holo_light</item>
+
+        <item name="android:buttonStyle">@style/ButtonBreadit</item>
+
+        <item name="android:imageButtonStyle">@style/ImageButtonBreadit</item>
+
+        <item name="android:dropDownSpinnerStyle">@style/SpinnerBreadit</item>
+
+        <item name="android:progressBarStyleHorizontal">@style/ProgressBarBreadit</item>
+
+        <item name="android:seekBarStyle">@style/SeekBarBreadit</item>
+
+        <item name="android:ratingBarStyle">@style/RatingBarBreadit</item>
+
+        <item name="android:ratingBarStyleIndicator">@style/RatingBarBigBreadit</item>
+
+        <item name="android:ratingBarStyleSmall">@style/RatingBarSmallBreadit</item>
+
+        <item name="android:buttonStyleToggle">@style/ToggleBreadit</item>
+
+        <item name="android:listChoiceBackgroundIndicator">@drawable/breadit_list_selector_holo_light</item>
+
+        <item name="android:activatedBackgroundIndicator">@drawable/breadit_activated_background_holo_light</item>
+
+        <item name="android:fastScrollThumbDrawable">@drawable/breadit_fastscroll_thumb_holo</item>
+
+    </style>
+
+    <style name="AutoCompleteTextViewBreadit" parent="android:Widget.Holo.Light.AutoCompleteTextView">
+        <item name="android:dropDownSelector">@drawable/breadit_list_selector_holo_light</item>
+        <item name="android:background">@drawable/breadit_edit_text_holo_light</item>
+    </style>
+
+    <style name="ButtonBreadit" parent="android:Widget.Holo.Light.Button">
+        <item name="android:background">@drawable/breadit_btn_default_holo_light</item>
+    </style>
+
+    <style name="ImageButtonBreadit" parent="android:Widget.Holo.Light.ImageButton">
+        <item name="android:background">@drawable/breadit_btn_default_holo_light</item>
+    </style>
+
+    <style name="SpinnerBreadit" parent="android:Widget.Holo.Light.Spinner">
+        <item name="android:background">@drawable/breadit_spinner_background_holo_light</item>
+        <item name="android:dropDownSelector">@drawable/breadit_list_selector_holo_light</item>
+    </style>
+
+    <style name="TabBreadit">
+        <item name="android:gravity">center_horizontal</item>
+        <item name="android:paddingLeft">16dip</item>
+        <item name="android:paddingRight">16dip</item>
+        <item name="android:background">@drawable/breadit_tab_indicator_holo</item>
+        <item name="android:layout_width">0dip</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:minWidth">80dip</item>
+    </style>
+
+    <style name="TabTextBreadit">
+        <item name="android:textColor">#000000</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textStyle">bold</item>
+        <!-- v14 <item name="android:textAllCaps">true</item> -->
+        <item name="android:ellipsize">marquee</item>
+        <item name="android:maxLines">2</item>
+        <item name="android:maxWidth">180dip</item>
+    </style>
+
+    <style name="ProgressBarBreadit" parent="android:Widget.Holo.Light.ProgressBar.Horizontal">
+        <item name="android:progressDrawable">@drawable/breadit_progress_horizontal_holo_light</item>
+        <item name="android:indeterminateDrawable">@drawable/breadit_progress_indeterminate_horizontal_holo_light</item>
+    </style>
+
+    <style name="SeekBarBreadit" parent="android:Widget.Holo.Light.SeekBar">
+        <item name="android:progressDrawable">@drawable/breadit_scrubber_progress_horizontal_holo_light</item>
+        <item name="android:indeterminateDrawable">@drawable/breadit_scrubber_progress_horizontal_holo_light</item>
+        <item name="android:thumb">@drawable/breadit_scrubber_control_selector_holo_light</item>
+    </style>
+
+    <style name="RatingBarBreadit" parent="android:Widget.Holo.Light.RatingBar">
+        <item name="android:progressDrawable">@drawable/breadit_ratingbar_full_holo_light</item>
+        <item name="android:indeterminateDrawable">@drawable/breadit_ratingbar_full_holo_light</item>
+    </style>
+
+    <style name="RatingBarBigBreadit" parent="android:Widget.Holo.Light.RatingBar.Indicator">
+        <item name="android:progressDrawable">@drawable/breadit_ratingbar_holo_light</item>
+        <item name="android:indeterminateDrawable">@drawable/breadit_ratingbar_holo_light</item>
+    </style>
+
+    <style name="RatingBarSmallBreadit" parent="android:Widget.Holo.Light.RatingBar.Small">
+        <item name="android:progressDrawable">@drawable/breadit_ratingbar_small_holo_light</item>
+        <item name="android:indeterminateDrawable">@drawable/breadit_ratingbar_small_holo_light</item>
+    </style>
+
+    <style name="ToggleBreadit" parent="android:Widget.Holo.Light.Button.Toggle">
+        <item name="android:background">@drawable/breadit_btn_toggle_holo_light</item>
     </style>
 
 </resources>
