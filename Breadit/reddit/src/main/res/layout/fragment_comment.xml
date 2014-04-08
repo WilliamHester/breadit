@@ -12,6 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:dividerHeight="4dp"
-        android:divider="@android:color/black"/>
+        android:divider="@android:color/black"
+        android:descendantFocusability="afterDescendants"/>
 
 </LinearLayout>

@@ -2,7 +2,11 @@ package me.williamhester.reddit;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import me.williamhester.areddit.Submission;
 import me.williamhester.areddit.User;
@@ -60,6 +64,35 @@ public class SubmissionActivity extends Activity {
         mAction.selectTab(tabs[selectedTab]);
 
         mAction.setDisplayHomeAsUpEnabled(true);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.submission, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_share) {
+            Intent sendIntent = new Intent();
+            sendIntent.setAction(Intent.ACTION_SEND);
+            sendIntent.putExtra(Intent.EXTRA_TEXT, mSubmission.getUrl());
+            sendIntent.setType("text/plain");
+            startActivity(Intent.createChooser(sendIntent, getResources().getText(R.string.share_with)));
+            return true;
+        } else if (id == R.id.action_open_link_in_browser) {
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(mSubmission.getUrl()));
+            startActivity(browserIntent);
+            return true;
+        } else if (id == R.id.action_open_comments_browser) {
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.reddit.com"
+                    + mSubmission.getPermalink()));
+            startActivity(browserIntent);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
 }

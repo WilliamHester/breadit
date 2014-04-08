@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.text.Html;
 import android.text.Spannable;
 import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
@@ -15,15 +16,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.ViewSwitcher;
 
 import com.koushikdutta.urlimageviewhelper.UrlImageViewHelper;
 
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -34,6 +40,7 @@ import me.williamhester.areddit.Comment;
 import me.williamhester.areddit.Submission;
 import me.williamhester.areddit.User;
 import me.williamhester.areddit.Votable;
+import me.williamhester.areddit.utils.Utilities;
 
 public class CommentFragment extends Fragment {
 
@@ -194,6 +201,13 @@ public class CommentFragment extends Fragment {
             }
         });
 
+        v.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent event) {
+                return mGestureDetector.onTouchEvent(event);
+            }
+        });
+
         return v;
     }
 
@@ -239,6 +253,42 @@ public class CommentFragment extends Fragment {
             TextView time = (TextView) convertView.findViewById(R.id.time);
             TextView body = (TextView) convertView.findViewById(R.id.comment_text);
             View voteStatus = convertView.findViewById(R.id.vote_status);
+            LinearLayout replyLayout = (LinearLayout) convertView.findViewById(R.id.edited_text);
+            final EditText replyBody = (EditText) convertView.findViewById(R.id.reply_body);
+            final Button confirm = (Button) convertView.findViewById(R.id.confirm_reply);
+            final Button cancel = (Button) convertView.findViewById(R.id.cancel_reply);
+
+            if (getItem(position).isBeingEdited()) {
+                confirm.setEnabled(true);
+                cancel.setEnabled(true);
+                replyBody.setEnabled(true);
+                body.setVisibility(View.GONE);
+                replyLayout.setVisibility(View.VISIBLE);
+                confirm.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if (position == 1)
+                            new ReplyAsyncTask(replyBody.getText().toString(),
+                                    mSubmission.getName()).execute();
+                        else if (position > 1)
+                            new ReplyAsyncTask(replyBody.getText().toString(),
+                                    getItem(position - 1).getName()).execute();
+                        confirm.setEnabled(false);
+                        cancel.setEnabled(false);
+                        replyBody.setEnabled(false);
+                    }
+                });
+                cancel.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        mCommentsList.remove(position);
+                        mCommentAdapter.notifyDataSetChanged();
+                    }
+                });
+            } else {
+                replyLayout.setVisibility(View.GONE);
+                body.setVisibility(View.VISIBLE);
+            }
 
             root.setPadding((int) (getResources().getDisplayMetrics().density
                     * 12 * getItem(position).getLevel()), 0, 0, 0);
@@ -314,6 +364,40 @@ public class CommentFragment extends Fragment {
         }
     }
 
+    private class ReplyAsyncTask extends AsyncTask<Void, Void, Void> {
+
+        private String mReplyText;
+        private String mName;
+
+        public ReplyAsyncTask(String replyText, String fullname){
+            mReplyText = replyText;
+            mName = fullname;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            if (mUser != null && mReplyText != null && mReplyText.length() != 0) {
+                List<NameValuePair> apiParams = new ArrayList<NameValuePair>();
+                apiParams.add(new BasicNameValuePair("api-type", "json"));
+                apiParams.add(new BasicNameValuePair("text", mReplyText));
+                apiParams.add(new BasicNameValuePair("thing_id", mName));
+                Log.i("ReplyDialogFragment", "Response = " + Utilities.post(apiParams,
+                        "http://www.reddit.com/api/comment", mUser.getCookie(),
+                        mUser.getModhash()));
+                Log.i("ReplyDialogFragment", "name = " + mName);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void v) {
+            // re-parse the comment tree and find the one that didn't exist before with the user's
+            //     name as the author name. Scroll to that one...
+            // That, or parse the new structure until the new comment is found and add that one in.
+            // pass new data for the comment and then notifydatasetchanged
+        }
+    }
+
     private class SwipeDetector extends GestureDetector.SimpleOnGestureListener {
 
         private static final int SWIPE_MIN_DISTANCE = 120;
@@ -355,12 +439,14 @@ public class CommentFragment extends Fragment {
                     mCommentsListView.smoothScrollBy(y, 300);
                 }
             }, 320);
-            if (position > 0) {
-                ReplyDialogFragment rf = ReplyDialogFragment.newInstance(mUser,
-                        mCommentsList.get(position - HEADER_VIEW_COUNT).getName(),
-                        mCommentsList.get(position - HEADER_VIEW_COUNT));
-                rf.show(getFragmentManager(), "reply_fragment");
+            Comment c = null;
+            if (position == 0) {
+                c = new Comment(mUser, 0);
+            } else if (position > 0) {
+                c = new Comment(mUser, mCommentsList.get(position - 1).getLevel() + 1);
             }
+            mCommentsList.add(position, c);
+            mCommentAdapter.notifyDataSetChanged();
             return false;
         }
 

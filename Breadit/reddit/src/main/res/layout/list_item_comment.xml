@@ -13,18 +13,17 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="8dp"
         android:orientation="vertical"
         android:background="@color/blackish">
 
         <LinearLayout
+            android:padding="8dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/points"
-                android:text="1234 points by "
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif-condensed"
@@ -34,7 +33,6 @@
 
             <TextView
                 android:id="@+id/author"
-                android:text="Shockwave_"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif-condensed"
@@ -42,7 +40,6 @@
 
             <TextView
                 android:id="@+id/time"
-                android:text=" 9h"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif-condensed"
@@ -54,13 +51,60 @@
 
         <TextView
             android:id="@+id/comment_text"
-            android:text="This is some dummy text that can be used temporarily to test out the commentView xml file."
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/mid_gray"/>
+            android:textColor="@color/mid_gray"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:paddingBottom="8dp"/>
 
-        <!--<include layout="@layout/view_reply"-->
-            <!--android:id="@+id/reply" />-->
+        <LinearLayout
+            android:id="@+id/edited_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <EditText android:id="@+id/reply_body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/mid_gray"
+                android:hint="@string/reply_hint"/>
+
+            <View android:layout_marginTop="8dp"
+                android:layout_height="1dp"
+                android:layout_width="match_parent"
+                android:background="@color/dark_gray"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <Button android:id="@+id/cancel_reply"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/cancel"
+                    style="?android:buttonBarButtonStyle"
+                    android:textColor="@color/mid_gray"/>
+
+                <View
+                    android:layout_height="match_parent"
+                    android:layout_width="1dp"
+                    android:background="@color/dark_gray"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"/>
+
+                <Button android:id="@+id/confirm_reply"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/reply"
+                    style="?android:buttonBarButtonStyle"
+                    android:textColor="@color/mid_gray"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
 
     </LinearLayout>
 </LinearLayout>

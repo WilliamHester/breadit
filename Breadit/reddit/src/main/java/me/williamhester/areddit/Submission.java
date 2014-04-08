@@ -72,6 +72,7 @@ public class Submission extends Thing implements Parcelable, Votable {
 
     public Submission(Parcel in) {
         Bundle b = in.readBundle();
+        mName = b.getString("name");
         mAuthor = b.getString("author");
         mAuthorFlairCss = b.getString("author_flair_css");
         mAuthorFlairText = b.getString("author_flair_text");
@@ -350,6 +351,7 @@ public class Submission extends Thing implements Parcelable, Votable {
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         Bundle b = new Bundle();
+        b.putString("name", mName);
         b.putString("author", mAuthor);
         b.putString("author_flair_css", mAuthorFlairCss);
         b.putString("author_flair_text", mAuthorFlairText);

@@ -4,6 +4,7 @@ import android.app.DialogFragment;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,8 +51,8 @@ public class ReplyDialogFragment extends DialogFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.dialog_fragment_reply, null);
+        final View commentView = v.findViewById(R.id.root_comment);
         if (mComment != null) {
-            final View commentView = v.findViewById(R.id.root_comment);
             TextView author = (TextView) commentView.findViewById(R.id.author);
             TextView score = (TextView) commentView.findViewById(R.id.points);
             TextView time = (TextView) commentView.findViewById(R.id.time);
@@ -86,6 +87,8 @@ public class ReplyDialogFragment extends DialogFragment {
                     }
                 }
             });
+        } else {
+            commentView.setVisibility(View.GONE);
         }
         
         mReplyText = (EditText) v.findViewById(R.id.reply_body);
@@ -155,8 +158,9 @@ public class ReplyDialogFragment extends DialogFragment {
                 apiParams.add(new BasicNameValuePair("api-type", "json"));
                 apiParams.add(new BasicNameValuePair("text", mReplyText.getText().toString()));
                 apiParams.add(new BasicNameValuePair("thing_id", mName));
-                Utilities.post(apiParams, "http://www.reddit.com/api/comment", mUser.getCookie(),
-                        mUser.getModhash());
+                Log.i("ReplyDialogFragment", "Response = " + Utilities.post(apiParams, "http://www.reddit.com/api/comment", mUser.getCookie(),
+                        mUser.getModhash()));
+                Log.i("ReplyDialogFragment", "name = " + mName);
             }
             return null;
         }

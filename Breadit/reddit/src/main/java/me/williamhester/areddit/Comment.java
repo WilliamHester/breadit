@@ -55,7 +55,21 @@ public class Comment extends Thing implements Parcelable, Votable {
 
     private int mLevel = 0;
     private boolean mIsHidden = false;
+    private boolean mIsBeingEdited = false;
     private String mReplyText;
+
+    // For use when replying to comments
+    public Comment(User user, int level) {
+        mAuthor = user.getUsername();
+        mVoteStatus = 0;
+        mUps = 0;
+        mDowns = 0;
+        mCreatedUtc = System.currentTimeMillis() / 1000;
+        mBodyHtml = "";
+        mBody = "";
+        mLevel = level;
+        mIsBeingEdited = true;
+    }
 
     private Comment(JsonObject jsonObj, int level) {
         super(jsonObj);
@@ -219,6 +233,14 @@ public class Comment extends Thing implements Parcelable, Votable {
 
     public CommentIterator getCommentIterator() {
         return new CommentIterator(this);
+    }
+
+    public void setBeingEdited(boolean b) {
+        mIsBeingEdited = b;
+    }
+
+    public boolean isBeingEdited() {
+        return mIsBeingEdited;
     }
 
 //    public void setReplyText(String mReplyText) {

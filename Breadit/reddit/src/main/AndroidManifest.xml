@@ -17,7 +17,9 @@
         </activity>
         <activity
             android:name=".SubmissionActivity"
-            android:parentActivityName="me.williamhester.reddit.MainActivity">
+            android:parentActivityName="me.williamhester.reddit.MainActivity"
+            android:windowSoftInputMode="adjustPan">
+            <!--android:windowSoftInputMode="adjustResize|stateHidden">-->
         </activity>
         <activity
             android:name=".SetupActivity" >
