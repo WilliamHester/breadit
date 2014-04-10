@@ -5,10 +5,19 @@
     android:layout_height="match_parent"
     android:background="@color/blackish">
 
-    <include android:id="@+id/root_comment"
-        layout="@layout/list_item_comment" />
-    
-    <EditText android:id="@+id/reply_body"
+    <ImageView android:id="@+id/captcha"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <EditText android:id="@+id/captcha_response"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <EditText android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <EditText android:id="@+id/submit_body"
         android:layout_width="match_parent"
         android:layout_height="100dp"
         android:gravity="top"

@@ -381,10 +381,10 @@ public class CommentFragment extends Fragment {
                 apiParams.add(new BasicNameValuePair("api-type", "json"));
                 apiParams.add(new BasicNameValuePair("text", mReplyText));
                 apiParams.add(new BasicNameValuePair("thing_id", mName));
-                Log.i("ReplyDialogFragment", "Response = " + Utilities.post(apiParams,
+                Log.i("SubmitDialogFragment", "Response = " + Utilities.post(apiParams,
                         "http://www.reddit.com/api/comment", mUser.getCookie(),
                         mUser.getModhash()));
-                Log.i("ReplyDialogFragment", "name = " + mName);
+                Log.i("SubmitDialogFragment", "name = " + mName);
             }
             return null;
         }

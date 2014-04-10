@@ -77,8 +77,6 @@ public class MainActivity extends Activity
                 mUser = new User(username, modhash, cookie);
             }
         }
-        if (mUser != null)
-            Log.i("MainActivity", "User is not null");
 
         mSubredditFragment = SubredditFragment.newInstance(mUser, mSubreddit);
         mNavigationDrawerFragment = NavigationDrawerFragment.newInstance(mUser);
@@ -87,8 +85,7 @@ public class MainActivity extends Activity
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
 
-        FragmentManager fm = getFragmentManager();
-        fm.beginTransaction().replace(R.id.navigation_drawer_container,
+        getFragmentManager().beginTransaction().replace(R.id.navigation_drawer_container,
                 mNavigationDrawerFragment)
                 .commit();
         getFragmentManager().beginTransaction()
@@ -112,12 +109,14 @@ public class MainActivity extends Activity
 
     private void updateActionBar(String sub) {
         ActionBar actionBar = getActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        actionBar.setDisplayShowTitleEnabled(true);
-        if (sub == null)
-            actionBar.setTitle("FrontPage");
-        else
-            actionBar.setTitle("/r/" + sub);
+        if (actionBar != null) {
+            actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+            actionBar.setDisplayShowTitleEnabled(true);
+            if (sub == null)
+                actionBar.setTitle("FrontPage");
+            else
+                actionBar.setTitle("/r/" + sub);
+        }
     }
 
 
@@ -127,11 +126,11 @@ public class MainActivity extends Activity
             // Only show items in the action bar relevant to this screen
             // if the drawer is not showing. Otherwise, let the drawer
             // decide what to show in the action bar.
-            getMenuInflater().inflate(R.menu.main, menu);
-            restoreActionBar();
-            return true;
+          getMenuInflater().inflate(R.menu.main, menu);
+//            restoreActionBar(); // I don't think we need this because we're already updating it
+//            return true;
 //        }
-//        return super.onCreateOptionsMenu(menu);
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -142,6 +141,9 @@ public class MainActivity extends Activity
         int id = item.getItemId();
         if (id == R.id.action_settings) {
             return true;
+        } else if (id == R.id.action_submit) {
+            SubmitDialogFragment sf = SubmitDialogFragment.newInstance(mUser, mSubreddit);
+            sf.show(getFragmentManager(), "submit_fragment");
         }
         return super.onOptionsItemSelected(item);
     }

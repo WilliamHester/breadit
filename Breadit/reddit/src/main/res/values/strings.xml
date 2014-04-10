@@ -38,4 +38,6 @@
     <string name="message_user">Message user</string>
     <string name="expand_links">Expand links</string>
 
+    <string name="submit">Submit</string>
+
 </resources>
