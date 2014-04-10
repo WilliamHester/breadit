@@ -13,7 +13,7 @@
     <string name="next">Let\'s go!</string>
 
     <string name="enter_acc_info">Please enter your Reddit account username and password.</string>
-    <string name="save">Save and begin!</string>
+    <string name="save_and_begin">Save and begin!</string>
     <string name="username">Username</string>
     <string name="password">Password</string>
 
@@ -30,5 +30,12 @@
     <string name="reply_hint">Enter reply</string>
     <string name="cancel">Cancel</string>
     <string name="reply">Reply</string>
+
+    <string name="edit">Edit</string>
+    <string name="save">Save</string>
+    <string name="delete">Delete</string>
+    <string name="view_profile">View profile</string>
+    <string name="message_user">Message user</string>
+    <string name="expand_links">Expand links</string>
 
 </resources>

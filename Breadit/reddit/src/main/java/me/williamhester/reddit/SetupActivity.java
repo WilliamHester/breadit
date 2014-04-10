@@ -94,7 +94,7 @@ public class SetupActivity extends FragmentActivity {
             if (position == 0) {
                 mSave.setText(R.string.next);
             } else {
-                mSave.setText(R.string.save);
+                mSave.setText(R.string.save_and_begin);
             }
         }
 

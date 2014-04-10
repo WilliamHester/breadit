@@ -1,7 +1,9 @@
 package me.williamhester.reddit;
 
+import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
@@ -23,7 +25,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.ViewSwitcher;
 
 import com.koushikdutta.urlimageviewhelper.UrlImageViewHelper;
 
@@ -335,9 +336,8 @@ public class CommentFragment extends Fragment {
                 String lastComment = null;
                 if (mCommentsList.size() > 0)
                     lastComment = mCommentsList.get(mCommentsList.size() - 1).getName();
-                List<Comment> comments = Comment.getComments(mPermalink, mUser, lastComment,
-                        mSortType);
-                return comments;
+
+                return  Comment.getComments(mPermalink, mUser, lastComment, mSortType);
             } catch (MalformedURLException e) {
                 e.printStackTrace();
                 return null;
@@ -451,6 +451,57 @@ public class CommentFragment extends Fragment {
         }
 
         @Override
+        public void onLongPress(MotionEvent event) {
+            int position = mCommentsListView.pointToPosition((int) event.getX(), (int) event.getY());
+            Votable v = null;
+            if (position == 0) {
+                v = mSubmission;
+            } else if (position > 0) {
+                v = mCommentsList.get(position - HEADER_VIEW_COUNT);
+            }
+            final int offset;
+            ArrayList<String> options = new ArrayList<String>();
+            if (mUser.getUsername().equals(v.getAuthor())) {
+                options.add(getResources().getString(R.string.edit));
+                options.add(getResources().getString(R.string.delete));
+                offset = 0;
+            } else {
+                offset = 2;
+            }
+            options.add(getResources().getString(R.string.reply));
+            options.add(getResources().getString(R.string.view_profile));
+            options.add(getResources().getString(R.string.message_user));
+            options.add(getResources().getString(R.string.save));
+            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+            builder.setItems((String[]) options.toArray(), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int which) {
+                    switch (which + offset) {
+                        case 0:
+                            // Edit
+                            break;
+                        case 1:
+                            // Delete
+                            break;
+                        case 2:
+                            // Reply
+                            break;
+                        case 3:
+                            // View user's profile
+                            break;
+                        case 4:
+                            // Message user
+                            break;
+                        case 5:
+                            // Save
+                            break;
+                    }
+                }
+            });
+            builder.create().show();
+        }
+
+        @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
             if (mUser != null) {
                 if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH)
@@ -458,10 +509,10 @@ public class CommentFragment extends Fragment {
                 // right to left swipe
                 int position = mCommentsListView.pointToPosition((int) e1.getX(), (int) e1.getY());
                 if (e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
-                    Votable v;
+                    Votable v = null;
                     if (position == 0) {
                         v = mSubmission;
-                    } else {
+                    } else if (position > 0) {
                         v = mCommentAdapter.getItem(position - HEADER_VIEW_COUNT);
                         if (v.getVoteStatus() == Comment.DOWNVOTED) {
                             new VoteAsyncTask(v.getName(), mUser, VoteAsyncTask.NEUTRAL).execute();
@@ -473,10 +524,10 @@ public class CommentFragment extends Fragment {
                     }
                     setVoteStatus(v, position);
                 } else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
-                    Votable v;
+                    Votable v = null;
                     if (position == 0) {
                         v = mSubmission;
-                    } else {
+                    } else if (position > 0) {
                         v = mCommentAdapter.getItem(position - HEADER_VIEW_COUNT);
                         if (v.getVoteStatus() == Comment.UPVOTED) {
                             new VoteAsyncTask(v.getName(), mUser, VoteAsyncTask.NEUTRAL).execute();
@@ -493,24 +544,26 @@ public class CommentFragment extends Fragment {
         }
 
         private void setVoteStatus(Votable votable, int position) {
-            View v = mCommentsListView.getChildAt(position - mCommentsListView.getFirstVisiblePosition());
-            View voteStatus = v.findViewById(R.id.vote_status);
-            TextView points = (TextView) v.findViewById(R.id.points);
-            switch (votable.getVoteStatus()) {
-                case Votable.UPVOTED:
-                    voteStatus.setVisibility(View.VISIBLE);
-                    voteStatus.setBackgroundColor(getResources().getColor(R.color.orangered));
-                    points.setText(votable.getScore() + " points by ");
-                    break;
-                case Votable.DOWNVOTED:
-                    voteStatus.setVisibility(View.VISIBLE);
-                    voteStatus.setBackgroundColor(getResources().getColor(R.color.periwinkle));
-                    points.setText(votable.getScore() + " points by ");
-                    break;
-                default:
-                    voteStatus.setVisibility(View.GONE);
-                    points.setText(votable.getScore() + " points by ");
-                    break;
+            if (votable != null) {
+                View v = mCommentsListView.getChildAt(position - mCommentsListView.getFirstVisiblePosition());
+                View voteStatus = v.findViewById(R.id.vote_status);
+                TextView points = (TextView) v.findViewById(R.id.points);
+                switch (votable.getVoteStatus()) {
+                    case Votable.UPVOTED:
+                        voteStatus.setVisibility(View.VISIBLE);
+                        voteStatus.setBackgroundColor(getResources().getColor(R.color.orangered));
+                        points.setText(votable.getScore() + " points by ");
+                        break;
+                    case Votable.DOWNVOTED:
+                        voteStatus.setVisibility(View.VISIBLE);
+                        voteStatus.setBackgroundColor(getResources().getColor(R.color.periwinkle));
+                        points.setText(votable.getScore() + " points by ");
+                        break;
+                    default:
+                        voteStatus.setVisibility(View.GONE);
+                        points.setText(votable.getScore() + " points by ");
+                        break;
+                }
             }
         }
     }

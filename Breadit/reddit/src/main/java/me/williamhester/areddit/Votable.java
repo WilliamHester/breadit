@@ -13,5 +13,6 @@ public interface Votable {
     public int getVoteStatus();
     public void setVoteStatus(int status);
     public long getScore();
+    public String getAuthor();
 
 }

@@ -410,8 +410,9 @@ public class SubredditFragment extends Fragment {
                 if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH)
                     return false;
                 // right to left swipe
-                if (e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
-                    int position = mSubmissions.pointToPosition((int) e1.getX(), (int) e1.getY());
+                int position = mSubmissions.pointToPosition((int) e1.getX(), (int) e1.getY());
+                if (position > -1 && e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE
+                        && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
                     Submission s = mSubmissionsAdapter.getItem(position);
                     if (s.getVoteStatus() == Submission.DOWNVOTED) {
                         new VoteAsyncTask(s.getName(), mUser, VoteAsyncTask.NEUTRAL).execute();
@@ -434,8 +435,8 @@ public class SubredditFragment extends Fragment {
                             points.setText(s.getScore() + " points by ");
                             break;
                     }
-                } else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
-                    int position = mSubmissions.pointToPosition((int) e1.getX(), (int) e1.getY());
+                } else if (position > -1 && e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE
+                        && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
                     Submission s = mSubmissionsAdapter.getItem(position);
                     if (s.getVoteStatus() == Submission.UPVOTED) {
                         new VoteAsyncTask(s.getName(), mUser, VoteAsyncTask.NEUTRAL).execute();
