@@ -39,11 +39,11 @@ public class Account implements Parcelable {
     private String mCookie;
     private String mDataString;
     private String mSavedSubmissions;
+    private String mSubredditsString;
     private String mHistory;
     private TreeSet<String> mHistoryTree;
     private long mId;
-
-    private ArrayList<String> mSubscribedSubreddits;
+    private List<String> mSubreddits;
 
     private JsonObject mData;
 
@@ -56,21 +56,21 @@ public class Account implements Parcelable {
         mCookie = b.getString(COOKIE);
         mDataString = b.getString(JS_STRING);
         mId = b.getLong(TABLE_ID);
-        String subs = b.getString(SUBSCRIBED_SUBREDDITS);
+        mSubredditsString = b.getString(SUBSCRIBED_SUBREDDITS);
         mSavedSubmissions = b.getString(SAVED_SUBMISSIONS);
         mHistory = b.getString(HISTORY);
 
         if (mDataString != null) {
             mData = new JsonParser().parse(mDataString).getAsJsonObject();
         }
-        if (subs != null) {
-            Scanner scan = new Scanner(subs).useDelimiter(",");
-            mSubscribedSubreddits = new ArrayList<String>();
+        if (mSubredditsString != null) {
+            Scanner scan = new Scanner(mSubredditsString).useDelimiter(",");
+            mSubreddits = new ArrayList<String>();
             while (scan.hasNext()) {
-                mSubscribedSubreddits.add(scan.next());
+                mSubreddits.add(scan.next());
             }
         } else {
-            mSubscribedSubreddits = new ArrayList<String>();
+            mSubreddits = new ArrayList<String>();
         }
         if (mHistory != null) {
             Scanner scan = new Scanner(mHistory).useDelimiter(",");
@@ -86,7 +86,7 @@ public class Account implements Parcelable {
 
     /**
      * This constructor should only be used to reconstruct a Account from data saved in
-     * SharedPreferences to create a new Account, the static method newUser() must be called.
+     * SharedPreferences to create a new Account, the static method newAccount() must be called.
      *
      * @param username
      * @param modhash
@@ -107,13 +107,15 @@ public class Account implements Parcelable {
         mModhash = c.getString(3);
         String subs = c.getString(4);
         mSavedSubmissions = c.getString(5);
+        mHistory = c.getString(6);
         Scanner scan = new Scanner(subs).useDelimiter(",");
-        mSubscribedSubreddits = new ArrayList<String>();
+        mSubreddits = new ArrayList<String>();
         while (scan.hasNext()) {
-            mSubscribedSubreddits.add(scan.next());
+            mSubreddits.add(scan.next());
         }
         if (mHistory != null) {
             scan = new Scanner(mHistory).useDelimiter(",");
+            mHistoryTree = new TreeSet<String>();
             while (scan.hasNext()) {
                 mHistoryTree.add(scan.next());
             }
@@ -146,12 +148,24 @@ public class Account implements Parcelable {
      *
      * @return returns a new Account object.
      */
-    public static Account newUser(String username, String password) throws IOException{
+    public static Account newAccount(String username, String password) throws IOException{
         Account a = new Account();
         a.mUsername = username;
         HashMap<String, String> hashCookiePair = hashCookiePair(username, password);
         a.mCookie = hashCookiePair.get("cookie");
         a.mModhash = hashCookiePair.get("modhash");
+        a.mHistory = "";
+        a.mSavedSubmissions = "";
+        List<Subreddit> subs = a.getSubscribedSubreddits();
+        a.mSubreddits = new ArrayList<String>();
+        StringBuilder sb = new StringBuilder();
+        for (Subreddit s : subs) {
+            a.mSubreddits.add(s.getDisplayName());
+            sb.append(s.getDisplayName());
+            sb.append(',');
+        }
+        a.mSubredditsString = sb.toString();
+
         try {
             a.mDataString = a.getUserData().toString();
         } catch (NullPointerException e) {
@@ -261,6 +275,10 @@ public class Account implements Parcelable {
 		return mCookie;
 	}
 
+    public String getHistory() {
+        return mHistory;
+    }
+
     public void setId(long id) {
         mId = id;
     }
@@ -269,11 +287,25 @@ public class Account implements Parcelable {
         return mId;
     }
 
-    public List<String> getSubscribedSubredditsStrings() {
-        return mSubscribedSubreddits;
+    public String getCommaSepSubs() {
+        return mSubredditsString;
     }
 
-    public void addToHistory(String fullname) {
+    public List<String> getSubreddits() {
+        return mSubreddits;
+    }
+
+    public void setSubreddits(List<String> subreddits) {
+        mSubreddits = subreddits;
+        StringBuilder sb = new StringBuilder();
+        for (String s : subreddits) {
+            sb.append(s);
+            sb.append(',');
+        }
+        mSubredditsString = sb.toString();
+    }
+
+    public void visit(String fullname) {
         mHistory = fullname + "," + mHistory;
         mHistoryTree.add(fullname);
     }
@@ -376,7 +408,7 @@ public class Account implements Parcelable {
      * @throws java.io.IOException if connection fails
      */
 
-    public ArrayList<Subreddit> getSubscribedSubreddits() throws IOException {
+    public List<Subreddit> getSubscribedSubreddits() throws IOException {
 
         ArrayList<Subreddit> subreddits = new ArrayList<Subreddit>();
 
@@ -433,6 +465,7 @@ public class Account implements Parcelable {
         b.putString(JS_STRING, mDataString);
         b.putLong(TABLE_ID, mId);
         b.putString(SAVED_SUBMISSIONS, mSavedSubmissions);
+        b.putString(SUBSCRIBED_SUBREDDITS, mSubredditsString);
         b.putString(HISTORY, mHistory);
         dest.writeBundle(b);
     }

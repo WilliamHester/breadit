@@ -69,7 +69,7 @@ public class CommentFragment extends Fragment {
         Bundle args = getArguments();
         mContext = getActivity();
         if (args != null) {
-            mAccount = args.getParcelable("user");
+            mAccount = args.getParcelable("account");
             mSubmission = args.getParcelable("submission");
             if (mSubmission != null) {
                 mUrl = mSubmission.getUrl();

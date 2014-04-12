@@ -12,19 +12,21 @@ public class AccountSqlHelper  extends SQLiteOpenHelper {
 
     public static final String TABLE_ACCOUNTS = "Accounts";
     public static final String COLUMN_ID = "_id";
-    public static final String COLUMN_ACCOUNT_USERNAME = "name";
-    public static final String COLUMN_ACCOUNT_COOKIE = "cookie";
-    public static final String COLUMN_ACCOUNT_MODHASH = "modhash";
+    public static final String COLUMN_USERNAME = "username";
+    public static final String COLUMN_COOKIE = "cookie";
+    public static final String COLUMN_MODHASH = "modhash";
     public static final String COLUMN_SUBREDDIT_LIST = "subreddit_list";
     public static final String COLUMN_SAVED_SUBMISSIONS = "saved_submissions";
+    public static final String COLUMN_HISTORY = "history";
 
     public static final String[] ALL_COLUMNS = {
             COLUMN_ID,
-            COLUMN_ACCOUNT_USERNAME,
-            COLUMN_ACCOUNT_COOKIE,
-            COLUMN_ACCOUNT_MODHASH,
+            COLUMN_USERNAME,
+            COLUMN_COOKIE,
+            COLUMN_MODHASH,
             COLUMN_SUBREDDIT_LIST,
-            COLUMN_SAVED_SUBMISSIONS
+            COLUMN_SAVED_SUBMISSIONS,
+            COLUMN_HISTORY
     };
 
     public static final String DATABASE_NAME = "Accounts.db";
@@ -34,11 +36,12 @@ public class AccountSqlHelper  extends SQLiteOpenHelper {
     private static final String DATABASE_CREATE = "CREATE TABLE "
             + TABLE_ACCOUNTS + "("
             + COLUMN_ID + " integer primary key autoincrement, "
-            + COLUMN_ACCOUNT_USERNAME + " text not null, "
-            + COLUMN_ACCOUNT_COOKIE + " text not null, "
-            + COLUMN_ACCOUNT_MODHASH + " text not null, "
+            + COLUMN_USERNAME + " text not null, "
+            + COLUMN_COOKIE + " text not null, "
+            + COLUMN_MODHASH + " text not null, "
             + COLUMN_SUBREDDIT_LIST + " text not null, "
-            + COLUMN_SAVED_SUBMISSIONS + " text not null);";
+            + COLUMN_SAVED_SUBMISSIONS + " text not null, "
+            + COLUMN_HISTORY + " text not null);";
 
     public AccountSqlHelper(Context context, String name, SQLiteDatabase.CursorFactory factory,
                            int version) {

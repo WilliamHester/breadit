@@ -316,9 +316,7 @@ public class Comment extends Thing implements Parcelable, Votable {
         if (after != null)
             urlString += "after=" + after;
 
-        String s = Utilities.get(null, urlString, cookie, modhash);
-        Log.i("Comment", s);
-        JsonArray array = new JsonParser().parse(s)
+        JsonArray array = new JsonParser().parse(Utilities.get(null, urlString, cookie, modhash))
                 .getAsJsonArray();
         if(array != null && array.size() > 0) {
             JsonObject replies = array.get(1).getAsJsonObject();

@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 ;import me.williamhester.areddit.Account;
 import me.williamhester.areddit.Subreddit;
@@ -58,7 +59,7 @@ public class NavigationDrawerFragment extends Fragment {
 
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerListView;
-    private ArrayList<String> mSubredditList;
+    private List<String> mSubredditList;
     private ArrayAdapter<String> mSubredditArrayAdapter;
 
     private int mCurrentSelectedPosition = 0;
@@ -66,8 +67,7 @@ public class NavigationDrawerFragment extends Fragment {
     private boolean mUserLearnedDrawer;
     private Account mAccount;
 
-    public NavigationDrawerFragment() {
-    }
+    public NavigationDrawerFragment() { }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -101,7 +101,9 @@ public class NavigationDrawerFragment extends Fragment {
         mDrawerListView = (ListView) v.findViewById(R.id.list);
 
         if (mAccount != null) {
-            mSubredditList = new ArrayList<String>();
+            mSubredditList = mAccount.getSubreddits();
+            Collections.sort(mSubredditList, mOrderList);
+            mSubredditList.add(0, "FrontPage");
             mSubredditArrayAdapter = new ArrayAdapter<String>(
                     getActivity().getActionBar().getThemedContext(),
                     android.R.layout.simple_list_item_activated_1,
@@ -316,27 +318,39 @@ public class NavigationDrawerFragment extends Fragment {
     }
 
 
-    private class GetUserSubreddits extends AsyncTask<Void, Void, Void> {
+    private class GetUserSubreddits extends AsyncTask<Void, Void, Boolean> {
+
         @Override
-        protected Void doInBackground(Void... voids) {
+        protected Boolean doInBackground(Void... voids) {
             try {
-                ArrayList<Subreddit> subreddits = mAccount.getSubscribedSubreddits();
+                List<Subreddit> subreddits = mAccount.getSubscribedSubreddits();
+                List<String> newSubs = new ArrayList<String>();
                 for (Subreddit s : subreddits) {
-                    mSubredditList.add(s.getDisplayName());
+                    newSubs.add(s.getDisplayName());
                 }
-                // Sort mSubredditList
-                Collections.sort(mSubredditList, orderList);
-                mSubredditList.add(0, "FrontPage");
+                Boolean isNew = !newSubs.equals(mSubredditList);
+                if (!isNew) {
+                    mAccount.setSubreddits(newSubs);
+                    AccountDataSource dataSource = new AccountDataSource(getActivity());
+                    dataSource.open();
+                    dataSource.setSubredditList(mAccount);
+                    dataSource.close();
+                }
+                return isNew;
             } catch (IOException e) {
                 e.printStackTrace();
                 Log.e("NDF", "IOException was thrown when getting getSubreddits");
             }
-            return null;
+            return false;
         }
 
         @Override
-        protected void onPostExecute(Void result) {
-            mSubredditArrayAdapter.notifyDataSetChanged();
+        protected void onPostExecute(Boolean isNew) {
+            if (isNew) {
+                Collections.sort(mSubredditList, mOrderList);
+                mSubredditList.add(0, "FrontPage");
+                mSubredditArrayAdapter.notifyDataSetChanged();
+            }
         }
     }
 
@@ -348,7 +362,7 @@ public class NavigationDrawerFragment extends Fragment {
         return fragment;
     }
 
-    private static Comparator<String> orderList = new Comparator<String>() {
+    private static Comparator<String> mOrderList = new Comparator<String>() {
         public int compare(String one, String two) {
             int result = String.CASE_INSENSITIVE_ORDER.compare(one, two);
             return (result != 0) ? result : one.compareTo(two);

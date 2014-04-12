@@ -31,11 +31,12 @@ public class AccountDataSource {
 
     public void addAccount(Account account) {
         ContentValues values = new ContentValues();
-        values.put(AccountSqlHelper.COLUMN_ACCOUNT_USERNAME, account.getUsername());
-        values.put(AccountSqlHelper.COLUMN_ACCOUNT_COOKIE, account.getCookie());
-        values.put(AccountSqlHelper.COLUMN_ACCOUNT_MODHASH, account.getModhash());
-        values.put(AccountSqlHelper.COLUMN_SUBREDDIT_LIST, "");
+        values.put(AccountSqlHelper.COLUMN_USERNAME, account.getUsername());
+        values.put(AccountSqlHelper.COLUMN_COOKIE, account.getCookie());
+        values.put(AccountSqlHelper.COLUMN_MODHASH, account.getModhash());
+        values.put(AccountSqlHelper.COLUMN_SUBREDDIT_LIST, account.getCommaSepSubs());
         values.put(AccountSqlHelper.COLUMN_SAVED_SUBMISSIONS, "");
+        values.put(AccountSqlHelper.COLUMN_HISTORY, "");
         long id = mDatabase.insert(AccountSqlHelper.TABLE_ACCOUNTS, null, values);
         account.setId(id);
     }
@@ -48,11 +49,20 @@ public class AccountDataSource {
         return new Account(c);
     }
 
-    public void setSubredditList(String subs, long id) {
+    public void setHistory(Account account) {
         ContentValues values = new ContentValues();
-        values.put(AccountSqlHelper.COLUMN_SUBREDDIT_LIST, subs);
+        values.put(AccountSqlHelper.COLUMN_HISTORY, account.getHistory());
 
-        String[] sId = { "" + id };
+        String[] sId = { "" + account.getId() };
+        String where = AccountSqlHelper.COLUMN_ID + "=?";
+        mDatabase.update(AccountSqlHelper.TABLE_ACCOUNTS, values, where, sId);
+    }
+
+    public void setSubredditList(Account account) {
+        ContentValues values = new ContentValues();
+        values.put(AccountSqlHelper.COLUMN_SUBREDDIT_LIST, account.getCommaSepSubs());
+
+        String[] sId = { "" + account.getId() };
         String where = AccountSqlHelper.COLUMN_ID + "=?";
         mDatabase.update(AccountSqlHelper.TABLE_ACCOUNTS, values, where, sId);
     }
@@ -68,8 +78,8 @@ public class AccountDataSource {
 
     public void updateLoginInfo(String cookie, String modhash, long id) {
         ContentValues values = new ContentValues();
-        values.put(AccountSqlHelper.COLUMN_ACCOUNT_COOKIE, cookie);
-        values.put(AccountSqlHelper.COLUMN_ACCOUNT_MODHASH, modhash);
+        values.put(AccountSqlHelper.COLUMN_COOKIE, cookie);
+        values.put(AccountSqlHelper.COLUMN_MODHASH, modhash);
 
         String[] sId = { "" + id };
         String where = AccountSqlHelper.COLUMN_ID + "=?";

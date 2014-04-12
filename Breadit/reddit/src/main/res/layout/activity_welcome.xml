@@ -3,7 +3,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/blackish">
 
     <android.support.v4.view.ViewPager android:id="@+id/view_pager"
         android:layout_weight="1"
@@ -13,7 +14,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/gainsboro"
+        android:background="@color/darker_gray"
         android:layout_marginRight="8dp"
         android:layout_marginLeft="8dp" />
 
@@ -27,12 +28,14 @@
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@string/skip_setup"/>
+            android:text="@string/skip_setup"
+            android:textColor="@color/auburn"
+            android:fontFamily="sans-serif-condensed"/>
 
         <View
             android:layout_width="1dp"
             android:layout_height="match_parent"
-            android:background="@color/gainsboro"
+            android:background="@color/darker_gray"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp" />
 
@@ -41,7 +44,9 @@
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@string/next"/>
+            android:text="@string/next"
+            android:textColor="@color/auburn"
+            android:fontFamily="sans-serif-condensed"/>
 
     </LinearLayout>
 

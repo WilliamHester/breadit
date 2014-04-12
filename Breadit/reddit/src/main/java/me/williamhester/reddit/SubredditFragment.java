@@ -4,6 +4,7 @@ import android.app.ActionBar;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -95,6 +96,12 @@ public class SubredditFragment extends Fragment {
                 R.color.orangered,R.color.periwinkle);
         populateSubmissions();
         return v;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mSubmissionsAdapter.notifyDataSetChanged();
     }
 
     public void setSubreddit(String subreddit) {
@@ -194,6 +201,12 @@ public class SubredditFragment extends Fragment {
             author.setText(s.getAuthor());
             domain.setText("(" + s.getDomain() + ")");
             points.setText(s.getScore() + " points by ");
+
+            if (mAccount != null && mAccount.hasVisited(mSubmissionList.get(position).getName())) {
+                title.setTypeface(title.getTypeface(), Typeface.ITALIC);
+            } else {
+                title.setTypeface(title.getTypeface(), Typeface.NORMAL);
+            }
             
             return convertView;
         }
@@ -327,8 +340,7 @@ public class SubredditFragment extends Fragment {
         }
 
         @Override
-        public void onScrollStateChanged(AbsListView view, int scrollState) {
-        }
+        public void onScrollStateChanged(AbsListView view, int scrollState) { }
     }
 
     public class SwipeDetector2 extends GestureDetector.SimpleOnGestureListener {
@@ -348,6 +360,15 @@ public class SubredditFragment extends Fragment {
                         - mSubmissions.getFirstVisiblePosition()) != null)
                     iv = (ImageView) mSubmissions.getChildAt(position
                             - mSubmissions.getFirstVisiblePosition()).findViewById(R.id.thumbnail);
+                if (mAccount == null) {
+                    Log.i("SubredditFragment", "mAccount is null");
+                } else if (!mAccount.hasVisited(mSubmissionList.get(position).getName())) {
+                    mAccount.visit(mSubmissionList.get(position).getName());
+                    AccountDataSource dataSource = new AccountDataSource(mContext);
+                    dataSource.open();
+                    dataSource.setHistory(mAccount);
+                    dataSource.close();
+                }
                 Intent i = new Intent(getActivity(), SubmissionActivity.class);
                 Bundle b = new Bundle();
                 b.putParcelable("submission", mSubmissionList.get(position));

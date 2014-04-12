@@ -4,10 +4,12 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <FrameLayout
+    <LinearLayout
+        android:gravity="center"
         android:layout_weight="1"
         android:layout_width="match_parent"
-        android:layout_height="0dp">
+        android:layout_height="0dp"
+        android:orientation="vertical">
         <TextView
             android:layout_gravity="center"
             android:gravity="center"
@@ -15,8 +17,18 @@
             android:layout_height="wrap_content"
             android:textSize="30sp"
             android:text="@string/enter_acc_info"
-            android:fontFamily="sans-serif-light" />
-    </FrameLayout>
+            android:fontFamily="sans-serif-condensed"
+            android:textColor="@color/auburn"/>
+        <TextView
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:text="@string/dont_worry"
+            android:fontFamily="sans-serif-condensed"
+            android:textColor="@color/auburn"/>
+    </LinearLayout>
 
     <LinearLayout
         android:layout_weight="1"
@@ -31,7 +43,8 @@
             android:layout_height="wrap_content"
             android:hint="@string/username"
             android:imeOptions="actionNext"
-            android:inputType="textNoSuggestions"/>
+            android:inputType="textNoSuggestions"
+            android:textColor="@color/auburn"/>
 
         <View
             android:layout_width="match_parent"
@@ -43,7 +56,8 @@
             android:layout_width="240dp"
             android:layout_height="wrap_content"
             android:hint="@string/password"
-            android:inputType="textPassword"/>
+            android:inputType="textPassword"
+            android:textColor="@color/auburn"/>
 
     </LinearLayout>
 
