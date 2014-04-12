@@ -3,7 +3,6 @@ package me.williamhester.reddit;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Fragment;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
@@ -14,25 +13,20 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
 
-;import me.williamhester.areddit.Subreddit;
-import me.williamhester.areddit.User;
+;import me.williamhester.areddit.Account;
+import me.williamhester.areddit.Subreddit;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
@@ -70,7 +64,7 @@ public class NavigationDrawerFragment extends Fragment {
     private int mCurrentSelectedPosition = 0;
     private boolean mFromSavedInstanceState;
     private boolean mUserLearnedDrawer;
-    private User mUser;
+    private Account mAccount;
 
     public NavigationDrawerFragment() {
     }
@@ -79,7 +73,7 @@ public class NavigationDrawerFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mUser = getArguments().getParcelable("user");
+            mAccount = getArguments().getParcelable("account");
         }
         // Read in the flag indicating whether or not the user has demonstrated awareness of the
         // drawer. See PREF_USER_LEARNED_DRAWER for details.
@@ -106,7 +100,7 @@ public class NavigationDrawerFragment extends Fragment {
         mDrawerLayout = (DrawerLayout) container.getRootView().findViewById(R.id.drawer_layout);
         mDrawerListView = (ListView) v.findViewById(R.id.list);
 
-        if (mUser != null) {
+        if (mAccount != null) {
             mSubredditList = new ArrayList<String>();
             mSubredditArrayAdapter = new ArrayAdapter<String>(
                     getActivity().getActionBar().getThemedContext(),
@@ -326,13 +320,13 @@ public class NavigationDrawerFragment extends Fragment {
         @Override
         protected Void doInBackground(Void... voids) {
             try {
-                ArrayList<Subreddit> subreddits = mUser.getSubscribedSubreddits();
+                ArrayList<Subreddit> subreddits = mAccount.getSubscribedSubreddits();
                 for (Subreddit s : subreddits) {
                     mSubredditList.add(s.getDisplayName());
                 }
                 // Sort mSubredditList
                 Collections.sort(mSubredditList, orderList);
-                mSubredditList.add(0,"FrontPage");
+                mSubredditList.add(0, "FrontPage");
             } catch (IOException e) {
                 e.printStackTrace();
                 Log.e("NDF", "IOException was thrown when getting getSubreddits");
@@ -346,9 +340,9 @@ public class NavigationDrawerFragment extends Fragment {
         }
     }
 
-    public static NavigationDrawerFragment newInstance(User user) {
+    public static NavigationDrawerFragment newInstance(Account account) {
         Bundle args = new Bundle();
-        args.putParcelable("user", user);
+        args.putParcelable("account", account);
         NavigationDrawerFragment fragment = new NavigationDrawerFragment();
         fragment.setArguments(args);
         return fragment;

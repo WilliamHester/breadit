@@ -8,8 +8,8 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import me.williamhester.areddit.Account;
 import me.williamhester.areddit.Submission;
-import me.williamhester.areddit.User;
 
 /**
  * Created by William on 2/11/14.
@@ -25,7 +25,7 @@ public class SubmissionActivity extends Activity {
     private String mUrl;
     private Submission mSubmission;
     private boolean mIsSelf;
-    private User mUser;
+    private Account mAccount;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -38,7 +38,7 @@ public class SubmissionActivity extends Activity {
             mPermalink = getIntent().getExtras().getString("permalink", null);
             mUrl = getIntent().getExtras().getString("url", null);
             mIsSelf = getIntent().getExtras().getBoolean("isSelf", false);
-            mUser = getIntent().getExtras().getParcelable("user");
+            mAccount = getIntent().getExtras().getParcelable("user");
             selectedTab = getIntent().getExtras().getInt("tab");
         }
 

@@ -35,6 +35,7 @@ public class Utilities {
             httpGet.setHeader("Cookie", "reddit_session=" + cookie);
         if (modhash != null)
             httpGet.addHeader("X-Modhash", modhash);
+
         HttpResponse httpResponse = httpClient.execute(httpGet);
         return readStream(httpResponse.getEntity().getContent());
     }

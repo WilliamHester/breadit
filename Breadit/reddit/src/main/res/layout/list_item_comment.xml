@@ -45,7 +45,7 @@
                 android:fontFamily="sans-serif-condensed"
                 android:textColor="@color/auburn"/>
 
-            <!--Todo: add an ImageView for if the user has a gilded comment-->
+            <!--Todo: add an ImageView for if the account has a gilded comment-->
 
         </LinearLayout>
 

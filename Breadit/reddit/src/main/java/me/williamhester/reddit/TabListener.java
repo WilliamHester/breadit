@@ -46,6 +46,6 @@ public class TabListener<T extends Fragment> implements ActionBar.TabListener {
     }
 
     public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
-        // User selected the already selected tab. Usually do nothing.
+        // Account selected the already selected tab. Usually do nothing.
     }
 }

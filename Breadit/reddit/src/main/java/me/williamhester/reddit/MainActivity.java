@@ -6,20 +6,12 @@ import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import me.williamhester.areddit.Subreddit;
-import me.williamhester.areddit.User;
+import me.williamhester.areddit.Account;
 
 public class MainActivity extends Activity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -31,7 +23,7 @@ public class MainActivity extends Activity
     private NavigationDrawerFragment mNavigationDrawerFragment;
     private SubredditFragment mSubredditFragment;
     private SharedPreferences mPrefs;
-    private User mUser;
+    private Account mAccount;
     private String mSubreddit;
 
     /**
@@ -48,42 +40,38 @@ public class MainActivity extends Activity
 
         if (getIntent() != null && getIntent().getExtras() != null) { // If the user just completed the setup
             boolean b = getIntent().getExtras().getBoolean("finishedSetup");
-            mUser = getIntent().getExtras().getParcelable("user");
+            mAccount = getIntent().getExtras().getParcelable("account");
             SharedPreferences.Editor edit = mPrefs.edit();
             edit.putBoolean("finishedSetup", b);
-            if (mUser != null) {
-                edit.putString("username", mUser.getUsername());
-                edit.putString("cookie", mUser.getCookie());
-                edit.putString("modhash", mUser.getModhash());
+            if (mAccount != null) {
+                AccountDataSource dataSource = new AccountDataSource(this);
+                dataSource.open();
+                dataSource.addAccount(mAccount);
+                dataSource.close();
+                edit.putLong("accountId", mAccount.getId());
             }
             edit.commit();
-
-            FragmentManager fragmentManager = getFragmentManager();
-            Bundle bundle = new Bundle();
-            bundle.putParcelable("user", mUser);
-            SubredditFragment sf = new SubredditFragment();
-            sf.setArguments(bundle);
-            fragmentManager.beginTransaction()
-                    .replace(R.id.container, sf)
-                    .commit();
         } else if (!mPrefs.getBoolean("finishedSetup", false)) { // If the user has not completed the setup
             Intent i = new Intent(this, SetupActivity.class);
             startActivity(i);
         } else { // If the user has completed the setup
-            String username = mPrefs.getString("username", "");
-            String cookie = mPrefs.getString("cookie", "");
-            String modhash = mPrefs.getString("modhash", "");
-            if (!username.equals("")) {
-                mUser = new User(username, modhash, cookie);
+            long id = mPrefs.getLong("accountId", -1);
+            if (id != -1) {
+                AccountDataSource dataSource = new AccountDataSource(this);
+                dataSource.open();
+                mAccount = dataSource.getAccount(id);
+                dataSource.close();
             }
         }
 
-        mSubredditFragment = SubredditFragment.newInstance(mUser, mSubreddit);
-        mNavigationDrawerFragment = NavigationDrawerFragment.newInstance(mUser);
+        mSubredditFragment = SubredditFragment.newInstance(mAccount, mSubreddit);
+        mNavigationDrawerFragment = NavigationDrawerFragment.newInstance(mAccount);
         mTitle = getTitle();
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
+
+        updateActionBar(null);
 
         getFragmentManager().beginTransaction().replace(R.id.navigation_drawer_container,
                 mNavigationDrawerFragment)
@@ -142,7 +130,7 @@ public class MainActivity extends Activity
         if (id == R.id.action_settings) {
             return true;
         } else if (id == R.id.action_submit) {
-            SubmitDialogFragment sf = SubmitDialogFragment.newInstance(mUser, mSubreddit);
+            SubmitDialogFragment sf = SubmitDialogFragment.newInstance(mAccount, mSubreddit);
             sf.show(getFragmentManager(), "submit_fragment");
         }
         return super.onOptionsItemSelected(item);

@@ -1,5 +1,6 @@
 package me.williamhester.areddit;
 
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -17,86 +18,148 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Scanner;
+import java.util.TreeSet;
 
 import me.williamhester.areddit.utils.Utilities;
 
-public class User implements Parcelable {
+public class Account implements Parcelable {
 
-    public static String USERNAME = "username";
-    public static String MODHASH = "modhash";
-    public static String COOKIE = "cookie";
-    public static String JS_STRING = "jsstring";
+    public static final String USERNAME = "username";
+    public static final String MODHASH = "modhash";
+    public static final String COOKIE = "cookie";
+    public static final String JS_STRING = "jsstring";
+    public static final String TABLE_ID = "table_id";
+    public static final String SUBSCRIBED_SUBREDDITS = "subscribed_subreddits";
+    public static final String SAVED_SUBMISSIONS = "saved_submissions";
+    public static final String HISTORY = "history";
 
 	private String mUsername;
 	private String mModhash;
     private String mCookie;
     private String mDataString;
+    private String mSavedSubmissions;
+    private String mHistory;
+    private TreeSet<String> mHistoryTree;
+    private long mId;
+
+    private ArrayList<String> mSubscribedSubreddits;
 
     private JsonObject mData;
 
-    private User() { }
+    private Account() { }
 
-    public User(Parcel in) {
+    public Account(Parcel in) {
         Bundle b = in.readBundle();
         mUsername = b.getString(USERNAME);
         mModhash = b.getString(MODHASH);
         mCookie = b.getString(COOKIE);
         mDataString = b.getString(JS_STRING);
+        mId = b.getLong(TABLE_ID);
+        String subs = b.getString(SUBSCRIBED_SUBREDDITS);
+        mSavedSubmissions = b.getString(SAVED_SUBMISSIONS);
+        mHistory = b.getString(HISTORY);
+
         if (mDataString != null) {
             mData = new JsonParser().parse(mDataString).getAsJsonObject();
+        }
+        if (subs != null) {
+            Scanner scan = new Scanner(subs).useDelimiter(",");
+            mSubscribedSubreddits = new ArrayList<String>();
+            while (scan.hasNext()) {
+                mSubscribedSubreddits.add(scan.next());
+            }
+        } else {
+            mSubscribedSubreddits = new ArrayList<String>();
+        }
+        if (mHistory != null) {
+            Scanner scan = new Scanner(mHistory).useDelimiter(",");
+            mHistoryTree = new TreeSet<String>();
+            while (scan.hasNext()) {
+                mHistoryTree.add(scan.next());
+            }
+        } else {
+            mHistory = "";
+            mHistoryTree = new TreeSet<String>();
         }
     }
 
     /**
-     * This constructor should only be used to reconstruct a User from data saved in
-     * SharedPreferences to create a new User, the static method newUser() must be called.
+     * This constructor should only be used to reconstruct a Account from data saved in
+     * SharedPreferences to create a new Account, the static method newUser() must be called.
      *
      * @param username
      * @param modhash
      * @param cookie
      */
-    public User(String username, String modhash, String cookie) {
+    public Account(String username, String modhash, String cookie) {
         mUsername = username;
         mModhash = modhash;
         mCookie = cookie;
         new UserDataLoader().execute();
     }
 
-    public static final Parcelable.Creator<User> CREATOR
-            = new Parcelable.Creator<User>() {
-        public User createFromParcel(Parcel in) {
-            return new User(in);
+    public Account(Cursor c) {
+        c.moveToFirst();
+        mId = c.getLong(0);
+        mUsername = c.getString(1);
+        mCookie = c.getString(2);
+        mModhash = c.getString(3);
+        String subs = c.getString(4);
+        mSavedSubmissions = c.getString(5);
+        Scanner scan = new Scanner(subs).useDelimiter(",");
+        mSubscribedSubreddits = new ArrayList<String>();
+        while (scan.hasNext()) {
+            mSubscribedSubreddits.add(scan.next());
+        }
+        if (mHistory != null) {
+            scan = new Scanner(mHistory).useDelimiter(",");
+            while (scan.hasNext()) {
+                mHistoryTree.add(scan.next());
+            }
+        } else {
+            mHistory = "";
+            mHistoryTree = new TreeSet<String>();
+        }
+    }
+
+    public static final Parcelable.Creator<Account> CREATOR
+            = new Parcelable.Creator<Account>() {
+        public Account createFromParcel(Parcel in) {
+            return new Account(in);
         }
 
-        public User[] newArray(int size) {
-            return new User[size];
+        public Account[] newArray(int size) {
+            return new Account[size];
         }
     };
 
     /**
-     * Creates a new User object and creates a cookie that can be used long-term.
+     * Creates a new Account object and creates a cookie that can be used long-term.
      *
      * @param username the username of the user
      * @param password the password of the user
-     * @return returns a User object with all of its data
+     *
+     * @return returns a Account object with all of its data
+     *
      * @throws IOException if the connection fails
-     * @return returns a new User object.
+     *
+     * @return returns a new Account object.
      */
-    public static User newUser(String username, String password)
-            throws IOException{
-        User u = new User();
-        u.mUsername = username;
+    public static Account newUser(String username, String password) throws IOException{
+        Account a = new Account();
+        a.mUsername = username;
         HashMap<String, String> hashCookiePair = hashCookiePair(username, password);
-        u.mCookie = hashCookiePair.get("cookie");
-        u.mModhash = hashCookiePair.get("modhash");
+        a.mCookie = hashCookiePair.get("cookie");
+        a.mModhash = hashCookiePair.get("modhash");
         try {
-            u.mDataString = u.getUserData().toString();
+            a.mDataString = a.getUserData().toString();
         } catch (NullPointerException e) {
-            if (u.mData == null) {
+            if (a.mData == null) {
                 Log.e("BreaditDebug", "mData is null");
             }
         }
-        return u;
+        return a;
     }
 
 	/**
@@ -113,10 +176,10 @@ public class User implements Parcelable {
 			throws IOException {
 		JsonObject object = new JsonParser().parse(submit(title, link, false, subreddit)).getAsJsonObject();
 		if (object.toString().contains(".error.USER_REQUIRED")) {
-//			User not logged in
+//			Account not logged in
             return null;
 		} else if (object.toString().contains(".error.RATELIMIT.field-ratelimit")) {
-//			User hit ratelimit
+//			Account hit ratelimit
             return null;
 		} else if (object.toString().contains(".error.ALREADY_SUB.field-url")) {
 //			That link has already been submitted.
@@ -138,10 +201,10 @@ public class User implements Parcelable {
 			throws IOException {
         JsonObject object = new JsonParser().parse(submit(title, text, true, subreddit)).getAsJsonObject();
         if (object.toString().contains(".error.USER_REQUIRED")) {
-//			User not logged in
+//			Account not logged in
             return null;
         } else if (object.toString().contains(".error.RATELIMIT.field-ratelimit")) {
-//			User hit ratelimit
+//			Account hit ratelimit
             return null;
         } else if (object.toString().contains(".error.ALREADY_SUB.field-url")) {
 //			That link has already been submitted.
@@ -198,6 +261,27 @@ public class User implements Parcelable {
 		return mCookie;
 	}
 
+    public void setId(long id) {
+        mId = id;
+    }
+
+    public long getId() {
+        return mId;
+    }
+
+    public List<String> getSubscribedSubredditsStrings() {
+        return mSubscribedSubreddits;
+    }
+
+    public void addToHistory(String fullname) {
+        mHistory = fullname + "," + mHistory;
+        mHistoryTree.add(fullname);
+    }
+
+    public boolean hasVisited(String fullname) {
+        return mHistoryTree.contains(fullname);
+    }
+
 	/**
 	 * This function logs in to reddit and returns an ArrayList containing a
 	 * modhash and cookie.
@@ -235,12 +319,6 @@ public class User implements Parcelable {
 	 * @return JSON data containing getUserData about the user
 	 */
 	private JsonObject getUserData() throws IOException {
-
-		if (mCookie == null || mModhash == null) {
-			throw new IOException("User not connected. " +
-                "Please invoke the \"newUser\" method before attempting " +
-                "to call any other User API functions.");
-		}
         String s = Utilities.get("", "http://www.reddit.com/api/me.json", mCookie, mModhash);
 
 		JsonObject jsonObject = new JsonParser().parse(s).getAsJsonObject();
@@ -267,6 +345,7 @@ public class User implements Parcelable {
 	 * @param selfPost If this submission is a self post
 	 * @param subreddit Which subreddit to submit this to
 	 * @return a String that can be parsed into a JsonObject
+     *
 	 * @throws java.io.IOException If connection fails
 	 */
 	private String submit(String title, String linkOrText,
@@ -352,6 +431,9 @@ public class User implements Parcelable {
         b.putString(MODHASH, mModhash);
         b.putString(COOKIE, mCookie);
         b.putString(JS_STRING, mDataString);
+        b.putLong(TABLE_ID, mId);
+        b.putString(SAVED_SUBMISSIONS, mSavedSubmissions);
+        b.putString(HISTORY, mHistory);
         dest.writeBundle(b);
     }
 
@@ -368,9 +450,5 @@ public class User implements Parcelable {
             }
             return null;
         }
-    }
-
-    public class FailedLoginException extends Exception {
-
     }
 }

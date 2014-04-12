@@ -18,8 +18,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import me.williamhester.areddit.Account;
 import me.williamhester.areddit.Captcha;
-import me.williamhester.areddit.User;
 import me.williamhester.areddit.utils.Utilities;
 
 /**
@@ -33,7 +33,7 @@ public class SubmitDialogFragment extends DialogFragment {
     private EditText mSubmitText;
     private EditText mTitle;
     private ImageView mCaptchaImage;
-    private User mUser;
+    private Account mAccount;
     private String mSubreddit;
 
     private Captcha mCaptcha;
@@ -42,7 +42,7 @@ public class SubmitDialogFragment extends DialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mUser = getArguments().getParcelable("user");
+            mAccount = getArguments().getParcelable("user");
             mSubreddit = getArguments().getString("subreddit");
         }
         setStyle(STYLE_NO_TITLE, getTheme());
@@ -73,9 +73,9 @@ public class SubmitDialogFragment extends DialogFragment {
         return v;
     }
 
-    public static SubmitDialogFragment newInstance(User user, String subreddit) {
+    public static SubmitDialogFragment newInstance(Account account, String subreddit) {
         Bundle b = new Bundle();
-        b.putParcelable("user", user);
+        b.putParcelable("account", account);
         b.putString("subreddit", subreddit);
         SubmitDialogFragment rf = new SubmitDialogFragment();
         rf.setArguments(b);
@@ -86,7 +86,7 @@ public class SubmitDialogFragment extends DialogFragment {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            if (mUser != null && mSubmitText != null && mSubmitText.getText() != null
+            if (mAccount != null && mSubmitText != null && mSubmitText.getText() != null
                     && mSubmitText.getText().toString().length() != 0) {
                 List<NameValuePair> apiParams = new ArrayList<NameValuePair>();
                 apiParams.add(new BasicNameValuePair("api-type", "json"));
@@ -103,8 +103,8 @@ public class SubmitDialogFragment extends DialogFragment {
                 apiParams.add(new BasicNameValuePair("title", mTitle.getText().toString()));
                 apiParams.add(new BasicNameValuePair("url", ""));
                 Log.i("SubmitDialogFragment", "Response = " + Utilities.post(apiParams,
-                        "http://www.reddit.com/api/submit", mUser.getCookie(),
-                        mUser.getModhash()));
+                        "http://www.reddit.com/api/submit", mAccount.getCookie(),
+                        mAccount.getModhash()));
             }
             return null;
         }
@@ -122,7 +122,7 @@ public class SubmitDialogFragment extends DialogFragment {
             try {
                 Log.i("RetrieveCaptcha", Utilities.get("",
                         "http://www.reddit.com/api/needs_captcha.json",
-                        mUser.getCookie(), mUser.getModhash()));
+                        mAccount.getCookie(), mAccount.getModhash()));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -130,8 +130,8 @@ public class SubmitDialogFragment extends DialogFragment {
             List<NameValuePair> apiParams = new ArrayList<NameValuePair>();
             apiParams.add(new BasicNameValuePair("api-type", "json"));
             Log.i("RetrieveCaptcha", Utilities.post(apiParams,
-                    "http://www.reddit.com/api/new_captcha", mUser.getCookie(),
-                    mUser.getModhash()));
+                    "http://www.reddit.com/api/new_captcha", mAccount.getCookie(),
+                    mAccount.getModhash()));
             return null;
         }
     }

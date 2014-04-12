@@ -9,7 +9,7 @@ import org.apache.http.message.BasicNameValuePair;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.williamhester.areddit.User;
+import me.williamhester.areddit.Account;
 import me.williamhester.areddit.utils.Utilities;
 
 /**
@@ -22,26 +22,26 @@ public class VoteAsyncTask extends AsyncTask<Void, Void, Boolean> {
     public static final int DOWNVOTE = -1;
 
     private String mFullname;
-    private User mUser;
+    private Account mAccount;
     private int mDir;
 
-    public VoteAsyncTask(String fullname, User user, int dir) {
+    public VoteAsyncTask(String fullname, Account account, int dir) {
         mDir = dir;
-        mUser = user;
+        mAccount = account;
         mFullname = fullname;
     }
 
     @Override
     protected Boolean doInBackground(Void... voids) {
-        if (mUser == null) {
-            Log.i("VoteAsyncTask", "User is null");
+        if (mAccount == null) {
+            Log.i("VoteAsyncTask", "Account is null");
             return false; // Can't vote if the user is not logged in.
         }
         List<NameValuePair> apiParams = new ArrayList<NameValuePair>();
         apiParams.add(new BasicNameValuePair("dir", mDir + ""));
         apiParams.add(new BasicNameValuePair("id", mFullname));
-        Log.i("VoteAsyncTask", Utilities.post(apiParams, "http://www.reddit.com/api/vote", mUser.getCookie(),
-                mUser.getModhash()));
+        Log.i("VoteAsyncTask", Utilities.post(apiParams, "http://www.reddit.com/api/vote", mAccount.getCookie(),
+                mAccount.getModhash()));
         return true; // If we get here, then we successfully voted.
     }
 }

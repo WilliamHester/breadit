@@ -20,7 +20,7 @@ import android.widget.EditText;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
-import me.williamhester.areddit.User;
+import me.williamhester.areddit.Account;
 
 /**
  * Created by William Hester on 3/20/14.
@@ -150,9 +150,9 @@ public class SetupActivity extends FragmentActivity {
             Bundle b;
             try {
                 b = new Bundle();
-                User user = User.newUser(mUsername.getText().toString(),
+                Account account = Account.newUser(mUsername.getText().toString(),
                         mPassword.getText().toString());
-                b.putParcelable("user", user);
+                b.putParcelable("account", account);
                 return b;
             } catch (MalformedURLException e) {
                 Log.e("BreaditDebug", e.toString());

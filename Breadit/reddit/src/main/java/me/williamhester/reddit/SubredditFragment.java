@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -33,7 +34,7 @@ import java.util.List;
 
 import me.williamhester.areddit.Submission;
 import me.williamhester.areddit.SubmissionsListViewHelper;
-import me.williamhester.areddit.User;
+import me.williamhester.areddit.Account;
 import me.williamhester.areddit.utils.Utilities;
 
 /**
@@ -50,7 +51,7 @@ public class SubredditFragment extends Fragment {
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private List<Submission> mSubmissionList;
     private HashSet<String> mNames;
-    private User mUser;
+    private Account mAccount;
 
     private GestureDetector mGestureDetector;
     private View.OnTouchListener mGestureListener;
@@ -63,7 +64,7 @@ public class SubredditFragment extends Fragment {
             mAction = getActivity().getActionBar();
         }
         if (getArguments() != null) {
-            mUser = getArguments().getParcelable("user");
+            mAccount = getArguments().getParcelable("account");
             mSubredditName = getArguments().getString("subreddit");
         }
         mContext = getActivity();
@@ -101,11 +102,11 @@ public class SubredditFragment extends Fragment {
         populateSubmissions();
     }
 
-    public static SubredditFragment newInstance(User user, String subredditName) {
+    public static SubredditFragment newInstance(Account account, String subredditName) {
         SubredditFragment sf = new SubredditFragment();
         Bundle b = new Bundle();
         b.putString("subreddit", subredditName);
-        b.putParcelable("user", user);
+        b.putParcelable("account", account);
         sf.setArguments(b);
         return sf;
     }
@@ -220,58 +221,17 @@ public class SubredditFragment extends Fragment {
         return time;
     }
 
-    private String calculateTime(long postTime) {
-        long currentTime = System.currentTimeMillis() / 1000;
-        long difference = currentTime - postTime;
-        String time;
-        if (difference / 31536000 > 0) {
-            if (difference / 3156000 == 1)
-                time = "1 year ago";
-            else
-                time = difference / 3156000 + " years ago";
-        } else if (difference / 2592000 > 0) {
-            if (difference / 2592000 == 1)
-                time = "1 month ago";
-            else
-                time = difference / 2592000 + " months ago";
-        } else if (difference / 604800 > 0) {
-            if (difference / 604800 == 1)
-                time = "1 week ago";
-            else
-                time = difference / 604800 + " Weeks ago";
-        } else if (difference / 86400 > 0) {
-            if (difference / 86400 == 1)
-                time = "1 day ago";
-            else
-                time = difference / 86400 + " day ago";
-        } else if (difference / 3600 > 0) {
-            if (difference / 3600 == 1)
-                time = "1 hour ago";
-            else
-                time = difference / 3600 + " hours ago";
-        } else if (difference / 60 > 0) {
-            if (difference / 60 == 1)
-                time = "1 minute ago";
-            else
-                time = difference / 60 + " minutes ago";
-        } else {
-            if (difference == 1)
-                time = "1 second ago";
-            else
-                time = difference + " seconds ago";
-        }
-        return time;
-    }
-
     private class RefreshUserClass extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void... voids) {
-            if (mUser != null) {
-                mUser.refreshUserData();
+            if (mAccount != null) {
+                mAccount.refreshUserData();
             }
 
+
+
             SubmissionsListViewHelper list = new SubmissionsListViewHelper(mSubredditName,
-                    Submission.HOT, -1, null, null, mUser, mSubmissions);
+                    Submission.HOT, -1, null, null, mAccount, mSubmissions);
             new RetrieveSubmissionsTask().execute(list);
             return null;
         }
@@ -286,11 +246,12 @@ public class SubredditFragment extends Fragment {
             try {
                 mSwipeRefreshLayout.setRefreshing(true);
                 String data;
-                if (mUser != null)
+                if (mAccount != null)
                     data = Utilities.get("", submissionsList[0].getUrl(),
-                        mUser.getCookie(), mUser.getModhash());
+                        mAccount.getCookie(), mAccount.getModhash());
                 else
                     data = Utilities.get("", submissionsList[0].getUrl(), null, null);
+
                 JsonObject rootObject = new JsonParser().parse(data).getAsJsonObject();
                 JsonArray array = rootObject.get("data").getAsJsonObject().get("children").getAsJsonArray();
 
@@ -359,7 +320,7 @@ public class SubredditFragment extends Fragment {
                 SubmissionsListViewHelper list = new SubmissionsListViewHelper(mSubredditName,
                         Submission.HOT, -1, null,
                         mSubmissionList.get(mSubmissionList.size() - 1).getName(),
-                        mUser, mSubmissions);
+                        mAccount, mSubmissions);
                 new RetrieveSubmissionsTask().execute(list);
                 loading = true;
             }
@@ -390,7 +351,7 @@ public class SubredditFragment extends Fragment {
                 Intent i = new Intent(getActivity(), SubmissionActivity.class);
                 Bundle b = new Bundle();
                 b.putParcelable("submission", mSubmissionList.get(position));
-                b.putParcelable("user", mUser);
+                b.putParcelable("account", mAccount);
                 // Clicked on the image side
                 if (iv != null && x >= iv.getLeft() + mSubmissions.getLeft()) {
                     b.putInt("tab", SubmissionActivity.CONTENT_TAB);
@@ -406,7 +367,7 @@ public class SubredditFragment extends Fragment {
 
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            if (mUser != null) {
+            if (mAccount != null) {
                 if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH)
                     return false;
                 // right to left swipe
@@ -415,10 +376,10 @@ public class SubredditFragment extends Fragment {
                         && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
                     Submission s = mSubmissionsAdapter.getItem(position);
                     if (s.getVoteStatus() == Submission.DOWNVOTED) {
-                        new VoteAsyncTask(s.getName(), mUser, VoteAsyncTask.NEUTRAL).execute();
+                        new VoteAsyncTask(s.getName(), mAccount, VoteAsyncTask.NEUTRAL).execute();
                         s.setVoteStatus(Submission.NEUTRAL);
                     } else {
-                        new VoteAsyncTask(s.getName(), mUser, VoteAsyncTask.DOWNVOTE).execute();
+                        new VoteAsyncTask(s.getName(), mAccount, VoteAsyncTask.DOWNVOTE).execute();
                         s.setVoteStatus(Submission.DOWNVOTED);
                     }
                     View v = mSubmissions.getChildAt(position - mSubmissions.getFirstVisiblePosition());
@@ -439,10 +400,10 @@ public class SubredditFragment extends Fragment {
                         && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
                     Submission s = mSubmissionsAdapter.getItem(position);
                     if (s.getVoteStatus() == Submission.UPVOTED) {
-                        new VoteAsyncTask(s.getName(), mUser, VoteAsyncTask.NEUTRAL).execute();
+                        new VoteAsyncTask(s.getName(), mAccount, VoteAsyncTask.NEUTRAL).execute();
                         s.setVoteStatus(Submission.NEUTRAL);
                     } else {
-                        new VoteAsyncTask(s.getName(), mUser, VoteAsyncTask.UPVOTE).execute();
+                        new VoteAsyncTask(s.getName(), mAccount, VoteAsyncTask.UPVOTE).execute();
                         s.setVoteStatus(Submission.UPVOTED);
                     }
                     View v = mSubmissions.getChildAt(position - mSubmissions.getFirstVisiblePosition());

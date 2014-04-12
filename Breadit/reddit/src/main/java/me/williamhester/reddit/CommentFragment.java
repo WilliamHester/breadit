@@ -39,7 +39,7 @@ import java.util.List;
 
 import me.williamhester.areddit.Comment;
 import me.williamhester.areddit.Submission;
-import me.williamhester.areddit.User;
+import me.williamhester.areddit.Account;
 import me.williamhester.areddit.Votable;
 import me.williamhester.areddit.utils.Utilities;
 
@@ -57,7 +57,7 @@ public class CommentFragment extends Fragment {
     private String mPermalink;
     private Submission mSubmission;
     private TextView mNumComments;
-    private User mUser;
+    private Account mAccount;
     private View mHeaderView;
     private View.OnTouchListener mGestureListener;
 
@@ -69,11 +69,11 @@ public class CommentFragment extends Fragment {
         Bundle args = getArguments();
         mContext = getActivity();
         if (args != null) {
-            mUser = args.getParcelable("user");
+            mAccount = args.getParcelable("user");
             mSubmission = args.getParcelable("submission");
             if (mSubmission != null) {
                 mUrl = mSubmission.getUrl();
-                mPermalink = mSubmission.getPermalink();
+                mPermalink = "http://www.reddit.com" + mSubmission.getPermalink();
             }
         }
         mCommentsList = new ArrayList<Comment>();
@@ -337,7 +337,7 @@ public class CommentFragment extends Fragment {
                 if (mCommentsList.size() > 0)
                     lastComment = mCommentsList.get(mCommentsList.size() - 1).getName();
 
-                return  Comment.getComments(mPermalink, mUser, lastComment, mSortType);
+                return Comment.getComments(mPermalink, mAccount, lastComment, mSortType);
             } catch (MalformedURLException e) {
                 e.printStackTrace();
                 return null;
@@ -376,14 +376,14 @@ public class CommentFragment extends Fragment {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            if (mUser != null && mReplyText != null && mReplyText.length() != 0) {
+            if (mAccount != null && mReplyText != null && mReplyText.length() != 0) {
                 List<NameValuePair> apiParams = new ArrayList<NameValuePair>();
                 apiParams.add(new BasicNameValuePair("api-type", "json"));
                 apiParams.add(new BasicNameValuePair("text", mReplyText));
                 apiParams.add(new BasicNameValuePair("thing_id", mName));
                 Log.i("SubmitDialogFragment", "Response = " + Utilities.post(apiParams,
-                        "http://www.reddit.com/api/comment", mUser.getCookie(),
-                        mUser.getModhash()));
+                        "http://www.reddit.com/api/comment", mAccount.getCookie(),
+                        mAccount.getModhash()));
                 Log.i("SubmitDialogFragment", "name = " + mName);
             }
             return null;
@@ -441,9 +441,9 @@ public class CommentFragment extends Fragment {
             }, 320);
             Comment c = null;
             if (position == 0) {
-                c = new Comment(mUser, 0);
+                c = new Comment(mAccount, 0);
             } else if (position > 0) {
-                c = new Comment(mUser, mCommentsList.get(position - 1).getLevel() + 1);
+                c = new Comment(mAccount, mCommentsList.get(position - 1).getLevel() + 1);
             }
             mCommentsList.add(position, c);
             mCommentAdapter.notifyDataSetChanged();
@@ -461,7 +461,7 @@ public class CommentFragment extends Fragment {
             }
             final int offset;
             ArrayList<String> options = new ArrayList<String>();
-            if (mUser.getUsername().equals(v.getAuthor())) {
+            if (mAccount.getUsername().equals(v.getAuthor())) {
                 options.add(getResources().getString(R.string.edit));
                 options.add(getResources().getString(R.string.delete));
                 offset = 0;
@@ -473,7 +473,9 @@ public class CommentFragment extends Fragment {
             options.add(getResources().getString(R.string.message_user));
             options.add(getResources().getString(R.string.save));
             AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-            builder.setItems((String[]) options.toArray(), new DialogInterface.OnClickListener() {
+            String[] array = new String[options.size()];
+            options.toArray(array);
+            builder.setItems(array, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int which) {
                     switch (which + offset) {
@@ -503,7 +505,7 @@ public class CommentFragment extends Fragment {
 
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            if (mUser != null) {
+            if (mAccount != null) {
                 if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH)
                     return false;
                 // right to left swipe
@@ -515,10 +517,10 @@ public class CommentFragment extends Fragment {
                     } else if (position > 0) {
                         v = mCommentAdapter.getItem(position - HEADER_VIEW_COUNT);
                         if (v.getVoteStatus() == Comment.DOWNVOTED) {
-                            new VoteAsyncTask(v.getName(), mUser, VoteAsyncTask.NEUTRAL).execute();
+                            new VoteAsyncTask(v.getName(), mAccount, VoteAsyncTask.NEUTRAL).execute();
                             v.setVoteStatus(Votable.NEUTRAL);
                         } else {
-                            new VoteAsyncTask(v.getName(), mUser, VoteAsyncTask.DOWNVOTE).execute();
+                            new VoteAsyncTask(v.getName(), mAccount, VoteAsyncTask.DOWNVOTE).execute();
                             v.setVoteStatus(Votable.DOWNVOTED);
                         }
                     }
@@ -530,10 +532,10 @@ public class CommentFragment extends Fragment {
                     } else if (position > 0) {
                         v = mCommentAdapter.getItem(position - HEADER_VIEW_COUNT);
                         if (v.getVoteStatus() == Comment.UPVOTED) {
-                            new VoteAsyncTask(v.getName(), mUser, VoteAsyncTask.NEUTRAL).execute();
+                            new VoteAsyncTask(v.getName(), mAccount, VoteAsyncTask.NEUTRAL).execute();
                             v.setVoteStatus(Votable.NEUTRAL);
                         } else {
-                            new VoteAsyncTask(v.getName(), mUser, VoteAsyncTask.UPVOTE).execute();
+                            new VoteAsyncTask(v.getName(), mAccount, VoteAsyncTask.UPVOTE).execute();
                             v.setVoteStatus(Votable.UPVOTED);
                         }
                     }
@@ -579,11 +581,14 @@ public class CommentFragment extends Fragment {
         @Override
         public boolean onTouchEvent(TextView widget, Spannable buffer, MotionEvent event) {
             if (event.getAction() == MotionEvent.ACTION_UP) {
-                if (super.onTouchEvent(widget, buffer, event))
+                if (super.onTouchEvent(widget, buffer, event)) {
                     return true;
+                }
+                super.onTouchEvent(widget, buffer, event);
                 View v = mCommentsListView.getChildAt(mPosition - mCommentsListView.getFirstVisiblePosition());
                 event.setLocation(event.getX(), event.getY() + v.getY());
                 return mGestureDetector.onTouchEvent(event);
+//            } else if (event.getAction() == MotionEvent.) {
             } else if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 boolean ret = super.onTouchEvent(widget, buffer, event);
                 View v = mCommentsListView.getChildAt(mPosition - mCommentsListView.getFirstVisiblePosition());

@@ -3,7 +3,6 @@ package me.williamhester.areddit;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.view.View;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -259,7 +258,7 @@ public class Submission extends Thing implements Parcelable, Votable {
      *                              since the current date back the subreddits should go.
      * @param before            The before= argument
      * @param after             The after= argument
-     * @param user              The user. If the user is not connected, it will throw an exception.
+     * @param account              The account. If the account is not connected, it will throw an exception.
      *
      * @return The list containing submissions
      *
@@ -267,7 +266,7 @@ public class Submission extends Thing implements Parcelable, Votable {
      */
     public static List<Submission> getSubmissions(String subredditName, int sortType,
                                                   int typeArgs, String before, String after,
-                                                  User user) throws IOException {
+                                                  Account account) throws IOException {
         String append;
         if (subredditName == null) {
             append = "";
@@ -330,7 +329,7 @@ public class Submission extends Thing implements Parcelable, Votable {
             urlString += "before=" + before;
         }
 
-        JsonObject object = new JsonParser().parse(Utilities.get(null, urlString, user.getCookie(), user.getModhash()))
+        JsonObject object = new JsonParser().parse(Utilities.get(null, urlString, account.getCookie(), account.getModhash()))
                 .getAsJsonObject();
         JsonObject data = object.get("data").getAsJsonObject();
         JsonArray array = data.get("children").getAsJsonArray();

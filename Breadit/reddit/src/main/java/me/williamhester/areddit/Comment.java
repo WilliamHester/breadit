@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
-import android.view.View;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -59,8 +58,8 @@ public class Comment extends Thing implements Parcelable, Votable {
     private String mReplyText;
 
     // For use when replying to comments
-    public Comment(User user, int level) {
-        mAuthor = user.getUsername();
+    public Comment(Account account, int level) {
+        mAuthor = account.getUsername();
         mVoteStatus = 0;
         mUps = 0;
         mDowns = 0;
@@ -275,8 +274,8 @@ public class Comment extends Thing implements Parcelable, Votable {
     /**
      * This function returns a list of comments
      *
-     * @param articleId The id of the link/article/submission
-     * @param user The user
+     * @param url The url of the comments thread
+     * @param account The account
      * @param after the last listing that is loaded
      * @param sortType the type of sorting
      *
@@ -284,14 +283,14 @@ public class Comment extends Thing implements Parcelable, Votable {
      *
      * @throws java.io.IOException      If connection fails
      */
-    public static List<Comment> getComments(String articleId, User user, String after, int sortType)
+    public static List<Comment> getComments(String url, Account account, String after, int sortType)
             throws IOException {
 
         ArrayList<Comment> comments = new ArrayList<Comment>();
 
-        String urlString = "http://www.reddit.com" + articleId + ".json?";
-        String cookie = user == null ? null : user.getCookie();
-        String modhash = user == null ? null : user.getModhash();
+        String urlString = url + ".json?";
+        String cookie = account == null ? null : account.getCookie();
+        String modhash = account == null ? null : account.getModhash();
 
         switch (sortType) {
             case BEST:

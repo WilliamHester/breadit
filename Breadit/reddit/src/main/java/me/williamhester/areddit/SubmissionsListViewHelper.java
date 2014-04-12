@@ -2,9 +2,6 @@ package me.williamhester.areddit;
 
 import android.widget.ListView;
 
-import java.net.URL;
-import java.util.ArrayList;
-
 /**
  * Created by William on 1/4/14.
  */
@@ -25,7 +22,7 @@ public class SubmissionsListViewHelper {
 
     private ListView mListView;
     private String mUrl;
-    private User mUser;
+    private Account mAccount;
 
     /**
      * Creates a list of submissions with the specified attributes. This should be used with
@@ -37,12 +34,12 @@ public class SubmissionsListViewHelper {
      *                              since the current date back the subreddits should go.
      * @param before the before= argument
      * @param after the after= argument
-     * @param user the user. If the user is not connected, it will throw an exception.
+     * @param account the account. If the account is not connected, it will throw an exception.
      *
      * @return The list containing submissions
      */
     public SubmissionsListViewHelper(String subredditName, int sortType, int typeArgs, String before,
-                                     String after, User user, ListView list) {
+                                     String after, Account account, ListView list) {
 
         String append;
         if (subredditName == null) {
@@ -105,7 +102,7 @@ public class SubmissionsListViewHelper {
         }
 
         mUrl = urlString;
-        mUser = user;
+        mAccount = account;
         mListView = list;
     }
 
@@ -113,8 +110,8 @@ public class SubmissionsListViewHelper {
         return mUrl;
     }
 
-    public User getUser() {
-        return mUser;
+    public Account getUser() {
+        return mAccount;
     }
 
     public ListView getListView() {
