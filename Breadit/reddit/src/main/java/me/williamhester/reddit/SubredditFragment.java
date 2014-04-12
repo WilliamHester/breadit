@@ -87,9 +87,11 @@ public class SubredditFragment extends Fragment {
             @Override
             public void onRefresh() {
                 if (mSubmissionList != null && mSubmissionList.size() != 0) {
-
+                    mNames.clear();
+                    mSubmissionList.clear();
                 }
-                populateSubmissions();
+                new RefreshUserClass().execute();
+//                populateSubmissions();
             }
         });
         mSwipeRefreshLayout.setColorScheme(R.color.orangered, R.color.periwinkle,
@@ -240,9 +242,6 @@ public class SubredditFragment extends Fragment {
             if (mAccount != null) {
                 mAccount.refreshUserData();
             }
-
-
-
             SubmissionsListViewHelper list = new SubmissionsListViewHelper(mSubredditName,
                     Submission.HOT, -1, null, null, mAccount, mSubmissions);
             new RetrieveSubmissionsTask().execute(list);
@@ -329,7 +328,8 @@ public class SubredditFragment extends Fragment {
                     currentPage++;
                 }
             }
-            if (!loading && (totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleThreshold)) {
+            if (!loading && mSubmissionList.size() > 0
+                    && (totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleThreshold)) {
                 SubmissionsListViewHelper list = new SubmissionsListViewHelper(mSubredditName,
                         Submission.HOT, -1, null,
                         mSubmissionList.get(mSubmissionList.size() - 1).getName(),
