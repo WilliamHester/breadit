@@ -2,6 +2,8 @@ package me.williamhester.reddit;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import me.williamhester.areddit.Account;
 
@@ -24,5 +26,26 @@ public class UserActivity extends Activity {
         getFragmentManager().beginTransaction()
                 .replace(R.id.container, UserFragment.newInstance(mUsername, mAccount))
                 .commit();
+
+        if (getActionBar() != null) {
+            getActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.user, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        switch (id) {
+            case android.R.id.home:
+                finish();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

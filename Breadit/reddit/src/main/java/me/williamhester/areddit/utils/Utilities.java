@@ -17,6 +17,8 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
+import me.williamhester.areddit.Account;
+
 /**
  * Created by William on 1/5/14.
  *
@@ -24,6 +26,14 @@ import java.util.List;
 public class Utilities {
 
     private static final String USER_AGENT = "Breadit_Android_App";
+
+    public static String get(String apiParams, String url, Account account) throws IOException {
+        if (account != null) {
+            return get(apiParams, url, account.getCookie(), account.getModhash());
+        } else {
+            return get(apiParams, url, null, null);
+        }
+    }
 
     public static String get(String apiParams, String url, String cookie, String modhash)
             throws IOException {

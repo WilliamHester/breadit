@@ -11,7 +11,6 @@ import android.text.Html;
 import android.text.Spannable;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
-import android.util.SparseArray;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -36,6 +35,7 @@ import org.apache.http.message.BasicNameValuePair;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import me.williamhester.areddit.Comment;
@@ -53,7 +53,7 @@ public class CommentFragment extends Fragment {
     private Context mContext;
     private GestureDetector mGestureDetector;
     private ListView mCommentsListView;
-    private SparseArray<HiddenComments> mHiddenComments;
+    private HashMap<String, HiddenComments> mHiddenComments;
     private String mUrl;
     private String mPermalink;
     private Submission mSubmission;
@@ -63,6 +63,7 @@ public class CommentFragment extends Fragment {
     private View.OnTouchListener mGestureListener;
 
     private int mSortType;
+    private boolean mLinkIsPressed = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -78,7 +79,7 @@ public class CommentFragment extends Fragment {
             }
         }
         mCommentsList = new ArrayList<Comment>();
-        mHiddenComments = new SparseArray<HiddenComments>();
+        mHiddenComments = new HashMap<String, HiddenComments>();
     }
 
     @Override
@@ -408,46 +409,52 @@ public class CommentFragment extends Fragment {
         @Override
         public boolean onSingleTapConfirmed(MotionEvent ev) {
             int position = mCommentsListView.pointToPosition((int) ev.getX(), (int) ev.getY());
-            if (position > 0) {
+            if (position > 0 && !mLinkIsPressed) {
                 View v = mCommentsListView.getChildAt(position - mCommentsListView.getFirstVisiblePosition());
                 TextView commentText = (TextView) v.findViewById(R.id.comment_text);
                 if (commentText.getVisibility() == View.VISIBLE) {
                     commentText.setVisibility(View.GONE);
                     mCommentAdapter.getItem(position - HEADER_VIEW_COUNT).setHidden(true);
-                    mHiddenComments.put(position, new HiddenComments(position));
+                    mHiddenComments.put(mCommentAdapter.getItem(position - HEADER_VIEW_COUNT).getName(),
+                            new HiddenComments(position));
                 } else {
                     commentText.setVisibility(View.VISIBLE);
                     mCommentAdapter.getItem(position - HEADER_VIEW_COUNT).setHidden(false);
-                    ArrayList<Comment> hc = mHiddenComments.get(position).getHiddenComments();
+                    ArrayList<Comment> hc = mHiddenComments
+                            .get(mCommentAdapter.getItem(position - HEADER_VIEW_COUNT).getName()).getHiddenComments();
                     mHiddenComments.remove(position);
                     for (Comment c : hc) {
                         mCommentsList.add(position++, c);
                     }
                 }
                 mCommentAdapter.notifyDataSetChanged();
+            } else if (mLinkIsPressed) {
+                mLinkIsPressed = false;
             }
             return false;
         }
 
         @Override
         public boolean onDoubleTap(MotionEvent event) {
-            int position = mCommentsListView.pointToPosition((int) event.getX(), (int) event.getY());
-            View childView = mCommentsListView.getChildAt(position - mCommentsListView.getFirstVisiblePosition());
-            final int y = childView == null ? 0 : (int) childView.getY();
-            mCommentsListView.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mCommentsListView.smoothScrollBy(y, 300);
+            if (mAccount != null) {
+                int position = mCommentsListView.pointToPosition((int) event.getX(), (int) event.getY());
+                View childView = mCommentsListView.getChildAt(position - mCommentsListView.getFirstVisiblePosition());
+                final int y = childView == null ? 0 : (int) childView.getY();
+                mCommentsListView.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mCommentsListView.smoothScrollBy(y, 300);
+                    }
+                }, 320);
+                Comment c = null;
+                if (position == 0) {
+                    c = new Comment(mAccount, 0);
+                } else if (position > 0) {
+                    c = new Comment(mAccount, mCommentsList.get(position - 1).getLevel() + 1);
                 }
-            }, 320);
-            Comment c = null;
-            if (position == 0) {
-                c = new Comment(mAccount, 0);
-            } else if (position > 0) {
-                c = new Comment(mAccount, mCommentsList.get(position - 1).getLevel() + 1);
+                mCommentsList.add(position, c);
+                mCommentAdapter.notifyDataSetChanged();
             }
-            mCommentsList.add(position, c);
-            mCommentAdapter.notifyDataSetChanged();
             return false;
         }
 
@@ -464,7 +471,7 @@ public class CommentFragment extends Fragment {
             }
             final int offset;
             ArrayList<String> options = new ArrayList<String>();
-            if (mAccount.getUsername().equals(v.getAuthor())) {
+            if (mAccount != null && mAccount.getUsername().equals(v.getAuthor())) {
                 options.add(getResources().getString(R.string.edit));
                 options.add(getResources().getString(R.string.delete));
                 offset = 0;
@@ -592,7 +599,7 @@ public class CommentFragment extends Fragment {
         public boolean onTouchEvent(TextView widget, Spannable buffer, MotionEvent event) {
             if (event.getAction() == MotionEvent.ACTION_UP) {
                 if (super.onTouchEvent(widget, buffer, event)) {
-                    return true;
+                    mLinkIsPressed = true;
                 }
                 super.onTouchEvent(widget, buffer, event);
                 View v = mCommentsListView.getChildAt(mPosition - mCommentsListView.getFirstVisiblePosition());

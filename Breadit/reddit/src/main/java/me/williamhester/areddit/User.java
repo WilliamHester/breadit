@@ -37,8 +37,8 @@ public class User extends Thing implements Parcelable {
 
     public static User getUser(String username, Account account) throws IOException,
             UserNotFoundException {
-        String s = Utilities.get("", "http://www.reddit.com/user/" + username + "/about.json",
-                account.getCookie(), account.getModhash());
+        String s;
+        s = Utilities.get("", "http://www.reddit.com/user/" + username + "/about.json", account);
         if (s.equals("{\"error\": 404}"))
             throw new UserNotFoundException();
         JsonObject jsonObject = new JsonParser().parse(s).getAsJsonObject();

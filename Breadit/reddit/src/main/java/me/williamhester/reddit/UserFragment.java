@@ -336,9 +336,8 @@ public class UserFragment extends Fragment {
             try {
                 List<Thing> things = new ArrayList<Thing>();
                 String dataString = Utilities.get("", "http://www.reddit.com/user/" + mUsername
-                        + "/.json", mAccount.getCookie(), mAccount.getModhash());
+                        + "/.json", mAccount);
                 JsonParser jsonParser = new JsonParser();
-                Log.i("UserFragment", dataString);
                 JsonElement element = jsonParser.parse(dataString);
                 if (!element.isJsonNull()) {
                     JsonArray children = element.getAsJsonObject()
