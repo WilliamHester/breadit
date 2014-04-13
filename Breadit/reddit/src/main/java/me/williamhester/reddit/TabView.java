@@ -36,14 +36,15 @@ public class TabView extends FrameLayout {
     private LinearLayout mLinearLayout;
     private List<Fragment> mFragmentList = new ArrayList<Fragment>();
     private List<String> mFragmentTags = new ArrayList<String>();
-    private TabAdapter mTabAdapter;
     private View mCursor;
     private ViewPager mViewPager;
     private float mCursorAlpha;
     private int mCursorHeight;
-    private int mSelectedTab;
+    private String mSelectedTab;
+    private int mSelectedTabPosition;
     private int mViewWidth = 0;
     private Drawable mCursorBackground;
+    private TabSwitcher mTabSwitcher;
 
     public TabView(Context context) {
         super(context);
@@ -56,7 +57,6 @@ public class TabView extends FrameLayout {
     public TabView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         mContext = context;
-        // Todo: get attributes and set them for the View below the selected item
         if (attrs != null) {
             String packageName = "http://www.williamhester.me/";
             mCursorHeight = attrs.getAttributeIntValue(packageName, "cursorHeight",
@@ -67,7 +67,13 @@ public class TabView extends FrameLayout {
             mCursorHeight = DEFAULT_CURSOR_SIZE;
             mCursorAlpha = DEFAULT_CURSOR_TRANSPARENCY;
         }
-        mTabAdapter = new TabAdapter(((Activity)context).getFragmentManager());
+        try {
+            mTabSwitcher = (TabSwitcher) context;
+        } catch (ClassCastException e) {
+            Log.e("TabView", "ERROR: Activity must implement TabSwitcher.");
+        }
+        mSelectedTabPosition = -1;
+        mSelectedTab = "";
         if (getViewTreeObserver() != null)
             getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                 @Override
@@ -78,13 +84,13 @@ public class TabView extends FrameLayout {
                         FrameLayout.LayoutParams params;
                         params = new FrameLayout.LayoutParams(mViewWidth, mCursorHeight);
                         params.gravity = Gravity.BOTTOM;
-                        mCursor.setBackgroundColor(getResources().getColor(R.color.ghostwhite));
-                        addView(mCursor, params);
-                        mCursor.setScaleX(mTabLayouts.get(mSelectedTab).getMeasuredWidth()
-                                / getMeasuredWidth());
+//                        mCursor.setBackgroundColor(getResources().getColor(R.color.ghostwhite));
+//                        addView(mCursor, params);
+//                        mCursor.setScaleX(mTabLayouts.get(mSelectedTabPosition).getMeasuredWidth()
+//                                / getMeasuredWidth());
                         int translationX = 0;
-                        if (mSelectedTab > 0)
-                            translationX += mTabLayouts.get(mSelectedTab - 1).getRight();
+                        if (mSelectedTabPosition > 0)
+                            translationX += mTabLayouts.get(mSelectedTabPosition - 1).getRight();
                         translationX -= (getMeasuredWidth() - mCursor.getScaleX() * getMeasuredWidth()) / 2;
                         mCursor.setTranslationX(translationX);
                     }
@@ -95,19 +101,13 @@ public class TabView extends FrameLayout {
     @Override
     public void onFinishInflate() {
         super.onFinishInflate();
-        setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT,
+                Gravity.CENTER));
         mCursor = new View(mContext);
         mLinearLayout = new LinearLayout(mContext);
-        addView(mLinearLayout, new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT,
-                LayoutParams.MATCH_PARENT));
+        addView(mLinearLayout, new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
+                LayoutParams.MATCH_PARENT, Gravity.CENTER));
         mCursor.setAlpha(mCursorAlpha);
-        // Todo: set the view parameters that can be specified by the user.
-    }
-
-    public void attachViewPager(ViewPager v) {
-        mViewPager = v;
-        mViewPager.setAdapter(mTabAdapter);
-        mViewPager.setOnPageChangeListener(mTabAdapter);
     }
 
     /**
@@ -122,13 +122,12 @@ public class TabView extends FrameLayout {
     public void addTab(Class<?> clss, Bundle fragmentArgs, int tabType, View innerView, String tag) {
         mFragmentTags.add(tag);
 
-        // Add the fragment data to the TabAdapter
-        mTabAdapter.addTab(clss, fragmentArgs);
-
         // Create the tab's view
         FrameLayout tabFrame = new FrameLayout(mContext);
         mTabLayouts.add(tabFrame);
+        tabFrame.setBackgroundResource(R.drawable.actionbar_item_background);
 
+        final String finalTag = tag;
         // Specify the parameters
         LinearLayout.LayoutParams params;
         switch (tabType) {
@@ -154,8 +153,26 @@ public class TabView extends FrameLayout {
         FrameLayout.LayoutParams innerParams = new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         innerParams.gravity = Gravity.CENTER_VERTICAL;
+        float scale = getResources().getDisplayMetrics().density;
+        tabFrame.setPadding((int) (8 * scale),
+                (int) (4 * scale), (int) (8 * scale), (int) (4 * scale));
         tabFrame.addView(innerView, innerParams);
+        tabFrame.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mSelectedTab.equals(finalTag)) {
+                    mTabSwitcher.onTabReselected(finalTag,
+                            mFragmentList.get(mFragmentTags.lastIndexOf(finalTag)));
+                } else {
+                    mTabSwitcher.onTabSelected(finalTag,
+                            mFragmentList.get(mFragmentTags.lastIndexOf(finalTag)));
+                }
+                mTabSwitcher.onTabUnSelected(mSelectedTab);
+                mSelectedTab = finalTag;
+            }
+        });
         mLinearLayout.addView(tabFrame, params);
+        mFragmentList.add(Fragment.instantiate(mContext, clss.getName(), fragmentArgs));
     }
 
     /**
@@ -172,7 +189,7 @@ public class TabView extends FrameLayout {
 
     public Fragment getFragment(int position) {
         if (position >= mFragmentList.size()) {
-            Log.e("QuantumDebug", "Fragment was requested out of bounds");
+            Log.e("BreaditDebug", "Fragment was requested out of bounds");
             return null;
         } else {
             return mFragmentList.get(position);
@@ -188,107 +205,9 @@ public class TabView extends FrameLayout {
         }
     }
 
-    private class TabAdapter extends FragmentPagerAdapter
-            implements ViewPager.OnPageChangeListener {
-
-        private int mRightOrLeft = 0;
-        private ArrayList<TabInfo> mTabs = new ArrayList<TabInfo>();
-
-        public TabAdapter(FragmentManager fm) {
-            super(fm);
-        }
-
-        public void addTab(Class<?> clss, Bundle args) {
-            TabInfo info = new TabInfo(clss, args);
-            mTabs.add(info);
-            notifyDataSetChanged();
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            TabInfo info = mTabs.get(position);
-            mFragmentList.add(Fragment.instantiate(mContext, info.clss.getName(), info.args));
-            return mFragmentList.get(mFragmentList.size() - 1);
-        }
-
-        @Override
-        public int getCount() {
-            return mTabs.size();
-        }
-
-        @Override
-        public void onPageScrolled(int position, float offset, int offsetPixels) {
-            if (offset > 0.0) {
-                // First, we need to check and see what direction this is moving if it's not set
-                if (mRightOrLeft == 0 && offset > 0.5)
-                    mRightOrLeft = -1;
-                else if (mRightOrLeft == 0)
-                    mRightOrLeft = 1;
-                // Now, let's scale the cursor to the correct size
-                int movingPosition = mSelectedTab;
-                float scaleOffset = offset;
-                if (mRightOrLeft == -1) {
-                    movingPosition = mSelectedTab - 1;
-                    scaleOffset = 1 - offset;
-                }
-                mCursor.setScaleX(((float) mTabLayouts.get(mSelectedTab).getMeasuredWidth()
-                        + ((mTabLayouts.get(mSelectedTab + mRightOrLeft).getMeasuredWidth()
-                        - mTabLayouts.get(mSelectedTab).getMeasuredWidth()) * scaleOffset))
-                        / getMeasuredWidth());
-                // Now, figure out how far we need to move the cursor
-                int translationX = 0;
-                translationX += mTabLayouts.get(movingPosition).getLeft();                            // Gets the left side of the current view
-                translationX += mTabLayouts.get(movingPosition).getMeasuredWidth() * offset;          // Gets how far across the view to move the cursor
-                translationX -= (getMeasuredWidth() - mCursor.getScaleX() * getMeasuredWidth()) / 2;  // Offsets the cursor because of scaling
-                mCursor.setTranslationX(translationX);
-            } else {
-                mSelectedTab = position;
-                mRightOrLeft = 0;
-                mCursor.setScaleX(((float) mTabLayouts.get(mSelectedTab).getMeasuredWidth())
-                        / getMeasuredWidth());
-                int translationX = 0;
-                translationX += mTabLayouts.get(mSelectedTab).getLeft();
-                translationX -= (getMeasuredWidth() - mCursor.getScaleX() * getMeasuredWidth()) / 2;
-                mCursor.setTranslationX(translationX);
-
-                Log.i("QuantumDebug", position + " " + offset + " " + offsetPixels);
-            }
-        }
-
-        @Override
-        public void onPageSelected(int position) {
-
-        }
-
-        @Override
-        public void onPageScrollStateChanged(int state) {
-            switch (state) {
-                case ViewPager.SCROLL_STATE_IDLE:
-                    mSelectedTab = mViewPager.getCurrentItem();
-                    mCursor.setScaleX(((float) mTabLayouts.get(mSelectedTab).getMeasuredWidth())
-                            / getMeasuredWidth());
-                    int translationX = 0;
-                    if (mSelectedTab > 0)
-                        translationX += mTabLayouts.get(mSelectedTab - 1).getRight();
-                    translationX -= (getMeasuredWidth() - mCursor.getScaleX() * getMeasuredWidth()) / 2;
-                    mCursor.setTranslationX(translationX);
-                    mRightOrLeft = 0;
-                    break;
-                case ViewPager.SCROLL_STATE_DRAGGING:
-                    break;
-                case ViewPager.SCROLL_STATE_SETTLING:
-                    break;
-            }
-        }
-
-        final class TabInfo {
-            private final Class<?> clss;
-            private final Bundle args;
-
-            public TabInfo(Class<?> _class, Bundle _args) {
-                clss = _class;
-                args = _args;
-            }
-        }
+    public interface TabSwitcher {
+        public void onTabSelected(String tag, Fragment fragment);
+        public void onTabReselected(String tag, Fragment fragment);
+        public void onTabUnSelected(String tag);
     }
 }

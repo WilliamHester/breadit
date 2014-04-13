@@ -24,5 +24,8 @@
         <activity
             android:name=".SetupActivity" >
         </activity>
+        <activity
+            android:name=".AccountActivity" >
+        </activity>
     </application>
 </manifest>

@@ -352,7 +352,6 @@ public class Account implements Parcelable {
 	 */
 	private JsonObject getUserData() throws IOException {
         String s = Utilities.get("", "http://www.reddit.com/api/me.json", mCookie, mModhash);
-
 		JsonObject jsonObject = new JsonParser().parse(s).getAsJsonObject();
 
 		return jsonObject.getAsJsonObject("data");

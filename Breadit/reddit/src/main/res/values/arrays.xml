@@ -43,4 +43,12 @@
         <item>This year</item>
         <item>All time</item>
     </string-array>
+
+    <string-array name="filter_types">
+        <item>All</item>
+        <item>Unread</item>
+        <item>Messages</item>
+        <item>Comment replies</item>
+        <item>Post replies</item>
+    </string-array>
 </resources>

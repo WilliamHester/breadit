@@ -129,6 +129,12 @@ public class MainActivity extends Activity
         } else if (id == R.id.action_submit) {
             SubmitDialogFragment sf = SubmitDialogFragment.newInstance(mAccount, mSubreddit);
             sf.show(getFragmentManager(), "submit_fragment");
+        } else if (id == R.id.action_my_account) {
+            Bundle b = new Bundle();
+            b.putParcelable("account", mAccount);
+            Intent i = new Intent(this, AccountActivity.class);
+            i.putExtras(b);
+            startActivity(i);
         }
         return super.onOptionsItemSelected(item);
     }
