@@ -19,6 +19,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -36,6 +37,7 @@ import java.util.List;
 import me.williamhester.areddit.Submission;
 import me.williamhester.areddit.SubmissionsListViewHelper;
 import me.williamhester.areddit.Account;
+import me.williamhester.areddit.Votable;
 import me.williamhester.areddit.utils.Utilities;
 
 /**
@@ -86,12 +88,7 @@ public class SubredditFragment extends Fragment {
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                if (mSubmissionList != null && mSubmissionList.size() != 0) {
-                    mNames.clear();
-                    mSubmissionList.clear();
-                }
-                new RefreshUserClass().execute();
-//                populateSubmissions();
+                new RefreshUserClass(true).execute();
             }
         });
         mSwipeRefreshLayout.setColorScheme(R.color.orangered, R.color.periwinkle,
@@ -186,11 +183,11 @@ public class SubredditFragment extends Fragment {
                 nameAndTime.setText(" in " + s.getSubredditName() + " " + calculateTimeShort(s.getCreatedUtc()));
             }
             switch (s.getVoteStatus()) {
-                case Submission.DOWNVOTED:
+                case Votable.DOWNVOTED:
                     voteStatus.setVisibility(View.VISIBLE);
                     voteStatus.setBackgroundColor(getResources().getColor(R.color.periwinkle));
                     break;
-                case Submission.UPVOTED:
+                case Votable.UPVOTED:
                     voteStatus.setVisibility(View.VISIBLE);
                     voteStatus.setBackgroundColor(getResources().getColor(R.color.orangered));
                     break;
@@ -204,10 +201,10 @@ public class SubredditFragment extends Fragment {
             domain.setText("(" + s.getDomain() + ")");
             points.setText(s.getScore() + " points by ");
 
-            if (mAccount != null && mAccount.hasVisited(mSubmissionList.get(position).getName())) {
+            if (mAccount != null && mAccount.hasVisited(getItem(position).getName())) {
                 title.setTypeface(title.getTypeface(), Typeface.ITALIC);
             } else {
-                title.setTypeface(title.getTypeface(), Typeface.NORMAL);
+                title.setTypeface(Typeface.create("sans-serif-light", Typeface.NORMAL));
             }
             
             return convertView;
@@ -237,6 +234,16 @@ public class SubredditFragment extends Fragment {
     }
 
     private class RefreshUserClass extends AsyncTask<Void, Void, Void> {
+        private boolean mRefreshList;
+
+        public RefreshUserClass() {
+            this(false);
+        }
+
+        public RefreshUserClass(boolean refreshList) {
+            mRefreshList = refreshList;
+        }
+
         @Override
         protected Void doInBackground(Void... voids) {
             if (mAccount != null) {
@@ -244,13 +251,22 @@ public class SubredditFragment extends Fragment {
             }
             SubmissionsListViewHelper list = new SubmissionsListViewHelper(mSubredditName,
                     Submission.HOT, -1, null, null, mAccount, mSubmissions);
-            new RetrieveSubmissionsTask().execute(list);
+            new RetrieveSubmissionsTask(mRefreshList).execute(list);
             return null;
         }
     }
 
     private class RetrieveSubmissionsTask extends AsyncTask<SubmissionsListViewHelper, Void,
             List<Submission>> {
+        private boolean mRefreshList;
+
+        public RetrieveSubmissionsTask() {
+            this(false);
+        }
+
+        public RetrieveSubmissionsTask(boolean refreshList) {
+            mRefreshList = refreshList;
+        }
 
         @Override
         protected List<Submission> doInBackground(SubmissionsListViewHelper... submissionsList) {
@@ -293,6 +309,10 @@ public class SubredditFragment extends Fragment {
 //                if (result.size() == 0) {
 //                mSubmissions.addFooterView(v);
 //                }
+                if (mRefreshList) {
+                    mSubmissionList.clear();
+                    mNames.clear();
+                }
                 for (Submission s : result) {
                     if (!mNames.contains(s.getName())) {
                         mSubmissionList.add(s);
@@ -300,6 +320,8 @@ public class SubredditFragment extends Fragment {
                     }
                 }
                 mSubmissionsAdapter.notifyDataSetChanged();
+            } else if (mRefreshList) {
+                Toast.makeText(mContext, R.string.failed_to_refresh, Toast.LENGTH_LONG).show();
             }
             mSwipeRefreshLayout.setRefreshing(false);
         }
