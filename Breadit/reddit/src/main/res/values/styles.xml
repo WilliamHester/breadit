@@ -49,6 +49,20 @@
 
         <item name="android:fastScrollThumbDrawable">@drawable/breadit_fastscroll_thumb_holo</item>
 
+        <!--ActionBar stuff-->
+
+        <item name="android:actionBarItemBackground">@drawable/selectable_background_breadit</item>
+        <item name="android:popupMenuStyle">@style/PopupMenu.Breadit</item>
+        <item name="android:dropDownListViewStyle">@style/DropDownListView.Breadit</item>
+        <item name="android:actionBarTabStyle">@style/ActionBarTabStyle.Breadit</item>
+        <item name="android:actionDropDownStyle">@style/DropDownNav.Breadit</item>
+        <item name="android:actionBarStyle">@style/ActionBar.Solid.Breadit</item>
+        <item name="android:actionModeBackground">@drawable/cab_background_top_breadit</item>
+        <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_breadit</item>
+        <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Breadit</item>
+
+        <!-- Light.DarkActionBar specific -->
+        <item name="android:actionBarWidgetTheme">@style/Theme.Breadit.Widget</item>
     </style>
 
     <style name="AutoCompleteTextViewBreadit" parent="android:Widget.Holo.Light.AutoCompleteTextView">
@@ -117,6 +131,51 @@
 
     <style name="ToggleBreadit" parent="android:Widget.Holo.Light.Button.Toggle">
         <item name="android:background">@drawable/breadit_btn_toggle_holo_light</item>
+    </style>
+
+    <!--ActionBar styles-->
+    <style name="ActionBar.Solid.Breadit" parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
+        <item name="android:background">@drawable/ab_solid_breadit</item>
+        <item name="android:backgroundStacked">@drawable/ab_stacked_solid_breadit</item>
+        <item name="android:backgroundSplit">@drawable/ab_bottom_solid_breadit</item>
+        <item name="android:progressBarStyle">@style/ProgressBar.Breadit</item>
+    </style>
+
+    <style name="ActionBar.Transparent.Breadit" parent="@android:style/Widget.Holo.ActionBar">
+        <item name="android:background">@drawable/ab_transparent_breadit</item>
+        <item name="android:progressBarStyle">@style/ProgressBar.Breadit</item>
+    </style>
+
+    <style name="PopupMenu.Breadit" parent="@android:style/Widget.Holo.ListPopupWindow">
+        <item name="android:popupBackground">@drawable/menu_dropdown_panel_breadit</item>
+    </style>
+
+    <style name="DropDownListView.Breadit" parent="@android:style/Widget.Holo.ListView.DropDown">
+        <item name="android:listSelector">@drawable/selectable_background_breadit</item>
+    </style>
+
+    <style name="ActionBarTabStyle.Breadit" parent="@android:style/Widget.Holo.ActionBar.TabView">
+        <item name="android:background">@drawable/tab_indicator_ab_breadit</item>
+    </style>
+
+    <style name="DropDownNav.Breadit" parent="@android:style/Widget.Holo.Spinner">
+        <item name="android:background">@drawable/spinner_background_ab_breadit</item>
+        <item name="android:popupBackground">@drawable/menu_dropdown_panel_breadit</item>
+        <item name="android:dropDownSelector">@drawable/selectable_background_breadit</item>
+    </style>
+
+    <style name="ProgressBar.Breadit" parent="@android:style/Widget.Holo.ProgressBar.Horizontal">
+        <item name="android:progressDrawable">@drawable/progress_horizontal_breadit</item>
+    </style>
+
+    <style name="ActionButton.CloseMode.Breadit" parent="@android:style/Widget.Holo.ActionButton.CloseMode">
+        <item name="android:background">@drawable/btn_cab_done_breadit</item>
+    </style>
+
+    <!-- this style is only referenced in a Light.DarkActionBar based theme -->
+    <style name="Theme.Breadit.Widget" parent="@android:style/Theme.Holo">
+        <item name="android:popupMenuStyle">@style/PopupMenu.Breadit</item>
+        <item name="android:dropDownListViewStyle">@style/DropDownListView.Breadit</item>
     </style>
 
 </resources>
