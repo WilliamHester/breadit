@@ -30,8 +30,7 @@
 
     <!--SubmissionFragment stuff-->
     <string name="share">Share</string>
-    <string name="open_link_browser">Open link in browser</string>
-    <string name="open_comments_browser">Open comments in browser</string>
+    <string name="open_link_browser">Open in browser</string>
     <string name="reply_hint">Enter reply</string>
     <string name="cancel">Cancel</string>
     <string name="reply">Reply</string>

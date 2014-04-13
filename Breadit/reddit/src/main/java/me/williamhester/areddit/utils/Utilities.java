@@ -88,4 +88,34 @@ public class Utilities {
         }
         return sb.toString();
     }
+
+    public static String calculateTimeShort(long postTime) {
+        long currentTime = System.currentTimeMillis() / 1000;
+        long difference = currentTime - postTime;
+        String time;
+        if (difference / 31536000 > 0) {
+            time = difference / 3156000 + "y";
+        } else if (difference / 2592000 > 0) {
+            time = difference / 2592000 + "m";
+        } else if (difference / 604800 > 0) {
+            time = difference / 604800 + "w";
+        } else if (difference / 86400 > 0) {
+            time = difference / 86400 + "d";
+        } else if (difference / 3600 > 0) {
+            time = difference / 3600 + "h";
+        } else if (difference / 60 > 0) {
+            time = difference / 60 + "m";
+        } else {
+            time = difference + "s";
+        }
+        return time;
+    }
+
+    public static String removeEndQuotes(String s) {
+        if (s.charAt(0) == '\"' && s.charAt(s.length() - 1) == '\"') {
+            return s.substring(1, s.length() - 1);
+        }
+        return s;
+    }
+
 }

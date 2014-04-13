@@ -85,7 +85,6 @@ public class Comment extends Thing implements Parcelable, Votable {
 
     public static Comment fromJsonString(JsonObject data, int level) {
         Comment comment = new Comment(data, level);
-        comment.mLevel = level;
         if (!comment.mKind.equals("more")) {
             if (!data.get("data").getAsJsonObject().get("approved_by").isJsonNull())
                 comment.mApprovedBy = data.get("data").getAsJsonObject().get("approved_by").getAsString();
@@ -141,6 +140,60 @@ public class Comment extends Thing implements Parcelable, Votable {
             JsonArray array = data.get("data").getAsJsonObject().get("children").getAsJsonArray();
             for (JsonElement e : array) {
                 comment.mMore.add(e.getAsString());
+            }
+        }
+        return comment;
+    }
+
+    public static Comment fromJsonString(JsonObject data) {
+        Comment comment = new Comment(data, 0);
+        if (!data.get("data").getAsJsonObject().get("approved_by").isJsonNull())
+            comment.mApprovedBy = data.get("data").getAsJsonObject().get("approved_by").getAsString();
+        if (!data.get("data").getAsJsonObject().get("author").isJsonNull())
+            comment.mAuthor = data.get("data").getAsJsonObject().get("author").getAsString();
+        if (!data.get("data").getAsJsonObject().get("author_flair_css_class").isJsonNull())
+            comment.mAuthorFlairCss = data.get("data").getAsJsonObject().get("author_flair_css_class").getAsString();
+        if (!data.get("data").getAsJsonObject().get("author_flair_text").isJsonNull())
+            comment.mAuthorFlairText = data.get("data").getAsJsonObject().get("author_flair_text").getAsString();
+        if (!data.get("data").getAsJsonObject().get("banned_by").isJsonNull())
+            comment.mBannedBy = data.get("data").getAsJsonObject().get("banned_by").getAsString();
+        comment.mBody = data.get("data").getAsJsonObject().get("body").getAsString();
+        comment.mBodyHtml = data.get("data").getAsJsonObject().get("body_html").getAsString();
+        if (data.get("data").getAsJsonObject().get("link_author") != null) {
+            if (!data.get("data").getAsJsonObject().get("link_author").isJsonNull())
+                comment.mLinkAuthor = data.get("data").getAsJsonObject().get("link_author").getAsString();
+            if (!data.get("data").getAsJsonObject().get("link_title").isJsonNull())
+                comment.mLinkTitle = data.get("data").getAsJsonObject().get("link_title").getAsString();
+            if (!data.get("data").getAsJsonObject().get("link_id").isJsonNull())
+                comment.mLinkId = data.get("data").getAsJsonObject().get("link_id").getAsString();
+            if (!data.get("data").getAsJsonObject().get("link_url").isJsonNull())
+                comment.mLinkUrl = data.get("data").getAsJsonObject().get("link_url").getAsString();
+        }
+        comment.mSubreddit = data.get("data").getAsJsonObject().get("subreddit").getAsString();
+        comment.mSubredditId = data.get("data").getAsJsonObject().get("subreddit_id").getAsString();
+        if (!data.get("data").getAsJsonObject().get("distinguished").isJsonNull())
+            comment.mDistinguished = data.get("data").getAsJsonObject().get("distinguished").getAsString();
+        comment.mSaved = data.get("data").getAsJsonObject().get("saved").getAsBoolean();
+        comment.mCreated = data.get("data").getAsJsonObject().get("created").getAsLong();
+        comment.mCreatedUtc = data.get("data").getAsJsonObject().get("created_utc").getAsLong();
+        comment.mUps = data.get("data").getAsJsonObject().get("ups").getAsLong();
+        comment.mDowns = data.get("data").getAsJsonObject().get("downs").getAsLong();
+        JsonElement je = data.get("data").getAsJsonObject().get("likes");
+        if (je.isJsonNull()) {
+            comment.mVoteStatus = NEUTRAL;
+        } else if (je.getAsBoolean()) {
+            comment.mVoteStatus = UPVOTED;
+        } else {
+            comment.mVoteStatus = DOWNVOTED;
+        }
+        je = data.get("data").getAsJsonObject().get("edited");
+        if (je.isJsonNull()) {
+            comment.mEdited = -1;
+        } else {
+            try {
+                comment.mEdited = je.getAsLong();
+            } catch (NumberFormatException e) {
+                comment.mEdited = -1;
             }
         }
         return comment;

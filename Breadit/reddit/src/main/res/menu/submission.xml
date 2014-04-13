@@ -10,8 +10,4 @@
         android:title="@string/open_link_browser"
         android:orderInCategory="2"
         android:showAsAction="never" />
-    <item android:id="@+id/action_open_comments_browser"
-        android:title="@string/open_comments_browser"
-        android:orderInCategory="3"
-        android:showAsAction="never" />
 </menu>

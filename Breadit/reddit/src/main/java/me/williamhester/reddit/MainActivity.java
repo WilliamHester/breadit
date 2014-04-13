@@ -114,7 +114,10 @@ public class MainActivity extends Activity
             // Only show items in the action bar relevant to this screen
             // if the drawer is not showing. Otherwise, let the drawer
             // decide what to show in the action bar.
-          getMenuInflater().inflate(R.menu.main, menu);
+        getMenuInflater().inflate(R.menu.main, menu);
+        if (mAccount == null) {
+            menu.removeItem(R.id.action_my_account);
+        }
 //            restoreActionBar(); // I don't think we need this because we're already updating it
 //            return true;
 //        }

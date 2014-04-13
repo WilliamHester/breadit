@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
@@ -453,11 +454,13 @@ public class CommentFragment extends Fragment {
         @Override
         public void onLongPress(MotionEvent event) {
             int position = mCommentsListView.pointToPosition((int) event.getX(), (int) event.getY());
-            Votable v = null;
+            final Votable v;
             if (position == 0) {
                 v = mSubmission;
             } else if (position > 0) {
                 v = mCommentsList.get(position - HEADER_VIEW_COUNT);
+            } else {
+                v = null;
             }
             final int offset;
             ArrayList<String> options = new ArrayList<String>();
@@ -489,6 +492,13 @@ public class CommentFragment extends Fragment {
                             // Reply
                             break;
                         case 3:
+                            Bundle b = new Bundle();
+                            b.putParcelable("account", mAccount);
+                            b.putString("username", v.getAuthor());
+                            Log.i("CommentFragment", v.getAuthor());
+                            Intent i = new Intent(mContext, UserActivity.class);
+                            i.putExtras(b);
+                            mContext.startActivity(i);
                             // View user's profile
                             break;
                         case 4:

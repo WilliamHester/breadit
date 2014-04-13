@@ -28,7 +28,7 @@ public class TabView extends FrameLayout {
     public static final int TAB_TYPE_MAIN = 0;
     public static final int TAB_TYPE_MINOR = 1;
 
-    private final int DEFAULT_CURSOR_SIZE = 16; // Cursor height in px
+    private final int DEFAULT_CURSOR_SIZE = 4; // Cursor height in px
     private final float DEFAULT_CURSOR_TRANSPARENCY = 0.80f;
 
     private ArrayList<FrameLayout> mTabLayouts = new ArrayList<FrameLayout>();
@@ -84,10 +84,12 @@ public class TabView extends FrameLayout {
                         FrameLayout.LayoutParams params;
                         params = new FrameLayout.LayoutParams(mViewWidth, mCursorHeight);
                         params.gravity = Gravity.BOTTOM;
-//                        mCursor.setBackgroundColor(getResources().getColor(R.color.ghostwhite));
-//                        addView(mCursor, params);
-//                        mCursor.setScaleX(mTabLayouts.get(mSelectedTabPosition).getMeasuredWidth()
-//                                / getMeasuredWidth());
+                        if (mSelectedTabPosition > -1) {
+                            mCursor.setBackgroundColor(getResources().getColor(R.color.auburn));
+                            addView(mCursor, params);
+                            mCursor.setScaleX(mTabLayouts.get(mSelectedTabPosition).getMeasuredWidth()
+                                    / getMeasuredWidth());
+                        }
                         int translationX = 0;
                         if (mSelectedTabPosition > 0)
                             translationX += mTabLayouts.get(mSelectedTabPosition - 1).getRight();
@@ -160,12 +162,13 @@ public class TabView extends FrameLayout {
         tabFrame.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
+                mSelectedTabPosition = mFragmentTags.indexOf(finalTag);
                 if (mSelectedTab.equals(finalTag)) {
                     mTabSwitcher.onTabReselected(finalTag,
-                            mFragmentList.get(mFragmentTags.lastIndexOf(finalTag)));
+                            mFragmentList.get(mSelectedTabPosition));
                 } else {
                     mTabSwitcher.onTabSelected(finalTag,
-                            mFragmentList.get(mFragmentTags.lastIndexOf(finalTag)));
+                            mFragmentList.get(mSelectedTabPosition));
                 }
                 mTabSwitcher.onTabUnSelected(mSelectedTab);
                 mSelectedTab = finalTag;
