@@ -54,4 +54,11 @@
     <string name="from">From</string>
     <string name="filter">Filter by</string>
 
+    <!--SubmissionDialogFragment-->
+    <string name="enter_self_text">Enter self text</string>
+    <string name="post_title">Submission title</string>
+    <string name="captcha_response">Captcha response</string>
+    <string name="new_text_post">New text post</string>
+    <string name="subreddit_name">Subreddit name</string>
+
 </resources>

@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/blackish">
+    android:orientation="vertical" android:layout_width="wrap_content"
+    android:layout_height="match_parent">
 
     <ImageView android:id="@+id/captcha"
         android:layout_width="wrap_content"
@@ -11,17 +10,28 @@
 
     <EditText android:id="@+id/captcha_response"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:textColor="@color/mid_gray"
+        android:hint="@string/captcha_response"/>
+
+    <EditText android:id="@+id/subreddit_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/mid_gray"
+        android:hint="@string/subreddit_name"/>
 
     <EditText android:id="@+id/title"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="wrap_content"
+        android:textColor="@color/mid_gray"
+        android:hint="@string/post_title"/>
 
     <EditText android:id="@+id/submit_body"
         android:layout_width="match_parent"
         android:layout_height="100dp"
         android:gravity="top"
-        android:hint="@string/reply_hint"/>
+        android:hint="@string/enter_self_text"
+        android:textColor="@color/mid_gray"/>
 
     <View android:layout_marginTop="8dp"
         android:layout_height="1dp"
@@ -51,7 +61,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/reply"
+            android:text="@string/submit"
             style="?android:buttonBarButtonStyle"
             android:textColor="@color/mid_gray"/>
 

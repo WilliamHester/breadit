@@ -30,6 +30,7 @@ public class SubmitDialogFragment extends DialogFragment {
     private Button mConfirm;
     private Button mCancel;
     private EditText mCaptchaResponse;
+    private EditText mSubredditName;
     private EditText mSubmitText;
     private EditText mTitle;
     private ImageView mCaptchaImage;
@@ -42,18 +43,17 @@ public class SubmitDialogFragment extends DialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mAccount = getArguments().getParcelable("user");
+            mAccount = getArguments().getParcelable("account");
             mSubreddit = getArguments().getString("subreddit");
         }
-        setStyle(STYLE_NO_TITLE, getTheme());
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.dialog_fragment_reply, null);
-
+        View v = inflater.inflate(R.layout.dialog_fragment_submit, null);
         mCaptchaImage = (ImageView) v.findViewById(R.id.captcha);
         mCaptchaResponse = (EditText) v.findViewById(R.id.captcha_response);
+        mSubredditName = (EditText) v.findViewById(R.id.subreddit_name);
         mSubmitText = (EditText) v.findViewById(R.id.submit_body);
         mTitle = (EditText) v.findViewById(R.id.title);
         mConfirm = (Button) v.findViewById(R.id.confirm_reply);
@@ -70,6 +70,14 @@ public class SubmitDialogFragment extends DialogFragment {
                 new SubmitAsyncTask().execute();
             }
         });
+
+        mCaptchaResponse.setVisibility(View.GONE);
+        mCaptchaImage.setVisibility(View.GONE);
+        if (mSubreddit != null) {
+            mSubredditName.setVisibility(View.GONE);
+        }
+
+        getDialog().setTitle(R.string.new_text_post);
         return v;
     }
 
@@ -88,16 +96,21 @@ public class SubmitDialogFragment extends DialogFragment {
         protected Void doInBackground(Void... voids) {
             if (mAccount != null && mSubmitText != null && mSubmitText.getText() != null
                     && mSubmitText.getText().toString().length() != 0) {
+                Log.i("SubmitDialogFragment", "Submitting...");
                 List<NameValuePair> apiParams = new ArrayList<NameValuePair>();
                 apiParams.add(new BasicNameValuePair("api-type", "json"));
                 apiParams.add(new BasicNameValuePair("captcha", ""));
                 apiParams.add(new BasicNameValuePair("extension", ""));
-                apiParams.add(new BasicNameValuePair("iden", mCaptcha.getIden()));
+                if (mCaptcha != null)
+                    apiParams.add(new BasicNameValuePair("iden", mCaptcha.getIden()));
                 apiParams.add(new BasicNameValuePair("kind", "self"));
                 apiParams.add(new BasicNameValuePair("resubmit", "false"));
                 apiParams.add(new BasicNameValuePair("save", "false"));
                 apiParams.add(new BasicNameValuePair("sendreplies", "false"));
-                apiParams.add(new BasicNameValuePair("sr", mSubreddit));
+                if (mSubreddit != null)
+                    apiParams.add(new BasicNameValuePair("sr", mSubreddit));
+                else
+                    apiParams.add(new BasicNameValuePair("sr", mSubredditName.getText().toString()));
                 apiParams.add(new BasicNameValuePair("text", mSubmitText.getText().toString()));
                 apiParams.add(new BasicNameValuePair("then", "comments"));
                 apiParams.add(new BasicNameValuePair("title", mTitle.getText().toString()));
@@ -105,6 +118,12 @@ public class SubmitDialogFragment extends DialogFragment {
                 Log.i("SubmitDialogFragment", "Response = " + Utilities.post(apiParams,
                         "http://www.reddit.com/api/submit", mAccount.getCookie(),
                         mAccount.getModhash()));
+            } else if (mAccount == null) {
+                Log.i("SubmitDialogFragment", "mAccount == null");
+            } else if (mSubmitText == null) {
+                Log.i("SubmitDialogFragment", "mSubmitText == null");
+            } else if (mSubmitText.getText() == null) {
+                Log.i("SubmitDialogFragment", "mSubmitText.getText() == null");
             }
             return null;
         }
@@ -120,18 +139,19 @@ public class SubmitDialogFragment extends DialogFragment {
         @Override
         protected Void doInBackground(Void... voids) {
             try {
-                Log.i("RetrieveCaptcha", Utilities.get("",
-                        "http://www.reddit.com/api/needs_captcha.json",
-                        mAccount.getCookie(), mAccount.getModhash()));
+                boolean needsCaptcha = Boolean.parseBoolean(Utilities.get("",
+                        "http://www.reddit.com/api/needs_captcha.json", mAccount));
+                if (needsCaptcha) {
+                    List<NameValuePair> apiParams = new ArrayList<NameValuePair>();
+                    apiParams.add(new BasicNameValuePair("api-type", "json"));
+                    Log.i("SubmitDialogFragment", Utilities
+                            .post(apiParams, "http://www.reddit.com/api/new_captcha", mAccount));
+                    mCaptchaImage.setVisibility(View.VISIBLE);
+                    mCaptchaResponse.setVisibility(View.VISIBLE);
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
-            List<NameValuePair> apiParams = new ArrayList<NameValuePair>();
-            apiParams.add(new BasicNameValuePair("api-type", "json"));
-            Log.i("RetrieveCaptcha", Utilities.post(apiParams,
-                    "http://www.reddit.com/api/new_captcha", mAccount.getCookie(),
-                    mAccount.getModhash()));
             return null;
         }
     }

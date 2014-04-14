@@ -175,11 +175,13 @@ public class SetupActivity extends FragmentActivity {
         @Override
         public void onPreExecute() {
             LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+            AlertDialog.Builder builder = new AlertDialog.Builder(mContext,
+                    android.R.style.Theme_DeviceDefault_Dialog);
             builder.setCancelable(false);
             builder.setTitle(R.string.hang_on);
             builder.setView(inflater.inflate(R.layout.dialog_sign_in, null));
             mDialog = builder.create();
+            mDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
             mDialog.show();
         }
 

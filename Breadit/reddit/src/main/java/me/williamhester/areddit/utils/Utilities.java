@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
+import java.util.jar.Attributes;
 
 import me.williamhester.areddit.Account;
 
@@ -48,6 +49,14 @@ public class Utilities {
 
         HttpResponse httpResponse = httpClient.execute(httpGet);
         return readStream(httpResponse.getEntity().getContent());
+    }
+
+    public static String post(List<NameValuePair> apiParams, String url, Account account) {
+        if (account != null) {
+            return post(apiParams, url, account.getCookie(), account.getModhash());
+        } else {
+            return post(apiParams, url, null, null);
+        }
     }
 
     public static String post(List<NameValuePair> apiParams, String url, String cookie,

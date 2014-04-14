@@ -166,7 +166,6 @@ public class CommentFragment extends Fragment {
         mNumComments.setText("Top " + mCommentsList.size() + " comments. Sorted by");
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(mContext,
                 R.layout.spinner_item, R.id.orange_spinner_text, sortTypes);
-//        adapter.setDropDownViewResource(android.R.layout.simple_list_item_2);
         sortBy.setAdapter(adapter);
         sortBy.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -437,8 +436,10 @@ public class CommentFragment extends Fragment {
         @Override
         public boolean onDoubleTap(MotionEvent event) {
             if (mAccount != null) {
-                int position = mCommentsListView.pointToPosition((int) event.getX(), (int) event.getY());
-                View childView = mCommentsListView.getChildAt(position - mCommentsListView.getFirstVisiblePosition());
+                int position = mCommentsListView.pointToPosition((int) event.getX(),
+                        (int) event.getY());
+                View childView = mCommentsListView.getChildAt(position
+                        - mCommentsListView.getFirstVisiblePosition());
                 final int y = childView == null ? 0 : (int) childView.getY();
                 mCommentsListView.postDelayed(new Runnable() {
                     @Override
@@ -599,21 +600,24 @@ public class CommentFragment extends Fragment {
         public boolean onTouchEvent(TextView widget, Spannable buffer, MotionEvent event) {
             if (event.getAction() == MotionEvent.ACTION_UP) {
                 if (super.onTouchEvent(widget, buffer, event)) {
-                    mLinkIsPressed = true;
+                    mLinkIsPressed = true; // Really horrible hack to prevent the onLongPress()
+                                           //    method from being called
                 }
                 super.onTouchEvent(widget, buffer, event);
-                View v = mCommentsListView.getChildAt(mPosition - mCommentsListView.getFirstVisiblePosition());
+                View v = mCommentsListView.getChildAt(mPosition
+                        - mCommentsListView.getFirstVisiblePosition());
                 event.setLocation(event.getX(), event.getY() + v.getY());
                 return mGestureDetector.onTouchEvent(event);
-//            } else if (event.getAction() == MotionEvent.) {
             } else if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 boolean ret = super.onTouchEvent(widget, buffer, event);
-                View v = mCommentsListView.getChildAt(mPosition - mCommentsListView.getFirstVisiblePosition());
+                View v = mCommentsListView.getChildAt(mPosition
+                        - mCommentsListView.getFirstVisiblePosition());
                 event.setLocation(event.getX(), event.getY() + v.getY());
                 mGestureDetector.onTouchEvent(event);
                 return ret;
             } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
-                View v = mCommentsListView.getChildAt(mPosition - mCommentsListView.getFirstVisiblePosition());
+                View v = mCommentsListView.getChildAt(mPosition
+                        - mCommentsListView.getFirstVisiblePosition());
                 event.setLocation(event.getX(), event.getY() + v.getY());
                 mGestureDetector.onTouchEvent(event);
             }

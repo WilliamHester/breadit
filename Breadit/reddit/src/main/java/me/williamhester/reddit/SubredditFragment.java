@@ -46,7 +46,6 @@ import me.williamhester.areddit.utils.Utilities;
  */
 public class SubredditFragment extends Fragment {
 
-    private ActionBar mAction;
     private Context mContext;
     private ListView mSubmissions;
     private String mSubredditName;
@@ -63,9 +62,6 @@ public class SubredditFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (getActivity() != null) {
-            mAction = getActivity().getActionBar();
-        }
         if (getArguments() != null) {
             mAccount = getArguments().getParcelable("account");
             mSubredditName = getArguments().getString("subreddit");
@@ -283,11 +279,6 @@ public class SubredditFragment extends Fragment {
         @Override
         protected void onPostExecute(List<Submission> result) {
             if (result != null) {
-                // If result has a size of 0, then we need to tell the user that they must start from
-                //     the beginning because there are no more submissions that can be loaded.
-//                if (result.size() == 0) {
-//                mSubmissions.addFooterView(v);
-//                }
                 if (mRefreshList) {
                     mSubmissionList.clear();
                     mNames.clear();
