@@ -17,6 +17,7 @@ public class AccountSqlHelper  extends SQLiteOpenHelper {
     public static final String COLUMN_MODHASH = "modhash";
     public static final String COLUMN_SUBREDDIT_LIST = "subreddit_list";
     public static final String COLUMN_SAVED_SUBMISSIONS = "saved_submissions";
+    public static final String COLUMN_SAVED_COMMENTS = "saved_comments";
     public static final String COLUMN_HISTORY = "history";
 
     public static final String[] ALL_COLUMNS = {
@@ -26,6 +27,7 @@ public class AccountSqlHelper  extends SQLiteOpenHelper {
             COLUMN_MODHASH,
             COLUMN_SUBREDDIT_LIST,
             COLUMN_SAVED_SUBMISSIONS,
+            COLUMN_SAVED_COMMENTS,
             COLUMN_HISTORY
     };
 
@@ -41,6 +43,7 @@ public class AccountSqlHelper  extends SQLiteOpenHelper {
             + COLUMN_MODHASH + " text not null, "
             + COLUMN_SUBREDDIT_LIST + " text not null, "
             + COLUMN_SAVED_SUBMISSIONS + " text not null, "
+            + COLUMN_SAVED_COMMENTS + " text not null, "
             + COLUMN_HISTORY + " text not null);";
 
     public AccountSqlHelper(Context context, String name, SQLiteDatabase.CursorFactory factory,

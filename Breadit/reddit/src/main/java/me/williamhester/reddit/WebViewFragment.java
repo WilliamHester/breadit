@@ -68,7 +68,8 @@ public class WebViewFragment extends Fragment {
     }
 
     private String imgurOptimize(String s) {
-        if (s.contains("imgur.com") && !s.contains("imgur.com/a/")) {
+        if (s.contains("imgur.com")
+                && !(s.contains("imgur.com/a/") || s.contains("imgur.com/gallery/"))) {
             s += ".png";
         }
         return s;

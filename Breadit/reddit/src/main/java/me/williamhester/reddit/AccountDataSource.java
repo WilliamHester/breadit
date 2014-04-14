@@ -36,6 +36,7 @@ public class AccountDataSource {
         values.put(AccountSqlHelper.COLUMN_MODHASH, account.getModhash());
         values.put(AccountSqlHelper.COLUMN_SUBREDDIT_LIST, account.getCommaSepSubs());
         values.put(AccountSqlHelper.COLUMN_SAVED_SUBMISSIONS, "");
+        values.put(AccountSqlHelper.COLUMN_SAVED_COMMENTS, "");
         values.put(AccountSqlHelper.COLUMN_HISTORY, "");
         long id = mDatabase.insert(AccountSqlHelper.TABLE_ACCOUNTS, null, values);
         account.setId(id);
@@ -67,11 +68,20 @@ public class AccountDataSource {
         mDatabase.update(AccountSqlHelper.TABLE_ACCOUNTS, values, where, sId);
     }
 
-    public void setSavedSubmissions(String submissions, long id) {
+    public void setSavedComments(Account account) {
         ContentValues values = new ContentValues();
-        values.put(AccountSqlHelper.COLUMN_SAVED_SUBMISSIONS, submissions);
+        values.put(AccountSqlHelper.COLUMN_SAVED_COMMENTS, account.getSavedComments());
 
-        String[] sId = { "" + id };
+        String[] sId = { "" + account.getId() };
+        String where = AccountSqlHelper.COLUMN_ID + "=?";
+        mDatabase.update(AccountSqlHelper.TABLE_ACCOUNTS, values, where, sId);
+    }
+
+    public void setSavedSubmissions(Account account) {
+        ContentValues values = new ContentValues();
+        values.put(AccountSqlHelper.COLUMN_SAVED_SUBMISSIONS, account.getSavedSubmissions());
+
+        String[] sId = { "" + account.getId() };
         String where = AccountSqlHelper.COLUMN_ID + "=?";
         mDatabase.update(AccountSqlHelper.TABLE_ACCOUNTS, values, where, sId);
     }

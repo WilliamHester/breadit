@@ -32,6 +32,7 @@ public class Account implements Parcelable {
     public static final String TABLE_ID = "table_id";
     public static final String SUBSCRIBED_SUBREDDITS = "subscribed_subreddits";
     public static final String SAVED_SUBMISSIONS = "saved_submissions";
+    public static final String SAVED_COMMENTS = "saved_comments";
     public static final String HISTORY = "history";
 
 	private String mUsername;
@@ -39,6 +40,7 @@ public class Account implements Parcelable {
     private String mCookie;
     private String mDataString;
     private String mSavedSubmissions;
+    private String mSavedComments;
     private String mSubredditsString;
     private String mHistory;
     private TreeSet<String> mHistoryTree;
@@ -58,6 +60,7 @@ public class Account implements Parcelable {
         mId = b.getLong(TABLE_ID);
         mSubredditsString = b.getString(SUBSCRIBED_SUBREDDITS);
         mSavedSubmissions = b.getString(SAVED_SUBMISSIONS);
+        mSavedComments = b.getString(SAVED_COMMENTS);
         mHistory = b.getString(HISTORY);
 
         if (mDataString != null) {
@@ -107,7 +110,8 @@ public class Account implements Parcelable {
         mModhash = c.getString(3);
         String subs = c.getString(4);
         mSavedSubmissions = c.getString(5);
-        mHistory = c.getString(6);
+        mSavedComments = c.getString(6);
+        mHistory = c.getString(7);
         Scanner scan = new Scanner(subs).useDelimiter(",");
         mSubreddits = new ArrayList<String>();
         while (scan.hasNext()) {
@@ -227,42 +231,6 @@ public class Account implements Parcelable {
         return object;
 	}
 
-	public boolean hasMail() {
-		return mData.get("has_mail").getAsBoolean();
-	}
-
-	public double created() {
-		return mData.get("created").getAsDouble();
-	}
-
-	public double createdUTC() {
-		return mData.get("created_utc").getAsDouble();
-	}
-
-	public long linkKarma() {
-		return mData.get("link_karma").getAsLong();
-	}
-
-	public long commentKarma() {
-		return mData.get("comment_karma").getAsLong();
-	}
-
-	public boolean isGold() {
-		return mData.get("is_gold").getAsBoolean();
-	}
-
-	public boolean isMod() {
-		return mData.get("is_mod").getAsBoolean();
-	}
-
-	public String id() {
-		return mData.get("id").toString();
-	}
-
-	public boolean hasModMail() {
-		return mData.get("has_mod_mail").getAsBoolean();
-	}
-
 	public String getUsername() {
 		return mUsername;
 	}
@@ -277,6 +245,22 @@ public class Account implements Parcelable {
 
     public String getHistory() {
         return mHistory;
+    }
+
+    public String getSavedComments() {
+        return mSavedComments;
+    }
+
+    public void addSavedComment(String fullname) {
+        mSavedComments = fullname + "," + mSavedComments;
+    }
+
+    public String getSavedSubmissions() {
+        return mSavedSubmissions;
+    }
+
+    public void addSavedSubmission(String fullname) {
+        mSavedSubmissions = fullname + "," + mSavedSubmissions;
     }
 
     public void setId(long id) {
@@ -465,6 +449,7 @@ public class Account implements Parcelable {
         b.putLong(TABLE_ID, mId);
         b.putString(SAVED_SUBMISSIONS, mSavedSubmissions);
         b.putString(SUBSCRIBED_SUBREDDITS, mSubredditsString);
+        b.putString(SAVED_COMMENTS, mSavedComments);
         b.putString(HISTORY, mHistory);
         dest.writeBundle(b);
     }

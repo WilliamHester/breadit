@@ -45,6 +45,11 @@ public class UserActivity extends Activity {
             case android.R.id.home:
                 finish();
                 return true;
+            case R.id.action_compose_message:
+                MessageDialogFragment messageDialogFragment = MessageDialogFragment
+                        .newInstance(mAccount, mUsername);
+                messageDialogFragment.show(getFragmentManager(), "message_dialog");
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }

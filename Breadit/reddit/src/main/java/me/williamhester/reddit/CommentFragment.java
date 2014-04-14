@@ -1,6 +1,7 @@
 package me.williamhester.reddit;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -133,7 +134,7 @@ public class CommentFragment extends Fragment {
         }
 
         nameAndTime.setText(" in " + mSubmission.getSubredditName() + " "
-                + calculateTimeShort(mSubmission.getCreatedUtc()));
+                + Utilities.calculateTimeShort(mSubmission.getCreatedUtc()));
 
         switch (mSubmission.getVoteStatus()) {
             case Votable.DOWNVOTED:
@@ -213,28 +214,6 @@ public class CommentFragment extends Fragment {
         return v;
     }
 
-    private String calculateTimeShort(long postTime) {
-        long currentTime = System.currentTimeMillis() / 1000;
-        long difference = currentTime - postTime;
-        String time;
-        if (difference / 31536000 > 0) {
-            time = difference / 3156000 + "y";
-        } else if (difference / 2592000 > 0) {
-            time = difference / 2592000 + "m";
-        } else if (difference / 604800 > 0) {
-            time = difference / 604800 + "w";
-        } else if (difference / 86400 > 0) {
-            time = difference / 86400 + "d";
-        } else if (difference / 3600 > 0) {
-            time = difference / 3600 + "h";
-        } else if (difference / 60 > 0) {
-            time = difference / 60 + "m";
-        } else {
-            time = difference + "s";
-        }
-        return time;
-    }
-
     private class CommentArrayAdapter extends ArrayAdapter<Comment> {
 
         public CommentArrayAdapter(Context context) {
@@ -294,9 +273,12 @@ public class CommentFragment extends Fragment {
 
             root.setPadding((int) (getResources().getDisplayMetrics().density
                     * 12 * getItem(position).getLevel()), 0, 0, 0);
-            author.setText(removeEndQuotes(getItem(position).getAuthor()));
-            score.setText(getItem(position).getScore() + " points by ");
-            time.setText(" " + calculateTimeShort(getItem(position).getCreatedUtc()));
+            author.setText(getItem(position).getAuthor());
+            if (getItem(position).getScore() != 1)
+                score.setText(getItem(position).getScore() + " points by ");
+            else
+                score.setText("1 point by ");
+            time.setText(" " + Utilities.calculateTimeShort(getItem(position).getCreatedUtc()));
             body.setText(Html.fromHtml(StringEscapeUtils.unescapeHtml4(getItem(position).getBodyHtml())));
             body.setMovementMethod(new CommentLinkMovementMethod(position + HEADER_VIEW_COUNT));
 
@@ -319,13 +301,6 @@ public class CommentFragment extends Fragment {
                 body.setVisibility(View.VISIBLE);
 
             return convertView;
-        }
-
-        private String removeEndQuotes(String s) {
-            if (s.charAt(0) == '\"' && s.charAt(s.length() - 1) == '\"') {
-                return s.substring(1, s.length() - 1);
-            }
-            return s;
         }
     }
 
@@ -399,6 +374,36 @@ public class CommentFragment extends Fragment {
         }
     }
 
+    private class DeleteAsyncTask extends AsyncTask<Void, Void, Void> {
+
+        private String mFullname;
+        private int mPosition;
+
+        public DeleteAsyncTask(String fullname, int position) {
+            mFullname = fullname;
+            mPosition = position;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            List<NameValuePair> apiParams = new ArrayList<NameValuePair>();
+            apiParams.add(new BasicNameValuePair("id", mFullname));
+            Log.i("CommentFragment", Utilities.post(apiParams, "http://www.reddit.com/api/del", mAccount));
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            if (mPosition > 0) {
+                mCommentAdapter.remove(mCommentAdapter.getItem(mPosition - HEADER_VIEW_COUNT));
+                mCommentAdapter.notifyDataSetChanged();
+            } else {
+                if (getActivity() != null)
+                    getActivity().finish();
+            }
+        }
+    }
+
     private class SwipeDetector extends GestureDetector.SimpleOnGestureListener {
 
         private static final int SWIPE_MIN_DISTANCE = 120;
@@ -453,15 +458,17 @@ public class CommentFragment extends Fragment {
                 } else if (position > 0) {
                     c = new Comment(mAccount, mCommentsList.get(position - 1).getLevel() + 1);
                 }
-                mCommentsList.add(position, c);
-                mCommentAdapter.notifyDataSetChanged();
+                if (position != -1) {
+                    mCommentsList.add(position, c);
+                    mCommentAdapter.notifyDataSetChanged();
+                }
             }
             return false;
         }
 
         @Override
         public void onLongPress(MotionEvent event) {
-            int position = mCommentsListView.pointToPosition((int) event.getX(), (int) event.getY());
+            final int position = mCommentsListView.pointToPosition((int) event.getX(), (int) event.getY());
             final Votable v;
             if (position == 0) {
                 v = mSubmission;
@@ -476,30 +483,66 @@ public class CommentFragment extends Fragment {
                 options.add(getResources().getString(R.string.edit));
                 options.add(getResources().getString(R.string.delete));
                 offset = 0;
-            } else {
+            } else if (mAccount != null) { // User logged in, but not OP
                 offset = 2;
+            } else { // User not logged in (so definitely not OP)
+                offset = 5;
             }
             options.add(getResources().getString(R.string.reply));
-            options.add(getResources().getString(R.string.view_profile));
             options.add(getResources().getString(R.string.message_user));
             options.add(getResources().getString(R.string.save));
-            AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+            options.add(getResources().getString(R.string.view_profile));
+            AlertDialog.Builder builder = new AlertDialog.Builder(mContext,
+                    android.R.style.Theme_Holo_Dialog);
             String[] array = new String[options.size()];
             options.toArray(array);
             builder.setItems(array, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int which) {
                     switch (which + offset) {
-                        case 0:
-                            // Edit
+                        case 0: // Edit
+
                             break;
-                        case 1:
-                            // Delete
+                        case 1: // Delete
+                            new DeleteAsyncTask(v.getName(), position).execute();
                             break;
-                        case 2:
-                            // Reply
+                        case 2: // Reply
+                            View childView = mCommentsListView.getChildAt(position
+                                    - mCommentsListView.getFirstVisiblePosition());
+                            final int y = childView == null ? 0 : (int) childView.getY();
+                            mCommentsListView.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mCommentsListView.smoothScrollBy(y, 300);
+                                }
+                            }, 320);
+                            Comment c = null;
+                            if (position == 0) {
+                                c = new Comment(mAccount, 0);
+                            } else if (position > 0) {
+                                c = new Comment(mAccount, mCommentsList.get(position - 1).getLevel() + 1);
+                            }
+                            mCommentsList.add(position, c);
+                            mCommentAdapter.notifyDataSetChanged();
                             break;
-                        case 3:
+                        case 3: // Message user
+                            MessageDialogFragment messageDialogFragment = MessageDialogFragment
+                                    .newInstance(mAccount, v.getAuthor());
+                            messageDialogFragment.show(getFragmentManager(), "message_dialog");
+                            break;
+                        case 4: // Save
+                            AccountDataSource dataSource = new AccountDataSource(mContext);
+                            dataSource.open();
+                            if (position == 0) {
+                                mAccount.addSavedSubmission(v.getName());
+                                dataSource.setSavedSubmissions(mAccount);
+                            } else {
+                                mAccount.addSavedComment(v.getName());
+                                dataSource.setSavedComments(mAccount);
+                            }
+                            dataSource.close();
+                            break;
+                        case 5: // View user's profile
                             Bundle b = new Bundle();
                             b.putParcelable("account", mAccount);
                             b.putString("username", v.getAuthor());
@@ -507,18 +550,13 @@ public class CommentFragment extends Fragment {
                             Intent i = new Intent(mContext, UserActivity.class);
                             i.putExtras(b);
                             mContext.startActivity(i);
-                            // View user's profile
-                            break;
-                        case 4:
-                            // Message user
-                            break;
-                        case 5:
-                            // Save
                             break;
                     }
                 }
             });
-            builder.create().show();
+            Dialog d = builder.create();
+            d.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            d.show();
         }
 
         @Override

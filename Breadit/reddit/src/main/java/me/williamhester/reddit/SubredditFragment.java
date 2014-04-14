@@ -1,6 +1,5 @@
 package me.williamhester.reddit;
 
-import android.app.ActionBar;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
@@ -51,7 +50,7 @@ public class SubredditFragment extends Fragment {
     private String mSubredditName;
     private SubmissionArrayAdapter mSubmissionsAdapter;
     private SwipeRefreshLayout mSwipeRefreshLayout;
-    private List<Submission> mSubmissionList;
+    private ArrayList<Submission> mSubmissionList;
     private HashSet<String> mNames;
     private Account mAccount;
 
@@ -65,6 +64,17 @@ public class SubredditFragment extends Fragment {
         if (getArguments() != null) {
             mAccount = getArguments().getParcelable("account");
             mSubredditName = getArguments().getString("subreddit");
+            mNames = new HashSet<String>();
+            mSubmissionList = new ArrayList<Submission>();
+        } else if (savedInstanceState != null) {
+            mAccount = savedInstanceState.getParcelable("account");
+            mSubredditName = savedInstanceState.getString("subreddit");
+            mSubmissionList = savedInstanceState.getParcelableArrayList("submissions");
+            String[] array = savedInstanceState.getStringArray("names");
+            mNames = new HashSet<String>();
+            for (String name : array) {
+                mNames.add(name);
+            }
         }
         mContext = getActivity();
     }
@@ -97,11 +107,26 @@ public class SubredditFragment extends Fragment {
     public void onResume() {
         super.onResume();
         mSubmissionsAdapter.notifyDataSetChanged();
+        if (mSubredditName != null) {
+            getActivity().getActionBar().setTitle("/r/" + mSubredditName);
+        } else {
+            getActivity().getActionBar().setTitle("FrontPage");
+        }
     }
 
-    public void setSubreddit(String subreddit) {
-        mSubredditName = subreddit;
-        populateSubmissions();
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putParcelableArrayList("submissions", mSubmissionList);
+        outState.putParcelable("account", mAccount);
+        outState.putString("subreddit", mSubredditName);
+        String[] array = new String[mNames.size()];
+        mNames.toArray(array);
+        outState.putStringArray("names", array);
+        super.onSaveInstanceState(outState);
+    }
+
+    public void refreshData() {
+        new RefreshUserClass(true).execute();
     }
 
     public static SubredditFragment newInstance(Account account, String subredditName) {
@@ -118,8 +143,6 @@ public class SubredditFragment extends Fragment {
      *     when the SwipeRefreshLayout's onRefresh method is called.
      */
     private void populateSubmissions() {
-        mNames = new HashSet<String>();
-        mSubmissionList = new ArrayList<Submission>();
 //        mSubmissions.addHeaderView(createHeaderView());
         mSubmissionsAdapter = new SubmissionArrayAdapter(mContext);
         mSubmissions.setAdapter(mSubmissionsAdapter);
@@ -223,6 +246,7 @@ public class SubredditFragment extends Fragment {
         protected Void doInBackground(Void... voids) {
             if (mAccount != null) {
                 mAccount.refreshUserData();
+                mSwipeRefreshLayout.setRefreshing(true);
             }
             SubmissionsListViewHelper list = new SubmissionsListViewHelper(mSubredditName,
                     Submission.HOT, -1, null, null, mAccount, mSubmissions);

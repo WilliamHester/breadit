@@ -61,4 +61,13 @@
     <string name="new_text_post">New text post</string>
     <string name="subreddit_name">Subreddit name</string>
 
+    <!--MessageDialogFragment-->
+    <string name="subject">Subject</string>
+    <string name="enter_body">Enter body text</string>
+    <string name="send">Send</string>
+    <string name="please_enter_body">Please enter a body for the message</string>
+    <string name="please_enter_username">Please enter a recipient for the message</string>
+    <string name="please_enter_subject">Please enter a subject for the message</string>
+    <string name="compose_message">Compose message</string>
+
 </resources>

@@ -137,4 +137,8 @@ public class Utilities {
         return s;
     }
 
+    public static interface UtilitiesAsyncHandler {
+        public void onTaskFinished();
+    }
+
 }

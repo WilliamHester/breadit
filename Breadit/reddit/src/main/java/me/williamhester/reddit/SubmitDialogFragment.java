@@ -46,6 +46,7 @@ public class SubmitDialogFragment extends DialogFragment {
             mAccount = getArguments().getParcelable("account");
             mSubreddit = getArguments().getString("subreddit");
         }
+        setStyle(STYLE_NORMAL, android.R.style.Theme_Holo_Dialog);
     }
 
     @Override
@@ -116,8 +117,7 @@ public class SubmitDialogFragment extends DialogFragment {
                 apiParams.add(new BasicNameValuePair("title", mTitle.getText().toString()));
                 apiParams.add(new BasicNameValuePair("url", ""));
                 Log.i("SubmitDialogFragment", "Response = " + Utilities.post(apiParams,
-                        "http://www.reddit.com/api/submit", mAccount.getCookie(),
-                        mAccount.getModhash()));
+                        "http://www.reddit.com/api/submit", mAccount));
             } else if (mAccount == null) {
                 Log.i("SubmitDialogFragment", "mAccount == null");
             } else if (mSubmitText == null) {

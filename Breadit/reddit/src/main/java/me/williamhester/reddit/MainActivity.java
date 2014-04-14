@@ -73,8 +73,8 @@ public class MainActivity extends Activity
 
         updateActionBar(null);
 
-        getFragmentManager().beginTransaction().replace(R.id.navigation_drawer_container,
-                mNavigationDrawerFragment)
+        getFragmentManager().beginTransaction()
+                .replace(R.id.navigation_drawer_container, mNavigationDrawerFragment)
                 .commit();
         getFragmentManager().beginTransaction()
                 .replace(R.id.container, mSubredditFragment)
@@ -83,9 +83,16 @@ public class MainActivity extends Activity
 
     @Override
     public void onNavigationDrawerItemSelected(String subreddit) {
-        mSubreddit = subreddit;
-        mSubredditFragment.setSubreddit(mSubreddit);
-        updateActionBar(subreddit);
+        if (mSubreddit == subreddit || (mSubreddit != null && mSubreddit.equals(subreddit))) {
+            mSubredditFragment.refreshData();
+        } else {
+            mSubreddit = subreddit;
+            mSubredditFragment = SubredditFragment.newInstance(mAccount, subreddit);
+            getFragmentManager().beginTransaction()
+                    .addToBackStack("prev_frag")
+                    .replace(R.id.container, mSubredditFragment)
+                    .commit();
+        }
     }
 
     public void restoreActionBar() {
