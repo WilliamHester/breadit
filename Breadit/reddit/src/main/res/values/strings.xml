@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!--Basic stuff and MainActivity-->
+    <!-- Basic stuff and MainActivity -->
     <string name="app_name">Breadit</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -9,7 +9,7 @@
     <string name="action_my_account">My account</string>
     <string name="submit">Submit</string>
 
-    <!--Welcome stuff-->
+    <!-- Welcome stuff -->
     <string name="welcome">Welcome to Breadit! Let\'s get started.</string>
     <string name="options">Continue the setup to sign in with an existing account, or skip the setup and do it later.</string>
     <string name="get_started">Get started!</string>
@@ -24,18 +24,18 @@
     <string name="username">Username</string>
     <string name="password">Password</string>
 
-    <!--SubredditFragment stuff-->
+    <!-- SubredditFragment stuff -->
     <string name="thumbnail_description">Thumbnail image for a post</string>
     <string name="failed_to_refresh">Could not refresh list.</string>
 
-    <!--SubmissionFragment stuff-->
+    <!-- SubmissionFragment stuff -->
     <string name="share">Share</string>
     <string name="open_link_browser">Open in browser</string>
     <string name="reply_hint">Enter reply</string>
     <string name="cancel">Cancel</string>
     <string name="reply">Reply</string>
 
-    <!--Comments stuff-->
+    <!-- Comments stuff -->
     <string name="edit">Edit</string>
     <string name="save">Save</string>
     <string name="delete">Delete</string>
@@ -43,25 +43,25 @@
     <string name="message_user">Message user</string>
     <string name="expand_links">Expand links</string>
 
-    <!--Sharing stuff-->
+    <!-- Sharing stuff -->
     <string name="share_with">Share link with…</string>
     <string name="comments">Comments</string>
     <string name="content">Content</string>
 
-    <!--Account stuff-->
+    <!-- Account stuff -->
     <string name="action_compose_message">Compose message</string>
     <string name="to">To</string>
     <string name="from">From</string>
     <string name="filter">Filter by</string>
 
-    <!--SubmissionDialogFragment-->
+    <!-- SubmissionDialogFragment -->
     <string name="enter_self_text">Enter self text</string>
     <string name="post_title">Submission title</string>
     <string name="captcha_response">Captcha response</string>
     <string name="new_text_post">New text post</string>
     <string name="subreddit_name">Subreddit name</string>
 
-    <!--MessageDialogFragment-->
+    <!-- MessageDialogFragment -->
     <string name="subject">Subject</string>
     <string name="enter_body">Enter body text</string>
     <string name="send">Send</string>
@@ -76,4 +76,11 @@
     <string name="hide_nsfw">Hide NSFW submissions</string>
     <string name="submission_settings">Submission Settings</string>
     <string name="nsfw_settings">NSFW Settings</string>
+    <string name="warn_nsfw">Warn before entering NSFW Subreddit</string>
+    <string name="user_options">User Options</string>
+    <string name="login">Log In</string>
+    <string name="logout">Log Out</string>
+    <string name="switch_users">Switch Users</string>
+    <string name="clear_history">Clear History</string>
+
 </resources>

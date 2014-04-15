@@ -12,7 +12,9 @@
             android:key="remove_viewed_sub"
             android:title="@string/remove_viewed_sub"
             android:defaultValue="false" />
-
+        <Preference
+            android:title="@string/clear_history"
+            android:key="pref_key_clear_history" />
     </PreferenceCategory>
     <PreferenceCategory
         android:title="@string/nsfw_settings"
@@ -25,5 +27,18 @@
             android:key="warn_nsfw"
             android:title="@string/warn_nsfw"
             android:defaultValue="true" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="@string/user_options"
+        android:key="pref_key_user_options" >
+        <Preference
+            android:title="@string/login"
+            android:key="pref_key_login" />
+        <Preference
+            android:title="@string/logout"
+            android:key="pref_key_logout" />
+        <Preference
+            android:title="@string/switch_users"
+            android:key="pref_key_switch_users" />
     </PreferenceCategory>
 </PreferenceScreen>
