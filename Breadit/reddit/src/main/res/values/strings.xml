@@ -82,5 +82,8 @@
     <string name="logout">Log Out</string>
     <string name="switch_users">Switch Users</string>
     <string name="clear_history">Clear History</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>
