@@ -70,4 +70,10 @@
     <string name="please_enter_subject">Please enter a subject for the message</string>
     <string name="compose_message">Compose message</string>
 
+    <!-- Preference Strings -->
+    <string name="remove_viewed_front">Hide viewed submissions from Front Page</string>
+    <string name="remove_viewed_sub">Hide viewed submissions from Subreddit</string>
+    <string name="hide_nsfw">Hide NSFW submissions</string>
+    <string name="submission_settings">Submission Settings</string>
+    <string name="nsfw_settings">NSFW Settings</string>
 </resources>

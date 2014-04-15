@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:title="@string/submission_settings"
+        android:key="pref_key_submission_settings">
+        <CheckBoxPreference
+            android:key="remove_viewed_front"
+            android:title="@string/remove_viewed_front"
+            android:defaultValue="false" />
+        <CheckBoxPreference
+            android:key="remove_viewed_sub"
+            android:title="@string/remove_viewed_sub"
+            android:defaultValue="false" />
+
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="@string/nsfw_settings"
+        android:key="pref_key_nsfw_settings">
+        <CheckBoxPreference
+            android:key="hide_nsfw"
+            android:title="@string/hide_nsfw"
+            android:defaultValue="true" />
+        <CheckBoxPreference
+            android:key="warn_nsfw"
+            android:title="@string/warn_nsfw"
+            android:defaultValue="true" />
+    </PreferenceCategory>
+</PreferenceScreen>
