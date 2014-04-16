@@ -2,7 +2,9 @@ package me.williamhester.reddit;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.Preference;
@@ -26,6 +28,8 @@ public class SettingsFragment extends PreferenceFragment {
     private Preference mLogOut;
     private Preference mSwitchUsers;
     private Account mAccount;
+    private SharedPreferences mPrefs;
+
 
     public static SettingsFragment newInstance(Account account) {
         SettingsFragment fragment = new SettingsFragment();
@@ -41,8 +45,10 @@ public class SettingsFragment extends PreferenceFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getPreferenceManager().setSharedPreferencesName("preferences");
         // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.preferences);
+        mPrefs = getActivity().getSharedPreferences("preferences", Context.MODE_PRIVATE);
 
         mRemoveViewedFront = findPreference("pref_remove_viewed_front");
         mRemoveViewedSub = findPreference("pref_remove_viewed_sub");
@@ -67,13 +73,7 @@ public class SettingsFragment extends PreferenceFragment {
     @Override
     public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
 
-        if(preference == mRemoveViewedFront) {
-
-        }
-        else if(preference == mRemoveViewedSub) {
-
-        }
-        else if(preference == mClearHistory) {
+        if(preference == mClearHistory) {
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(),android.R.style.Theme_Holo_Dialog);
             builder.setMessage(R.string.are_you_sure);
             builder.setTitle(R.string.clear_history);
