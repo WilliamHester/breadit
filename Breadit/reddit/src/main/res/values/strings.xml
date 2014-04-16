@@ -85,7 +85,14 @@
     <string name="switch_users">Switch Users</string>
     <string name="clear_history">Clear History</string>
     <string name="title_activity_settings">Settings</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="are_you_sure">Are you sure you want to clear your history?</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="yes">Confirm</string>
+
+    <!-- Drawer Stuff -->
+    <string name="search_sub_hint">Enter a subreddit!</string>
+    <string name="currently_viewing">Currently Viewing: </string>
+    <string name="subscribe">Subscribed?</string>
+    <string name="sort_by">Sort By: </string>
 
 </resources>

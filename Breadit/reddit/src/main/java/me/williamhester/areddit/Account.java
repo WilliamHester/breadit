@@ -247,6 +247,10 @@ public class Account implements Parcelable {
         return mHistory;
     }
 
+    public void setHistory(String historyIn) {
+        mHistory = historyIn;
+    }
+
     public String getSavedComments() {
         return mSavedComments;
     }

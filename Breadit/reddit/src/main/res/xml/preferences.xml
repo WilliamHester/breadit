@@ -3,42 +3,42 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory
         android:title="@string/submission_settings"
-        android:key="pref_key_submission_settings">
+        android:key="pref_submission_settings">
         <CheckBoxPreference
-            android:key="remove_viewed_front"
+            android:key="pref_remove_viewed_front"
             android:title="@string/remove_viewed_front"
             android:defaultValue="false" />
         <CheckBoxPreference
-            android:key="remove_viewed_sub"
+            android:key="pref_remove_viewed_sub"
             android:title="@string/remove_viewed_sub"
             android:defaultValue="false" />
         <Preference
             android:title="@string/clear_history"
-            android:key="pref_key_clear_history" />
+            android:key="pref_clear_history" />
     </PreferenceCategory>
     <PreferenceCategory
         android:title="@string/nsfw_settings"
-        android:key="pref_key_nsfw_settings">
+        android:key="pref_nsfw_settings">
         <CheckBoxPreference
-            android:key="hide_nsfw"
+            android:key="pref_hide_nsfw"
             android:title="@string/hide_nsfw"
             android:defaultValue="true" />
         <CheckBoxPreference
-            android:key="warn_nsfw"
+            android:key="pref_warn_nsfw"
             android:title="@string/warn_nsfw"
             android:defaultValue="true" />
     </PreferenceCategory>
     <PreferenceCategory
         android:title="@string/user_options"
-        android:key="pref_key_user_options" >
+        android:key="pref_user_options" >
         <Preference
             android:title="@string/login"
-            android:key="pref_key_login" />
+            android:key="pref_login" />
         <Preference
             android:title="@string/logout"
-            android:key="pref_key_logout" />
-        <Preference
+            android:key="pref_logout" />
+        <ListPreference
             android:title="@string/switch_users"
-            android:key="pref_key_switch_users" />
+            android:key="pref_switch_users" />
     </PreferenceCategory>
 </PreferenceScreen>
