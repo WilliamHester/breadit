@@ -85,7 +85,8 @@
     <string name="switch_users">Switch Users</string>
     <string name="clear_history">Clear History</string>
     <string name="title_activity_settings">Settings</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="are_you_sure">Are you sure you want to clear your history?</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="yes">Confirm</string>
 
 </resources>
