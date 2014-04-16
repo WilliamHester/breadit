@@ -2,6 +2,7 @@ package me.williamhester.reddit;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
@@ -114,8 +115,7 @@ public class MessagesFragment extends Fragment {
                         mFilterType = Message.MOD_MAIL;
                         break;
                 }
-                mMessageList.clear();
-                new LoadMessagesTask().execute();
+                new LoadMessagesTask(true).execute();
             }
 
             @Override
@@ -151,6 +151,8 @@ public class MessagesFragment extends Fragment {
             TextView metadata = (TextView) convertView.findViewById(R.id.metadata);
             TextView body = (TextView) convertView.findViewById(R.id.body);
 
+            View readStatus = convertView.findViewById(R.id.read_status);
+
             LinearLayout editedText = (LinearLayout) convertView.findViewById(R.id.edited_text);
 //            EditText replyBody = (EditText) convertView.findViewById(R.id.reply_body);
 //            Button cancelReply = (Button) convertView.findViewById(R.id.cancel_reply);
@@ -178,10 +180,14 @@ public class MessagesFragment extends Fragment {
             }
 
             author.setText(m.getAuthor());
-            metadata.setText(" " + calculateTimeShort(m.getCreatedUtc()));
+            metadata.setText(" " + Utilities.calculateTimeShort(m.getCreatedUtc()));
             String unescaped = StringEscapeUtils.unescapeHtml4(m.getBodyHtml());
             String formatted = unescaped.substring(31, unescaped.length() - 20);
             body.setText(Html.fromHtml(formatted));
+
+            if (m.isUnread()) {
+                readStatus.setBackgroundColor(Color.RED);
+            }
 
             // Todo: allow replies, but for now, this will be a stub.
             editedText.setVisibility(View.GONE);
@@ -192,36 +198,21 @@ public class MessagesFragment extends Fragment {
         }
     }
 
-    private String calculateTimeShort(long postTime) {
-        long currentTime = System.currentTimeMillis() / 1000;
-        long difference = currentTime - postTime;
-        String time;
-        if (difference / 31536000 > 0) {
-            time = difference / 3156000 + "y";
-        } else if (difference / 2592000 > 0) {
-            time = difference / 2592000 + "m";
-        } else if (difference / 604800 > 0) {
-            time = difference / 604800 + "w";
-        } else if (difference / 86400 > 0) {
-            time = difference / 86400 + "d";
-        } else if (difference / 3600 > 0) {
-            time = difference / 3600 + "h";
-        } else if (difference / 60 > 0) {
-            time = difference / 60 + "m";
-        } else {
-            time = difference + "s";
-        }
-        return time;
-    }
+    private class LoadMessagesTask extends AsyncTask<Void, Void, List<Message>> {
+        private boolean mClear;
 
-    private class LoadMessagesTask extends AsyncTask<Void, Void, Void> {
+        public LoadMessagesTask() {
+            mClear = false;
+        }
+
+        public LoadMessagesTask(boolean clear) {
+            mClear = clear;
+        }
+
         @Override
-        protected Void doInBackground(Void... voids) {
+        protected List<Message> doInBackground(Void... voids) {
             try {
-                List<Message> messages = Message.getMessages(mFilterType, null, null, mAccount);
-                for (Message m : messages) {
-                    mMessageList.add(m);
-                }
+                return Message.getMessages(mFilterType, null, null, mAccount);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -229,7 +220,13 @@ public class MessagesFragment extends Fragment {
         }
 
         @Override
-        protected void onPostExecute(Void result) {
+        protected void onPostExecute(List<Message> result) {
+            if (mClear) {
+                mMessageList.clear();
+            }
+            for (Message m : result) {
+                mMessageList.add(m);
+            }
             mMessageAdapter.notifyDataSetChanged();
         }
     }

@@ -1,10 +1,9 @@
 package me.williamhester.reddit;
 
+import android.app.ActionBar;
 import android.app.Fragment;
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
@@ -34,13 +33,11 @@ public class TabView extends FrameLayout {
     private List<Fragment> mFragmentList = new ArrayList<Fragment>();
     private List<String> mFragmentTags = new ArrayList<String>();
     private View mCursor;
-    private ViewPager mViewPager;
     private float mCursorAlpha;
     private int mCursorHeight;
     private String mSelectedTab;
     private int mSelectedTabPosition;
     private int mViewWidth = 0;
-    private Drawable mCursorBackground;
     private TabSwitcher mTabSwitcher;
 
     public TabView(Context context) {
@@ -76,22 +73,17 @@ public class TabView extends FrameLayout {
                 @Override
                 public void onGlobalLayout() {
                     if (mViewWidth != mLinearLayout.getMeasuredWidth()) {
-                        mViewWidth = mLinearLayout.getMeasuredWidth();
-                        removeView(mCursor);
-                        FrameLayout.LayoutParams params;
-                        params = new FrameLayout.LayoutParams(mViewWidth, mCursorHeight);
-                        params.gravity = Gravity.BOTTOM;
-                        if (mSelectedTabPosition > -1) {
-                            mCursor.setBackgroundColor(getResources().getColor(R.color.auburn));
-                            addView(mCursor, params);
-                            mCursor.setScaleX(mTabLayouts.get(mSelectedTabPosition).getMeasuredWidth()
-                                    / getMeasuredWidth());
+                        for (FrameLayout f : mTabLayouts) {
+                            float scale = getResources().getDisplayMetrics().density;
+                            View v = f.findViewById(R.id.selector);
+                            f.removeView(v);
+                            FrameLayout.LayoutParams params =
+                                    new LayoutParams(f.getChildAt(0).getMeasuredWidth(),
+                                            mCursorHeight);
+                            params.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
+                            params.setMargins(0, (int) (2 * scale), 0, (int) (2 * scale));
+                            f.addView(v, params);
                         }
-                        int translationX = 0;
-                        if (mSelectedTabPosition > 0)
-                            translationX += mTabLayouts.get(mSelectedTabPosition - 1).getRight();
-                        translationX -= (getMeasuredWidth() - mCursor.getScaleX() * getMeasuredWidth()) / 2;
-                        mCursor.setTranslationX(translationX);
                     }
                 }
             });
@@ -109,20 +101,12 @@ public class TabView extends FrameLayout {
         mCursor.setAlpha(mCursorAlpha);
     }
 
-    /**
-     * This method adds a tab to the right of the previously added tabs. If no tabs exist, it adds
-     * a tab to the left side of the view.
-     *
-     * @param clss the class of the fragment to be added
-     * @param fragmentArgs the bundle that should be passed to the fragment upon creation
-     * @param tabType the type that specifies whether the tab should be a main tab or minor tab.
-     * @param tag the tag of the Fragment so that it can be found later
-     */
-    public void addTab(Class<?> clss, Bundle fragmentArgs, int tabType, View innerView, String tag) {
+    public void addTab(Fragment fragment, int tabType, View innerView, String tag) {
         mFragmentTags.add(tag);
 
         // Create the tab's view
         FrameLayout tabFrame = new FrameLayout(mContext);
+        tabFrame.setId(R.id.tab_frame);
         mTabLayouts.add(tabFrame);
         tabFrame.setBackgroundResource(R.drawable.actionbar_item_background);
 
@@ -156,14 +140,35 @@ public class TabView extends FrameLayout {
         tabFrame.setPadding((int) (8 * scale),
                 (int) (4 * scale), (int) (8 * scale), (int) (4 * scale));
         tabFrame.addView(innerView, innerParams);
+        FrameLayout.LayoutParams selectorParams = new FrameLayout.LayoutParams(0, (int) (2 * scale));
+        selectorParams.gravity = Gravity.BOTTOM;
+        selectorParams.setMargins((int) (4 * scale),
+                (int) (4 * scale), (int) (4 * scale), (int) (4 * scale));
+        View selector = new View(mContext);
+        selector.setId(R.id.selector);
+        selector.setBackgroundColor(getResources().getColor(R.color.auburn));
+        if (mFragmentTags.size() > 1) {
+            selector.setVisibility(View.GONE);
+        } else {
+            mSelectedTabPosition = 0;
+            mSelectedTab = tag;
+        }
+        tabFrame.addView(selector, selectorParams);
         tabFrame.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
+                int oldIndex = mSelectedTabPosition;
                 mSelectedTabPosition = mFragmentTags.indexOf(finalTag);
                 if (mSelectedTab.equals(finalTag)) {
                     mTabSwitcher.onTabReselected(finalTag,
                             mFragmentList.get(mSelectedTabPosition));
                 } else {
+                    View v = mTabLayouts.get(oldIndex);
+                    View selectedSelector = v.findViewById(R.id.selector);
+                    selectedSelector.setVisibility(View.INVISIBLE);
+                    View v2 = mTabLayouts.get(mSelectedTabPosition);
+                    View selector = v2.findViewById(R.id.selector);
+                    selector.setVisibility(View.VISIBLE);
                     mTabSwitcher.onTabSelected(finalTag,
                             mFragmentList.get(mSelectedTabPosition));
                 }
@@ -172,7 +177,7 @@ public class TabView extends FrameLayout {
             }
         });
         mLinearLayout.addView(tabFrame, params);
-        mFragmentList.add(Fragment.instantiate(mContext, clss.getName(), fragmentArgs));
+        mFragmentList.add(fragment);
     }
 
     /**
@@ -182,6 +187,20 @@ public class TabView extends FrameLayout {
      * @param clss the class of the fragment to be added
      * @param fragmentArgs the bundle that should be passed to the fragment upon creation
      * @param tabType the type that specifies whether the tab should be a main tab or minor tab.
+     * @param tag the tag of the Fragment so that it can be found later
+     */
+    public void addTab(Class<?> clss, Bundle fragmentArgs, int tabType, View innerView, String tag) {
+        addTab(Fragment.instantiate(mContext, clss.getName(), fragmentArgs), tabType, innerView, tag);
+    }
+
+    /**
+     * This method adds a tab to the right of the previously added tabs. If no tabs exist, it adds
+     * a tab to the left side of the view.
+     *
+     * @param clss the class of the fragment to be added
+     * @param fragmentArgs the bundle that should be passed to the fragment upon creation
+     * @param tabType the type that specifies whether the tab should be a main tab or minor tab.
+     * @param innerView the view that will appear as the tab selector
      */
     public void addTab(Class<?> clss, Bundle fragmentArgs, int tabType, View innerView) {
         addTab(clss, fragmentArgs, tabType, innerView, null);
