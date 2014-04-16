@@ -28,6 +28,8 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import org.w3c.dom.Text;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -102,18 +104,7 @@ public class NavigationDrawerFragment extends Fragment {
         setHasOptionsMenu(true);
     }
 
-//
-//@Override
-//    public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
-//        View v = inflater.inflate(R.layout.fragment_messages, null);
-//        mMessagesListView = (ListView) v.findViewById(R.id.messages);
-//        mMessageAdapter = new MessageArrayAdapter(mContext);
-//        mHeaderView = createHeaderView(inflater);
-//        mMessagesListView.addHeaderView(mHeaderView);
-//        mMessagesListView.setAdapter(mMessageAdapter);
-//        new LoadMessagesTask().execute();
-//        return v;
-//    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
@@ -127,11 +118,11 @@ public class NavigationDrawerFragment extends Fragment {
             mSubredditList = mAccount.getSubreddits();
             Collections.sort(mSubredditList, mOrderList);
             mSubredditList.add(0, "FrontPage");
-            mSubredditArrayAdapter = new ArrayAdapter<String>(
-                    getActivity().getActionBar().getThemedContext(),
-                    android.R.layout.simple_list_item_activated_1,
-                    android.R.id.text1, mSubredditList);
-            mDrawerListView.setAdapter(mSubredditArrayAdapter);
+//            mSubredditArrayAdapter = new ArrayAdapter<String>(
+//                    getActivity().getActionBar().getThemedContext(),
+//                    android.R.layout.simple_list_item_activated_1,
+//                    android.R.id.text1, mSubredditList);
+            mDrawerListView.setAdapter(new SubredditAdapter(mSubredditList));
             new GetUserSubreddits().execute();
         } else {
             mSubredditList = new ArrayList<String>();
@@ -140,11 +131,13 @@ public class NavigationDrawerFragment extends Fragment {
                 mSubredditList.add(s);
             }
             mSubredditList.add(0, "FrontPage");
-            mDrawerListView.setAdapter(new ArrayAdapter<String>(
-                    getActivity().getActionBar().getThemedContext(),
-                    android.R.layout.simple_list_item_activated_1,
-                    android.R.id.text1, mSubredditList
-            ));
+//            mDrawerListView.setAdapter(new ArrayAdapter<String>(
+//                    getActivity().getActionBar().getThemedContext(),
+//                    android.R.layout.simple_list_item_activated_1,
+//                    android.R.id.text1, mSubredditList
+//            ));
+//            List<String> input = mSubredditList;
+            mDrawerListView.setAdapter(new SubredditAdapter(mSubredditList));
         }
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
 
@@ -463,5 +456,26 @@ public class NavigationDrawerFragment extends Fragment {
 //            }
 //        });
         return v;
+    }
+
+
+    private class SubredditAdapter extends ArrayAdapter<String> {
+
+        public SubredditAdapter(List<String> items) {
+            super(getActivity().getActionBar().getThemedContext(), 0, items);
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View v = convertView;
+            if (v == null) {
+                v = getActivity().getLayoutInflater()
+                        .inflate(R.layout.list_item_subreddit, null);
+            }
+            String subreddit = mSubredditList.get(position);
+            TextView subredditName = (TextView)v.findViewById(R.id.subreddit_list_item_title);
+            subredditName.setText(subreddit);
+            return v;
+        }
     }
 }
