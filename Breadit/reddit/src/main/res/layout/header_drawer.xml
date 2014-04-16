@@ -32,6 +32,7 @@
         <ImageButton
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:id="@+id/search_button"
         android:src="@android:drawable/ic_menu_send"
         android:background="@android:color/transparent"
         />
@@ -63,6 +64,7 @@
          android:layout_width="wrap_content"
          android:layout_height="wrap_content"
          android:text="@string/subscribe"
+         android:textSize="20sp"
          android:textColor="@color/ghostwhite"
          android:id="@+id/subscribed_CheckBox"
          android:checked="true"/>
@@ -75,7 +77,7 @@
             android:layout_height="wrap_content"
             android:text="@string/sort_by"
             android:textColor="@color/ghostwhite"
-            android:textSize="15sp"
+            android:textSize="20sp"
             android:padding="6dp"
             />
 
@@ -85,6 +87,7 @@
             android:id="@+id/header_spinner1"
             android:layout_weight="1"
             android:visibility="visible"
+            android:padding="6dp"
             />
 
         <Spinner
@@ -93,6 +96,7 @@
             android:id="@+id/header_spinner2"
             android:layout_weight="1"
             android:visibility="visible"
+            android:padding="6dp"
 
         />
 

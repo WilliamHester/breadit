@@ -10,10 +10,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Subreddits"
+        android:textColor="@color/auburn"
         android:textSize="20sp"
         android:background="@color/blackish"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="@color/ghostwhite"
         style="?android:listSeparatorTextViewStyle"
         android:layout_gravity="center_horizontal" />
 
