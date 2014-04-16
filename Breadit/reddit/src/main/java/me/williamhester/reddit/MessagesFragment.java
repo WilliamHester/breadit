@@ -108,7 +108,10 @@ public class MessagesFragment extends Fragment {
                         mFilterType = Message.POST_REPLIES;
                         break;
                     case 5:
-                        mFilterType = Comment.OLD;
+                        mFilterType = Message.SENT;
+                        break;
+                    case 6:
+                        mFilterType = Message.MOD_MAIL;
                         break;
                 }
                 mMessageList.clear();

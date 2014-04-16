@@ -7,6 +7,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import java.io.IOException;
+import java.util.Calendar;
 
 import me.williamhester.areddit.utils.Utilities;
 
@@ -75,6 +76,63 @@ public class User extends Thing implements Parcelable {
 
     public String getUsername() {
         return mUsername;
+    }
+
+    public String calculateCakeDay() {
+        Calendar cakeday = Calendar.getInstance();
+        cakeday.setTimeInMillis(mCreatedUtc * 1000);
+        StringBuilder sb = new StringBuilder();
+        sb.append("Cake Day on ");
+        switch (cakeday.get(Calendar.MONTH)) {
+            case Calendar.JANUARY:
+                sb.append("January ");
+                break;
+            case Calendar.FEBRUARY:
+                sb.append("February ");
+                break;
+            case Calendar.MARCH:
+                sb.append("March ");
+                break;
+            case Calendar.APRIL:
+                sb.append("April ");
+                break;
+            case Calendar.MAY:
+                sb.append("May ");
+                break;
+            case Calendar.JUNE:
+                sb.append("June ");
+                break;
+            case Calendar.JULY:
+                sb.append("July ");
+                break;
+            case Calendar.AUGUST:
+                sb.append("August ");
+                break;
+            case Calendar.SEPTEMBER:
+                sb.append("September ");
+                break;
+            case Calendar.OCTOBER:
+                sb.append("October ");
+                break;
+            case Calendar.NOVEMBER:
+                sb.append("November ");
+                break;
+            case Calendar.DECEMBER:
+                sb.append("December ");
+                break;
+        }
+        sb.append(cakeday.get(Calendar.DAY_OF_MONTH));
+        int day = cakeday.get(Calendar.DAY_OF_MONTH);
+        if (day == 1 || day == 21 || day == 31) {
+            sb.append("st");
+        } else if (day == 2 || day == 22) {
+            sb.append("nd");
+        } else if (day == 3 || day == 23) {
+            sb.append("rd");
+        } else {
+            sb.append("th");
+        }
+        return sb.toString();
     }
 
     @Override

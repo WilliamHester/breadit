@@ -135,6 +135,11 @@ public class MainActivity extends Activity
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_settings) {
+            Intent i = new Intent(this, SettingsActivity.class);
+            Bundle b = new Bundle();
+            b.putParcelable("account", mAccount);
+            i.putExtras(b);
+            startActivity(i);
             return true;
         } else if (id == R.id.action_submit) {
             SubmitDialogFragment sf = SubmitDialogFragment.newInstance(mAccount, mSubreddit);

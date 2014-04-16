@@ -50,5 +50,7 @@
         <item>Messages</item>
         <item>Comment replies</item>
         <item>Post replies</item>
+        <item>Sent</item>
+        <item>Mod mail</item>
     </string-array>
 </resources>

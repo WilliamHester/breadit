@@ -116,4 +116,9 @@
         </LinearLayout>
 
     </LinearLayout>
+
+    <View android:id="@+id/read_status"
+        android:layout_width="6dp"
+        android:layout_height="match_parent"/>
+
 </LinearLayout>

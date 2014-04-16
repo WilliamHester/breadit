@@ -27,6 +27,8 @@
     <!-- SubredditFragment stuff -->
     <string name="thumbnail_description">Thumbnail image for a post</string>
     <string name="failed_to_refresh">Could not refresh list.</string>
+    <string name="loading_submissions">Just a moment. Loading more submissions.</string>
+    <string name="failed_to_load">Failed to load more submissions. Click to try again.</string>
 
     <!-- SubmissionFragment stuff -->
     <string name="share">Share</string>

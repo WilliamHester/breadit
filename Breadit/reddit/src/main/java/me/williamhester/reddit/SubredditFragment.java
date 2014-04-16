@@ -17,6 +17,7 @@ import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -53,9 +54,12 @@ public class SubredditFragment extends Fragment {
     private ArrayList<Submission> mSubmissionList;
     private HashSet<String> mNames;
     private Account mAccount;
+    private View mFooterView;
 
     private GestureDetector mGestureDetector;
     private View.OnTouchListener mGestureListener;
+
+    private boolean mFailedToLoad = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -90,6 +94,8 @@ public class SubredditFragment extends Fragment {
         };
 
         mSubmissions = (ListView) v.findViewById(R.id.submissions);
+        mFooterView = createFooterView(inflater);
+        mSubmissions.addFooterView(mFooterView);
         mSwipeRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.swipe_refresh);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -107,9 +113,10 @@ public class SubredditFragment extends Fragment {
     public void onResume() {
         super.onResume();
         mSubmissionsAdapter.notifyDataSetChanged();
-        if (mSubredditName != null) {
+        if (mSubredditName != null && getActivity() != null
+                && getActivity().getActionBar() != null) {
             getActivity().getActionBar().setTitle("/r/" + mSubredditName);
-        } else {
+        } else if (getActivity() != null && getActivity().getActionBar() != null) {
             getActivity().getActionBar().setTitle("FrontPage");
         }
     }
@@ -157,6 +164,11 @@ public class SubredditFragment extends Fragment {
         View v = inflater.inflate(R.layout.header_subreddit, null);
         TextView title = (TextView) v.findViewById(R.id.subreddit);
         title.setText("/r/" + mSubredditName);
+        return v;
+    }
+
+    private View createFooterView(LayoutInflater inflater) {
+        View v = inflater.inflate(R.layout.footer_subreddit_fragment, null);
         return v;
     }
 
@@ -287,10 +299,14 @@ public class SubredditFragment extends Fragment {
                     JsonObject jsonData = array.get(i).getAsJsonObject();
                     submissions.add(Submission.fromJsonString(jsonData));
                 }
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-                return null;
             } catch (IOException e) {
+                TextView loading = (TextView) mFooterView.findViewById(R.id.loading_text);
+                if (loading != null)
+                    loading.setText(R.string.failed_to_load);
+                ProgressBar progressBar = (ProgressBar) mFooterView.findViewById(R.id.progress_bar);
+                if (progressBar != null)
+                    progressBar.setVisibility(View.GONE);
+                mFailedToLoad = true;
                 e.printStackTrace();
                 return null;
             } catch (NullPointerException e) {
@@ -323,15 +339,11 @@ public class SubredditFragment extends Fragment {
 
     public class InfiniteLoadingScrollListener implements AbsListView.OnScrollListener {
 
-        private int visibleThreshold = 5;
-        private int currentPage = 0;
+        private final int VISIBLE_THRESHOLD = 5;
         private int previousTotal = 0;
         private boolean loading = true;
 
         public InfiniteLoadingScrollListener() {
-        }
-        public InfiniteLoadingScrollListener(int visibleThreshold) {
-            this.visibleThreshold = visibleThreshold;
         }
 
         @Override
@@ -341,11 +353,10 @@ public class SubredditFragment extends Fragment {
                 if (totalItemCount > previousTotal) {
                     loading = false;
                     previousTotal = totalItemCount;
-                    currentPage++;
                 }
             }
             if (!loading && mSubmissionList.size() > 0
-                    && (totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleThreshold)) {
+                    && (totalItemCount - visibleItemCount) <= (firstVisibleItem + VISIBLE_THRESHOLD)) {
                 SubmissionsListViewHelper list = new SubmissionsListViewHelper(mSubredditName,
                         Submission.HOT, -1, null,
                         mSubmissionList.get(mSubmissionList.size() - 1).getName(),
@@ -370,7 +381,16 @@ public class SubredditFragment extends Fragment {
             int x = (int) ev.getX();
             int y = (int) ev.getY();
             int position = mSubmissions.pointToPosition(x, y);
-            if (position >= 0) {
+            if (position == mSubmissionList.size()) {
+                if (mFailedToLoad) {
+                    mFailedToLoad = false;
+                    new RefreshUserClass().execute();
+                    TextView loading = (TextView) mFooterView.findViewById(R.id.loading_text);
+                    loading.setText(R.string.loading_submissions);
+                    ProgressBar progressBar = (ProgressBar) mFooterView.findViewById(R.id.progress_bar);
+                    progressBar.setVisibility(View.VISIBLE);
+                }
+            } else if (position >= 0) {
                 ImageView iv = null;
                 if (mSubmissions.getChildAt(position
                         - mSubmissions.getFirstVisiblePosition()) != null)

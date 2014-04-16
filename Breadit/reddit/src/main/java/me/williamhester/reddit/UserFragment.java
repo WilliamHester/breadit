@@ -30,6 +30,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import me.williamhester.areddit.Account;
@@ -298,7 +300,6 @@ public class UserFragment extends Fragment {
         }
     }
 
-
     private class LoadUserDataTask extends AsyncTask<Void, Void, User> {
         @Override
         protected User doInBackground(Void... voids) {
@@ -316,10 +317,11 @@ public class UserFragment extends Fragment {
         @Override
         protected void onPostExecute(User result) {
             if (result != null) {
+                mUser = result;
                 DecimalFormat format = new DecimalFormat("###,###,###,##0");
                 mLinkKarma.setText(format.format(result.getLinkKarma()) + " Link karma");
                 mCommentKarma.setText(format.format(result.getCommentKarma()) + " Comment karma");
-
+                mCakeDay.setText(mUser.calculateCakeDay());
             }
             mSubmittedAdapter.notifyDataSetChanged();
         }
