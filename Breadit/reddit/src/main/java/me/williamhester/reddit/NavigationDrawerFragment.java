@@ -22,11 +22,13 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.w3c.dom.Text;
 
@@ -406,6 +408,15 @@ public class NavigationDrawerFragment extends Fragment {
         }
         mCurrentSubreddit.setText("FrontPage");
         CheckBox mCheckBox = (CheckBox) v.findViewById(R.id.subscribed_CheckBox);
+        mCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if (b)
+                    Toast.makeText(getActivity(), "Subscribed to " + mCurrentSubreddit.getText().toString(), Toast.LENGTH_SHORT).show();
+                else
+                    Toast.makeText(getActivity(), "Unsubscribed from " + mCurrentSubreddit.getText().toString(), Toast.LENGTH_SHORT).show();
+            }
+        });
         Spinner mSubSpinner = (Spinner) v.findViewById(R.id.header_spinner1);
         Spinner mFilterSpinner = (Spinner) v.findViewById(R.id.header_spinner2);
         ArrayAdapter<String> adapter1 = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, R.id.orange_spinner_text,
@@ -414,6 +425,26 @@ public class NavigationDrawerFragment extends Fragment {
         ArrayAdapter<String> adapter2 = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, R.id.orange_spinner_text,
                 getResources().getStringArray(R.array.sub_sort_types));
         mFilterSpinner.setAdapter(adapter2);
+        mSubSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                String choice = getResources().getStringArray(R.array.sort_types)[i];
+                Toast.makeText(getActivity(), choice + " selected", Toast.LENGTH_SHORT).show();
+            }
+            public void onNothingSelected(AdapterView<?> adapterView) {
+                return;
+            }
+        });
+        mFilterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                String choice = getResources().getStringArray(R.array.sub_sort_types)[i];
+                Toast.makeText(getActivity(), choice + " selected", Toast.LENGTH_SHORT).show();
+            }
+            public void onNothingSelected(AdapterView<?> adapterView) {
+                return;
+            }
+        });
+
+
 //        username.setText(mAccount.getUsername());
 //
 //        new LoadAccountDataTask().execute();

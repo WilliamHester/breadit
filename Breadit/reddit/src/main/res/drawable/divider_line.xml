@@ -4,11 +4,11 @@
     android:shape="rectangle">
 
     <size
-        android:height="2dp"
+        android:height="1dp"
         android:width="@dimen/navigation_drawer_width" />
 
     <solid
-        android:color="@color/periwinkle"
+        android:color="@color/mid_gray"
         />
 
 </shape>
