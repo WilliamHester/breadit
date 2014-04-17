@@ -139,6 +139,7 @@ public class Utilities {
 
     public static interface UtilitiesAsyncHandler {
         public void onTaskFinished();
+        public void onConnectionFailed();
     }
 
 }

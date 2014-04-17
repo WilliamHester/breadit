@@ -24,12 +24,13 @@ import android.widget.Toast;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.stream.MalformedJsonException;
 import com.koushikdutta.urlimageviewhelper.UrlImageViewHelper;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -60,6 +61,8 @@ public class SubredditFragment extends Fragment {
     private View.OnTouchListener mGestureListener;
 
     private boolean mFailedToLoad = false;
+    private int mPrimarySortType = Submission.HOT;
+    private int mSecondarySortType = Submission.ALL;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -83,6 +86,7 @@ public class SubredditFragment extends Fragment {
         mContext = getActivity();
     }
 
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle bundle) {
         View v = inflater.inflate(R.layout.fragment_subreddit, null);
         mGestureDetector = new GestureDetector(mContext, new SwipeDetector2());
@@ -130,6 +134,16 @@ public class SubredditFragment extends Fragment {
         mNames.toArray(array);
         outState.putStringArray("names", array);
         super.onSaveInstanceState(outState);
+    }
+
+    public void setPrimarySort(int sortType) {
+        mPrimarySortType = sortType;
+        refreshData();
+    }
+
+    public void setSecondarySort(int sortType) {
+        mSecondarySortType = sortType;
+        refreshData();
     }
 
     public void refreshData() {
@@ -261,7 +275,7 @@ public class SubredditFragment extends Fragment {
                 mSwipeRefreshLayout.setRefreshing(true);
             }
             SubmissionsListViewHelper list = new SubmissionsListViewHelper(mSubredditName,
-                    Submission.HOT, -1, null, null, mAccount, mSubmissions);
+                    mPrimarySortType, mSecondarySortType, null, null, mAccount, mSubmissions);
             new RetrieveSubmissionsTask(mRefreshList).execute(list);
             return null;
         }
@@ -270,6 +284,7 @@ public class SubredditFragment extends Fragment {
     private class RetrieveSubmissionsTask extends AsyncTask<SubmissionsListViewHelper, Void,
             List<Submission>> {
         private boolean mRefreshList;
+        private boolean mNothingHere = false;
 
         public RetrieveSubmissionsTask() {
             this(false);
@@ -300,16 +315,13 @@ public class SubredditFragment extends Fragment {
                     submissions.add(Submission.fromJsonString(jsonData));
                 }
             } catch (IOException e) {
-                TextView loading = (TextView) mFooterView.findViewById(R.id.loading_text);
-                if (loading != null)
-                    loading.setText(R.string.failed_to_load);
-                ProgressBar progressBar = (ProgressBar) mFooterView.findViewById(R.id.progress_bar);
-                if (progressBar != null)
-                    progressBar.setVisibility(View.GONE);
-                mFailedToLoad = true;
                 e.printStackTrace();
                 return null;
             } catch (NullPointerException e) {
+                e.printStackTrace();
+                return null;
+            } catch (JsonSyntaxException e) {
+                mNothingHere = true;
                 e.printStackTrace();
                 return null;
             }
@@ -332,6 +344,21 @@ public class SubredditFragment extends Fragment {
                 mSubmissionsAdapter.notifyDataSetChanged();
             } else if (mRefreshList) {
                 Toast.makeText(mContext, R.string.failed_to_refresh, Toast.LENGTH_LONG).show();
+            } else if (mNothingHere) {
+                TextView loading = (TextView) mFooterView.findViewById(R.id.loading_text);
+                if (loading != null)
+                    loading.setText(R.string.nothing_here);
+                ProgressBar progressBar = (ProgressBar) mFooterView.findViewById(R.id.progress_bar);
+                if (progressBar != null)
+                    progressBar.setVisibility(View.GONE);
+            } else if (mFailedToLoad) {
+                TextView loading = (TextView) mFooterView.findViewById(R.id.loading_text);
+                if (loading != null)
+                    loading.setText(R.string.failed_to_load);
+                ProgressBar progressBar = (ProgressBar) mFooterView.findViewById(R.id.progress_bar);
+                if (progressBar != null)
+                    progressBar.setVisibility(View.GONE);
+                mFailedToLoad = true;
             }
             mSwipeRefreshLayout.setRefreshing(false);
         }
@@ -358,7 +385,7 @@ public class SubredditFragment extends Fragment {
             if (!loading && mSubmissionList.size() > 0
                     && (totalItemCount - visibleItemCount) <= (firstVisibleItem + VISIBLE_THRESHOLD)) {
                 SubmissionsListViewHelper list = new SubmissionsListViewHelper(mSubredditName,
-                        Submission.HOT, -1, null,
+                        mPrimarySortType, mSecondarySortType, null,
                         mSubmissionList.get(mSubmissionList.size() - 1).getName(),
                         mAccount, mSubmissions);
                 new RetrieveSubmissionsTask().execute(list);

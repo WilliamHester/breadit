@@ -29,6 +29,7 @@
     <string name="failed_to_refresh">Could not refresh list.</string>
     <string name="loading_submissions">Just a moment. Loading more submissions.</string>
     <string name="failed_to_load">Failed to load more submissions. Click to try again.</string>
+    <string name="nothing_here">There\'s nothing here!</string>
 
     <!-- SubmissionFragment stuff -->
     <string name="share">Share</string>
@@ -90,9 +91,16 @@
     <string name="yes">Confirm</string>
 
     <!-- Drawer Stuff -->
-    <string name="search_sub_hint">Enter a subreddit!</string>
-    <string name="currently_viewing">Currently Viewing: </string>
-    <string name="subscribe">Subscribed?</string>
-    <string name="sort_by">Sort By: </string>
+    <string name="search_sub_hint">Enter a subreddit</string>
+    <string name="currently_viewing">Currently Viewing</string>
+    <string name="subscribe">Subscribed</string>
+    <string name="sort_by">Sort By</string>
+
+    <!-- MessageFragment -->
+    <string name="mark_unread">Mark unread</string>
+    <string name="block_user">Block user</string>
+    <string name="view_context">View context</string>
+    <string name="report">Report</string>
+    <string name="full_comments">Full comments</string>
 
 </resources>

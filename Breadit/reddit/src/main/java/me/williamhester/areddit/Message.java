@@ -7,6 +7,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.stream.MalformedJsonException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -125,6 +126,10 @@ public class Message implements Votable, Parcelable {
         return mUnread;
     }
 
+    public void setIsRead(boolean read) {
+        mUnread = read;
+    }
+
     public boolean isComment() {
         return mWasComment;
     }
@@ -166,7 +171,7 @@ public class Message implements Votable, Parcelable {
      * @throws java.io.IOException      If connection fails
      */
     public static List<Message> getMessages(int type, String before, String after,
-                                                  Account account) throws IOException {
+            Account account) throws IOException {
         String append = "";
         switch (type) {
             case ALL:

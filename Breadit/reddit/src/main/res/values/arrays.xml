@@ -35,6 +35,14 @@
         <item>Old</item>
     </string-array>
 
+    <string-array name="subreddit_sort_types">
+        <item>Hot</item>
+        <item>New</item>
+        <item>Rising</item>
+        <item>Controversial</item>
+        <item>Top</item>
+    </string-array>
+
     <string-array name="sub_sort_types">
         <item>This hour</item>
         <item>Today</item>

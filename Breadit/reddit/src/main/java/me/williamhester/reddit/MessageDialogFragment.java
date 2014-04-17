@@ -29,15 +29,17 @@ public class MessageDialogFragment extends DialogFragment {
     private EditText mSubject;
     private EditText mBody;
 
-    private String mUsername;
+    private String mName;
     private Account mAccount;
+    private boolean mReply;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mUsername = getArguments().getString("username");
+            mName = getArguments().getString("name");
             mAccount = getArguments().getParcelable("account");
+            mReply = getArguments().getBoolean("reply");
         }
         setStyle(STYLE_NORMAL, android.R.style.Theme_Holo_Dialog);
     }
@@ -51,7 +53,7 @@ public class MessageDialogFragment extends DialogFragment {
         Button cancel = (Button) v.findViewById(R.id.cancel);
         Button send = (Button) v.findViewById(R.id.send);
 
-        if (mUsername != null) {
+        if (mName != null) {
             mTo.setVisibility(View.GONE);
         }
 
@@ -67,14 +69,18 @@ public class MessageDialogFragment extends DialogFragment {
                 if (mBody.getText().toString().length() == 0) {
                     Toast.makeText(getActivity(), R.string.please_enter_body, Toast.LENGTH_SHORT)
                             .show();
-                } else if (mUsername == null && mTo.getText().toString().length() == 0) {
+                } else if (mName == null && mTo.getText().toString().length() == 0) {
                     Toast.makeText(getActivity(), R.string.please_enter_username, Toast.LENGTH_SHORT)
                             .show();
                 } else if (mSubject.getText().toString().length() == 0) {
                     Toast.makeText(getActivity(), R.string.please_enter_subject, Toast.LENGTH_SHORT)
                             .show();
                 } else {
-                    new SendMessageAsyncTask().execute();
+                    if (mReply) {
+                        new ReplyAsyncTask().execute();
+                    } else {
+                        new SendMessageAsyncTask().execute();
+                    }
                 }
             }
         });
@@ -82,13 +88,18 @@ public class MessageDialogFragment extends DialogFragment {
         return v;
     }
 
-    public static MessageDialogFragment newInstance(Account account, String username) {
+    public static MessageDialogFragment newInstance(Account account, String name, boolean reply) {
         Bundle b = new Bundle();
         b.putParcelable("account", account);
-        b.putString("username", username);
+        b.putString("name", name);
+        b.putBoolean("reply", reply);
         MessageDialogFragment m = new MessageDialogFragment();
         m.setArguments(b);
         return m;
+    }
+
+    public static MessageDialogFragment newInstance(Account account, String name) {
+        return newInstance(account, name, false);
     }
 
     private class SendMessageAsyncTask extends AsyncTask<Void, Void, Void> {
@@ -98,18 +109,41 @@ public class MessageDialogFragment extends DialogFragment {
             apiParams.add(new BasicNameValuePair("api_type", "json"));
             apiParams.add(new BasicNameValuePair("subject", mSubject.getText().toString()));
             apiParams.add(new BasicNameValuePair("text", mBody.getText().toString()));
-            if (mUsername != null)
-                apiParams.add(new BasicNameValuePair("to", mUsername));
+            if (mName != null)
+                apiParams.add(new BasicNameValuePair("to", mName));
             else
                 apiParams.add(new BasicNameValuePair("to", mTo.getText().toString()));
             Log.i("MessageDialogFragment", Utilities.post(apiParams,
                     "http://www.reddit.com/api/compose", mAccount));
+            Log.i("MessageDialogFragment", mAccount.getUsername());
             return null;
         }
 
         @Override
         protected void onPostExecute(Void result) {
             dismiss();
+        }
+    }
+
+    private class ReplyAsyncTask extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            if (mAccount != null) {
+                List<NameValuePair> apiParams = new ArrayList<NameValuePair>();
+                apiParams.add(new BasicNameValuePair("api-type", "json"));
+                apiParams.add(new BasicNameValuePair("text", mBody.getText().toString()));
+                apiParams.add(new BasicNameValuePair("thing_id", mName));
+                Log.i("SubmitDialogFragment", "Response = " + Utilities.post(apiParams,
+                        "http://www.reddit.com/api/comment", mAccount));
+                Log.i("SubmitDialogFragment", "name = " + mName);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void v) {
+
         }
     }
 

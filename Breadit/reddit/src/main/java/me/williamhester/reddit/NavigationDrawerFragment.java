@@ -3,7 +3,6 @@ package me.williamhester.reddit;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Fragment;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
@@ -17,10 +16,8 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -30,8 +27,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.w3c.dom.Text;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,6 +34,7 @@ import java.util.Comparator;
 import java.util.List;
 
 ;import me.williamhester.areddit.Account;
+import me.williamhester.areddit.Submission;
 import me.williamhester.areddit.Subreddit;
 
 /**
@@ -79,6 +75,7 @@ public class NavigationDrawerFragment extends Fragment {
     private boolean mUserLearnedDrawer;
     private Account mAccount;
     private TextView mCurrentSubreddit;
+    private CheckBox mCheckbox;
 
     public NavigationDrawerFragment() { }
 
@@ -120,11 +117,8 @@ public class NavigationDrawerFragment extends Fragment {
             mSubredditList = mAccount.getSubreddits();
             Collections.sort(mSubredditList, mOrderList);
             mSubredditList.add(0, "FrontPage");
-//            mSubredditArrayAdapter = new ArrayAdapter<String>(
-//                    getActivity().getActionBar().getThemedContext(),
-//                    android.R.layout.simple_list_item_activated_1,
-//                    android.R.id.text1, mSubredditList);
-            mDrawerListView.setAdapter(new SubredditAdapter(mSubredditList));
+            mSubredditArrayAdapter = new SubredditAdapter(mSubredditList);
+            mDrawerListView.setAdapter(mSubredditArrayAdapter);
             new GetUserSubreddits().execute();
         } else {
             mSubredditList = new ArrayList<String>();
@@ -133,20 +127,15 @@ public class NavigationDrawerFragment extends Fragment {
                 mSubredditList.add(s);
             }
             mSubredditList.add(0, "FrontPage");
-//            mDrawerListView.setAdapter(new ArrayAdapter<String>(
-//                    getActivity().getActionBar().getThemedContext(),
-//                    android.R.layout.simple_list_item_activated_1,
-//                    android.R.id.text1, mSubredditList
-//            ));
-//            List<String> input = mSubredditList;
-            mDrawerListView.setAdapter(new SubredditAdapter(mSubredditList));
+            mSubredditArrayAdapter = new SubredditAdapter(mSubredditList);
+            mDrawerListView.setAdapter(mSubredditArrayAdapter);
         }
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
 
         mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                selectItem(mSubredditList.get(i-1));
+                selectItem(mSubredditList.get(i - 1));
             }
         });
 
@@ -261,10 +250,12 @@ public class NavigationDrawerFragment extends Fragment {
             mDrawerLayout.closeDrawers();
         }
         if (mCallbacks != null) {
-            if (subreddit.compareTo("FrontPage") == 0)
+            if (subreddit.equals("FrontPage") || subreddit.equals("")) {
                 mCallbacks.onNavigationDrawerItemSelected(null);
-            else {
+                mCheckbox.setVisibility(View.INVISIBLE);
+            } else {
                 mCallbacks.onNavigationDrawerItemSelected(subreddit);
+                mCheckbox.setVisibility(View.VISIBLE);
             }
             Log.d("Drawer", subreddit + " chosen");
             mCurrentSubreddit.setText(subreddit);
@@ -338,6 +329,8 @@ public class NavigationDrawerFragment extends Fragment {
          * Called when an item in the navigation drawer is selected.
          */
         void onNavigationDrawerItemSelected(String subreddit);
+        void onSortSelected(int sortType);
+        void onSubSortSelected(int sortType);
     }
 
 
@@ -407,85 +400,64 @@ public class NavigationDrawerFragment extends Fragment {
             Log.d("Drawer", "mCurrentSubreddit null");
         }
         mCurrentSubreddit.setText("FrontPage");
-        CheckBox mCheckBox = (CheckBox) v.findViewById(R.id.subscribed_CheckBox);
-        mCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        mCheckbox = (CheckBox) v.findViewById(R.id.subscribed_CheckBox);
+        mCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 if (b)
-                    Toast.makeText(getActivity(), "Subscribed to " + mCurrentSubreddit.getText().toString(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "Subscribed to "
+                            + mCurrentSubreddit.getText().toString(), Toast.LENGTH_SHORT).show();
                 else
-                    Toast.makeText(getActivity(), "Unsubscribed from " + mCurrentSubreddit.getText().toString(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), "Unsubscribed from "
+                            + mCurrentSubreddit.getText().toString(), Toast.LENGTH_SHORT).show();
             }
         });
-        Spinner mSubSpinner = (Spinner) v.findViewById(R.id.header_spinner1);
-        Spinner mFilterSpinner = (Spinner) v.findViewById(R.id.header_spinner2);
-        ArrayAdapter<String> adapter1 = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, R.id.orange_spinner_text,
-                getResources().getStringArray(R.array.sort_types));
-        mSubSpinner.setAdapter(adapter1);
-        ArrayAdapter<String> adapter2 = new ArrayAdapter<String>(getActivity(), R.layout.spinner_item, R.id.orange_spinner_text,
+        mCheckbox.setVisibility(View.INVISIBLE);
+
+        Spinner subSpinner = (Spinner) v.findViewById(R.id.header_spinner1);
+        final Spinner filterSpinner = (Spinner) v.findViewById(R.id.header_spinner2);
+
+        ArrayAdapter<String> adapter1 = new ArrayAdapter<String>(getActivity(),
+                R.layout.spinner_item,
+                R.id.orange_spinner_text,
+                getResources().getStringArray(R.array.subreddit_sort_types));
+        subSpinner.setAdapter(adapter1);
+
+        ArrayAdapter<String> adapter2 = new ArrayAdapter<String>(getActivity(),
+                R.layout.spinner_item,
+                R.id.orange_spinner_text,
                 getResources().getStringArray(R.array.sub_sort_types));
-        mFilterSpinner.setAdapter(adapter2);
-        mSubSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
+        filterSpinner.setAdapter(adapter2);
+        filterSpinner.setSelection(Submission.ALL);
+
+        subSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                String choice = getResources().getStringArray(R.array.sort_types)[i];
-                Toast.makeText(getActivity(), choice + " selected", Toast.LENGTH_SHORT).show();
+                if (i > 2) {
+                    filterSpinner.setVisibility(View.VISIBLE);
+                } else {
+                    filterSpinner.setVisibility(View.GONE);
+                }
+                mCallbacks.onSortSelected(i);
             }
-            public void onNothingSelected(AdapterView<?> adapterView) {
-                return;
-            }
-        });
-        mFilterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                String choice = getResources().getStringArray(R.array.sub_sort_types)[i];
-                Toast.makeText(getActivity(), choice + " selected", Toast.LENGTH_SHORT).show();
-            }
+
+            @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
                 return;
             }
         });
 
+        filterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                mCallbacks.onSubSortSelected(i);
+            }
 
-//        username.setText(mAccount.getUsername());
-//
-//        new LoadAccountDataTask().execute();
-//
-//        Spinner filter = (Spinner) v.findViewById(R.id.filter);
-//        ArrayAdapter<String> adapter = new ArrayAdapter<String>(mContext,
-//                R.layout.spinner_item, R.id.orange_spinner_text,
-//                getResources().getStringArray(R.array.filter_types));
-//        filter.setAdapter(adapter);
-//        filter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-//            @Override
-//            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-//                switch (i) {
-//                    case 0:
-//                        mFilterType = Message.ALL;
-//                        break;
-//                    case 1:
-//                        mFilterType = Message.UNREAD;
-//                        break;
-//                    case 2:
-//                        mFilterType = Message.MESSAGES;
-//                        break;
-//                    case 3:
-//                        mFilterType = Message.COMMENT_REPLIES;
-//                        break;
-//                    case 4:
-//                        mFilterType = Message.POST_REPLIES;
-//                        break;
-//                    case 5:
-//                        mFilterType = Comment.OLD;
-//                        break;
-//                }
-//                mMessageList.clear();
-//                new LoadMessagesTask().execute();
-//            }
-//
-//            @Override
-//            public void onNothingSelected(AdapterView<?> adapterView) {
-//                // Do nothing
-//            }
-//        });
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+                return;
+            }
+        });
         return v;
     }
 

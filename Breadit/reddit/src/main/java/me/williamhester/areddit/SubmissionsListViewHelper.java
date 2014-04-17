@@ -110,7 +110,7 @@ public class SubmissionsListViewHelper {
         return mUrl;
     }
 
-    public Account getUser() {
+    public Account getAccount() {
         return mAccount;
     }
 

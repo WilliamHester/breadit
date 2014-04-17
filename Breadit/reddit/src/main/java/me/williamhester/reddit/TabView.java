@@ -1,6 +1,5 @@
 package me.williamhester.reddit;
 
-import android.app.ActionBar;
 import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
@@ -24,7 +23,7 @@ public class TabView extends FrameLayout {
     public static final int TAB_TYPE_MAIN = 0;
     public static final int TAB_TYPE_MINOR = 1;
 
-    private final int DEFAULT_CURSOR_SIZE = 4; // Cursor height in px
+    private final int DEFAULT_CURSOR_SIZE = 2; // Cursor height in px
     private final float DEFAULT_CURSOR_TRANSPARENCY = 0.80f;
 
     private ArrayList<FrameLayout> mTabLayouts = new ArrayList<FrameLayout>();
@@ -51,10 +50,11 @@ public class TabView extends FrameLayout {
     public TabView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         mContext = context;
+        float scale = getResources().getDisplayMetrics().density;
         if (attrs != null) {
             String packageName = "http://www.williamhester.me/";
-            mCursorHeight = attrs.getAttributeIntValue(packageName, "cursorHeight",
-                    DEFAULT_CURSOR_SIZE);
+            mCursorHeight = (int) (attrs.getAttributeIntValue(packageName, "cursorHeight",
+                    DEFAULT_CURSOR_SIZE) * scale);
             mCursorAlpha = attrs.getAttributeFloatValue(packageName, "cursorAlpha",
                     DEFAULT_CURSOR_TRANSPARENCY);
         } else {
@@ -73,8 +73,8 @@ public class TabView extends FrameLayout {
                 @Override
                 public void onGlobalLayout() {
                     if (mViewWidth != mLinearLayout.getMeasuredWidth()) {
+                        float scale = getResources().getDisplayMetrics().density;
                         for (FrameLayout f : mTabLayouts) {
-                            float scale = getResources().getDisplayMetrics().density;
                             View v = f.findViewById(R.id.selector);
                             f.removeView(v);
                             FrameLayout.LayoutParams params =

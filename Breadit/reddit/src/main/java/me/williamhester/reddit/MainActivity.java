@@ -2,6 +2,7 @@ package me.williamhester.reddit;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -87,12 +88,30 @@ public class MainActivity extends Activity
             mSubredditFragment.refreshData();
         } else {
             mSubreddit = subreddit;
-            mSubredditFragment = SubredditFragment.newInstance(mAccount, subreddit);
-            getFragmentManager().beginTransaction()
-                    .addToBackStack("prev_frag")
-                    .replace(R.id.container, mSubredditFragment)
-                    .commit();
+            Fragment frag = getFragmentManager().findFragmentByTag(subreddit);
+            if (frag != null) {
+                getFragmentManager().beginTransaction()
+                        .addToBackStack(subreddit)
+                        .replace(R.id.container, frag)
+                        .commit();
+            } else {
+                mSubredditFragment = SubredditFragment.newInstance(mAccount, subreddit);
+                getFragmentManager().beginTransaction()
+                        .addToBackStack(subreddit)
+                        .replace(R.id.container, mSubredditFragment)
+                        .commit();
+            }
         }
+    }
+
+    @Override
+    public void onSortSelected(int sort) {
+        mSubredditFragment.setPrimarySort(sort);
+    }
+
+    @Override
+    public void onSubSortSelected(int sort) {
+        mSubredditFragment.setSecondarySort(sort);
     }
 
     public void restoreActionBar() {
@@ -117,17 +136,10 @@ public class MainActivity extends Activity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-//        if (!mNavigationDrawerFragment.isDrawerOpen()) {
-            // Only show items in the action bar relevant to this screen
-            // if the drawer is not showing. Otherwise, let the drawer
-            // decide what to show in the action bar.
         getMenuInflater().inflate(R.menu.main, menu);
         if (mAccount == null) {
             menu.removeItem(R.id.action_my_account);
         }
-//            restoreActionBar(); // I don't think we need this because we're already updating it
-//            return true;
-//        }
         return super.onCreateOptionsMenu(menu);
     }
 
