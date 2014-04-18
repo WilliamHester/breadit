@@ -47,6 +47,9 @@ import me.williamhester.areddit.utils.Utilities;
  */
 public class SubredditFragment extends Fragment {
 
+    public static final int HISTORY = 0;
+    public static final int SAVED = 1;
+
     private Context mContext;
     private ListView mSubmissions;
     private String mSubredditName;
@@ -154,6 +157,15 @@ public class SubredditFragment extends Fragment {
         SubredditFragment sf = new SubredditFragment();
         Bundle b = new Bundle();
         b.putString("subreddit", subredditName);
+        b.putParcelable("account", account);
+        sf.setArguments(b);
+        return sf;
+    }
+
+    public static SubredditFragment newInstance(Account account, int type) {
+        SubredditFragment sf = new SubredditFragment();
+        Bundle b = new Bundle();
+        b.putInt("type", type);
         b.putParcelable("account", account);
         sf.setArguments(b);
         return sf;

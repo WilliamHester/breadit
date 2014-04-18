@@ -2,6 +2,8 @@ package me.williamhester.areddit.utils;
 
 import android.util.Log;
 
+
+//import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
@@ -11,12 +13,12 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
-import java.util.jar.Attributes;
 
 import me.williamhester.areddit.Account;
 
@@ -84,6 +86,20 @@ public class Utilities {
 
         Log.e("Utilities", "Response returned null");
 
+        return null;
+    }
+
+    public static String imgurPostImage() {
+        DefaultHttpClient httpClient = new DefaultHttpClient();
+        HttpPost httpPost = new HttpPost("https://api.imgur.com/3/image");
+        httpPost.addHeader("User-Agent", USER_AGENT);
+        httpPost.addHeader("Authorization", "CLIENT-ID 2bdd3ec7a3fa918");
+
+//        BufferedImage image = ImageIO.read(file);
+        ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
+//        ImageIO.write(image, "png", byteArray);
+        byte[] byteImage = byteArray.toByteArray();
+//        String imageString = new Base64().encodeAsString(byteImage);
         return null;
     }
 

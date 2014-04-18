@@ -5,12 +5,19 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
+import android.util.TypedValue;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import me.williamhester.areddit.Account;
+import me.williamhester.areddit.Message;
 
 public class MainActivity extends Activity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -24,6 +31,8 @@ public class MainActivity extends Activity
     private SharedPreferences mPrefs;
     private Account mAccount;
     private String mSubreddit;
+    private TabView mTabView;
+    private TextView mTitleView;
 
     /**
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
@@ -70,6 +79,7 @@ public class MainActivity extends Activity
         if (getActionBar() != null) {
             getActionBar().setDisplayHomeAsUpEnabled(true);
             getActionBar().setHomeButtonEnabled(true);
+            setUpActionBar();
         }
 
         updateActionBar(null);
@@ -114,6 +124,40 @@ public class MainActivity extends Activity
         mSubredditFragment.setSecondarySort(sort);
     }
 
+    private void setUpActionBar() {
+        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        View v = inflater.inflate(R.layout.actionbar_tabview, null);
+
+        mTitleView = new TextView(this);
+        mTitleView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+        mTitleView.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
+        mTitleView.setTextColor(getResources().getColor(R.color.mid_gray));
+        updateActionBar(mSubreddit);
+        ImageView saveImage = new ImageView(this);
+        saveImage.setImageDrawable(getResources().getDrawable(android.R.drawable.ic_menu_save));
+        ImageView historyImage = new ImageView(this);
+        historyImage.setImageDrawable(getResources()
+                .getDrawable(android.R.drawable.ic_menu_recent_history));
+
+        Bundle args = new Bundle();
+        args.putParcelable("account", mAccount);
+
+        mTabView = (TabView) v.findViewById(R.id.tabs);
+        mTabView.addTab(SubredditFragment.newInstance(mAccount, mSubreddit),
+                TabView.TAB_TYPE_MAIN, mTitleView, "subreddit");
+        mTabView.addTab(SubredditFragment.newInstance(mAccount, SubredditFragment.SAVED),
+                TabView.TAB_TYPE_MINOR, saveImage, "saved");
+        mTabView.addTab(SubredditFragment.newInstance(mAccount, SubredditFragment.HISTORY),
+                TabView.TAB_TYPE_MINOR, historyImage, "history");
+
+        getFragmentManager().beginTransaction()
+                .replace(R.id.container, mTabView.getFragment("subreddit"))
+                .commit();
+
+        getActionBar().setDisplayShowCustomEnabled(true);
+        getActionBar().setCustomView(v);
+    }
+
     public void restoreActionBar() {
         ActionBar actionBar = getActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
@@ -122,15 +166,10 @@ public class MainActivity extends Activity
     }
 
     private void updateActionBar(String sub) {
-        ActionBar actionBar = getActionBar();
-        if (actionBar != null) {
-            actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-            actionBar.setDisplayShowTitleEnabled(true);
-            if (sub == null)
-                actionBar.setTitle("FrontPage");
-            else
-                actionBar.setTitle("/r/" + sub);
-        }
+        if (sub == null)
+            mTitleView.setText("FrontPage");
+        else
+            mTitleView.setText("/r/" + sub);
     }
 
 

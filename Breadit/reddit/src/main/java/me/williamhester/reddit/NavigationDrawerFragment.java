@@ -386,7 +386,7 @@ public class NavigationDrawerFragment extends Fragment {
     };
 
     private View createHeaderView(LayoutInflater inflater) {
-        View v = inflater.inflate(R.layout.header_drawer, null);
+        View v = inflater.inflate(R.layout.header_drawer_2, null);
         final EditText mSubredditSearch = (EditText) v.findViewById(R.id.search_subreddit);
         ImageButton mSearch = (ImageButton) v.findViewById(R.id.search_button);
         mSearch.setOnClickListener(new View.OnClickListener() {
