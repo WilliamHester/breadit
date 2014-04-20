@@ -2,7 +2,6 @@ package me.williamhester.areddit;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -35,7 +34,6 @@ public class Subreddit extends Thing implements Parcelable {
 
     public Subreddit(JsonObject data) {
         super(data);
-        Log.i("Data", "data = " + data.toString());
         data = data.get("data").getAsJsonObject();
 //        mAccountsActive = data.get("accounts_active").getAsInt();
 //        mCommentScoreHideMins = data.get("comment_score_hide_mins").getAsInt();

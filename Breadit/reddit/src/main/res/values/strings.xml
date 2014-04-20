@@ -91,7 +91,7 @@
     <string name="yes">Confirm</string>
 
     <!-- Drawer Stuff -->
-    <string name="search_sub_hint">Enter a subreddit</string>
+    <string name="search_sub_hint">Go to a subreddit</string>
     <string name="currently_viewing">Currently Viewing</string>
     <string name="subscribe">Subscribed</string>
     <string name="sort_by">Sorted by</string>

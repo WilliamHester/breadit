@@ -11,7 +11,6 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -271,7 +270,7 @@ public class NavigationDrawerFragment extends Fragment {
                 mCheckbox.setVisibility(View.GONE);
             } else if (subreddit.equals("FrontPage") || subreddit.equals("")) {
                 mCallbacks.onNavigationDrawerItemSelected(null);
-                mCheckbox.setVisibility(View.INVISIBLE);
+                mCheckbox.setVisibility(View.GONE);
             } else {
                 mCallbacks.onNavigationDrawerItemSelected(subreddit);
                 mCheckbox.setVisibility(View.VISIBLE);
@@ -282,8 +281,7 @@ public class NavigationDrawerFragment extends Fragment {
                     new SubscribeAsyncTask(b).execute();
                 }
             });
-            Log.d("Drawer", subreddit + " chosen");
-            mCurrentSubreddit.setText(subreddit);
+            mCurrentSubreddit.setText("Currently viewing " + subreddit);
         }
     }
 
@@ -370,7 +368,6 @@ public class NavigationDrawerFragment extends Fragment {
                 return isNew;
             } catch (IOException e) {
                 e.printStackTrace();
-                Log.e("NDF", "IOException was thrown when getting getSubreddits");
             }
             return false;
         }
@@ -411,10 +408,7 @@ public class NavigationDrawerFragment extends Fragment {
             }
         });
         mCurrentSubreddit = (TextView) v.findViewById(R.id.current_subreddit);
-        if (mCurrentSubreddit == null) {
-            Log.d("Drawer", "mCurrentSubreddit null");
-        }
-        mCurrentSubreddit.setText("FrontPage");
+        mCurrentSubreddit.setText("Currently viewing FrontPage");
         mCheckbox = (CheckBox) v.findViewById(R.id.subscribed_CheckBox);
         mCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -427,7 +421,7 @@ public class NavigationDrawerFragment extends Fragment {
                             + mCurrentSubreddit.getText().toString(), Toast.LENGTH_SHORT).show();
             }
         });
-        mCheckbox.setVisibility(View.INVISIBLE);
+        mCheckbox.setVisibility(View.GONE);
 
         Spinner subSpinner = (Spinner) v.findViewById(R.id.header_spinner1);
         final Spinner filterSpinner = (Spinner) v.findViewById(R.id.header_spinner2);
@@ -490,6 +484,8 @@ public class NavigationDrawerFragment extends Fragment {
                 v = getActivity().getLayoutInflater()
                         .inflate(R.layout.list_item_subreddit, null);
             }
+            if (position == mDrawerListView.getSelectedItemPosition())
+                v.setBackgroundColor(getResources().getColor(R.color.auburn));
             String subreddit = mSubredditList.get(position);
             TextView subredditName = (TextView)v.findViewById(R.id.subreddit_list_item_title);
             subredditName.setText(subreddit);
@@ -513,9 +509,9 @@ public class NavigationDrawerFragment extends Fragment {
             } else {
                 apiParams.add(new BasicNameValuePair("action", "unsub"));
             }
-            apiParams.add(new BasicNameValuePair("sr", mSubreddit.getName()));
             if (mSubreddit != null) {
-                Log.i("NDF", Utilities.post(apiParams, "http://www.reddit.com/api/subscribe/", mAccount));
+                apiParams.add(new BasicNameValuePair("sr", mSubreddit.getName()));
+                Utilities.post(apiParams, "http://www.reddit.com/api/subscribe/", mAccount);
             }
             return null;
         }
@@ -528,13 +524,14 @@ public class NavigationDrawerFragment extends Fragment {
                 Collections.sort(mSubredditList, mOrderList);
                 mSubredditList.add(0, "FrontPage");
             } else {
-                mSubredditList.remove(mSubreddit.getDisplayName());
+                if (mSubreddit != null)
+                    mSubredditList.remove(mSubreddit.getDisplayName());
             }
             mSubredditArrayAdapter.notifyDataSetChanged();
         }
     }
 
-    private class SubredditDataAsyncTask extends AsyncTask<Void, Void, Void> {
+    private class SubredditDataAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
         private String mSubName;
 
@@ -543,25 +540,33 @@ public class NavigationDrawerFragment extends Fragment {
         }
 
         @Override
-        protected Void doInBackground(Void... voids) {
+        protected Boolean doInBackground(Void... voids) {
             try {
                 mSubredditIsLoading = true;
                 String s = Utilities.get("", "http://www.reddit.com/r/" + mSubName + "/about.json",
                         mAccount);
-                Log.i("NDF", s);
                 mSubreddit = Subreddit.fromString(s);
             } catch (IOException e) {
                 e.printStackTrace();
+                return false;
             } catch (JsonParseException e) {
                 e.printStackTrace();
+                return false;
+            } finally {
+                mSubredditIsLoading = false;
             }
-            mSubredditIsLoading = false;
-            return null;
+            return true;
         }
 
         @Override
-        protected void onPostExecute(Void result) {
-            mCheckbox.setChecked(mSubreddit.userIsSubscriber());
+        protected void onPostExecute(Boolean result) {
+            if (result) {
+                mCheckbox.setChecked(mSubreddit.userIsSubscriber());
+                mCheckbox.setEnabled(true);
+            } else {
+                mCheckbox.setChecked(false);
+                mCheckbox.setEnabled(false);
+            }
         }
     }
 }
