@@ -2,11 +2,14 @@ package me.williamhester.areddit;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.stream.MalformedJsonException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -334,37 +337,44 @@ public class Comment extends Thing implements Parcelable, Votable {
 
         ArrayList<Thing> things = new ArrayList<Thing>();
 
-        String urlString = url + ".json?";
-        String cookie = account == null ? null : account.getCookie();
-        String modhash = account == null ? null : account.getModhash();
+        String urlString;
+        if (url.contains("?")) {
+            String firstHalf = url.substring(0, url.indexOf('?') - 1);
+            String secondHalf = url.substring(url.indexOf('?') + 1);
+            urlString = firstHalf + ".json?" + secondHalf;
+        } else {
 
-        switch (sortType) {
-            case BEST:
-                urlString += "sort=confidence&";
-                break;
-            case TOP:
-                urlString += "sort=top&";
-                break;
-            case HOT:
-                urlString += "sort=hot&";
-                break;
-            case CONTROVERSIAL:
-                urlString += "sort=controversial&";
-                break;
-            case NEW:
-                urlString += "sort=new&";
-                break;
-            case OLD:
-                urlString += "sort=old&";
-                break;
+            urlString = url + ".json?";
+
+            switch (sortType) {
+                case BEST:
+                    urlString += "sort=confidence&";
+                    break;
+                case TOP:
+                    urlString += "sort=top&";
+                    break;
+                case HOT:
+                    urlString += "sort=hot&";
+                    break;
+                case CONTROVERSIAL:
+                    urlString += "sort=controversial&";
+                    break;
+                case NEW:
+                    urlString += "sort=new&";
+                    break;
+                case OLD:
+                    urlString += "sort=old&";
+                    break;
+            }
+
+            if (after != null)
+                urlString += "after=" + after;
         }
 
-        if (after != null)
-            urlString += "after=" + after;
-
-        JsonArray array = new JsonParser().parse(Utilities.get(null, urlString, cookie, modhash))
+        String parceable = Utilities.get(null, urlString, account);
+        JsonArray array = new JsonParser().parse(parceable)
                 .getAsJsonArray();
-        if(array != null && array.size() > 0) {
+        if (array != null && array.size() > 0) {
             JsonObject submission = array.get(0).getAsJsonObject();
             things.add(Submission.fromJsonString(submission.get("data").getAsJsonObject()
                     .get("children").getAsJsonArray().get(0).getAsJsonObject()));
@@ -372,11 +382,10 @@ public class Comment extends Thing implements Parcelable, Votable {
             JsonArray children = replies.get("data").getAsJsonObject().get("children").getAsJsonArray();
 
             for (int i = 0; i < children.size(); i++) {
-                JsonObject jsonData = (JsonObject)children.get(i);
+                JsonObject jsonData = (JsonObject) children.get(i);
                 things.add(fromJsonString(jsonData, 0));
             }
         }
-
         return things;
     }
 
