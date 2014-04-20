@@ -145,8 +145,8 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
 
     @Override
     public void onTabReselected(String tag, Fragment fragment) {
-        if (tag.equals("comments")) {
-            ((CommentFragment)getFragmentManager().findFragmentByTag("comments")).scrollToTop();
+        if (fragment instanceof CommentFragment) {
+            ((CommentFragment) fragment).scrollToTop();
         }
     }
 
