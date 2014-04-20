@@ -318,7 +318,7 @@ public class Comment extends Thing implements Parcelable, Votable {
     }
 
     /**
-     * This function returns a list of comments
+     * This function returns a list of Comments and their parent Submission
      *
      * @param url The url of the comments thread
      * @param account The account
@@ -329,10 +329,10 @@ public class Comment extends Thing implements Parcelable, Votable {
      *
      * @throws java.io.IOException      If connection fails
      */
-    public static List<Comment> getComments(String url, Account account, String after, int sortType)
+    public static List<Thing> getComments(String url, Account account, String after, int sortType)
             throws IOException {
 
-        ArrayList<Comment> comments = new ArrayList<Comment>();
+        ArrayList<Thing> things = new ArrayList<Thing>();
 
         String urlString = url + ".json?";
         String cookie = account == null ? null : account.getCookie();
@@ -365,16 +365,19 @@ public class Comment extends Thing implements Parcelable, Votable {
         JsonArray array = new JsonParser().parse(Utilities.get(null, urlString, cookie, modhash))
                 .getAsJsonArray();
         if(array != null && array.size() > 0) {
+            JsonObject submission = array.get(0).getAsJsonObject();
+            things.add(Submission.fromJsonString(submission.get("data").getAsJsonObject()
+                    .get("children").getAsJsonArray().get(0).getAsJsonObject()));
             JsonObject replies = array.get(1).getAsJsonObject();
             JsonArray children = replies.get("data").getAsJsonObject().get("children").getAsJsonArray();
 
             for (int i = 0; i < children.size(); i++) {
                 JsonObject jsonData = (JsonObject)children.get(i);
-                comments.add(fromJsonString(jsonData, 0));
+                things.add(fromJsonString(jsonData, 0));
             }
         }
 
-        return comments;
+        return things;
     }
 
     public class CommentIterator implements Iterator<Comment> {

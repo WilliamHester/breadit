@@ -108,7 +108,14 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
 
         mTabView = (TabView) v.findViewById(R.id.tabs);
         mTabView.addTab(CommentFragment.class, args, TabView.TAB_TYPE_MAIN, commentTab, "comments");
-        mTabView.addTab(WebViewFragment.class, args, TabView.TAB_TYPE_MAIN, content, "content");
+        if (!mSubmission.isMeta()) {
+            mTabView.addTab(WebViewFragment.class, args, TabView.TAB_TYPE_MAIN, content, "content");
+        } else {
+            args = new Bundle();
+            args.putParcelable("account", mAccount);
+            args.putString("permalink", mSubmission.getUrl());
+            mTabView.addTab(CommentFragment.class, args, TabView.TAB_TYPE_MAIN, content, "content");
+        }
 
         ActionBar actionBar = getActionBar();
         if (actionBar != null) {
@@ -137,7 +144,9 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
 
     @Override
     public void onTabReselected(String tag, Fragment fragment) {
-
+        if (tag.equals("comments")) {
+            ((CommentFragment)getFragmentManager().findFragmentByTag("comments")).scrollToTop();
+        }
     }
 
     @Override

@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.text.Html;
 import android.text.Spannable;
 import android.text.method.LinkMovementMethod;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -42,6 +41,7 @@ import java.util.List;
 import me.williamhester.areddit.Comment;
 import me.williamhester.areddit.Submission;
 import me.williamhester.areddit.Account;
+import me.williamhester.areddit.Thing;
 import me.williamhester.areddit.Votable;
 import me.williamhester.areddit.utils.Utilities;
 
@@ -83,6 +83,9 @@ public class CommentFragment extends Fragment {
             if (mSubmission != null) {
                 mUrl = mSubmission.getUrl();
                 mPermalink = "http://www.reddit.com" + mSubmission.getPermalink();
+            } else {
+                mPermalink = args.getString("permalink");
+                new CommentLoaderTask().execute();
             }
             mCommentsList = new ArrayList<Comment>();
         }
@@ -94,7 +97,6 @@ public class CommentFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_comment, null);
         if (savedInstanceState != null)
             mCommentsList = savedInstanceState.getParcelableArrayList("comments");
-        Log.i("CommentFragment", mCommentsList.size() + "");
         mGestureDetector = new GestureDetector(mContext, new SwipeDetector());
         mGestureListener = new View.OnTouchListener() {
             @Override
@@ -102,14 +104,14 @@ public class CommentFragment extends Fragment {
                 return mGestureDetector.onTouchEvent(motionEvent);
             }
         };
-        if (mHeaderView == null) {
-            mHeaderView = createHeaderView(inflater);
-        }
         mCommentsListView = (ListView) v.findViewById(R.id.comments);
-        mCommentsListView.addHeaderView(mHeaderView);
-        mCommentAdapter = new CommentArrayAdapter(mContext);
-        mCommentsListView.setAdapter(mCommentAdapter);
-        mCommentsListView.setOnTouchListener(mGestureListener);
+        if (mHeaderView == null && mSubmission != null) {
+            mHeaderView = createHeaderView(inflater);
+            mCommentsListView.addHeaderView(mHeaderView);
+            mCommentAdapter = new CommentArrayAdapter(mContext);
+            mCommentsListView.setAdapter(mCommentAdapter);
+            mCommentsListView.setOnTouchListener(mGestureListener);
+        }
         return v;
     }
 
@@ -123,7 +125,12 @@ public class CommentFragment extends Fragment {
         outState.putInt("sortType", mSortType);
     }
 
-    public View createHeaderView(LayoutInflater inflater) {
+    private View createHeaderView() {
+        return createHeaderView((LayoutInflater)
+                mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE));
+    }
+
+    private View createHeaderView(LayoutInflater inflater) {
         View v = inflater.inflate(R.layout.view_comments_header, null);
 
         TextView selfText = (TextView) v.findViewById(R.id.self_text);
@@ -212,9 +219,6 @@ public class CommentFragment extends Fragment {
                         break;
                 }
                 if (old != mSortType) {
-                    mCommentAdapter = new CommentArrayAdapter(mContext);
-                    mCommentsListView.setAdapter(mCommentAdapter);
-                    mCommentsListView.setOnTouchListener(mGestureListener);
                     new CommentLoaderTask().execute();
                 }
             }
@@ -233,6 +237,11 @@ public class CommentFragment extends Fragment {
         });
 
         return v;
+    }
+
+    public void scrollToTop() {
+        mCommentsListView.smoothScrollToPositionFromTop(0, 0,
+                mCommentsListView.getFirstVisiblePosition() * 5);
     }
 
     private class CommentArrayAdapter extends ArrayAdapter<Comment> {
@@ -325,10 +334,10 @@ public class CommentFragment extends Fragment {
         }
     }
 
-    private class CommentLoaderTask extends AsyncTask<Void, Void, List<Comment>> {
+    private class CommentLoaderTask extends AsyncTask<Void, Void, List<Thing>> {
 
         @Override
-        protected List<Comment> doInBackground(Void... params) {
+        protected List<Thing> doInBackground(Void... params) {
             try {
                 String lastComment = null;
                 if (mCommentsList.size() > 0)
@@ -345,12 +354,22 @@ public class CommentFragment extends Fragment {
         }
 
         @Override
-        protected void onPostExecute(List<Comment> result) {
+        protected void onPostExecute(List<Thing> result) {
             if (result != null) {
                 mCommentsList.clear();
-                for (Comment comment : result) {
-                    if (comment != null) {
-                        Comment.CommentIterator iterator = comment.getCommentIterator();
+                if (mSubmission == null) {
+                    if (result.get(0) instanceof Submission) {
+                        mSubmission = (Submission) result.get(0);
+                        mHeaderView = createHeaderView();
+                        mCommentsListView.addHeaderView(mHeaderView);
+                    }
+                    mCommentAdapter = new CommentArrayAdapter(mContext);
+                    mCommentsListView.setAdapter(mCommentAdapter);
+                    mCommentsListView.setOnTouchListener(mGestureListener);
+                }
+                for (Thing comment : result) {
+                    if (comment != null && comment instanceof Comment) {
+                        Comment.CommentIterator iterator = ((Comment) comment).getCommentIterator();
                         while (iterator.hasNext()) {
                             mCommentsList.add(iterator.next());
                         }
@@ -379,10 +398,7 @@ public class CommentFragment extends Fragment {
                 apiParams.add(new BasicNameValuePair("api-type", "json"));
                 apiParams.add(new BasicNameValuePair("text", mReplyText));
                 apiParams.add(new BasicNameValuePair("thing_id", mName));
-                Log.i("SubmitDialogFragment", "Response = " + Utilities.post(apiParams,
-                        "http://www.reddit.com/api/comment", mAccount.getCookie(),
-                        mAccount.getModhash()));
-                Log.i("SubmitDialogFragment", "name = " + mName);
+                Utilities.post(apiParams, "http://www.reddit.com/api/comment", mAccount);
             }
             return null;
         }
@@ -410,7 +426,7 @@ public class CommentFragment extends Fragment {
         protected Void doInBackground(Void... voids) {
             List<NameValuePair> apiParams = new ArrayList<NameValuePair>();
             apiParams.add(new BasicNameValuePair("id", mFullname));
-            Log.i("CommentFragment", Utilities.post(apiParams, "http://www.reddit.com/api/del", mAccount));
+            Utilities.post(apiParams, "http://www.reddit.com/api/del", mAccount);
             return null;
         }
 
@@ -447,8 +463,10 @@ public class CommentFragment extends Fragment {
                     commentText.setVisibility(View.VISIBLE);
                     mCommentAdapter.getItem(position - HEADER_VIEW_COUNT).setHidden(false);
                     ArrayList<Comment> hc = mHiddenComments
-                            .get(mCommentAdapter.getItem(position - HEADER_VIEW_COUNT).getName()).getHiddenComments();
-                    mHiddenComments.remove(position);
+                            .get(mCommentAdapter.getItem(position - HEADER_VIEW_COUNT).getName())
+                            .getHiddenComments();
+                    mHiddenComments.remove(mCommentAdapter.getItem(position - HEADER_VIEW_COUNT)
+                            .getName());
                     for (Comment c : hc) {
                         mCommentsList.add(position++, c);
                     }
@@ -568,7 +586,6 @@ public class CommentFragment extends Fragment {
                             Bundle b = new Bundle();
                             b.putParcelable("account", mAccount);
                             b.putString("username", v.getAuthor());
-                            Log.i("CommentFragment", v.getAuthor());
                             Intent i = new Intent(mContext, UserActivity.class);
                             i.putExtras(b);
                             mContext.startActivity(i);
@@ -672,19 +689,22 @@ public class CommentFragment extends Fragment {
                 super.onTouchEvent(widget, buffer, event);
                 View v = mCommentsListView.getChildAt(mPosition
                         - mCommentsListView.getFirstVisiblePosition());
-                event.setLocation(event.getX(), event.getY() + v.getY());
+                if (v != null)
+                    event.setLocation(event.getX(), event.getY() + v.getY());
                 return mGestureDetector.onTouchEvent(event);
             } else if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 boolean ret = super.onTouchEvent(widget, buffer, event);
                 View v = mCommentsListView.getChildAt(mPosition
                         - mCommentsListView.getFirstVisiblePosition());
-                event.setLocation(event.getX(), event.getY() + v.getY());
+                if (v != null)
+                    event.setLocation(event.getX(), event.getY() + v.getY());
                 mGestureDetector.onTouchEvent(event);
                 return ret;
             } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
                 View v = mCommentsListView.getChildAt(mPosition
                         - mCommentsListView.getFirstVisiblePosition());
-                event.setLocation(event.getX(), event.getY() + v.getY());
+                if (v != null)
+                    event.setLocation(event.getX(), event.getY() + v.getY());
                 mGestureDetector.onTouchEvent(event);
             }
             return false;

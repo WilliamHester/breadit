@@ -248,6 +248,10 @@ public class Submission extends Thing implements Parcelable, Votable {
         return mCreatedUtc;
     }
 
+    public boolean isMeta() {
+        return mUrl.contains("reddit.com") && mUrl.contains("comments");
+    }
+
     /**
      * This function returns a list containing the submissions on a given
      * subreddit and page.
