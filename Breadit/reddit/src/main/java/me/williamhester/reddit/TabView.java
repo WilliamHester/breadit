@@ -154,37 +154,36 @@ public class TabView extends FrameLayout {
         View selector = new View(mContext);
         selector.setId(R.id.selector);
         selector.setBackgroundColor(getResources().getColor(R.color.auburn));
-        if (mFragmentTags.size() > 1) {
-            selector.setVisibility(View.GONE);
-        } else {
-            mSelectedTabPosition = 0;
-            mSelectedTab = tag;
-        }
+        selector.setVisibility(View.GONE);
         tabFrame.addView(selector, selectorParams);
         tabFrame.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                int oldIndex = mSelectedTabPosition;
-                mSelectedTabPosition = mFragmentTags.indexOf(finalTag);
-                if (mSelectedTab.equals(finalTag)) {
-                    mTabSwitcher.onTabReselected(finalTag,
-                            mFragmentList.get(mSelectedTabPosition));
-                } else {
-                    View v = mTabLayouts.get(oldIndex);
-                    View selectedSelector = v.findViewById(R.id.selector);
-                    selectedSelector.setVisibility(View.INVISIBLE);
-                    View v2 = mTabLayouts.get(mSelectedTabPosition);
-                    View selector = v2.findViewById(R.id.selector);
-                    selector.setVisibility(View.VISIBLE);
-                    mTabSwitcher.onTabSelected(finalTag,
-                            mFragmentList.get(mSelectedTabPosition));
-                }
-                mTabSwitcher.onTabUnSelected(mSelectedTab);
-                mSelectedTab = finalTag;
+                selectTab(finalTag);
             }
         });
         mLinearLayout.addView(tabFrame, params);
         mFragmentList.add(fragment);
+    }
+
+    public void selectTab(String tag) {
+        int oldIndex = mSelectedTabPosition;
+        mSelectedTabPosition = mFragmentTags.indexOf(tag);
+        if (mSelectedTab.equals(tag)) {
+            mTabSwitcher.onTabReselected(tag, mFragmentList.get(mSelectedTabPosition));
+        } else {
+            if (oldIndex != -1) {
+                View v = mTabLayouts.get(oldIndex);
+                View selectedSelector = v.findViewById(R.id.selector);
+                selectedSelector.setVisibility(View.INVISIBLE);
+            }
+            View v2 = mTabLayouts.get(mSelectedTabPosition);
+            View selector = v2.findViewById(R.id.selector);
+            selector.setVisibility(View.VISIBLE);
+            mTabSwitcher.onTabSelected(tag, mFragmentList.get(mSelectedTabPosition));
+        }
+        mTabSwitcher.onTabUnSelected(mSelectedTab);
+        mSelectedTab = tag;
     }
 
     /**

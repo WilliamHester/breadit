@@ -33,12 +33,9 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
 
     private ActionBar mAction;
 
-    private String mPermalink;
-    private String mUrl;
     private Submission mSubmission;
-    private boolean mIsSelf;
-    private Account mAccount;
     private TabView mTabView;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -48,16 +45,12 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
         int selectedTab = 0;
         if (getIntent().getExtras() != null) {
             mSubmission = getIntent().getExtras().getParcelable("submission");
-            mPermalink = getIntent().getExtras().getString("permalink", null);
-            mUrl = getIntent().getExtras().getString("url", null);
-            mIsSelf = getIntent().getExtras().getBoolean("isSelf", false);
-            mAccount = getIntent().getExtras().getParcelable("user");
             selectedTab = getIntent().getExtras().getInt("tab");
         }
 
         mAction = getActionBar();
         if (mAction != null) {
-            setUpActionBarTabs();
+            setUpActionBarTabs(selectedTab);
             mAction.setDisplayHomeAsUpEnabled(true);
         }
     }
@@ -90,7 +83,7 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
         return super.onOptionsItemSelected(item);
     }
 
-    public void setUpActionBarTabs() {
+    public void setUpActionBarTabs(int selectedTab) {
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         View v = inflater.inflate(R.layout.actionbar_tabview, null);
 
@@ -125,9 +118,19 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
             actionBar.setCustomView(v);
         }
 
-        getFragmentManager().beginTransaction()
-                .add(R.id.container, mTabView.getFragment("comments"), "comments")
-                .commit();
+        String tag;
+        switch (selectedTab) {
+            case COMMENT_TAB:
+                tag = "comments";
+                break;
+            case CONTENT_TAB:
+                tag = "content";
+                break;
+            default:
+                tag = "comments";
+        }
+
+        mTabView.selectTab(tag);
     }
 
     @Override
@@ -138,7 +141,7 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
                     .commit();
         } else {
             getFragmentManager().beginTransaction()
-                    .add(R.id.container, fragment)
+                    .add(R.id.container, fragment, tag)
                     .commit();
         }
     }

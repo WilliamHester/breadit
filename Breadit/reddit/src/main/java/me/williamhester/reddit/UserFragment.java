@@ -30,8 +30,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import me.williamhester.areddit.Account;
@@ -43,9 +41,6 @@ import me.williamhester.areddit.User;
 import me.williamhester.areddit.Votable;
 import me.williamhester.areddit.utils.Utilities;
 
-/**
- * Created by William on 4/13/14.
- */
 public class UserFragment extends Fragment {
 
     private Account mAccount;
@@ -54,7 +49,7 @@ public class UserFragment extends Fragment {
 
     private Context mContext;
     private ListView mSubmittedListView;
-    private List<Thing> mSubmittedThings;
+    private ArrayList<Thing> mSubmittedThings;
     private SubmittedArrayAdapter mSubmittedAdapter;
     private TextView mCommentKarma;
     private TextView mLinkKarma;
@@ -69,6 +64,9 @@ public class UserFragment extends Fragment {
         if (getArguments() != null) {
             mUsername = getArguments().getString("username");
             mAccount = getArguments().getParcelable("account");
+        }
+        if (mUsername == null && mAccount != null) {
+            mUsername = mAccount.getUsername();
         }
     }
 

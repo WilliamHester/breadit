@@ -73,8 +73,8 @@ public class MessagesFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_messages, null);
         mMessagesListView = (ListView) v.findViewById(R.id.messages);
         mMessageAdapter = new MessageArrayAdapter(mContext);
-        mHeaderView = createHeaderView(inflater);
-        mMessagesListView.addHeaderView(mHeaderView);
+//        mHeaderView = createHeaderView(inflater);
+//        mMessagesListView.addHeaderView(mHeaderView);
         mMessagesListView.setAdapter(mMessageAdapter);
         mMessagesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override

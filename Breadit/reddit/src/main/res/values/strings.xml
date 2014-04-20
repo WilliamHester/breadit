@@ -103,4 +103,8 @@
     <string name="report">Report</string>
     <string name="full_comments">Full comments</string>
 
+    <!-- AccountActivity -->
+    <string name="inbox">Inbox</string>
+    <string name="my_account">My account</string>
+
 </resources>

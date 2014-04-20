@@ -12,9 +12,6 @@ import android.webkit.WebViewClient;
 
 import me.williamhester.areddit.Submission;
 
-/**
- * Created by William on 3/25/14.
- */
 public class WebViewFragment extends Fragment {
 
     public static String URI = "uri";

@@ -3,20 +3,14 @@ package me.williamhester.reddit;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Fragment;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 
 import me.williamhester.areddit.Account;
-import me.williamhester.areddit.Message;
 
-/**
- * Created by William on 4/12/14.
- */
 public class AccountActivity extends Activity implements TabView.TabSwitcher {
 
     private Account mAccount;
@@ -36,17 +30,15 @@ public class AccountActivity extends Activity implements TabView.TabSwitcher {
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         View v = inflater.inflate(R.layout.actionbar_tabview, null);
 
-        ImageView inboxImage = new ImageView(this);
-        inboxImage.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_email));
-        ImageView sentImage = new ImageView(this);
-        sentImage.setImageDrawable(getResources().getDrawable(R.drawable.ic_action_person));
+        View inboxView = inflater.inflate(R.layout.tab_inbox, null);
+        View profileView = inflater.inflate(R.layout.tab_my_profile, null);
 
         Bundle args = new Bundle();
         args.putParcelable("account", mAccount);
 
         mTabView = (TabView) v.findViewById(R.id.tabs);
-        mTabView.addTab(MessagesFragment.class, args, TabView.TAB_TYPE_MINOR, inboxImage, "inbox");
-        mTabView.addTab(UserFragment.class, args, TabView.TAB_TYPE_MINOR, sentImage, "sent");
+        mTabView.addTab(MessagesFragment.class, args, TabView.TAB_TYPE_MAIN, inboxView, "inbox");
+        mTabView.addTab(UserFragment.class, args, TabView.TAB_TYPE_MAIN, profileView, "sent");
 
         ActionBar actionBar = getActionBar();
         if (actionBar != null) {
@@ -55,9 +47,7 @@ public class AccountActivity extends Activity implements TabView.TabSwitcher {
             actionBar.setCustomView(v);
         }
 
-        getFragmentManager().beginTransaction()
-                .add(R.id.container, mTabView.getFragment("inbox"), "inbox")
-                .commit();
+        mTabView.selectTab("inbox");
     }
 
     @Override
@@ -92,7 +82,7 @@ public class AccountActivity extends Activity implements TabView.TabSwitcher {
                     .commit();
         } else {
             getFragmentManager().beginTransaction()
-                    .add(R.id.container, fragment)
+                    .add(R.id.container, fragment, tag)
                     .commit();
         }
     }
