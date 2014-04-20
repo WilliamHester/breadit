@@ -40,8 +40,7 @@ public class VoteAsyncTask extends AsyncTask<Void, Void, Boolean> {
         List<NameValuePair> apiParams = new ArrayList<NameValuePair>();
         apiParams.add(new BasicNameValuePair("dir", mDir + ""));
         apiParams.add(new BasicNameValuePair("id", mFullname));
-        Log.i("VoteAsyncTask", Utilities.post(apiParams, "http://www.reddit.com/api/vote", mAccount.getCookie(),
-                mAccount.getModhash()));
+        Utilities.post(apiParams, "http://www.reddit.com/api/vote", mAccount);
         return true; // If we get here, then we successfully voted.
     }
 }

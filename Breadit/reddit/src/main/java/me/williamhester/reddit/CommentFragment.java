@@ -71,21 +71,30 @@ public class CommentFragment extends Fragment {
         super.onCreate(savedInstanceState);
         Bundle args = getArguments();
         mContext = getActivity();
-        if (args != null) {
+        if (savedInstanceState != null) {
+            mCommentsList = savedInstanceState.getParcelableArrayList("comments");
+            mAccount = savedInstanceState.getParcelable("account");
+            mSubmission = savedInstanceState.getParcelable("submission");
+            mPermalink = savedInstanceState.getString("permalink");
+            mSortType = savedInstanceState.getInt("sortType");
+        } else if (args != null) {
             mAccount = args.getParcelable("account");
             mSubmission = args.getParcelable("submission");
             if (mSubmission != null) {
                 mUrl = mSubmission.getUrl();
                 mPermalink = "http://www.reddit.com" + mSubmission.getPermalink();
             }
+            mCommentsList = new ArrayList<Comment>();
         }
-        mCommentsList = new ArrayList<Comment>();
         mHiddenComments = new HashMap<String, HiddenComments>();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_comment, null);
+        if (savedInstanceState != null)
+            mCommentsList = savedInstanceState.getParcelableArrayList("comments");
+        Log.i("CommentFragment", mCommentsList.size() + "");
         mGestureDetector = new GestureDetector(mContext, new SwipeDetector());
         mGestureListener = new View.OnTouchListener() {
             @Override
@@ -102,6 +111,16 @@ public class CommentFragment extends Fragment {
         mCommentsListView.setAdapter(mCommentAdapter);
         mCommentsListView.setOnTouchListener(mGestureListener);
         return v;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList("comments", mCommentsList);
+        outState.putParcelable("account", mAccount);
+        outState.putParcelable("submission", mSubmission);
+        outState.putString("permalink", mPermalink);
+        outState.putInt("sortType", mSortType);
     }
 
     public View createHeaderView(LayoutInflater inflater) {
@@ -171,6 +190,7 @@ public class CommentFragment extends Fragment {
         sortBy.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                int old = mSortType;
                 switch (i) {
                     case 0:
                         mSortType = Comment.TOP;
@@ -191,11 +211,12 @@ public class CommentFragment extends Fragment {
                         mSortType = Comment.OLD;
                         break;
                 }
-                mCommentsList = new ArrayList<Comment>();
-                mCommentAdapter = new CommentArrayAdapter(mContext);
-                mCommentsListView.setAdapter(mCommentAdapter);
-                mCommentsListView.setOnTouchListener(mGestureListener);
-                new CommentLoaderTask().execute();
+                if (old != mSortType) {
+                    mCommentAdapter = new CommentArrayAdapter(mContext);
+                    mCommentsListView.setAdapter(mCommentAdapter);
+                    mCommentsListView.setOnTouchListener(mGestureListener);
+                    new CommentLoaderTask().execute();
+                }
             }
 
             @Override
@@ -326,6 +347,7 @@ public class CommentFragment extends Fragment {
         @Override
         protected void onPostExecute(List<Comment> result) {
             if (result != null) {
+                mCommentsList.clear();
                 for (Comment comment : result) {
                     if (comment != null) {
                         Comment.CommentIterator iterator = comment.getCommentIterator();
@@ -406,7 +428,7 @@ public class CommentFragment extends Fragment {
 
     private class SwipeDetector extends GestureDetector.SimpleOnGestureListener {
 
-        private static final int SWIPE_MIN_DISTANCE = 120;
+        private static final int SWIPE_MIN_DISTANCE = 170;
         private static final int SWIPE_MAX_OFF_PATH = 250;
         private static final int SWIPE_THRESHOLD_VELOCITY = 200;
 
@@ -562,8 +584,12 @@ public class CommentFragment extends Fragment {
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
             if (mAccount != null) {
-                if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH)
+                try {
+                    if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH)
+                        return false;
+                } catch (NullPointerException e) {
                     return false;
+                }
                 // right to left swipe
                 int position = mCommentsListView.pointToPosition((int) e1.getX(), (int) e1.getY());
                 if (e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
@@ -581,6 +607,7 @@ public class CommentFragment extends Fragment {
                         }
                     }
                     setVoteStatus(v, position);
+                    return true;
                 } else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
                     Votable v = null;
                     if (position == 0) {
@@ -596,6 +623,7 @@ public class CommentFragment extends Fragment {
                         }
                     }
                     setVoteStatus(v, position);
+                    return true;
                 }
             }
             return false;

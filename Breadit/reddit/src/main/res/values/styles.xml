@@ -68,6 +68,7 @@
     <style name="AutoCompleteTextViewBreadit" parent="android:Widget.Holo.Light.AutoCompleteTextView">
         <item name="android:dropDownSelector">@drawable/breadit_list_selector_holo_light</item>
         <item name="android:background">@drawable/breadit_edit_text_holo_light</item>
+        <item name="android:textColor">@color/mid_gray</item>
     </style>
 
     <style name="ButtonBreadit" parent="android:Widget.Holo.Light.Button">

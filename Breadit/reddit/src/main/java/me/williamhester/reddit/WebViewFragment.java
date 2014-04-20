@@ -34,6 +34,7 @@ public class WebViewFragment extends Fragment {
             mUri = getArguments().getString("url", null);
             mSubmission = getArguments().getParcelable("submission");
         }
+        Log.i("WVF", "onCreate");
     }
 
     @Override
@@ -56,8 +57,33 @@ public class WebViewFragment extends Fragment {
             } else {
                 mWebView.loadUrl(imgurOptimize(mSubmission.getUrl()));
             }
+        Log.i("WVF", "onCreateView");
 
         return v;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.i("WVF", "onResume");
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.i("WVF", "onPause");
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.i("WVF", "onStop");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.i("WVF", "onDestroy");
     }
 
     @Override

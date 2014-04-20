@@ -1,9 +1,7 @@
 package me.williamhester.areddit;
 
-import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -28,7 +26,7 @@ public class Comment extends Thing implements Parcelable, Votable {
     public static final int OLD = 5;
 
     private List<Comment> mReplies;
-    private List<String> mMore;
+//    private List<String> mMore;
 
     private String mApprovedBy;
     private String mAuthor;
@@ -76,11 +74,6 @@ public class Comment extends Thing implements Parcelable, Votable {
         if (!getKind().equals("more")) {
             mReplies = generateReplies(jsonObj);
         }
-    }
-
-    public Comment(Parcel in) {
-        this(new JsonParser().parse(in.readBundle().getString("jsonData")).getAsJsonObject(),
-                in.readBundle().getInt("level"));
     }
 
     public static Comment fromJsonString(JsonObject data, int level) {
@@ -136,11 +129,11 @@ public class Comment extends Thing implements Parcelable, Votable {
                 }
             }
         } else {
-            comment.mMore = new ArrayList<String>();
-            JsonArray array = data.get("data").getAsJsonObject().get("children").getAsJsonArray();
-            for (JsonElement e : array) {
-                comment.mMore.add(e.getAsString());
-            }
+//            comment.mMore = new ArrayList<String>();
+//            JsonArray array = data.get("data").getAsJsonObject().get("children").getAsJsonArray();
+//            for (JsonElement e : array) {
+//                comment.mMore.add(e.getAsString());
+//            }
         }
         return comment;
     }
@@ -384,30 +377,6 @@ public class Comment extends Thing implements Parcelable, Votable {
         return comments;
     }
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel parcel, int i) {
-        Bundle b = new Bundle();
-        b.putString("jsonData", mData.toString());
-        b.putInt("level", mLevel);
-        parcel.writeBundle(b);
-    }
-
-    public static final Parcelable.Creator<Comment> CREATOR
-            = new Parcelable.Creator<Comment>() {
-        public Comment createFromParcel(Parcel in) {
-            return new Comment(in);
-        }
-
-        public Comment[] newArray(int size) {
-            return new Comment[size];
-        }
-    };
-
     public class CommentIterator implements Iterator<Comment> {
 
         private Stack<Comment> mStack;
@@ -440,4 +409,87 @@ public class Comment extends Thing implements Parcelable, Votable {
             throw new UnsupportedOperationException();
         }
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeTypedList(mReplies);
+//        dest.writeList(this.mMore);
+        dest.writeString(this.mApprovedBy);
+        dest.writeString(this.mAuthor);
+        dest.writeString(this.mAuthorFlairCss);
+        dest.writeString(this.mAuthorFlairText);
+        dest.writeString(this.mBannedBy);
+        dest.writeString(this.mBody);
+        dest.writeString(this.mBodyHtml);
+        dest.writeString(this.mSubreddit);
+        dest.writeString(this.mSubredditId);
+        dest.writeString(this.mLinkAuthor);
+        dest.writeString(this.mLinkId);
+        dest.writeString(this.mLinkTitle);
+        dest.writeString(this.mLinkUrl);
+        dest.writeString(this.mDistinguished);
+        dest.writeByte(mSaved ? (byte) 1 : (byte) 0);
+        dest.writeInt(this.mVoteStatus);
+        dest.writeLong(this.mCreated);
+        dest.writeLong(this.mCreatedUtc);
+        dest.writeLong(this.mUps);
+        dest.writeLong(this.mDowns);
+        dest.writeLong(this.mEdited);
+        dest.writeInt(this.mLevel);
+        dest.writeByte(mIsHidden ? (byte) 1 : (byte) 0);
+        dest.writeByte(mIsBeingEdited ? (byte) 1 : (byte) 0);
+        dest.writeString(this.mReplyText);
+        dest.writeString(this.mId);
+        dest.writeString(this.mName);
+        dest.writeString(this.mKind);
+    }
+
+    private Comment(Parcel in) {
+        in.readTypedList(mReplies, Comment.CREATOR);
+//        this.mMore = new ArrayList<List<String>>();
+//        in.readList(this.mMore, List<String>.class.getClassLoader());
+        this.mApprovedBy = in.readString();
+        this.mAuthor = in.readString();
+        this.mAuthorFlairCss = in.readString();
+        this.mAuthorFlairText = in.readString();
+        this.mBannedBy = in.readString();
+        this.mBody = in.readString();
+        this.mBodyHtml = in.readString();
+        this.mSubreddit = in.readString();
+        this.mSubredditId = in.readString();
+        this.mLinkAuthor = in.readString();
+        this.mLinkId = in.readString();
+        this.mLinkTitle = in.readString();
+        this.mLinkUrl = in.readString();
+        this.mDistinguished = in.readString();
+        this.mSaved = in.readByte() != 0;
+        this.mVoteStatus = in.readInt();
+        this.mCreated = in.readLong();
+        this.mCreatedUtc = in.readLong();
+        this.mUps = in.readLong();
+        this.mDowns = in.readLong();
+        this.mEdited = in.readLong();
+        this.mLevel = in.readInt();
+        this.mIsHidden = in.readByte() != 0;
+        this.mIsBeingEdited = in.readByte() != 0;
+        this.mReplyText = in.readString();
+        this.mId = in.readString();
+        this.mName = in.readString();
+        this.mKind = in.readString();
+    }
+
+    public static Creator<Comment> CREATOR = new Creator<Comment>() {
+        public Comment createFromParcel(Parcel source) {
+            return new Comment(source);
+        }
+
+        public Comment[] newArray(int size) {
+            return new Comment[size];
+        }
+    };
 }

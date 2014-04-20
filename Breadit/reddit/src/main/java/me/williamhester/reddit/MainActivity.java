@@ -3,6 +3,7 @@ package me.williamhester.reddit;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
@@ -13,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -79,7 +81,6 @@ public class MainActivity extends Activity
         if (getActionBar() != null) {
             getActionBar().setDisplayHomeAsUpEnabled(true);
             getActionBar().setHomeButtonEnabled(true);
-            setUpActionBar();
         }
 
         updateActionBar(null);
@@ -124,40 +125,6 @@ public class MainActivity extends Activity
         mSubredditFragment.setSecondarySort(sort);
     }
 
-    private void setUpActionBar() {
-        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-        View v = inflater.inflate(R.layout.actionbar_tabview, null);
-
-        mTitleView = new TextView(this);
-        mTitleView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
-        mTitleView.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
-        mTitleView.setTextColor(getResources().getColor(R.color.mid_gray));
-        updateActionBar(mSubreddit);
-        ImageView saveImage = new ImageView(this);
-        saveImage.setImageDrawable(getResources().getDrawable(android.R.drawable.ic_menu_save));
-        ImageView historyImage = new ImageView(this);
-        historyImage.setImageDrawable(getResources()
-                .getDrawable(android.R.drawable.ic_menu_recent_history));
-
-        Bundle args = new Bundle();
-        args.putParcelable("account", mAccount);
-
-        mTabView = (TabView) v.findViewById(R.id.tabs);
-        mTabView.addTab(SubredditFragment.newInstance(mAccount, mSubreddit),
-                TabView.TAB_TYPE_MAIN, mTitleView, "subreddit");
-        mTabView.addTab(SubredditFragment.newInstance(mAccount, SubredditFragment.SAVED),
-                TabView.TAB_TYPE_MINOR, saveImage, "saved");
-        mTabView.addTab(SubredditFragment.newInstance(mAccount, SubredditFragment.HISTORY),
-                TabView.TAB_TYPE_MINOR, historyImage, "history");
-
-        getFragmentManager().beginTransaction()
-                .replace(R.id.container, mTabView.getFragment("subreddit"))
-                .commit();
-
-        getActionBar().setDisplayShowCustomEnabled(true);
-        getActionBar().setCustomView(v);
-    }
-
     public void restoreActionBar() {
         ActionBar actionBar = getActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
@@ -167,9 +134,9 @@ public class MainActivity extends Activity
 
     private void updateActionBar(String sub) {
         if (sub == null)
-            mTitleView.setText("FrontPage");
+            getActionBar().setTitle("FrontPage");
         else
-            mTitleView.setText("/r/" + sub);
+            getActionBar().setTitle("/r/" + sub);
     }
 
 

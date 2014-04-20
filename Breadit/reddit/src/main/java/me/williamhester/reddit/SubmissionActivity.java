@@ -2,19 +2,30 @@ package me.williamhester.reddit;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.TypedValue;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import org.w3c.dom.Text;
 
 import me.williamhester.areddit.Account;
+import me.williamhester.areddit.Message;
 import me.williamhester.areddit.Submission;
 
 /**
  * Created by William on 2/11/14.
  */
-public class SubmissionActivity extends Activity {
+public class SubmissionActivity extends Activity implements TabView.TabSwitcher {
 
     public static final int COMMENT_TAB = 0;
     public static final int CONTENT_TAB = 1;
@@ -26,6 +37,7 @@ public class SubmissionActivity extends Activity {
     private Submission mSubmission;
     private boolean mIsSelf;
     private Account mAccount;
+    private TabView mTabView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -44,26 +56,9 @@ public class SubmissionActivity extends Activity {
 
         mAction = getActionBar();
         if (mAction != null) {
-            mAction.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+            setUpActionBarTabs();
+            mAction.setDisplayHomeAsUpEnabled(true);
         }
-
-        ActionBar.Tab[] tabs = new ActionBar.Tab[2];
-
-        tabs[0] = mAction.newTab().setText(R.string.comments)
-                .setTabListener(new TabListener<CommentFragment>(this, "commentsFragment",
-                        CommentFragment.class, getIntent().getExtras()));
-        mAction.addTab(tabs[0]);
-
-        if (!mSubmission.isSelf()) {
-            tabs[1] = mAction.newTab().setText(R.string.content)
-                    .setTabListener(new TabListener<WebViewFragment>(this, "webViewFragment",
-                            WebViewFragment.class, getIntent().getExtras()));
-            mAction.addTab(tabs[1]);
-        }
-
-        mAction.selectTab(tabs[selectedTab]);
-
-        mAction.setDisplayHomeAsUpEnabled(true);
     }
 
     @Override
@@ -92,6 +87,62 @@ public class SubmissionActivity extends Activity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public void setUpActionBarTabs() {
+        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        View v = inflater.inflate(R.layout.actionbar_tabview, null);
+
+        TextView commentTab = new TextView(this);
+        commentTab.setText(R.string.comments);
+        commentTab.setTextColor(getResources().getColor(R.color.mid_gray));
+        commentTab.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
+        commentTab.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+        TextView content = new TextView(this);
+        content.setText(R.string.content);
+        content.setTextColor(getResources().getColor(R.color.mid_gray));
+        content.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
+        content.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+
+        Bundle args = getIntent().getExtras();
+
+        mTabView = (TabView) v.findViewById(R.id.tabs);
+        mTabView.addTab(CommentFragment.class, args, TabView.TAB_TYPE_MAIN, commentTab, "comments");
+        mTabView.addTab(WebViewFragment.class, args, TabView.TAB_TYPE_MAIN, content, "content");
+
+        ActionBar actionBar = getActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setDisplayShowCustomEnabled(true);
+            actionBar.setCustomView(v);
+        }
+
+        getFragmentManager().beginTransaction()
+                .add(R.id.container, mTabView.getFragment("comments"), "comments")
+                .commit();
+    }
+
+    @Override
+    public void onTabSelected(String tag, Fragment fragment) {
+        if (getFragmentManager().findFragmentByTag(tag) != null) {
+            getFragmentManager().beginTransaction()
+                    .replace(R.id.container, getFragmentManager().findFragmentByTag(tag))
+                    .commit();
+        } else {
+            getFragmentManager().beginTransaction()
+                    .add(R.id.container, fragment)
+                    .commit();
+        }
+    }
+
+    @Override
+    public void onTabReselected(String tag, Fragment fragment) {
+
+    }
+
+    @Override
+    public void onTabUnSelected(String tag) {
+
     }
 
 }

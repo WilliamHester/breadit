@@ -464,8 +464,12 @@ public class SubredditFragment extends Fragment {
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
             if (mAccount != null) {
-                if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH)
+                try {
+                    if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH)
+                        return false;
+                } catch (NullPointerException e) {
                     return false;
+                }
                 // right to left swipe
                 int position = mSubmissions.pointToPosition((int) e1.getX(), (int) e1.getY());
                 if (position > -1 && e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE

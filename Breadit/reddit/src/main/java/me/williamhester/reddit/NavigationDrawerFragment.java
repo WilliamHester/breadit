@@ -3,6 +3,7 @@ package me.williamhester.reddit;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
@@ -15,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
@@ -400,11 +402,14 @@ public class NavigationDrawerFragment extends Fragment {
     private View createHeaderView(LayoutInflater inflater) {
         View v = inflater.inflate(R.layout.header_drawer_2, null);
         final EditText mSubredditSearch = (EditText) v.findViewById(R.id.search_subreddit);
-        ImageButton mSearch = (ImageButton) v.findViewById(R.id.search_button);
-        mSearch.setOnClickListener(new View.OnClickListener() {
+        final ImageButton search = (ImageButton) v.findViewById(R.id.search_button);
+        search.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-               selectItem(mSubredditSearch.getText().toString().trim());
+                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
+                        Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(search.getWindowToken(), 0);
+                selectItem(mSubredditSearch.getText().toString().trim());
             }
         });
         mCurrentSubreddit = (TextView) v.findViewById(R.id.current_subreddit);
