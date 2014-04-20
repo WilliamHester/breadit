@@ -55,7 +55,6 @@ public class CommentFragment extends Fragment {
     private GestureDetector mGestureDetector;
     private ListView mCommentsListView;
     private HashMap<String, HiddenComments> mHiddenComments;
-    private String mUrl;
     private String mPermalink;
     private Submission mSubmission;
     private TextView mNumComments;
@@ -81,7 +80,6 @@ public class CommentFragment extends Fragment {
             mAccount = args.getParcelable("account");
             mSubmission = args.getParcelable("submission");
             if (mSubmission != null) {
-                mUrl = mSubmission.getUrl();
                 mPermalink = "http://www.reddit.com" + mSubmission.getPermalink();
             } else {
                 mPermalink = args.getString("permalink");
@@ -104,7 +102,8 @@ public class CommentFragment extends Fragment {
                 return mGestureDetector.onTouchEvent(motionEvent);
             }
         };
-        mCommentsListView = (ListView) v.findViewById(R.id.comments);
+        if (v != null)
+            mCommentsListView = (ListView) v.findViewById(R.id.comments);
         if (mHeaderView == null && mSubmission != null) {
             mHeaderView = createHeaderView(inflater);
             mCommentsListView.addHeaderView(mHeaderView);
@@ -515,7 +514,7 @@ public class CommentFragment extends Fragment {
             } else if (position > 0) {
                 v = mCommentsList.get(position - HEADER_VIEW_COUNT);
             } else {
-                v = null;
+                return;
             }
             final int offset;
             ArrayList<String> options = new ArrayList<String>();
@@ -735,7 +734,8 @@ public class CommentFragment extends Fragment {
 
         @Override
         public boolean equals(Object o) {
-            return ((HiddenComments)o).getBelowPosition() == mBelowPosition;
+            return o instanceof HiddenComments
+                    && ((HiddenComments) o).getBelowPosition() == mBelowPosition;
         }
 
     }
