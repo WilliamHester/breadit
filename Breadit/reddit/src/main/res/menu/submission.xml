@@ -3,7 +3,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/action_share"
         android:title="@string/share"
-        android:icon="@drawable/ic_action_share"
+        android:icon="@android:drawable/ic_menu_share"
         android:orderInCategory="1"
         android:showAsAction="ifRoom"/>
     <item android:id="@+id/action_open_link_in_browser"

@@ -38,6 +38,7 @@ public class TabView extends FrameLayout {
     private int mSelectedTabPosition;
     private int mViewWidth = 0;
     private TabSwitcher mTabSwitcher;
+    private boolean mAllAreMinor = true;
 
     public TabView(Context context) {
         super(context);
@@ -77,9 +78,13 @@ public class TabView extends FrameLayout {
                         for (FrameLayout f : mTabLayouts) {
                             View v = f.findViewById(R.id.selector);
                             f.removeView(v);
-                            FrameLayout.LayoutParams params =
-                                    new LayoutParams(f.getChildAt(0).getMeasuredWidth(),
-                                            mCursorHeight);
+                            FrameLayout.LayoutParams params;
+                            if (mAllAreMinor) {
+                                params = new LayoutParams(f.getChildAt(0).getMeasuredWidth(),
+                                        mCursorHeight);
+                            } else {
+                                params = new LayoutParams(f.getMeasuredWidth(), mCursorHeight);
+                            }
                             params.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
                             params.setMargins(0, (int) (2 * scale), 0, (int) (2 * scale));
                             f.addView(v, params);
@@ -96,8 +101,9 @@ public class TabView extends FrameLayout {
                 Gravity.CENTER));
         mCursor = new View(mContext);
         mLinearLayout = new LinearLayout(mContext);
-        addView(mLinearLayout, new FrameLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
+        addView(mLinearLayout, new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT,
                 LayoutParams.MATCH_PARENT, Gravity.CENTER));
+        mLinearLayout.setGravity(Gravity.CENTER);
         mCursor.setAlpha(mCursorAlpha);
     }
 
@@ -119,6 +125,7 @@ public class TabView extends FrameLayout {
                         LayoutParams.MATCH_PARENT);
                 params.weight = 1;
                 params.gravity = Gravity.CENTER_VERTICAL;
+                mAllAreMinor = false;
                 break;
             case TAB_TYPE_MINOR:
                 params = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,

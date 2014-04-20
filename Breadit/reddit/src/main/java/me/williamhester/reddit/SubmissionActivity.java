@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -112,7 +113,7 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
             mTabView.addTab(WebViewFragment.class, args, TabView.TAB_TYPE_MAIN, content, "content");
         } else {
             args = new Bundle();
-            args.putParcelable("account", mAccount);
+            args.putParcelable("account", (Parcelable) getIntent().getExtras().get("account"));
             args.putString("permalink", mSubmission.getUrl());
             mTabView.addTab(CommentFragment.class, args, TabView.TAB_TYPE_MAIN, content, "content");
         }
