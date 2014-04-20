@@ -41,6 +41,8 @@ public class WebViewFragment extends Fragment {
         mWebView.getSettings().setDisplayZoomControls(false);
         mWebView.getSettings().setJavaScriptEnabled(true);
         mWebView.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
+        mWebView.getSettings().setUseWideViewPort(true);
+        mWebView.getSettings().setLoadWithOverviewMode(true);
         mWebView.setBackgroundColor(0x00000000);
 
         if (savedInstanceState != null)

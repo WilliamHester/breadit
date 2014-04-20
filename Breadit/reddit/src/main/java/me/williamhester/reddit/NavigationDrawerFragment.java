@@ -12,6 +12,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -524,7 +525,8 @@ public class NavigationDrawerFragment extends Fragment {
         @Override
         protected void onPostExecute(Void result) {
             if (mSubscribe) {
-                mSubredditList.add(mSubreddit.getDisplayName());
+                if (mSubreddit != null)
+                    mSubredditList.add(mSubreddit.getDisplayName());
                 mSubredditList.remove(0);
                 Collections.sort(mSubredditList, mOrderList);
                 mSubredditList.add(0, "FrontPage");
@@ -556,6 +558,7 @@ public class NavigationDrawerFragment extends Fragment {
                 return false;
             } catch (JsonParseException e) {
                 e.printStackTrace();
+                mSubreddit = null;
                 return false;
             } finally {
                 mSubredditIsLoading = false;

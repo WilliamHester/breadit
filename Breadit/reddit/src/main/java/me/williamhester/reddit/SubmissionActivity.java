@@ -100,24 +100,6 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
 
         Bundle args = getIntent().getExtras();
 
-        mTabView = (TabView) v.findViewById(R.id.tabs);
-        mTabView.addTab(CommentFragment.class, args, TabView.TAB_TYPE_MAIN, commentTab, "comments");
-        if (!mSubmission.isMeta()) {
-            mTabView.addTab(WebViewFragment.class, args, TabView.TAB_TYPE_MAIN, content, "content");
-        } else {
-            args = new Bundle();
-            args.putParcelable("account", (Parcelable) getIntent().getExtras().get("account"));
-            args.putString("permalink", mSubmission.getUrl());
-            mTabView.addTab(CommentFragment.class, args, TabView.TAB_TYPE_MAIN, content, "content");
-        }
-
-        ActionBar actionBar = getActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setDisplayShowCustomEnabled(true);
-            actionBar.setCustomView(v);
-        }
-
         String tag;
         switch (selectedTab) {
             case COMMENT_TAB:
@@ -130,7 +112,27 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
                 tag = "comments";
         }
 
-        mTabView.selectTab(tag);
+        mTabView = (TabView) v.findViewById(R.id.tabs);
+        mTabView.addTab(CommentFragment.class, args, TabView.TAB_TYPE_MAIN, commentTab, "comments");
+        if (!mSubmission.isMeta() && !mSubmission.isSelf()) {
+            mTabView.addTab(WebViewFragment.class, args, TabView.TAB_TYPE_MAIN, content, "content");
+            mTabView.selectTab(tag);
+        } else if (!mSubmission.isSelf()) {
+            args = new Bundle();
+            args.putParcelable("account", (Parcelable) getIntent().getExtras().get("account"));
+            args.putString("permalink", mSubmission.getUrl());
+            mTabView.addTab(CommentFragment.class, args, TabView.TAB_TYPE_MAIN, content, "content");
+            mTabView.selectTab(tag);
+        } else {
+            mTabView.selectTab("comments");
+        }
+
+        ActionBar actionBar = getActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setDisplayShowCustomEnabled(true);
+            actionBar.setCustomView(v);
+        }
     }
 
     @Override
