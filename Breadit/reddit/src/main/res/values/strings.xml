@@ -94,7 +94,7 @@
     <string name="search_sub_hint">Enter a subreddit</string>
     <string name="currently_viewing">Currently Viewing</string>
     <string name="subscribe">Subscribed</string>
-    <string name="sort_by">Sort By</string>
+    <string name="sort_by">Sorted by</string>
 
     <!-- MessageFragment -->
     <string name="mark_unread">Mark unread</string>

@@ -27,6 +27,11 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.JsonParseException;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,6 +41,7 @@ import java.util.List;
 ;import me.williamhester.areddit.Account;
 import me.williamhester.areddit.Submission;
 import me.williamhester.areddit.Subreddit;
+import me.williamhester.areddit.utils.Utilities;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
@@ -73,11 +79,21 @@ public class NavigationDrawerFragment extends Fragment {
     private int mCurrentSelectedPosition = 0;
     private boolean mFromSavedInstanceState;
     private boolean mUserLearnedDrawer;
+    private boolean mSubredditIsLoading = false;
     private Account mAccount;
     private TextView mCurrentSubreddit;
     private CheckBox mCheckbox;
+    private Subreddit mSubreddit;
 
-    public NavigationDrawerFragment() { }
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mCallbacks = (NavigationDrawerCallbacks) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException("Activity must implement NavigationDrawerCallbacks.");
+        }
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -245,30 +261,29 @@ public class NavigationDrawerFragment extends Fragment {
         mDrawerLayout.setDrawerListener(mDrawerToggle);
     }
 
-    private void selectItem(String subreddit) {
+    private void selectItem(final String subreddit) {
+        new SubredditDataAsyncTask(subreddit).execute();
         if (mDrawerLayout != null) {
             mDrawerLayout.closeDrawers();
         }
         if (mCallbacks != null) {
-            if (subreddit.equals("FrontPage") || subreddit.equals("")) {
+            if (mAccount == null) {
+                mCheckbox.setVisibility(View.GONE);
+            } else if (subreddit.equals("FrontPage") || subreddit.equals("")) {
                 mCallbacks.onNavigationDrawerItemSelected(null);
                 mCheckbox.setVisibility(View.INVISIBLE);
             } else {
                 mCallbacks.onNavigationDrawerItemSelected(subreddit);
                 mCheckbox.setVisibility(View.VISIBLE);
             }
+            mCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                    new SubscribeAsyncTask(b).execute();
+                }
+            });
             Log.d("Drawer", subreddit + " chosen");
             mCurrentSubreddit.setText(subreddit);
-        }
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            mCallbacks = (NavigationDrawerCallbacks) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException("Activity must implement NavigationDrawerCallbacks.");
         }
     }
 
@@ -392,7 +407,7 @@ public class NavigationDrawerFragment extends Fragment {
         mSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-               selectItem(mSubredditSearch.getText().toString());
+               selectItem(mSubredditSearch.getText().toString().trim());
             }
         });
         mCurrentSubreddit = (TextView) v.findViewById(R.id.current_subreddit);
@@ -479,6 +494,74 @@ public class NavigationDrawerFragment extends Fragment {
             TextView subredditName = (TextView)v.findViewById(R.id.subreddit_list_item_title);
             subredditName.setText(subreddit);
             return v;
+        }
+    }
+
+    private class SubscribeAsyncTask extends AsyncTask<Void, Void, Void> {
+
+        private boolean mSubscribe;
+
+        public SubscribeAsyncTask(boolean sub) {
+            mSubscribe = sub;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            List<NameValuePair> apiParams = new ArrayList<NameValuePair>();
+            if (mSubscribe) {
+                apiParams.add(new BasicNameValuePair("action", "sub"));
+            } else {
+                apiParams.add(new BasicNameValuePair("action", "unsub"));
+            }
+            apiParams.add(new BasicNameValuePair("sr", mSubreddit.getName()));
+            if (mSubreddit != null) {
+                Log.i("NDF", Utilities.post(apiParams, "http://www.reddit.com/api/subscribe/", mAccount));
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            if (mSubscribe) {
+                mSubredditList.add(mSubreddit.getDisplayName());
+                mSubredditList.remove(0);
+                Collections.sort(mSubredditList, mOrderList);
+                mSubredditList.add(0, "FrontPage");
+            } else {
+                mSubredditList.remove(mSubreddit.getDisplayName());
+            }
+            mSubredditArrayAdapter.notifyDataSetChanged();
+        }
+    }
+
+    private class SubredditDataAsyncTask extends AsyncTask<Void, Void, Void> {
+
+        private String mSubName;
+
+        public SubredditDataAsyncTask(String sub) {
+            mSubName = sub;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+                mSubredditIsLoading = true;
+                String s = Utilities.get("", "http://www.reddit.com/r/" + mSubName + "/about.json",
+                        mAccount);
+                Log.i("NDF", s);
+                mSubreddit = Subreddit.fromString(s);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JsonParseException e) {
+                e.printStackTrace();
+            }
+            mSubredditIsLoading = false;
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            mCheckbox.setChecked(mSubreddit.userIsSubscriber());
         }
     }
 }

@@ -1,26 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    >
-
-    <ImageView
-        android:id="@+id/drawable_line"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/divider_line"/>
+    android:layout_height="wrap_content">
 
     <TextView
-        android:layout_below="@id/drawable_line"
         android:id="@+id/subreddit_list_item_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@color/orangered"
+        android:textColor="@color/mid_gray"
         android:padding="6dp"
-        android:textSize="25sp"
-        android:text="test"
-        android:background="@color/blackish"
-/>
+        android:textSize="20sp"
+        android:fontFamily="sans-serif-condensed"/>
+        <!--android:background="@color/blackish" />-->
 
-</RelativeLayout>
+</LinearLayout>

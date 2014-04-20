@@ -1,117 +1,155 @@
 package me.williamhester.areddit;
 
-import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 public class Subreddit extends Thing implements Parcelable {
 
+    private int mAccountsActive;
+    private int mCommentScoreHideMins;
+    private long mCreated;
+    private long mCreatedUtc;
+    private long mSubscribers;
+    private String mDescription;
+    private String mDescriptionHtml;
+    private String mDisplayName;
+    private String mHeaderImg;
+    private String mHeaderTitle;
+    private String mPublicDescription;
+    private String mSubmissionType;
+    private String mSubmitLinkLabel;
+    private String mSubmitTextLabel;
+    private String mSubredditType;
+    private String mTitle;
+    private String mUrl;
+    private boolean mOver18;
+    private boolean mPublicTraffic;
+    private boolean mUserIsBanned;
+    private boolean mUserIsContributor;
+    private boolean mUserIsModerator;
+    private boolean mUserIsSubscriber;
+
     public Subreddit(JsonObject data) {
         super(data);
-        mData = data;
+        Log.i("Data", "data = " + data.toString());
+        data = data.get("data").getAsJsonObject();
+//        mAccountsActive = data.get("accounts_active").getAsInt();
+//        mCommentScoreHideMins = data.get("comment_score_hide_mins").getAsInt();
+        mCreated = data.get("created").getAsLong();
+        mCreatedUtc = data.get("created_utc").getAsLong();
+        mSubscribers = data.get("subscribers").getAsLong();
+//        mDescription = data.get("description").getAsString();
+//        mDescriptionHtml = data.get("description_html").getAsString();
+        mDisplayName = data.get("display_name").getAsString();
+//        mHeaderImg = data.get("header_img").getAsString();
+//        mHeaderTitle = data.get("header_title").getAsString();
+//        mPublicDescription = data.get("public_description").getAsString();
+//        mSubmissionType = data.get("submission_type").getAsString();
+//        mSubmitLinkLabel = data.get("submit_link_label").getAsString();
+//        mSubmitTextLabel = data.get("submit_text_label").getAsString();
+//        mSubredditType = data.get("subreddit_type").getAsString();
+        mTitle = data.get("title").getAsString();
+        mUrl = data.get("url").getAsString();
+        mOver18 = data.get("over18").getAsBoolean();
+        mPublicTraffic = data.get("public_traffic").getAsBoolean();
+        mUserIsBanned = data.get("user_is_banned").getAsBoolean();
+        mUserIsContributor = data.get("user_is_contributor").getAsBoolean();
+        mUserIsModerator = data.get("user_is_moderator").getAsBoolean();
+        mUserIsSubscriber = data.get("user_is_subscriber").getAsBoolean();
     }
 
-    public Subreddit(Parcel in) {
-        this(new JsonParser().parse(in.readBundle().getString("jsonData")).getAsJsonObject());
+    public static Subreddit fromString(String dataString) {
+        JsonParser parser = new JsonParser();
+        JsonObject data = parser.parse(dataString).getAsJsonObject();
+        return new Subreddit(data);
     }
-
-//    public HTML getSubmitTextHtml() {
-//        return (HTML) mData.get("data").getAsJsonObject().get("submit_text_html").getAsString();
-//    }
 
     public boolean userIsBanned() {
-        return Boolean.parseBoolean(mData.get("data").getAsJsonObject().get("user_is_banned").getAsString());
+        return mUserIsBanned;
     }
 
     public String getDisplayName() {
-        return  mData.get("data").getAsJsonObject().get("display_name").getAsString();
+        return  mDisplayName;
     }
 
     public String getHeaderImgUrl() {
-        return  mData.get("data").getAsJsonObject().get("header_img").getAsString();
+        return  mHeaderImg;
     }
 
-//    public HTML getDescripionHtml() {
-//        return new HTML()mData.get("data").getAsJsonObject().get("description_html").getAsString();
-//    }
-
     public String getTitle() {
-        return  mData.get("data").getAsJsonObject().get("title").getAsString();
+        return  mTitle;
     }
 
     public boolean isNsfw() {
-        return Boolean.parseBoolean(mData.get("data").getAsJsonObject().get("over18").getAsString());
+        return mOver18;
     }
 
     public boolean userIsModerator() {
-        return Boolean.parseBoolean(mData.get("data").getAsJsonObject().get("user_is_moderator").getAsString());
+        return mUserIsModerator;
     }
 
     public String getHeaderTitle() {
-        return  mData.get("data").getAsJsonObject().get("header_title").getAsString();
+        return mHeaderTitle;
     }
 
     public String getDescription() {
-        return  mData.get("data").getAsJsonObject().get("description").getAsString();
+        return mDescription;
     }
 
     public String getSubmitLinkLabel() {
-        return  mData.get("data").getAsJsonObject().get("submit_link_label").getAsString();
+        return mSubmitLinkLabel;
     }
 
     public boolean isPublicTraffic() {
-        return Boolean.parseBoolean( mData.get("data").getAsJsonObject().get("public_traffic").getAsString());
+        return mPublicTraffic;
     }
 
-    //Todo add a header_size getter. It is formatted like [160, 64]
-
     public long getSubscriberCount() {
-        return Long.parseLong(mData.get("data").getAsJsonObject().get("subscribers").getAsString());
+        return mSubscribers;
     }
 
     public String getSubmitTextLabel() {
-        return  mData.get("data").getAsJsonObject().get("submit_text_label").getAsString();
+        return  mSubmitTextLabel;
     }
 
     public String getUrl() {
-        return  mData.get("data").getAsJsonObject().get("url").getAsString();
+        return  mUrl;
     }
 
-    //Todo probably should not be of type String, but I'm not sure if it's a float or what
-    public String getCreated() {
-        return  mData.get("data").getAsJsonObject().get("created").getAsString();
+    public long getCreated() {
+        return  mCreated;
     }
 
-    //Todo probably should not be of type String, but I'm not sure if it's a float or what
-    public String getCreatedUtc() {
-        return  mData.get("data").getAsJsonObject().get("created_utc").getAsString();
+    public long getCreatedUtc() {
+        return  mCreatedUtc;
     }
 
     public boolean userIsContributor() {
-        return Boolean.parseBoolean(mData.get("data").getAsJsonObject().get("user_is_contributor").getAsString());
+        return mUserIsContributor;
     }
 
     public String getPublicDescription() {
-        return  mData.get("data").getAsJsonObject().get("public_description").getAsString();
+        return  mPublicDescription;
     }
 
     public long getCommentScoreHideMins() {
-        return Long.parseLong(mData.get("data").getAsJsonObject().get("comment_score_hide_mins").getAsString());
+        return mCommentScoreHideMins;
     }
 
     public String getSubredditType() {
-        return  mData.get("data").getAsJsonObject().get("subreddit_type").getAsString();
+        return  mSubredditType;
     }
 
     public String getSubmissionType() {
-        return  mData.get("data").getAsJsonObject().get("submission_type").getAsString();
+        return  mSubmissionType;
     }
 
     public boolean userIsSubscriber() {
-        return Boolean.parseBoolean(mData.get("data").getAsJsonObject().get("user_is_subscriber").getAsString());
+        return mUserIsSubscriber;
     }
 
     @Override
@@ -120,21 +158,71 @@ public class Subreddit extends Thing implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel parcel, int i) {
-        Bundle b = new Bundle();
-        b.putString("jsonData", mData.toString());
-        parcel.writeBundle(b);
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(this.mAccountsActive);
+        dest.writeInt(this.mCommentScoreHideMins);
+        dest.writeLong(this.mCreated);
+        dest.writeLong(this.mCreatedUtc);
+        dest.writeLong(this.mSubscribers);
+        dest.writeString(this.mDescription);
+        dest.writeString(this.mDescriptionHtml);
+        dest.writeString(this.mDisplayName);
+        dest.writeString(this.mHeaderImg);
+        dest.writeString(this.mHeaderTitle);
+        dest.writeString(this.mPublicDescription);
+        dest.writeString(this.mSubmissionType);
+        dest.writeString(this.mSubmitLinkLabel);
+        dest.writeString(this.mSubmitTextLabel);
+        dest.writeString(this.mSubredditType);
+        dest.writeString(this.mTitle);
+        dest.writeString(this.mUrl);
+        dest.writeByte(mOver18 ? (byte) 1 : (byte) 0);
+        dest.writeByte(mPublicTraffic ? (byte) 1 : (byte) 0);
+        dest.writeByte(mUserIsBanned ? (byte) 1 : (byte) 0);
+        dest.writeByte(mUserIsContributor ? (byte) 1 : (byte) 0);
+        dest.writeByte(mUserIsModerator ? (byte) 1 : (byte) 0);
+        dest.writeByte(mUserIsSubscriber ? (byte) 1 : (byte) 0);
+        dest.writeString(this.mId);
+        dest.writeString(this.mName);
+        dest.writeString(this.mKind);
     }
 
-    public static final Parcelable.Creator<Subreddit> CREATOR
-            = new Parcelable.Creator<Subreddit>() {
-        public Subreddit createFromParcel(Parcel in) {
-            return new Subreddit(in);
+    private Subreddit(Parcel in) {
+        this.mAccountsActive = in.readInt();
+        this.mCommentScoreHideMins = in.readInt();
+        this.mCreated = in.readLong();
+        this.mCreatedUtc = in.readLong();
+        this.mSubscribers = in.readLong();
+        this.mDescription = in.readString();
+        this.mDescriptionHtml = in.readString();
+        this.mDisplayName = in.readString();
+        this.mHeaderImg = in.readString();
+        this.mHeaderTitle = in.readString();
+        this.mPublicDescription = in.readString();
+        this.mSubmissionType = in.readString();
+        this.mSubmitLinkLabel = in.readString();
+        this.mSubmitTextLabel = in.readString();
+        this.mSubredditType = in.readString();
+        this.mTitle = in.readString();
+        this.mUrl = in.readString();
+        this.mOver18 = in.readByte() != 0;
+        this.mPublicTraffic = in.readByte() != 0;
+        this.mUserIsBanned = in.readByte() != 0;
+        this.mUserIsContributor = in.readByte() != 0;
+        this.mUserIsModerator = in.readByte() != 0;
+        this.mUserIsSubscriber = in.readByte() != 0;
+        this.mId = in.readString();
+        this.mName = in.readString();
+        this.mKind = in.readString();
+    }
+
+    public static Creator<Subreddit> CREATOR = new Creator<Subreddit>() {
+        public Subreddit createFromParcel(Parcel source) {
+            return new Subreddit(source);
         }
 
         public Subreddit[] newArray(int size) {
             return new Subreddit[size];
         }
     };
-
 }

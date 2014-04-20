@@ -672,7 +672,7 @@ public class CommentFragment extends Fragment {
             mBelowPosition = position;
             int level = mCommentsList.get(position - HEADER_VIEW_COUNT).getLevel();
             position++;
-            while (position < mCommentsList.size() && mCommentsList.get(position - HEADER_VIEW_COUNT).getLevel() > level) {
+            while (position <= mCommentsList.size() && mCommentsList.get(position - HEADER_VIEW_COUNT).getLevel() > level) {
                 mHiddenCommentsList.add(mCommentsList.remove(position - HEADER_VIEW_COUNT));
             }
         }
