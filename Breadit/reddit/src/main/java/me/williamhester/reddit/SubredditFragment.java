@@ -25,7 +25,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
-import com.google.gson.stream.MalformedJsonException;
 import com.koushikdutta.urlimageviewhelper.UrlImageViewHelper;
 
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -224,15 +223,17 @@ public class SubredditFragment extends Fragment {
             TextView title = (TextView) convertView.findViewById(R.id.title);
             TextView domain = (TextView) convertView.findViewById(R.id.domain);
             final TextView points = (TextView) convertView.findViewById(R.id.points);
-            View spacer = convertView.findViewById(R.id.spacer);
 
             // if the submission is a self post, we need to hide the thumbnail
-            if (s.isSelf()) {
-                thumbnail.setVisibility(View.GONE);
-                spacer.setVisibility(View.GONE);
+            if (s.isNsfw()) {
+                thumbnail.setScaleType(ImageView.ScaleType.CENTER);
+                thumbnail.setImageDrawable(getResources().getDrawable(R.drawable.ic_nsfw));
+            } else if (s.isSelf() || s.getThumbnailUrl().equals("")) {
+                thumbnail.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                thumbnail.setImageDrawable(getResources()
+                        .getDrawable(R.drawable.ic_action_next_item));
             } else {
-                thumbnail.setVisibility(View.VISIBLE);
-                spacer.setVisibility(View.VISIBLE);
+                thumbnail.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 UrlImageViewHelper.setUrlDrawable(thumbnail, s.getThumbnailUrl());
             }
 
