@@ -14,10 +14,9 @@ public class SettingsActivity extends Activity {
         setContentView(R.layout.activity_settings);
         // Display the fragment as the main content.
         getFragmentManager().beginTransaction()
-                .replace(android.R.id.content, new SettingsFragment())
+                .replace(R.id.container, new SettingsFragment())
                 .commit();
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
