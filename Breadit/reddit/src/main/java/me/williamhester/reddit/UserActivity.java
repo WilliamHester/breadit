@@ -1,6 +1,7 @@
 package me.williamhester.reddit;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,7 +20,11 @@ public class UserActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user);
-        if (getIntent().getExtras() != null) {
+        if (getIntent() != null && getIntent().getAction() != null
+                && getIntent().getAction().equals(Intent.ACTION_VIEW)) {
+            mUsername = getIntent().getDataString();
+            mUsername = mUsername.substring(mUsername.indexOf("/u/") + 3);
+        } else if (getIntent().getExtras() != null) {
             mAccount = getIntent().getExtras().getParcelable("account");
             mUsername = getIntent().getExtras().getString("username");
         }

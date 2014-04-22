@@ -3,6 +3,7 @@ package me.williamhester.reddit;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -63,6 +64,7 @@ public class SubredditFragment extends Fragment {
     private View.OnTouchListener mGestureListener;
 
     private boolean mFailedToLoad = false;
+    private boolean mHideNsfw = true;
     private int mPrimarySortType = Submission.HOT;
     private int mSecondarySortType = Submission.ALL;
 
@@ -70,12 +72,8 @@ public class SubredditFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (getArguments() != null) {
-            mAccount = getArguments().getParcelable("account");
-            mSubredditName = getArguments().getString("subreddit");
-            mNames = new HashSet<String>();
-            mSubmissionList = new ArrayList<Submission>();
-        } else if (savedInstanceState != null) {
+        mContext = getActivity();
+        if (savedInstanceState != null) {
             mAccount = savedInstanceState.getParcelable("account");
             mSubredditName = savedInstanceState.getString("subreddit");
             mSubmissionList = savedInstanceState.getParcelableArrayList("submissions");
@@ -84,8 +82,14 @@ public class SubredditFragment extends Fragment {
             for (String name : array) {
                 mNames.add(name);
             }
+        } else if (getArguments() != null) {
+            mAccount = getArguments().getParcelable("account");
+            mSubredditName = getArguments().getString("subreddit");
+            mNames = new HashSet<String>();
+            mSubmissionList = new ArrayList<Submission>();
         }
-        mContext = getActivity();
+        SharedPreferences prefs = mContext.getSharedPreferences("preferences", Context.MODE_PRIVATE);
+        mHideNsfw = prefs.getBoolean("pref_hide_nsfw", true);
     }
 
     @Override
@@ -349,7 +353,7 @@ public class SubredditFragment extends Fragment {
                     mNames.clear();
                 }
                 for (Submission s : result) {
-                    if (!mNames.contains(s.getName())) {
+                    if (!mNames.contains(s.getName()) && (!mHideNsfw || !s.isNsfw())) {
                         mSubmissionList.add(s);
                         mNames.add(s.getName());
                     }

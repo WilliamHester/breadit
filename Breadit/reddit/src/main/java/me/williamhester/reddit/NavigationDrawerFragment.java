@@ -12,10 +12,14 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -81,10 +85,13 @@ public class NavigationDrawerFragment extends Fragment {
     private boolean mFromSavedInstanceState;
     private boolean mUserLearnedDrawer;
     private boolean mSubredditIsLoading = false;
+    private boolean mIsOpen = false;
     private Account mAccount;
     private TextView mCurrentSubreddit;
     private CheckBox mCheckbox;
     private Subreddit mSubreddit;
+    private Spinner mFilterSpinner;
+    private Spinner mSubSpinner;
 
     @Override
     public void onAttach(Activity activity) {
@@ -175,7 +182,7 @@ public class NavigationDrawerFragment extends Fragment {
                 if (!isAdded()) {
                     return;
                 }
-
+                mIsOpen = false;
                 getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
             }
 
@@ -185,6 +192,7 @@ public class NavigationDrawerFragment extends Fragment {
                 if (!isAdded()) {
                     return;
                 }
+                mIsOpen = true;
                 getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
             }
         };
@@ -200,66 +208,6 @@ public class NavigationDrawerFragment extends Fragment {
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
         return v;
-    }
-
-    /**
-     * Users of this fragment must call this method to set up the navigation drawer interactions.
-     *
-     * @param drawerLayout The DrawerLayout containing this fragment's UI.
-     */
-    public void setUp(DrawerLayout drawerLayout, Activity host) {
-
-        final Activity c = host;
-
-//        mFragmentContainerView = getActivity().findViewById(fragmentId);
-        mDrawerLayout = drawerLayout;
-
-        // set a custom shadow that overlays the main content when the drawer opens
-        mDrawerLayout.setDrawerShadow(R.drawable.drawer_shadow, GravityCompat.START);
-        // set up the drawer's list view with items and click listener
-
-        ActionBar actionBar = host.getActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setHomeButtonEnabled(true);
-//
-        // ActionBarDrawerToggle ties together the the proper interactions
-        // between the navigation drawer and the action bar app icon.
-        mDrawerToggle = new ActionBarDrawerToggle(
-                host,                             /* host Activity */
-                mDrawerLayout,                    /* DrawerLayout object */
-                R.drawable.ic_drawer,             /* nav drawer image to replace 'Up' caret */
-                R.string.navigation_drawer_open,  /* "open drawer" description for accessibility */
-                R.string.navigation_drawer_close  /* "close drawer" description for accessibility */
-        ) {
-            @Override
-            public void onDrawerClosed(View drawerView) {
-                super.onDrawerClosed(drawerView);
-                if (!isAdded()) {
-                    return;
-                }
-
-                getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
-            }
-
-            @Override
-            public void onDrawerOpened(View drawerView) {
-                super.onDrawerOpened(drawerView);
-                if (!isAdded()) {
-                    return;
-                }
-                c.invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
-            }
-        };
-
-        // Defer code dependent on restoration of previous instance state.
-        mDrawerLayout.post(new Runnable() {
-            @Override
-            public void run() {
-                mDrawerToggle.syncState();
-            }
-        });
-
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
     }
 
     private void selectItem(final String subreddit) {
@@ -285,6 +233,8 @@ public class NavigationDrawerFragment extends Fragment {
             });
             mCurrentSubreddit.setText("Currently viewing " + subreddit);
         }
+        mFilterSpinner.setSelection(0);
+        mSubSpinner.setSelection(0);
     }
 
     @Override
@@ -314,6 +264,17 @@ public class NavigationDrawerFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
+    public boolean isOpen() {
+        return mIsOpen;
+    }
+
+    public void toggle() {
+        if (mIsOpen)
+            mDrawerLayout.closeDrawer(Gravity.START);
+        else
+            mDrawerLayout.openDrawer(Gravity.START);
+    }
+
     /**
      * Callbacks interface that all activities using this fragment must implement.
      */
@@ -341,9 +302,13 @@ public class NavigationDrawerFragment extends Fragment {
                 if (isNew) {
                     mAccount.setSubreddits(newSubs);
                     AccountDataSource dataSource = new AccountDataSource(getActivity());
-                    dataSource.open();
-                    dataSource.setSubredditList(mAccount);
-                    dataSource.close();
+                    try {
+                        dataSource.open();
+                        dataSource.setSubredditList(mAccount);
+                        dataSource.close();
+                    } catch (NullPointerException e) {
+                        Log.e("Breadit", "Error accessing SQLite database");
+                    }
                 }
                 return isNew;
             } catch (IOException e) {
@@ -379,15 +344,36 @@ public class NavigationDrawerFragment extends Fragment {
 
     private View createHeaderView(LayoutInflater inflater) {
         View v = inflater.inflate(R.layout.header_drawer_2, null);
-        final EditText mSubredditSearch = (EditText) v.findViewById(R.id.search_subreddit);
+        final EditText subredditSearch = (EditText) v.findViewById(R.id.search_subreddit);
         final ImageButton search = (ImageButton) v.findViewById(R.id.search_button);
+        ImageButton clear = (ImageButton) v.findViewById(R.id.clear);
         search.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
                         Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(search.getWindowToken(), 0);
-                selectItem(mSubredditSearch.getText().toString().trim());
+                selectItem(subredditSearch.getText().toString().trim());
+            }
+        });
+        subredditSearch.setImeActionLabel(getResources().getString(R.string.go),
+                EditorInfo.IME_ACTION_GO);
+        subredditSearch.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
+                if (actionId == EditorInfo.IME_ACTION_GO) {
+                    InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
+                            Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(search.getWindowToken(), 0);
+                    selectItem(subredditSearch.getText().toString().trim().replace(" ", ""));
+                }
+                return false;
+            }
+        });
+        clear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                subredditSearch.setText("");
             }
         });
         mCurrentSubreddit = (TextView) v.findViewById(R.id.current_subreddit);
@@ -406,29 +392,29 @@ public class NavigationDrawerFragment extends Fragment {
         });
         mCheckbox.setVisibility(View.GONE);
 
-        Spinner subSpinner = (Spinner) v.findViewById(R.id.header_spinner1);
-        final Spinner filterSpinner = (Spinner) v.findViewById(R.id.header_spinner2);
+        mSubSpinner = (Spinner) v.findViewById(R.id.header_spinner1);
+        mFilterSpinner = (Spinner) v.findViewById(R.id.header_spinner2);
 
         ArrayAdapter<String> adapter1 = new ArrayAdapter<String>(getActivity(),
                 R.layout.spinner_item,
                 R.id.orange_spinner_text,
                 getResources().getStringArray(R.array.subreddit_sort_types));
-        subSpinner.setAdapter(adapter1);
+        mSubSpinner.setAdapter(adapter1);
 
         ArrayAdapter<String> adapter2 = new ArrayAdapter<String>(getActivity(),
                 R.layout.spinner_item,
                 R.id.orange_spinner_text,
                 getResources().getStringArray(R.array.sub_sort_types));
-        filterSpinner.setAdapter(adapter2);
-        filterSpinner.setSelection(Submission.ALL);
+        mFilterSpinner.setAdapter(adapter2);
+        mFilterSpinner.setSelection(Submission.ALL);
 
-        subSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        mSubSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 if (i > 2) {
-                    filterSpinner.setVisibility(View.VISIBLE);
+                    mFilterSpinner.setVisibility(View.VISIBLE);
                 } else {
-                    filterSpinner.setVisibility(View.GONE);
+                    mFilterSpinner.setVisibility(View.GONE);
                 }
                 mCallbacks.onSortSelected(i);
             }
@@ -439,7 +425,7 @@ public class NavigationDrawerFragment extends Fragment {
             }
         });
 
-        filterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        mFilterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 mCallbacks.onSubSortSelected(i);
@@ -525,6 +511,10 @@ public class NavigationDrawerFragment extends Fragment {
 
         @Override
         protected Boolean doInBackground(Void... voids) {
+            if (mSubName.equals("")) {
+                mSubreddit = null;
+                return false;
+            }
             try {
                 mSubredditIsLoading = true;
                 String s = Utilities.get("", "http://www.reddit.com/r/" + mSubName + "/about.json",

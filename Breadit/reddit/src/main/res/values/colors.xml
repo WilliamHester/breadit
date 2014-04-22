@@ -16,5 +16,6 @@
     <!--Reddit Colors-->
     <color name="orangered">#FF8B24</color>
     <color name="periwinkle">#9494FF</color>
+    <color name="op">#0055DF</color>
 
 </resources>

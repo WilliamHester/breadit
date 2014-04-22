@@ -17,19 +17,43 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="http" android:host="www.reddit.com" android:pathPattern="/r/.*" />
+                <data android:scheme="http" android:host="reddit.com" android:pathPattern="/r/.*" />
+            </intent-filter>
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT" />
+                <action android:name="android.intent.action.VIEW" />
+                <data android:scheme="me.williamhester.breadit" android:host="r" android:pathPattern=".*" />
+            </intent-filter>
         </activity>
         <activity
             android:name="me.williamhester.reddit.SubmissionActivity"
             android:parentActivityName="me.williamhester.reddit.MainActivity"
             android:windowSoftInputMode="adjustPan" >
-
-            <!-- android:windowSoftInputMode="adjustResize|stateHidden"> -->
         </activity>
         <activity android:name="me.williamhester.reddit.SetupActivity" >
         </activity>
         <activity android:name="me.williamhester.reddit.AccountActivity" >
         </activity>
         <activity android:name="me.williamhester.reddit.UserActivity" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="http" android:host="www.reddit.com" android:pathPattern="/u/.*" />
+                <data android:scheme="http" android:host="reddit.com" android:pathPattern="/u/.*" />
+                <data android:scheme="http" android:host="www.reddit.com" android:pathPattern="/user/.*" />
+                <data android:scheme="http" android:host="reddit.com" android:pathPattern="/user/.*" />
+            </intent-filter>
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT" />
+                <action android:name="android.intent.action.VIEW" />
+                <data android:scheme="me.williamhester.breadit" android:host="u" android:pathPattern=".*" />
+            </intent-filter>
         </activity>
         <activity
             android:name="me.williamhester.reddit.SettingsActivity"

@@ -107,4 +107,7 @@
     <string name="inbox">Inbox</string>
     <string name="my_account">My account</string>
 
+    <!-- NavigationDrawerFragment -->
+    <string name="go">Go</string>
+
 </resources>

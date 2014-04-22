@@ -11,14 +11,32 @@
         android:layout_width="match_parent"
         android:paddingBottom="8dp">
 
-        <EditText
-            android:id="@+id/search_subreddit"
+        <FrameLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textColor="@color/mid_gray"
-            android:hint="@string/search_sub_hint"/>
+            android:layout_weight="1">
 
+            <EditText
+                android:id="@+id/search_subreddit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:imeOptions="actionGo"
+                android:imeActionLabel="@string/go"
+                android:textColor="@color/mid_gray"
+                android:hint="@string/search_sub_hint"/>
+
+            <ImageButton android:id="@+id/clear"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:scaleType="fitCenter"
+                android:background="@android:color/transparent"
+                android:src="@android:drawable/ic_menu_close_clear_cancel"
+                android:paddingRight="8dp"
+                android:layout_gravity="right|center_vertical"
+                android:layout_marginRight="8dp" />
+
+        </FrameLayout>
 
         <ImageButton
             android:layout_width="wrap_content"

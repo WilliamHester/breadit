@@ -54,10 +54,12 @@ public class Subreddit extends Thing implements Parcelable {
         mUrl = data.get("url").getAsString();
         mOver18 = data.get("over18").getAsBoolean();
         mPublicTraffic = data.get("public_traffic").getAsBoolean();
-        mUserIsBanned = data.get("user_is_banned").getAsBoolean();
-        mUserIsContributor = data.get("user_is_contributor").getAsBoolean();
-        mUserIsModerator = data.get("user_is_moderator").getAsBoolean();
-        mUserIsSubscriber = data.get("user_is_subscriber").getAsBoolean();
+        if (!data.get("user_is_banned").isJsonNull()) {
+            mUserIsBanned = data.get("user_is_banned").getAsBoolean();
+            mUserIsContributor = data.get("user_is_contributor").getAsBoolean();
+            mUserIsModerator = data.get("user_is_moderator").getAsBoolean();
+            mUserIsSubscriber = data.get("user_is_subscriber").getAsBoolean();
+        }
     }
 
     public static Subreddit fromString(String dataString) {

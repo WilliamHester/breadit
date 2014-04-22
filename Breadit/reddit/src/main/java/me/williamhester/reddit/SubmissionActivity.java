@@ -8,24 +8,16 @@ import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.text.TextUtils;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
-
-import me.williamhester.areddit.Account;
-import me.williamhester.areddit.Message;
 import me.williamhester.areddit.Submission;
 
-/**
- * Created by William on 2/11/14.
- */
 public class SubmissionActivity extends Activity implements TabView.TabSwitcher {
 
     public static final int COMMENT_TAB = 0;
@@ -35,6 +27,8 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
 
     private Submission mSubmission;
     private TabView mTabView;
+    private Fragment mComments;
+    private Fragment mContent;
 
 
     @Override
@@ -58,6 +52,9 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.submission, menu);
+        if (mSubmission.isSelf()) { // We don't want people leaving the app for a self post
+            menu.removeItem(R.id.action_open_link_in_browser);
+        }
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -83,7 +80,7 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
         return super.onOptionsItemSelected(item);
     }
 
-    public void setUpActionBarTabs(int selectedTab) {
+    private void setUpActionBarTabs(int selectedTab) {
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         View v = inflater.inflate(R.layout.actionbar_tabview, null);
 
@@ -91,12 +88,12 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
         commentTab.setText(R.string.comments);
         commentTab.setTextColor(getResources().getColor(R.color.mid_gray));
         commentTab.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
-        commentTab.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+        commentTab.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
         TextView content = new TextView(this);
         content.setText(R.string.content);
         content.setTextColor(getResources().getColor(R.color.mid_gray));
         content.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
-        content.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+        content.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
 
         Bundle args = getIntent().getExtras();
 
@@ -113,15 +110,21 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
         }
 
         mTabView = (TabView) v.findViewById(R.id.tabs);
-        mTabView.addTab(CommentFragment.class, args, TabView.TAB_TYPE_MAIN, commentTab, "comments");
+        mComments = new CommentFragment();
+        mComments.setArguments(args);
+        mTabView.addTab(mComments, TabView.TAB_TYPE_MAIN, commentTab, "comments");
         if (!mSubmission.isMeta() && !mSubmission.isSelf()) {
-            mTabView.addTab(WebViewFragment.class, args, TabView.TAB_TYPE_MAIN, content, "content");
+            mContent = new WebViewFragment();
+            mContent.setArguments(args);
+            mTabView.addTab(mContent, TabView.TAB_TYPE_MAIN, content, "content");
             mTabView.selectTab(tag);
         } else if (!mSubmission.isSelf()) {
             args = new Bundle();
             args.putParcelable("account", (Parcelable) getIntent().getExtras().get("account"));
             args.putString("permalink", mSubmission.getUrl());
-            mTabView.addTab(CommentFragment.class, args, TabView.TAB_TYPE_MAIN, content, "content");
+            mContent = new CommentFragment();
+            mContent.setArguments(args);
+            mTabView.addTab(mContent, TabView.TAB_TYPE_MAIN, content, "content");
             mTabView.selectTab(tag);
         } else {
             mTabView.selectTab("comments");
@@ -137,11 +140,15 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
 
     @Override
     public void onTabSelected(String tag, Fragment fragment) {
+        getFragmentManager().executePendingTransactions();
+        Log.i("SubmissionActivity", "Tag = " + tag);
         if (getFragmentManager().findFragmentByTag(tag) != null) {
+            Log.i("SubmissionActivity", "Replacing with " + tag);
             getFragmentManager().beginTransaction()
-                    .replace(R.id.container, getFragmentManager().findFragmentByTag(tag))
+                    .replace(R.id.container, getFragmentManager().findFragmentByTag(tag), tag)
                     .commit();
         } else {
+            Log.i("SubmissionActivity", "Adding " + tag + " to FragmentManager");
             getFragmentManager().beginTransaction()
                     .add(R.id.container, fragment, tag)
                     .commit();

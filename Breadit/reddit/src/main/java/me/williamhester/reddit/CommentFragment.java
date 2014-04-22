@@ -8,9 +8,16 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.Html;
 import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.SpannedString;
 import android.text.method.LinkMovementMethod;
+import android.text.style.ClickableSpan;
+import android.text.style.URLSpan;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -239,6 +246,7 @@ public class CommentFragment extends Fragment {
     }
 
     public void scrollToTop() {
+        Log.i("CommentFragment", "" + mCommentsList.size());
         mCommentsListView.smoothScrollToPositionFromTop(0, 0,
                 mCommentsListView.getFirstVisiblePosition() * 5);
     }
@@ -303,12 +311,21 @@ public class CommentFragment extends Fragment {
             root.setPadding((int) (getResources().getDisplayMetrics().density
                     * 12 * getItem(position).getLevel()), 0, 0, 0);
             author.setText(getItem(position).getAuthor());
+            if (getItem(position).getAuthor().equals(mSubmission.getAuthor())) {
+                author.setTextColor(getResources().getColor(R.color.op));
+            } else {
+                author.setTextColor(getResources().getColor(R.color.auburn));
+            }
+
             if (getItem(position).getScore() != 1)
                 score.setText(getItem(position).getScore() + " points by ");
             else
                 score.setText("1 point by ");
             time.setText(" " + Utilities.calculateTimeShort(getItem(position).getCreatedUtc()));
-            body.setText(Html.fromHtml(StringEscapeUtils.unescapeHtml4(getItem(position).getBodyHtml())));
+            String bodyText = formatHtmlForMeta(getItem(position).getBodyHtml());
+            Spanned text = Html.fromHtml(StringEscapeUtils.unescapeHtml4(bodyText));
+            body.setText(text);
+
             body.setMovementMethod(new CommentLinkMovementMethod(position + HEADER_VIEW_COUNT));
 
             switch (getItem(position).getVoteStatus()) {
@@ -331,6 +348,21 @@ public class CommentFragment extends Fragment {
 
             return convertView;
         }
+    }
+
+    /**
+     * A somewhat hackish way to stop the app from crashing and opening the link properly
+     * @param html
+     * @return
+     */
+    private String formatHtmlForMeta(String html) {
+        if (html.contains("href=\"")
+                && (html.contains("href=\"/r/") || html.contains("href=\"/u/"))) {
+            html = html.replace("&lt;a href=\"/r/", "&lt;a href=\"me.williamhester.breadit://r/");
+            html = html.replace("&lt;a href=\"/u/", "&lt;a href=\"me.williamhester.breadit://u/");
+            return html;
+        }
+        return html;
     }
 
     private class CommentLoaderTask extends AsyncTask<Void, Void, List<Thing>> {
@@ -685,7 +717,6 @@ public class CommentFragment extends Fragment {
                     mLinkIsPressed = true; // Really horrible hack to prevent the onLongPress()
                                            //    method from being called
                 }
-                super.onTouchEvent(widget, buffer, event);
                 View v = mCommentsListView.getChildAt(mPosition
                         - mCommentsListView.getFirstVisiblePosition());
                 if (v != null)

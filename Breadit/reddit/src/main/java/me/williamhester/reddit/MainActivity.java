@@ -9,7 +9,9 @@ import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.util.TypedValue;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -48,7 +50,19 @@ public class MainActivity extends Activity
 
         mPrefs = getSharedPreferences("preferences", MODE_PRIVATE);
 
-        if (getIntent() != null && getIntent().getExtras() != null) { // If the user just completed the setup
+        if (getIntent() != null && getIntent().getAction() != null
+                && getIntent().getAction().equals(Intent.ACTION_VIEW)) {
+            mSubreddit = getIntent().getDataString();
+            mSubreddit = mSubreddit.substring(mSubreddit.indexOf("/r/") + 3);
+            Log.i("MainActivity", mSubreddit);
+            long id = mPrefs.getLong("accountId", -1);
+            if (id != -1) {
+                AccountDataSource dataSource = new AccountDataSource(this);
+                dataSource.open();
+                mAccount = dataSource.getAccount(id);
+                dataSource.close();
+            }
+        } else if (getIntent() != null && getIntent().getExtras() != null) { // If the user just completed the setup
             boolean b = getIntent().getExtras().getBoolean("finishedSetup");
             mAccount = getIntent().getExtras().getParcelable("account");
             SharedPreferences.Editor edit = mPrefs.edit();
@@ -113,6 +127,19 @@ public class MainActivity extends Activity
                         .commit();
             }
         }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event)  {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (mNavigationDrawerFragment.isOpen()) {
+                mNavigationDrawerFragment.toggle();
+                return true;
+            } else {
+                return super.onKeyDown(keyCode, event);
+            }
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     @Override
