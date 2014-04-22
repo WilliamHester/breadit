@@ -26,22 +26,11 @@ import me.williamhester.areddit.Message;
 public class MainActivity extends Activity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
-    /**
-     * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
-     */
-    private DrawerLayout mDrawerLayout;
     private NavigationDrawerFragment mNavigationDrawerFragment;
     private SubredditFragment mSubredditFragment;
     private SharedPreferences mPrefs;
     private Account mAccount;
     private String mSubreddit;
-    private TabView mTabView;
-    private TextView mTitleView;
-
-    /**
-     * Used to store the last screen title. For use in {@link #restoreActionBar()}.
-     */
-    private CharSequence mTitle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,7 +79,6 @@ public class MainActivity extends Activity
 
         mSubredditFragment = SubredditFragment.newInstance(mAccount, mSubreddit);
         mNavigationDrawerFragment = NavigationDrawerFragment.newInstance(mAccount);
-        mTitle = getTitle();
 
         if (getActionBar() != null) {
             getActionBar().setDisplayHomeAsUpEnabled(true);

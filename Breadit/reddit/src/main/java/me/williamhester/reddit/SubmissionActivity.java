@@ -8,7 +8,6 @@ import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -117,6 +116,8 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
             mContent = new WebViewFragment();
             mContent.setArguments(args);
             mTabView.addTab(mContent, TabView.TAB_TYPE_MAIN, content, "content");
+            if (!tag.equals("comments")) // Hotfix for the weird tab problem
+                mTabView.selectTab("comments");
             mTabView.selectTab(tag);
         } else if (!mSubmission.isSelf()) {
             args = new Bundle();
@@ -125,6 +126,8 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
             mContent = new CommentFragment();
             mContent.setArguments(args);
             mTabView.addTab(mContent, TabView.TAB_TYPE_MAIN, content, "content");
+            if (!tag.equals("comments")) // Hotfix for the weird tab problem
+                mTabView.selectTab("comments");
             mTabView.selectTab(tag);
         } else {
             mTabView.selectTab("comments");
@@ -141,14 +144,11 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
     @Override
     public void onTabSelected(String tag, Fragment fragment) {
         getFragmentManager().executePendingTransactions();
-        Log.i("SubmissionActivity", "Tag = " + tag);
         if (getFragmentManager().findFragmentByTag(tag) != null) {
-            Log.i("SubmissionActivity", "Replacing with " + tag);
             getFragmentManager().beginTransaction()
                     .replace(R.id.container, getFragmentManager().findFragmentByTag(tag), tag)
                     .commit();
         } else {
-            Log.i("SubmissionActivity", "Adding " + tag + " to FragmentManager");
             getFragmentManager().beginTransaction()
                     .add(R.id.container, fragment, tag)
                     .commit();
