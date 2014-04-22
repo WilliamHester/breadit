@@ -140,13 +140,6 @@ public class MainActivity extends Activity
         mSubredditFragment.setSecondarySort(sort);
     }
 
-    public void restoreActionBar() {
-        ActionBar actionBar = getActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        actionBar.setDisplayShowTitleEnabled(true);
-        actionBar.setTitle("FrontPage");
-    }
-
     private void updateActionBar(String sub) {
         if (sub == null)
             getActionBar().setTitle("FrontPage");

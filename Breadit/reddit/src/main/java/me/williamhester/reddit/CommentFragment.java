@@ -356,10 +356,13 @@ public class CommentFragment extends Fragment {
      * @return
      */
     private String formatHtmlForMeta(String html) {
-        if (html.contains("href=\"")
-                && (html.contains("href=\"/r/") || html.contains("href=\"/u/"))) {
+        if (html.contains("href=\"")) {
             html = html.replace("&lt;a href=\"/r/", "&lt;a href=\"me.williamhester.breadit://r/");
             html = html.replace("&lt;a href=\"/u/", "&lt;a href=\"me.williamhester.breadit://u/");
+            html = html.replace("&lt;a href=\"http://www.reddit.com/r/", "&lt;a href=\"me.williamhester.breadit://r/");
+            html = html.replace("&lt;a href=\"http://www.reddit.com/u/", "&lt;a href=\"me.williamhester.breadit://u/");
+            html = html.replace("&lt;a href=\"http://reddit.com/r/", "&lt;a href=\"me.williamhester.breadit://r/");
+            html = html.replace("&lt;a href=\"http://reddit.com/u/", "&lt;a href=\"me.williamhester.breadit://u/");
             return html;
         }
         return html;
@@ -402,7 +405,9 @@ public class CommentFragment extends Fragment {
                     if (comment != null && comment instanceof Comment) {
                         Comment.CommentIterator iterator = ((Comment) comment).getCommentIterator();
                         while (iterator.hasNext()) {
-                            mCommentsList.add(iterator.next());
+                            Comment c = iterator.next();
+                            if (c.getAuthor() != null)
+                                mCommentsList.add(c);
                         }
                     }
                 }
