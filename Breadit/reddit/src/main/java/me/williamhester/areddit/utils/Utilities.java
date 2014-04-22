@@ -193,8 +193,6 @@ public class Utilities {
         if (end != s.length() - 1) {
             sb.append(s.substring(end, s.length()));
         }
-        Log.i("Utilities", "s = " + s);
-        Log.i("Utilities", "html = " + sb.toString());
         return sb.toString();
     }
 

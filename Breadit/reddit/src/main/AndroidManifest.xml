@@ -41,7 +41,8 @@
                 <!--<data android:scheme="me.williamhester.breadit" android:host="r" android:pathPattern=".*/comments/.*/.*/" />-->
             </intent-filter>
         </activity>
-        <activity android:name="me.williamhester.reddit.SetupActivity" >
+        <activity android:name="me.williamhester.reddit.SetupActivity"
+            android:screenOrientation="portrait">
         </activity>
         <activity android:name="me.williamhester.reddit.AccountActivity" >
         </activity>
@@ -63,7 +64,8 @@
         </activity>
         <activity
             android:name="me.williamhester.reddit.SettingsActivity"
-            android:label="@string/title_activity_settings" >
+            android:label="@string/title_activity_settings"
+            android:screenOrientation="portrait">
         </activity>
     </application>
 

@@ -46,6 +46,7 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
         if (getIntent().getAction() != null && getIntent().getAction().equals(Intent.ACTION_VIEW)) {
             mPermalink = getIntent().getDataString();
             mPermalink = "http://www.reddit.com" + mPermalink.substring(mPermalink.indexOf("/r/"));
+            Log.i("SubmissionActivity", "Viewing " + mPermalink);
             SharedPreferences prefs = getSharedPreferences("prefs", MODE_PRIVATE);
             long id = prefs.getLong("accountId", -1);
             if (id != -1) {
@@ -58,6 +59,7 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
                     Log.e("Breadit", "error accessing database");
                 }
             }
+            setUpActionBarTabs(COMMENT_TAB);
         } else if (getIntent().getExtras() != null) {
             mSubmission = getIntent().getExtras().getParcelable("submission");
             selectedTab = getIntent().getExtras().getInt("tab");
@@ -117,6 +119,7 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
         content.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
 
         Bundle args = getIntent().getExtras();
+        args.putString("permalink", mPermalink);
 
         String tag;
         switch (selectedTab) {

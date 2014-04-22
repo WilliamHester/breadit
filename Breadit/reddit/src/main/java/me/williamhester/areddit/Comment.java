@@ -336,6 +336,9 @@ public class Comment extends Thing implements Parcelable, Votable {
             throws IOException {
 
         ArrayList<Thing> things = new ArrayList<Thing>();
+        if (url == null) {
+            return things;
+        }
 
         String urlString;
         if (url.contains("?")) {
