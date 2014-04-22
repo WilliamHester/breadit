@@ -11,7 +11,8 @@
             android:defaultValue="false" />
         <CheckBoxPreference
             android:key="pref_remove_viewed_sub"
-            android:title="@string/remove_viewed_sub"
+            android:title="@string/remove_viewed_sub_title"
+            android:summary="@string/remove_viewed_sub"
             android:defaultValue="false" />
         <Preference
             android:title="@string/clear_history"

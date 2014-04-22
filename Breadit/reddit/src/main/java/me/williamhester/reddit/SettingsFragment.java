@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -68,6 +69,7 @@ public class SettingsFragment extends PreferenceFragment {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
                     mAccount.setHistory("");
+                    Log.i("SettingsFragment", mAccount.getUsername());
                     AccountDataSource dataSource = new AccountDataSource(getActivity());
                     dataSource.open();
                     dataSource.setHistory(mAccount);
@@ -83,6 +85,16 @@ public class SettingsFragment extends PreferenceFragment {
             Dialog d = builder.create();
             d.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
             d.show();
+        }
+        else if(preference == mLogIn) {
+            LogInDialogFragment fragment = new LogInDialogFragment();
+            fragment.show(getFragmentManager(), "login");
+        }
+        else if(preference == mLogOut) {
+
+        }
+        else if(preference == mSwitchUsers) {
+
         }
         return super.onPreferenceTreeClick(preferenceScreen, preference);
     }
