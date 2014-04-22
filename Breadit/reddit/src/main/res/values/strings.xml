@@ -74,11 +74,14 @@
     <string name="compose_message">Compose message</string>
 
     <!-- Preference Strings -->
-    <string name="remove_viewed_front">Hide viewed submissions from Front Page</string>
-    <string name="remove_viewed_sub">Hide viewed submissions from Subreddit</string>
+    <string name="remove_viewed_front_title">Hide from FrontPage</string>
+    <string name="remove_viewed_front">Remove viewed submissions from FrontPage view</string>
+    <string name="remove_viewed_sub_title">Hide from Subreddit</string>
+    <string name="remove_viewed_sub">Remove viewed submissions from Subreddit view</string>
     <string name="hide_nsfw">Hide NSFW submissions</string>
     <string name="submission_settings">Submission Settings</string>
     <string name="nsfw_settings">NSFW Settings</string>
+    <string name="warn_nsfw_title">NSFW Safeguard</string>
     <string name="warn_nsfw">Warn before entering NSFW Subreddit</string>
     <string name="user_options">User Options</string>
     <string name="login">Log In</string>
@@ -91,7 +94,7 @@
     <string name="yes">Confirm</string>
 
     <!-- Drawer Stuff -->
-    <string name="search_sub_hint">Go to a subreddit</string>
+    <string name="search_sub_hint">Go to a Subreddit</string>
     <string name="currently_viewing">Currently Viewing</string>
     <string name="subscribe">Subscribed</string>
     <string name="sort_by">Sorted by</string>

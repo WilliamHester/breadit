@@ -6,7 +6,8 @@
         android:key="pref_submission_settings">
         <CheckBoxPreference
             android:key="pref_remove_viewed_front"
-            android:title="@string/remove_viewed_front"
+            android:title="@string/remove_viewed_front_title"
+            android:summary="@string/remove_viewed_front"
             android:defaultValue="false" />
         <CheckBoxPreference
             android:key="pref_remove_viewed_sub"
@@ -25,7 +26,8 @@
             android:defaultValue="true" />
         <CheckBoxPreference
             android:key="pref_warn_nsfw"
-            android:title="@string/warn_nsfw"
+            android:title="@string/warn_nsfw_title"
+            android:summary="@string/warn_nsfw"
             android:defaultValue="true" />
     </PreferenceCategory>
     <PreferenceCategory
