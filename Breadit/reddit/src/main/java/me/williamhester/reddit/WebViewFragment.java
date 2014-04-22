@@ -27,8 +27,8 @@ public class WebViewFragment extends Fragment {
         if (savedInstanceState != null) {
             mUri = savedInstanceState.getString(URI);
         } else if (getArguments() != null) {
-            mUri = getArguments().getString("url", null);
             mSubmission = getArguments().getParcelable("submission");
+            mUri = mSubmission.getUrl();
         }
     }
 

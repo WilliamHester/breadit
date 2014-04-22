@@ -27,13 +27,19 @@
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
                 <action android:name="android.intent.action.VIEW" />
-                <data android:scheme="me.williamhester.breadit" android:host="r" android:pathPattern=".*" />
+                <data android:scheme="me.williamhester.breadit" android:host="subreddit" android:pathPattern=".*" />
             </intent-filter>
         </activity>
         <activity
             android:name="me.williamhester.reddit.SubmissionActivity"
             android:parentActivityName="me.williamhester.reddit.MainActivity"
             android:windowSoftInputMode="adjustPan" >
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT" />
+                <action android:name="android.intent.action.VIEW" />
+                <data android:scheme="me.williamhester.breadit" android:host="r" />
+                <!--<data android:scheme="me.williamhester.breadit" android:host="r" android:pathPattern=".*/comments/.*/.*/" />-->
+            </intent-filter>
         </activity>
         <activity android:name="me.williamhester.reddit.SetupActivity" >
         </activity>
@@ -52,7 +58,7 @@
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
                 <action android:name="android.intent.action.VIEW" />
-                <data android:scheme="me.williamhester.breadit" android:host="u" android:pathPattern=".*" />
+                <data android:scheme="me.williamhester.breadit" android:host="user" android:pathPattern=".*" />
             </intent-filter>
         </activity>
         <activity

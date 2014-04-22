@@ -129,9 +129,9 @@ public class Utilities {
         long difference = currentTime - postTime;
         String time;
         if (difference / 31536000 > 0) {
-            time = difference / 3156000 + "y";
+            time = difference / 31536000 + "y";
         } else if (difference / 2592000 > 0) {
-            time = difference / 2592000 + "m";
+            time = difference / 2592000 + "mo";
         } else if (difference / 604800 > 0) {
             time = difference / 604800 + "w";
         } else if (difference / 86400 > 0) {
@@ -151,6 +151,51 @@ public class Utilities {
             return s.substring(1, s.length() - 1);
         }
         return s;
+    }
+
+    public static String formatHtml(String s) {
+        int offset;
+        int end = 0;
+        int beginning = s.indexOf("a href=\"http://www.reddit.com/r/", end);
+        int temp = s.indexOf("a href=\"http://reddit.com/r/", end);
+        if ((beginning < temp && beginning == -1) || (temp < beginning && temp != -1)) {
+            beginning = temp;
+            offset = 26;
+        } else {
+            offset = 30;
+        }
+        StringBuilder sb = new StringBuilder();
+        while (beginning != -1) {
+            beginning = beginning == -1 ? s.length() : beginning;
+            int i = s.indexOf("/", beginning + offset + 2);
+            int j = s.indexOf("/\"", beginning + offset + 2);
+            int k = s.indexOf("\"", beginning + offset + 2);
+
+            sb.append(s.substring(end, beginning)); // what's in-between the link and the last link
+            sb.append("a href=\"me.williamhester.breadit://"); // to start the link
+
+            end = k + 1;
+            if (i == -1 || i == j) { // definitely a subreddit
+                sb.append("subreddit/");
+                sb.append(s.substring(beginning + offset + 2, end));
+            } else { // found a link to another post
+                sb.append(s.substring(beginning + offset, end));
+            }
+            beginning = s.indexOf("a href=\"http://www.reddit.com/r/", end);
+            temp = s.indexOf("a href=\"http://reddit.com/r/", end);
+            if ((beginning < temp && beginning == -1) || (temp < beginning && temp != -1)) {
+                beginning = temp;
+                offset = 26;
+            } else {
+                offset = 30;
+            }
+        }
+        if (end != s.length() - 1) {
+            sb.append(s.substring(end, s.length()));
+        }
+        Log.i("Utilities", "s = " + s);
+        Log.i("Utilities", "html = " + sb.toString());
+        return sb.toString();
     }
 
     public static interface UtilitiesAsyncHandler {

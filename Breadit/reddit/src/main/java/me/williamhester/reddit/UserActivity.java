@@ -23,7 +23,7 @@ public class UserActivity extends Activity {
         if (getIntent() != null && getIntent().getAction() != null
                 && getIntent().getAction().equals(Intent.ACTION_VIEW)) {
             mUsername = getIntent().getDataString();
-            mUsername = mUsername.substring(mUsername.indexOf("/u/") + 3);
+            mUsername = mUsername.substring(mUsername.indexOf("/user/") + 6);
         } else if (getIntent().getExtras() != null) {
             mAccount = getIntent().getExtras().getParcelable("account");
             mUsername = getIntent().getExtras().getString("username");

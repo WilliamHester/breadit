@@ -42,7 +42,7 @@ public class MainActivity extends Activity
         if (getIntent() != null && getIntent().getAction() != null
                 && getIntent().getAction().equals(Intent.ACTION_VIEW)) {
             mSubreddit = getIntent().getDataString();
-            mSubreddit = mSubreddit.substring(mSubreddit.indexOf("/r/") + 3);
+            mSubreddit = mSubreddit.substring(mSubreddit.indexOf("/subreddit/") + 11);
             Log.i("MainActivity", mSubreddit);
             long id = mPrefs.getLong("accountId", -1);
             if (id != -1) {

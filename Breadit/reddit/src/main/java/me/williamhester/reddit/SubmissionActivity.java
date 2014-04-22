@@ -3,11 +3,14 @@ package me.williamhester.reddit;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -15,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import me.williamhester.areddit.Account;
 import me.williamhester.areddit.Submission;
 
 public class SubmissionActivity extends Activity implements TabView.TabSwitcher {
@@ -24,10 +28,13 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
 
     private ActionBar mAction;
 
+    private Context mContext = this;
     private Submission mSubmission;
     private TabView mTabView;
     private Fragment mComments;
     private Fragment mContent;
+    private String mPermalink;
+    private Account mAccount;
 
 
     @Override
@@ -36,14 +43,29 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
         setContentView(R.layout.activity_content);
 
         int selectedTab = 0;
-        if (getIntent().getExtras() != null) {
+        if (getIntent().getAction() != null && getIntent().getAction().equals(Intent.ACTION_VIEW)) {
+            mPermalink = getIntent().getDataString();
+            mPermalink = "http://www.reddit.com" + mPermalink.substring(mPermalink.indexOf("/r/"));
+            SharedPreferences prefs = getSharedPreferences("prefs", MODE_PRIVATE);
+            long id = prefs.getLong("accountId", -1);
+            if (id != -1) {
+                try {
+                    AccountDataSource dataSource = new AccountDataSource(this);
+                    dataSource.open();
+                    mAccount = dataSource.getAccount(id);
+                    dataSource.close();
+                } catch (NullPointerException e) {
+                    Log.e("Breadit", "error accessing database");
+                }
+            }
+        } else if (getIntent().getExtras() != null) {
             mSubmission = getIntent().getExtras().getParcelable("submission");
             selectedTab = getIntent().getExtras().getInt("tab");
+            setUpActionBarTabs(selectedTab);
         }
 
         mAction = getActionBar();
         if (mAction != null) {
-            setUpActionBarTabs(selectedTab);
             mAction.setDisplayHomeAsUpEnabled(true);
         }
     }
@@ -51,7 +73,7 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.submission, menu);
-        if (mSubmission.isSelf()) { // We don't want people leaving the app for a self post
+        if (mSubmission != null && mSubmission.isSelf()) { // We don't want people leaving the app for a self post
             menu.removeItem(R.id.action_open_link_in_browser);
         }
         return super.onCreateOptionsMenu(menu);
@@ -112,7 +134,36 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
         mComments = new CommentFragment();
         mComments.setArguments(args);
         mTabView.addTab(mComments, TabView.TAB_TYPE_MAIN, commentTab, "comments");
-        if (!mSubmission.isMeta() && !mSubmission.isSelf()) {
+        if (mSubmission == null) {
+            mTabView.selectTab("comments");
+            ((CommentFragment) mComments).setOnSubmissionLoadedListener(new CommentFragment.OnSubmissionLoaded() {
+                @Override
+                public void onSubmissionLoaded(Submission submission) {
+                    mSubmission = submission;
+
+                    TextView content = new TextView(mContext);
+                    content.setText(R.string.content);
+                    content.setTextColor(getResources().getColor(R.color.mid_gray));
+                    content.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
+                    content.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+
+                    if (!mSubmission.isMeta() && !mSubmission.isSelf()) {
+                        Bundle args = new Bundle();
+                        args.putParcelable("submission", mSubmission);
+                        mContent = new WebViewFragment();
+                        mContent.setArguments(args);
+                        mTabView.addTab(mContent, TabView.TAB_TYPE_MAIN, content, "content");
+                    } else if (!mSubmission.isSelf()) {
+                        Bundle args = new Bundle();
+                        args.putParcelable("account", mAccount);
+                        args.putString("permalink", mPermalink);
+                        mContent = new CommentFragment();
+                        mContent.setArguments(args);
+                        mTabView.addTab(mContent, TabView.TAB_TYPE_MAIN, content, "content");
+                    }
+                }
+            });
+        } else if (!mSubmission.isMeta() && !mSubmission.isSelf()) {
             mContent = new WebViewFragment();
             mContent.setArguments(args);
             mTabView.addTab(mContent, TabView.TAB_TYPE_MAIN, content, "content");
@@ -166,5 +217,4 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
     public void onTabUnSelected(String tag) {
 
     }
-
 }

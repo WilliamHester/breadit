@@ -68,6 +68,7 @@ public class CommentFragment extends Fragment {
     private Account mAccount;
     private View mHeaderView;
     private View.OnTouchListener mGestureListener;
+    private OnSubmissionLoaded mCallback;
 
     private int mSortType;
     private boolean mLinkIsPressed = false;
@@ -129,6 +130,10 @@ public class CommentFragment extends Fragment {
         outState.putParcelable("submission", mSubmission);
         outState.putString("permalink", mPermalink);
         outState.putInt("sortType", mSortType);
+    }
+
+    public void setOnSubmissionLoadedListener(OnSubmissionLoaded listener) {
+        mCallback = listener;
     }
 
     private View createHeaderView() {
@@ -357,12 +362,13 @@ public class CommentFragment extends Fragment {
      */
     private String formatHtmlForMeta(String html) {
         if (html.contains("href=\"")) {
-            html = html.replace("&lt;a href=\"/r/", "&lt;a href=\"me.williamhester.breadit://r/");
-            html = html.replace("&lt;a href=\"/u/", "&lt;a href=\"me.williamhester.breadit://u/");
-            html = html.replace("&lt;a href=\"http://www.reddit.com/r/", "&lt;a href=\"me.williamhester.breadit://r/");
-            html = html.replace("&lt;a href=\"http://www.reddit.com/u/", "&lt;a href=\"me.williamhester.breadit://u/");
-            html = html.replace("&lt;a href=\"http://reddit.com/r/", "&lt;a href=\"me.williamhester.breadit://r/");
-            html = html.replace("&lt;a href=\"http://reddit.com/u/", "&lt;a href=\"me.williamhester.breadit://u/");
+            html = html.replace("&lt;a href=\"/r/", "&lt;a href=\"me.williamhester.breadit://subreddit/");
+            html = html.replace("&lt;a href=\"/u/", "&lt;a href=\"me.williamhester.breadit://user/");
+            html = html.replace("&lt;a href=\"http://www.reddit.com/u/", "&lt;a href=\"me.williamhester.breadit://user/");
+            html = html.replace("&lt;a href=\"http://reddit.com/u/", "&lt;a href=\"me.williamhester.breadit://user/");
+            if (html.contains("reddit.com/r/")) {
+                return Utilities.formatHtml(html);
+            }
             return html;
         }
         return html;
@@ -396,6 +402,9 @@ public class CommentFragment extends Fragment {
                         mSubmission = (Submission) result.get(0);
                         mHeaderView = createHeaderView();
                         mCommentsListView.addHeaderView(mHeaderView);
+                        if (mCallback != null) {
+                            mCallback.onSubmissionLoaded(mSubmission);
+                        }
                     }
                     mCommentAdapter = new CommentArrayAdapter(mContext);
                     mCommentsListView.setAdapter(mCommentAdapter);
@@ -774,5 +783,9 @@ public class CommentFragment extends Fragment {
                     && ((HiddenComments) o).getBelowPosition() == mBelowPosition;
         }
 
+    }
+
+    public interface OnSubmissionLoaded {
+        public void onSubmissionLoaded(Submission submission);
     }
 }
