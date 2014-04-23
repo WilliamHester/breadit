@@ -55,7 +55,7 @@ public class Utilities {
 
     public static String post(List<NameValuePair> apiParams, String url, Account account) {
         if (account != null) {
-            return post(apiParams, url, account.getCookie(), account.getModhash());
+            return post(apiParams, url, account.getCookie(), removeEndQuotes(account.getModhash()));
         } else {
             return post(apiParams, url, null, null);
         }

@@ -41,10 +41,6 @@ import me.williamhester.areddit.Account;
 import me.williamhester.areddit.Votable;
 import me.williamhester.areddit.utils.Utilities;
 
-/**
- * Created by William Hester on 1/3/14.
- * This class is the Fragment that contains the list of Submissions for that specific Subreddit.
- */
 public class SubredditFragment extends Fragment {
 
     public static final int HISTORY = 0;

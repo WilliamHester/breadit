@@ -350,7 +350,7 @@ public class Account implements Parcelable {
         } catch (IOException e) {
             return false;
         }
-        mModhash = mData.get("modhash").getAsString();
+        mModhash = Utilities.removeEndQuotes(mData.get("modhash").getAsString());
         mDataString = mData.toString();
         return true;
     }

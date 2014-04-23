@@ -8,6 +8,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
 
@@ -36,6 +38,10 @@ public class SubmitDialogFragment extends DialogFragment {
     private ImageView mCaptchaImage;
     private Account mAccount;
     private String mSubreddit;
+
+    private boolean mNsfw = false;
+    private boolean mSelfPost = true;
+    private boolean mSendReplies = true;
 
     private Captcha mCaptcha;
 
@@ -71,6 +77,27 @@ public class SubmitDialogFragment extends DialogFragment {
                 new SubmitAsyncTask().execute();
             }
         });
+        CheckBox nsfwCheckbox = (CheckBox) v.findViewById(R.id.nsfw_checkbox);
+        nsfwCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                mNsfw = b;
+            }
+        });
+        CheckBox selfCheckbox = (CheckBox) v.findViewById(R.id.self_checkbox);
+        selfCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                mSelfPost = b;
+            }
+        });
+        CheckBox sendReplies = (CheckBox) v.findViewById(R.id.send_replies);
+        sendReplies.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                mSendReplies = b;
+            }
+        });
 
         mCaptchaResponse.setVisibility(View.GONE);
         mCaptchaImage.setVisibility(View.GONE);
@@ -95,27 +122,34 @@ public class SubmitDialogFragment extends DialogFragment {
 
         @Override
         protected Void doInBackground(Void... voids) {
+            Log.i("SDF", mAccount.getUsername());
             if (mAccount != null && mSubmitText != null && mSubmitText.getText() != null
                     && mSubmitText.getText().toString().length() != 0) {
                 Log.i("SubmitDialogFragment", "Submitting...");
                 List<NameValuePair> apiParams = new ArrayList<NameValuePair>();
                 apiParams.add(new BasicNameValuePair("api-type", "json"));
+                if (mSelfPost) {
+                    Log.i("SDF", "self-post");
+                    apiParams.add(new BasicNameValuePair("text", mSubmitText.getText().toString()));
+                    apiParams.add(new BasicNameValuePair("kind", "self"));
+                } else {
+                    Log.i("SDF", "link");
+                    apiParams.add(new BasicNameValuePair("kind", "link"));
+                    apiParams.add(new BasicNameValuePair("url", mSubmitText.getText().toString()));
+                }
                 apiParams.add(new BasicNameValuePair("captcha", ""));
                 apiParams.add(new BasicNameValuePair("extension", ""));
                 if (mCaptcha != null)
                     apiParams.add(new BasicNameValuePair("iden", mCaptcha.getIden()));
-                apiParams.add(new BasicNameValuePair("kind", "self"));
                 apiParams.add(new BasicNameValuePair("resubmit", "false"));
                 apiParams.add(new BasicNameValuePair("save", "false"));
-                apiParams.add(new BasicNameValuePair("sendreplies", "false"));
+                apiParams.add(new BasicNameValuePair("sendreplies", Boolean.toString(mSendReplies)));
                 if (mSubreddit != null)
                     apiParams.add(new BasicNameValuePair("sr", mSubreddit));
                 else
                     apiParams.add(new BasicNameValuePair("sr", mSubredditName.getText().toString()));
-                apiParams.add(new BasicNameValuePair("text", mSubmitText.getText().toString()));
                 apiParams.add(new BasicNameValuePair("then", "comments"));
                 apiParams.add(new BasicNameValuePair("title", mTitle.getText().toString()));
-                apiParams.add(new BasicNameValuePair("url", ""));
                 Log.i("SubmitDialogFragment", "Response = " + Utilities.post(apiParams,
                         "http://www.reddit.com/api/submit", mAccount));
             } else if (mAccount == null) {

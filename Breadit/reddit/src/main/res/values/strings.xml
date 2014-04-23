@@ -63,6 +63,9 @@
     <string name="captcha_response">Captcha response</string>
     <string name="new_text_post">New text post</string>
     <string name="subreddit_name">Subreddit name</string>
+    <string name="nsfw">NSFW</string>
+    <string name="self_post">Self-post</string>
+    <string name="send_replies_inbox">Send replies to my inbox</string>
 
     <!-- MessageDialogFragment -->
     <string name="subject">Subject</string>
