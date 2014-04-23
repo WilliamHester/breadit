@@ -122,12 +122,32 @@ public class SubredditFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        mSubmissionsAdapter.notifyDataSetChanged();
         if (mSubredditName != null && getActivity() != null
                 && getActivity().getActionBar() != null) {
             getActivity().getActionBar().setTitle("/r/" + mSubredditName);
         } else if (getActivity() != null && getActivity().getActionBar() != null) {
             getActivity().getActionBar().setTitle("FrontPage");
+        }
+        SharedPreferences prefs = mContext.getSharedPreferences("preferences", Context.MODE_PRIVATE);
+        long oldId = -1;
+        if (mAccount != null) {
+            oldId = mAccount.getId();
+        }
+        long id = prefs.getLong("accountId", -1);
+        if (id != -1) {
+            try {
+                AccountDataSource dataSource = new AccountDataSource(mContext);
+                dataSource.open();
+                mAccount = dataSource.getAccount(id);
+                dataSource.close();
+            } catch (NullPointerException e) {
+                Log.e("Breadit", "Error opening database");
+            }
+        }
+        if (oldId != id) {
+            new RefreshUserClass(true).execute();
+        } else {
+            mSubmissionsAdapter.notifyDataSetChanged();
         }
     }
 
@@ -179,21 +199,11 @@ public class SubredditFragment extends Fragment {
      *     when the SwipeRefreshLayout's onRefresh method is called.
      */
     private void populateSubmissions() {
-//        mSubmissions.addHeaderView(createHeaderView());
         mSubmissionsAdapter = new SubmissionArrayAdapter(mContext);
         mSubmissions.setAdapter(mSubmissionsAdapter);
         mSubmissions.setOnTouchListener(mGestureListener);
         mSubmissions.setOnScrollListener(new InfiniteLoadingScrollListener());
         new RefreshUserClass().execute();
-    }
-
-    private View createHeaderView() {
-        LayoutInflater inflater
-                = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View v = inflater.inflate(R.layout.header_subreddit, null);
-        TextView title = (TextView) v.findViewById(R.id.subreddit);
-        title.setText("/r/" + mSubredditName);
-        return v;
     }
 
     private View createFooterView(LayoutInflater inflater) {
@@ -351,6 +361,9 @@ public class SubredditFragment extends Fragment {
                 if (mRefreshList) {
                     mSubmissionList.clear();
                     mNames.clear();
+                }
+                if (result.size() < 25) {
+                    mSubmissions.removeFooterView(mFooterView);
                 }
                 for (Submission s : result) {
                     if (!mNames.contains(s.getName()) && (!mHideNsfw || !s.isNsfw())) {

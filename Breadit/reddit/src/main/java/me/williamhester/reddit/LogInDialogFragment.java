@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -65,7 +66,7 @@ public class LogInDialogFragment extends DialogFragment {
 
     }*/
 
-    private class LoginUserTask extends AsyncTask<Void, Void, Bundle> {
+    private class LoginUserTask extends AsyncTask<Void, Void, Account> {
         private Dialog mDialog;
 
         @Override
@@ -82,7 +83,7 @@ public class LogInDialogFragment extends DialogFragment {
         }
 
         @Override
-        protected Bundle doInBackground(Void... nothing) {
+        protected Account doInBackground(Void... nothing) {
             Bundle b;
             try {
                 b = new Bundle();
@@ -90,7 +91,7 @@ public class LogInDialogFragment extends DialogFragment {
                 Account account = Account.newAccount(mUsername.getText().toString(),
                         mPassword.getText().toString());
                 b.putParcelable("account", account);
-                return b;
+                return account;
             } catch (MalformedURLException e) {
                 Log.e("BreaditDebug", e.toString());
                 return null;
@@ -103,12 +104,21 @@ public class LogInDialogFragment extends DialogFragment {
         }
 
         @Override
-        protected void onPostExecute(Bundle b) {
-            if (b != null) {
-                b.putBoolean("finishedSetup", true);
-                Intent i = new Intent(getActivity(), MainActivity.class);
-                i.putExtras(b);
-                getActivity().startActivity(i);
+        protected void onPostExecute(Account a) {
+            if (a != null) {
+                AccountDataSource dataSource = new AccountDataSource(getActivity());
+                dataSource.open();
+                dataSource.addAccount(a);
+                dataSource.close();
+                if (getActivity() != null) {
+                    SharedPreferences prefs = getActivity()
+                            .getSharedPreferences("preferences", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = prefs.edit();
+                    editor.putLong("accountId", a.getId());
+                    editor.commit();
+                }
+                mDialog.dismiss();
+                dismiss();
             } else {
                 Toast.makeText(getActivity(), R.string.invalid_entries, Toast.LENGTH_LONG).show();
                 mDialog.dismiss();

@@ -4,41 +4,37 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
-        android:layout_weight="1"
+    <EditText android:id="@+id/username"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center"
+        android:layout_width="240dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/username"
+        android:imeOptions="actionNext"
+        android:inputType="textNoSuggestions"/>
+
+    <View
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:orientation="vertical">
+        android:layout_height="16dp" />
 
-        <EditText android:id="@+id/username"
-            android:layout_gravity="center_horizontal"
-            android:gravity="center"
-            android:layout_width="240dp"
-            android:layout_height="wrap_content"
-            android:hint="@string/username"
-            android:imeOptions="actionNext"
-            android:inputType="textNoSuggestions"
-            android:textColor="@color/auburn"/>
+    <EditText android:id="@+id/password"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:layout_width="240dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/password"
+        android:inputType="textPassword"/>
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="16dp" />
-
-        <EditText android:id="@+id/password"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:layout_width="240dp"
-            android:layout_height="wrap_content"
-            android:hint="@string/password"
-            android:inputType="textPassword"
-            android:textColor="@color/auburn"/>
-
-    </LinearLayout>
-    <LinearLayout
-        android:layout_weight="1"
+    <View android:layout_marginTop="8dp"
+        android:layout_height="1dp"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:background="@color/dark_gray"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="horizontal">
+
         <Button
             android:id="@+id/login_cancel"
             android:text="@string/cancel"
@@ -46,6 +42,14 @@
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"/>
+
+        <View
+            android:layout_height="match_parent"
+            android:layout_width="1dp"
+            android:background="@color/dark_gray"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"/>
+
         <Button
             android:id="@+id/login_confirm"
             android:text="@string/yes"
@@ -53,5 +57,6 @@
             android:layout_height="wrap_content"
             android:layout_width="0dp"
             android:layout_weight="1"/>
+
     </LinearLayout>
 </LinearLayout>

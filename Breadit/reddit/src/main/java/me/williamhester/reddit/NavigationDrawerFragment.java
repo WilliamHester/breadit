@@ -121,6 +121,44 @@ public class NavigationDrawerFragment extends Fragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        SharedPreferences prefs = getActivity().getSharedPreferences("preferences", Context.MODE_PRIVATE);
+        long oldId = -1;
+        if (mAccount != null) {
+            oldId = mAccount.getId();
+        }
+        long id = prefs.getLong("accountId", -1);
+        if (id != -1) {
+            try {
+                AccountDataSource dataSource = new AccountDataSource(getActivity());
+                dataSource.open();
+                mAccount = dataSource.getAccount(id);
+                dataSource.close();
+            } catch (NullPointerException e) {
+                Log.e("Breadit", "Error opening database");
+            }
+        }
+        if (mAccount != null) {
+            mSubredditList = mAccount.getSubreddits();
+            Collections.sort(mSubredditList, mOrderList);
+            mSubredditList.add(0, "FrontPage");
+            mSubredditArrayAdapter = new SubredditAdapter(mSubredditList);
+            mDrawerListView.setAdapter(mSubredditArrayAdapter);
+            new GetUserSubreddits().execute();
+        } else {
+            mSubredditList = new ArrayList<String>();
+            String[] subs = getResources().getStringArray(R.array.default_subreddits);
+            for (String s : subs) {
+                mSubredditList.add(s);
+            }
+            mSubredditList.add(0, "FrontPage");
+            mSubredditArrayAdapter = new SubredditAdapter(mSubredditList);
+            mDrawerListView.setAdapter(mSubredditArrayAdapter);
+        }
+    }
+
+    @Override
     public void onActivityCreated (Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         // Indicate that this fragment would like to influence the set of actions in the action bar.

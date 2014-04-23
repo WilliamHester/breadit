@@ -18,7 +18,7 @@
     <string name="dont_worry">Don\'t worry, we\'re not the NSA.</string>
     <string name="hang_on">Hang on…</string>
     <string name="signing_in">We\'re getting your information from Reddit. This could take a minute.</string>
-    <string name="invalid_entries">Please enter a valid username and password.</string>
+    <string name="invalid_entries">Sorry, there was a problem logging in. Check your username and password.</string>
     <string name="enter_acc_info">Please enter your Reddit account username and password.</string>
     <string name="save_and_begin">Save and begin!</string>
     <string name="username">Username</string>
