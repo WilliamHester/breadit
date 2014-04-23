@@ -10,7 +10,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.Gravity;
@@ -87,17 +86,20 @@ public class NavigationDrawerFragment extends Fragment {
     private boolean mSubredditIsLoading = false;
     private boolean mIsOpen = false;
     private Account mAccount;
+    private Context mContext;
     private TextView mCurrentSubreddit;
     private CheckBox mCheckbox;
     private Subreddit mSubreddit;
     private Spinner mFilterSpinner;
     private Spinner mSubSpinner;
+    private String mSubName;
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {
             mCallbacks = (NavigationDrawerCallbacks) activity;
+            mContext = activity;
         } catch (ClassCastException e) {
             throw new ClassCastException("Activity must implement NavigationDrawerCallbacks.");
         }
@@ -108,10 +110,14 @@ public class NavigationDrawerFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mAccount = getArguments().getParcelable("account");
+            mSubName = getArguments().getString("subreddit");
+            if (mSubName == null) {
+                mSubName = "FrontPage";
+            }
         }
         // Read in the flag indicating whether or not the user has demonstrated awareness of the
         // drawer. See PREF_USER_LEARNED_DRAWER for details.
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mContext);
         mUserLearnedDrawer = sp.getBoolean(PREF_USER_LEARNED_DRAWER, false);
 
         if (savedInstanceState != null) {
@@ -123,12 +129,12 @@ public class NavigationDrawerFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        SharedPreferences prefs = getActivity()
+        SharedPreferences prefs = mContext
                 .getSharedPreferences("preferences", Context.MODE_PRIVATE);
         long id = prefs.getLong("accountId", -1);
         if (id != -1) {
             try {
-                AccountDataSource dataSource = new AccountDataSource(getActivity());
+                AccountDataSource dataSource = new AccountDataSource(mContext);
                 dataSource.open();
                 mAccount = dataSource.getAccount(id);
                 dataSource.close();
@@ -191,7 +197,6 @@ public class NavigationDrawerFragment extends Fragment {
             mSubredditArrayAdapter = new SubredditAdapter(mSubredditList);
             mDrawerListView.setAdapter(mSubredditArrayAdapter);
         }
-        mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
 
         mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -247,7 +252,7 @@ public class NavigationDrawerFragment extends Fragment {
         return v;
     }
 
-    private void selectItem(final String subreddit) {
+    private void selectItem(String subreddit) {
         new SubredditDataAsyncTask(subreddit).execute();
         if (mDrawerLayout != null) {
             mDrawerLayout.closeDrawers();
@@ -338,7 +343,7 @@ public class NavigationDrawerFragment extends Fragment {
                 Boolean isNew = !newSubs.equals(mSubredditList);
                 if (isNew) {
                     mAccount.setSubreddits(newSubs);
-                    AccountDataSource dataSource = new AccountDataSource(getActivity());
+                    AccountDataSource dataSource = new AccountDataSource(mContext);
                     try {
                         dataSource.open();
                         dataSource.setSubredditList(mAccount);
@@ -365,7 +370,12 @@ public class NavigationDrawerFragment extends Fragment {
     }
 
     public static NavigationDrawerFragment newInstance(Account account) {
+        return newInstance(account, null);
+    }
+
+    public static NavigationDrawerFragment newInstance(Account account, String subreddit) {
         Bundle args = new Bundle();
+        args.putString("subreddit", subreddit);
         args.putParcelable("account", account);
         NavigationDrawerFragment fragment = new NavigationDrawerFragment();
         fragment.setArguments(args);
@@ -387,7 +397,7 @@ public class NavigationDrawerFragment extends Fragment {
         search.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
+                InputMethodManager imm = (InputMethodManager) mContext.getSystemService(
                         Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(search.getWindowToken(), 0);
                 selectItem(subredditSearch.getText().toString().trim());
@@ -399,7 +409,7 @@ public class NavigationDrawerFragment extends Fragment {
             @Override
             public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
                 if (actionId == EditorInfo.IME_ACTION_GO) {
-                    InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
+                    InputMethodManager imm = (InputMethodManager) mContext.getSystemService(
                             Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(search.getWindowToken(), 0);
                     selectItem(subredditSearch.getText().toString().trim().replace(" ", ""));
@@ -414,16 +424,16 @@ public class NavigationDrawerFragment extends Fragment {
             }
         });
         mCurrentSubreddit = (TextView) v.findViewById(R.id.current_subreddit);
-        mCurrentSubreddit.setText("Currently viewing FrontPage");
+        mCurrentSubreddit.setText("Currently viewing " + mSubName);
         mCheckbox = (CheckBox) v.findViewById(R.id.subscribed_CheckBox);
         mCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 if (b)
-                    Toast.makeText(getActivity(), "Subscribed to "
+                    Toast.makeText(mContext, "Subscribed to "
                             + mCurrentSubreddit.getText().toString(), Toast.LENGTH_SHORT).show();
                 else
-                    Toast.makeText(getActivity(), "Unsubscribed from "
+                    Toast.makeText(mContext, "Unsubscribed from "
                             + mCurrentSubreddit.getText().toString(), Toast.LENGTH_SHORT).show();
             }
         });
@@ -432,13 +442,13 @@ public class NavigationDrawerFragment extends Fragment {
         mSubSpinner = (Spinner) v.findViewById(R.id.header_spinner1);
         mFilterSpinner = (Spinner) v.findViewById(R.id.header_spinner2);
 
-        ArrayAdapter<String> adapter1 = new ArrayAdapter<String>(getActivity(),
+        ArrayAdapter<String> adapter1 = new ArrayAdapter<String>(mContext,
                 R.layout.spinner_item,
                 R.id.orange_spinner_text,
                 getResources().getStringArray(R.array.subreddit_sort_types));
         mSubSpinner.setAdapter(adapter1);
 
-        ArrayAdapter<String> adapter2 = new ArrayAdapter<String>(getActivity(),
+        ArrayAdapter<String> adapter2 = new ArrayAdapter<String>(mContext,
                 R.layout.spinner_item,
                 R.id.orange_spinner_text,
                 getResources().getStringArray(R.array.sub_sort_types));

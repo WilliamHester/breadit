@@ -1,34 +1,23 @@
 package me.williamhester.reddit;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Typeface;
 import android.os.Bundle;
-import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import me.williamhester.areddit.Account;
-import me.williamhester.areddit.Message;
 
 public class MainActivity extends Activity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
     private NavigationDrawerFragment mNavigationDrawerFragment;
     private SubredditFragment mSubredditFragment;
-    private SharedPreferences mPrefs;
     private Account mAccount;
     private String mSubreddit;
 
@@ -37,14 +26,14 @@ public class MainActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mPrefs = getSharedPreferences("preferences", MODE_PRIVATE);
+        SharedPreferences prefs = getSharedPreferences("preferences", MODE_PRIVATE);
 
         if (getIntent() != null && getIntent().getAction() != null
                 && getIntent().getAction().equals(Intent.ACTION_VIEW)) {
             mSubreddit = getIntent().getDataString();
-            mSubreddit = mSubreddit.substring(mSubreddit.indexOf("/subreddit/") + 11);
-            Log.i("MainActivity", mSubreddit);
-            long id = mPrefs.getLong("accountId", -1);
+            if (mSubreddit != null)
+                mSubreddit = mSubreddit.substring(mSubreddit.indexOf("/subreddit/") + 11);
+            long id = prefs.getLong("accountId", -1);
             if (id != -1) {
                 AccountDataSource dataSource = new AccountDataSource(this);
                 dataSource.open();
@@ -54,7 +43,7 @@ public class MainActivity extends Activity
         } else if (getIntent() != null && getIntent().getExtras() != null) { // If the user just completed the setup
             boolean b = getIntent().getExtras().getBoolean("finishedSetup");
             mAccount = getIntent().getExtras().getParcelable("account");
-            SharedPreferences.Editor edit = mPrefs.edit();
+            SharedPreferences.Editor edit = prefs.edit();
             edit.putBoolean("finishedSetup", b);
             if (mAccount != null) {
                 AccountDataSource dataSource = new AccountDataSource(this);
@@ -64,11 +53,11 @@ public class MainActivity extends Activity
                 edit.putLong("accountId", mAccount.getId());
             }
             edit.commit();
-        } else if (!mPrefs.getBoolean("finishedSetup", false)) { // If the user has not completed the setup
+        } else if (!prefs.getBoolean("finishedSetup", false)) { // If the user has not completed the setup
             Intent i = new Intent(this, SetupActivity.class);
             startActivity(i);
         } else { // If the user has completed the setup
-            long id = mPrefs.getLong("accountId", -1);
+            long id = prefs.getLong("accountId", -1);
             if (id != -1) {
                 AccountDataSource dataSource = new AccountDataSource(this);
                 dataSource.open();
@@ -76,14 +65,14 @@ public class MainActivity extends Activity
                 dataSource.close();
             }
         }
-
-        mSubredditFragment = SubredditFragment.newInstance(mAccount, mSubreddit);
-        mNavigationDrawerFragment = NavigationDrawerFragment.newInstance(mAccount);
-
         if (getActionBar() != null) {
             getActionBar().setDisplayHomeAsUpEnabled(true);
             getActionBar().setHomeButtonEnabled(true);
         }
+
+        mSubredditFragment = SubredditFragment.newInstance(mAccount, mSubreddit);
+        if (mNavigationDrawerFragment == null)
+            mNavigationDrawerFragment = NavigationDrawerFragment.newInstance(mAccount);
 
         updateActionBar(null);
 
@@ -115,7 +104,8 @@ public class MainActivity extends Activity
 
     @Override
     public void onNavigationDrawerItemSelected(String subreddit) {
-        if (mSubreddit == subreddit || (mSubreddit != null && mSubreddit.equals(subreddit))) {
+        if ((mSubreddit == null && subreddit == null)
+                || (mSubreddit != null && mSubreddit.equals(subreddit))) {
             mSubredditFragment.refreshData();
         } else {
             mSubreddit = subreddit;
@@ -159,9 +149,9 @@ public class MainActivity extends Activity
     }
 
     private void updateActionBar(String sub) {
-        if (sub == null)
+        if (sub == null && getActionBar() != null)
             getActionBar().setTitle("FrontPage");
-        else
+        else if (getActionBar() != null)
             getActionBar().setTitle("/r/" + sub);
     }
 
