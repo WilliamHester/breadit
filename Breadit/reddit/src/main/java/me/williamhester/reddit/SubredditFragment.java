@@ -61,6 +61,7 @@ public class SubredditFragment extends Fragment {
 
     private boolean mFailedToLoad = false;
     private boolean mHideNsfw = true;
+    private boolean mHideViewed = false;
     private int mPrimarySortType = Submission.HOT;
     private int mSecondarySortType = Submission.ALL;
 
@@ -124,27 +125,7 @@ public class SubredditFragment extends Fragment {
         } else if (getActivity() != null && getActivity().getActionBar() != null) {
             getActivity().getActionBar().setTitle("FrontPage");
         }
-        SharedPreferences prefs = mContext.getSharedPreferences("preferences", Context.MODE_PRIVATE);
-        long oldId = -1;
-        if (mAccount != null) {
-            oldId = mAccount.getId();
-        }
-        long id = prefs.getLong("accountId", -1);
-        if (id != -1) {
-            try {
-                AccountDataSource dataSource = new AccountDataSource(mContext);
-                dataSource.open();
-                mAccount = dataSource.getAccount(id);
-                dataSource.close();
-            } catch (NullPointerException e) {
-                Log.e("Breadit", "Error opening database");
-            }
-        }
-        if (oldId != id) {
-            new RefreshUserClass(true).execute();
-        } else {
-            mSubmissionsAdapter.notifyDataSetChanged();
-        }
+        loadPrefs();
     }
 
     @Override
@@ -188,6 +169,35 @@ public class SubredditFragment extends Fragment {
         b.putParcelable("account", account);
         sf.setArguments(b);
         return sf;
+    }
+
+    private void loadPrefs() {
+        SharedPreferences prefs = mContext.getSharedPreferences("preferences", Context.MODE_PRIVATE);
+        boolean oldHideViewed = mHideViewed;
+        long oldId = -1;
+        if (mAccount != null) {
+            oldId = mAccount.getId();
+        }
+        long id = prefs.getLong("accountId", -1);
+        if (mSubredditName != null) {
+            mHideViewed = prefs.getBoolean("pref_remove_viewed_sub", false);
+        } else {
+            mHideViewed = prefs.getBoolean("pref_remove_viewed_front", false);
+        }
+        if (id != -1) {
+            try {
+                AccountDataSource dataSource = new AccountDataSource(mContext);
+                dataSource.open();
+                mAccount = dataSource.getAccount(id);
+                dataSource.close();
+            } catch (NullPointerException e) {
+                Log.e("Breadit", "Error opening database");
+            }
+        }
+        mSubmissionsAdapter.notifyDataSetChanged();
+        if (oldId != id || oldHideViewed != mHideViewed) {
+            new RefreshUserClass(true).execute();
+        }
     }
 
     /**
@@ -362,7 +372,9 @@ public class SubredditFragment extends Fragment {
                     mSubmissions.removeFooterView(mFooterView);
                 }
                 for (Submission s : result) {
-                    if (!mNames.contains(s.getName()) && (!mHideNsfw || !s.isNsfw())) {
+                    if (!mNames.contains(s.getName()) && (!mHideNsfw || !s.isNsfw())
+                            && !(mHideViewed && mAccount != null
+                            && mAccount.hasVisited(s.getName()))) {
                         mSubmissionList.add(s);
                         mNames.add(s.getName());
                     }
@@ -445,6 +457,12 @@ public class SubredditFragment extends Fragment {
                 }
             } else if (position >= 0) {
                 ImageView iv = null;
+                Submission s;
+                if (mHideViewed) {
+                    s = mSubmissionList.remove(position);
+                } else {
+                    s = mSubmissionList.get(position);
+                }
                 if (mSubmissions.getChildAt(position
                         - mSubmissions.getFirstVisiblePosition()) != null)
                     iv = (ImageView) mSubmissions.getChildAt(position
@@ -452,7 +470,7 @@ public class SubredditFragment extends Fragment {
                 if (mAccount == null) {
                     Log.i("SubredditFragment", "mAccount is null");
                 } else if (!mAccount.hasVisited(mSubmissionList.get(position).getName())) {
-                    mAccount.visit(mSubmissionList.get(position).getName());
+                    mAccount.visit(s.getName());
                     AccountDataSource dataSource = new AccountDataSource(mContext);
                     dataSource.open();
                     dataSource.setHistory(mAccount);
@@ -460,7 +478,7 @@ public class SubredditFragment extends Fragment {
                 }
                 Intent i = new Intent(getActivity(), SubmissionActivity.class);
                 Bundle b = new Bundle();
-                b.putParcelable("submission", mSubmissionList.get(position));
+                b.putParcelable("submission", s);
                 b.putParcelable("account", mAccount);
                 // Clicked on the image side
                 if (iv != null && x >= iv.getLeft() + mSubmissions.getLeft()) {
@@ -470,6 +488,7 @@ public class SubredditFragment extends Fragment {
                 }
                 i.putExtras(b);
                 mContext.startActivity(i);
+                mSubmissionsAdapter.notifyDataSetChanged();
             }
             return false;
         }
