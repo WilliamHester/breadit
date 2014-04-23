@@ -80,6 +80,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="12sp"
                 android:fontFamily="sans-serif-condensed"
+                android:ellipsize="end"
                 android:textColor="@color/mid_gray"/>
 
         </LinearLayout>

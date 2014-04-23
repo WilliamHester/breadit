@@ -47,7 +47,7 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
             mPermalink = getIntent().getDataString();
             mPermalink = "http://www.reddit.com" + mPermalink.substring(mPermalink.indexOf("/r/"));
             Log.i("SubmissionActivity", "Viewing " + mPermalink);
-            SharedPreferences prefs = getSharedPreferences("prefs", MODE_PRIVATE);
+            SharedPreferences prefs = getSharedPreferences("preferences", MODE_PRIVATE);
             long id = prefs.getLong("accountId", -1);
             if (id != -1) {
                 try {
@@ -62,6 +62,7 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
             setUpActionBarTabs(COMMENT_TAB);
         } else if (getIntent().getExtras() != null) {
             mSubmission = getIntent().getExtras().getParcelable("submission");
+            mAccount = getIntent().getExtras().getParcelable("account");
             selectedTab = getIntent().getExtras().getInt("tab");
             setUpActionBarTabs(selectedTab);
         }
@@ -118,8 +119,10 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
         content.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
         content.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
 
-        Bundle args = getIntent().getExtras();
+        Bundle args = new Bundle();
         args.putString("permalink", mPermalink);
+        args.putParcelable("submission", mSubmission);
+        args.putParcelable("account", mAccount);
 
         String tag;
         switch (selectedTab) {

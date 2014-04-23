@@ -82,7 +82,7 @@
     <string name="remove_viewed_sub_title">Hide from Subreddit</string>
     <string name="remove_viewed_sub">Remove viewed submissions from Subreddit view</string>
     <string name="hide_nsfw">Hide NSFW submissions</string>
-    <string name="submission_settings">Submission Settings</string>
+    <string name="history_settings">History Settings</string>
     <string name="nsfw_settings">NSFW Settings</string>
     <string name="warn_nsfw_title">NSFW Safeguard</string>
     <string name="warn_nsfw">Warn before entering NSFW Subreddit</string>

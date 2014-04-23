@@ -483,6 +483,7 @@ public class NavigationDrawerFragment extends Fragment {
                 return;
             }
         });
+        selectItem(mSubName);
         return v;
     }
 
