@@ -123,11 +123,8 @@ public class NavigationDrawerFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        SharedPreferences prefs = getActivity().getSharedPreferences("preferences", Context.MODE_PRIVATE);
-        long oldId = -1;
-        if (mAccount != null) {
-            oldId = mAccount.getId();
-        }
+        SharedPreferences prefs = getActivity()
+                .getSharedPreferences("preferences", Context.MODE_PRIVATE);
         long id = prefs.getLong("accountId", -1);
         if (id != -1) {
             try {
@@ -138,6 +135,8 @@ public class NavigationDrawerFragment extends Fragment {
             } catch (NullPointerException e) {
                 Log.e("Breadit", "Error opening database");
             }
+        } else {
+            mAccount = null;
         }
         if (mAccount != null) {
             mSubredditList = mAccount.getSubreddits();

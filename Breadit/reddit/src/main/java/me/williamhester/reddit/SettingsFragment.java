@@ -14,6 +14,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.List;
+
 import me.williamhester.areddit.Account;
 
 public class SettingsFragment extends PreferenceFragment {
@@ -65,7 +67,7 @@ public class SettingsFragment extends PreferenceFragment {
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(),android.R.style.Theme_Holo_Dialog);
             builder.setMessage(R.string.are_you_sure);
             builder.setTitle(R.string.clear_history);
-            builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+            builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
                     mAccount.setHistory("");
@@ -94,7 +96,62 @@ public class SettingsFragment extends PreferenceFragment {
 
         }
         else if(preference == mSwitchUsers) {
-
+            final List<Account> accounts;
+            AccountDataSource dataSource = new AccountDataSource(getActivity());
+            dataSource.open();
+            accounts = dataSource.getAllAccounts();
+            dataSource.close();
+            final String[] accountNames = new String[accounts.size() + 1];
+            for (int i = 0; i < accounts.size(); i++) {
+                accountNames[i] = accounts.get(i).getUsername();
+            }
+            accountNames[accounts.size()] = "Anonymous user (Logged out)";
+            final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(),
+                    android.R.style.Theme_Holo_Dialog);
+            int selection = 0;
+            final SharedPreferences prefs = getActivity()
+                    .getSharedPreferences("preferences", Context.MODE_PRIVATE);
+            long currentId = prefs.getLong("accountId", -1);
+            if (currentId != -1) {
+                for (int i = 0; i < accounts.size(); i++) {
+                    if (currentId == accounts.get(i).getId()) {
+                        selection = i;
+                    }
+                }
+            } else {
+                selection = accountNames.length - 1;
+            }
+            builder.setTitle(R.string.select_an_account)
+                    .setSingleChoiceItems(accountNames, selection,
+                            new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+//                            selection = i;
+                        }
+                    })
+                    .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            // Nothing
+                        }
+                    })
+                    .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            long id = -1;
+                            int selection = ((AlertDialog)dialogInterface)
+                                    .getListView().getCheckedItemPosition();
+                            if (selection < accounts.size()) {
+                                id = accounts.get(selection).getId();
+                            }
+                            SharedPreferences.Editor editor = prefs.edit();
+                            editor.putLong("accountId", id);
+                            editor.commit();
+                        }
+                    });
+            Dialog d = builder.create();
+            d.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            d.show();
         }
         return super.onPreferenceTreeClick(preferenceScreen, preference);
     }

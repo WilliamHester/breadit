@@ -52,7 +52,7 @@
 
         <Button
             android:id="@+id/login_confirm"
-            android:text="@string/yes"
+            android:text="@string/confirm"
             style="?android:buttonBarButtonStyle"
             android:layout_height="wrap_content"
             android:layout_width="0dp"

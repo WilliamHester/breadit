@@ -103,7 +103,6 @@ public class Account implements Parcelable {
     }
 
     public Account(Cursor c) {
-        c.moveToFirst();
         mId = c.getLong(0);
         mUsername = c.getString(1);
         mCookie = c.getString(2);

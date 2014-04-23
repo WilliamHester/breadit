@@ -5,6 +5,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
+
+import java.util.ArrayList;
 
 import me.williamhester.areddit.Account;
 
@@ -47,6 +50,7 @@ public class AccountDataSource {
             return null;
         Cursor c = mDatabase.query(AccountSqlHelper.TABLE_ACCOUNTS, AccountSqlHelper.ALL_COLUMNS,
                 AccountSqlHelper.COLUMN_ID + " = " + id, null, null, null, null);
+        c.moveToFirst();
         return new Account(c);
     }
 
@@ -95,4 +99,21 @@ public class AccountDataSource {
         String where = AccountSqlHelper.COLUMN_ID + "=?";
         mDatabase.update(AccountSqlHelper.TABLE_ACCOUNTS, values, where, sId);
     }
+
+    public ArrayList<Account> getAllAccounts() {
+        ArrayList<Account> accounts = new ArrayList<Account>();
+        Cursor cursor = mDatabase.query(AccountSqlHelper.TABLE_ACCOUNTS, AccountSqlHelper.ALL_COLUMNS,
+                null, null, null, null, null);
+
+        cursor.moveToFirst();
+        while(!cursor.isAfterLast()) {
+            Account account = new Account(cursor);
+            accounts.add(account);
+            cursor.moveToNext();
+        }
+
+        cursor.close();
+        return accounts;
+    }
+
 }

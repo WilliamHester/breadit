@@ -40,7 +40,7 @@
         <Preference
             android:title="@string/logout"
             android:key="pref_logout" />
-        <ListPreference
+        <Preference
             android:title="@string/switch_users"
             android:key="pref_switch_users" />
     </PreferenceCategory>
