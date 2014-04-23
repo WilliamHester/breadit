@@ -40,6 +40,7 @@ public class MainActivity extends Activity
                 mAccount = dataSource.getAccount(id);
                 dataSource.close();
             }
+            mNavigationDrawerFragment = NavigationDrawerFragment.newInstance(mAccount, mSubreddit);
         } else if (getIntent() != null && getIntent().getExtras() != null) { // If the user just completed the setup
             boolean b = getIntent().getExtras().getBoolean("finishedSetup");
             mAccount = getIntent().getExtras().getParcelable("account");
