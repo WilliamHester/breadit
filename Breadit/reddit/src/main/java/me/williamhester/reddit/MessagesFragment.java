@@ -40,9 +40,6 @@ import me.williamhester.areddit.Message;
 import me.williamhester.areddit.Votable;
 import me.williamhester.areddit.utils.Utilities;
 
-/**
- * Created by William on 4/12/14.
- */
 public class MessagesFragment extends Fragment {
 
     private Account mAccount;
@@ -73,8 +70,8 @@ public class MessagesFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_messages, null);
         mMessagesListView = (ListView) v.findViewById(R.id.messages);
         mMessageAdapter = new MessageArrayAdapter(mContext);
-//        mHeaderView = createHeaderView(inflater);
-//        mMessagesListView.addHeaderView(mHeaderView);
+        mHeaderView = createHeaderView(inflater);
+        mMessagesListView.addHeaderView(mHeaderView);
         mMessagesListView.setAdapter(mMessageAdapter);
         mMessagesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override

@@ -116,4 +116,9 @@ public class AccountDataSource {
         return accounts;
     }
 
+    public void deleteAccount(Account account) {
+        mDatabase.delete(AccountSqlHelper.TABLE_ACCOUNTS, AccountSqlHelper.COLUMN_ID
+                + " = " + account.getId(), null);
+    }
+
 }

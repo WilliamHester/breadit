@@ -94,6 +94,24 @@ public class MainActivity extends Activity
                 .replace(R.id.container, mSubredditFragment)
                 .commit();
     }
+    @Override
+    public void onResume() {
+        super.onResume();
+        SharedPreferences prefs = getSharedPreferences("preferences", Context.MODE_PRIVATE);
+        long id = prefs.getLong("accountId", -1);
+        if (id != -1) {
+            try {
+                AccountDataSource dataSource = new AccountDataSource(this);
+                dataSource.open();
+                mAccount = dataSource.getAccount(id);
+                dataSource.close();
+            } catch (NullPointerException e) {
+                Log.e("Breadit", "Error opening database");
+            }
+        }
+        invalidateOptionsMenu();
+    }
+
 
     @Override
     public void onNavigationDrawerItemSelected(String subreddit) {
