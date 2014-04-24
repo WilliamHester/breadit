@@ -253,33 +253,40 @@ public class NavigationDrawerFragment extends Fragment {
     }
 
     private void selectItem(String subreddit) {
-        new SubredditDataAsyncTask(subreddit).execute();
         if (mDrawerLayout != null) {
             mDrawerLayout.closeDrawers();
         }
         if (mCallbacks != null) {
-            if (mAccount == null) {
-                mCheckbox.setVisibility(View.GONE);
-            } else if (subreddit.equals("FrontPage") || subreddit.equals("")) {
-                mCheckbox.setVisibility(View.GONE);
-            } else {
-                mCheckbox.setVisibility(View.VISIBLE);
-            }
             if (subreddit.equals("FrontPage") || subreddit.equals("")) {
                 mCallbacks.onNavigationDrawerItemSelected(null);
             } else {
                 mCallbacks.onNavigationDrawerItemSelected(subreddit);
             }
-            mCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                    new SubscribeAsyncTask(b).execute();
-                }
-            });
-            mCurrentSubreddit.setText("Currently viewing " + subreddit);
         }
-        mFilterSpinner.setSelection(0);
-        mSubSpinner.setSelection(0);
+    }
+
+    public void setSubreddit(String subreddit, int primarySort, int secondarySort) {
+        new SubredditDataAsyncTask(subreddit).execute();
+        if (mAccount == null) {
+            mCheckbox.setVisibility(View.GONE);
+        } else if (subreddit == null || subreddit.equals("FrontPage") || subreddit.equals("")) {
+            mCheckbox.setVisibility(View.GONE);
+        } else {
+            mCheckbox.setVisibility(View.VISIBLE);
+        }
+        mCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                new SubscribeAsyncTask(b).execute();
+            }
+        });
+        if (subreddit != null) {
+            mCurrentSubreddit.setText("Currently viewing " + subreddit);
+        } else {
+            mCurrentSubreddit.setText("Currently viewing FrontPage");
+        }
+        mSubSpinner.setSelection(primarySort);
+        mFilterSpinner.setSelection(secondarySort);
     }
 
     @Override
@@ -564,7 +571,7 @@ public class NavigationDrawerFragment extends Fragment {
 
         @Override
         protected Boolean doInBackground(Void... voids) {
-            if (mSubName.equals("")) {
+            if (mSubName == null || mSubName.equals("")) {
                 mSubreddit = null;
                 return false;
             }

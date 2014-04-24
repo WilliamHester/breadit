@@ -2,6 +2,7 @@ package me.williamhester.reddit;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -17,7 +18,7 @@ public class MainActivity extends Activity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
     private NavigationDrawerFragment mNavigationDrawerFragment;
-    private SubredditFragment mSubredditFragment;
+    private Fragment mSubredditFragment;
     private Account mAccount;
     private String mSubreddit;
 
@@ -71,7 +72,6 @@ public class MainActivity extends Activity
             getActionBar().setHomeButtonEnabled(true);
         }
 
-        mSubredditFragment = SubredditFragment.newInstance(mAccount, mSubreddit);
         if (mNavigationDrawerFragment == null)
             mNavigationDrawerFragment = NavigationDrawerFragment.newInstance(mAccount);
 
@@ -83,21 +83,33 @@ public class MainActivity extends Activity
 //                            .findFragmentByTag("NavigationDrawer"), "NavigationDrawer")
 //                    .commit();
 //        } else {
-            getFragmentManager().beginTransaction()
-                    .add(R.id.navigation_drawer_container, mNavigationDrawerFragment,
-                            "NavigationDrawer")
-                    .commit();
+        getFragmentManager().beginTransaction()
+                .add(R.id.navigation_drawer_container, mNavigationDrawerFragment,
+                        "NavigationDrawer")
+                .commit();
 //        }
         if (getFragmentManager().findFragmentByTag("SubredditFragment") != null) {
+            mSubredditFragment = getFragmentManager().findFragmentByTag("SubredditFragment");
             getFragmentManager().beginTransaction()
-                    .replace(R.id.container, getFragmentManager()
-                            .findFragmentByTag("SubredditFragment"), "SubredditFragment")
+                    .replace(R.id.container, mSubredditFragment, "SubredditFragment")
                     .commit();
         } else {
+            mSubredditFragment = SubredditFragment.newInstance(mAccount, mSubreddit);
             getFragmentManager().beginTransaction()
                     .add(R.id.container, mSubredditFragment, "SubredditFragment")
                     .commit();
         }
+
+        getFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
+            @Override
+            public void onBackStackChanged() {
+                mSubredditFragment = getFragmentManager().findFragmentByTag("SubredditFragment");
+                mSubreddit = ((SubredditFragment) mSubredditFragment).getSubreddit();
+                mNavigationDrawerFragment.setSubreddit(mSubreddit,
+                        ((SubredditFragment) mSubredditFragment).getPrimarySortType(),
+                        ((SubredditFragment) mSubredditFragment).getSecondarySortType());
+            }
+        });
     }
     @Override
     public void onResume() {
@@ -123,11 +135,12 @@ public class MainActivity extends Activity
         Log.i("Main", subreddit + " selected");
         if ((mSubreddit == null && subreddit == null)
                 || (mSubreddit != null && mSubreddit.equals(subreddit))) {
-            mSubredditFragment.refreshData();
+            ((SubredditFragment) mSubredditFragment).refreshData();
         } else {
             mSubreddit = subreddit;
             Fragment frag = getFragmentManager().findFragmentByTag(subreddit);
             if (frag != null) {
+                mSubredditFragment = frag;
                 getFragmentManager().beginTransaction()
                         .addToBackStack(subreddit)
                         .replace(R.id.container, frag, "SubredditFragment")
@@ -140,6 +153,7 @@ public class MainActivity extends Activity
                         .commit();
             }
         }
+        mSubreddit = subreddit;
     }
 
     @Override
@@ -157,12 +171,12 @@ public class MainActivity extends Activity
 
     @Override
     public void onSortSelected(int sort) {
-        mSubredditFragment.setPrimarySort(sort);
+        ((SubredditFragment) mSubredditFragment).setPrimarySort(sort);
     }
 
     @Override
     public void onSubSortSelected(int sort) {
-        mSubredditFragment.setSecondarySort(sort);
+        ((SubredditFragment) mSubredditFragment).setSecondarySort(sort);
     }
 
     private void updateActionBar(String sub) {
@@ -171,7 +185,6 @@ public class MainActivity extends Activity
         else if (getActionBar() != null)
             getActionBar().setTitle("/r/" + sub);
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

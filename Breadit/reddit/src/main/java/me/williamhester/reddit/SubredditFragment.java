@@ -148,6 +148,18 @@ public class SubredditFragment extends Fragment {
         refreshData();
     }
 
+    public int getPrimarySortType() {
+        return mPrimarySortType;
+    }
+
+    public int getSecondarySortType() {
+        return mSecondarySortType;
+    }
+
+    public String getSubreddit() {
+        return mSubredditName;
+    }
+
     public void refreshData() {
         new RefreshUserClass(true).execute();
     }
