@@ -622,32 +622,33 @@ public class CommentFragment extends Fragment {
                 public void onClick(DialogInterface dialogInterface, int which) {
                     switch (which + offset) {
                         case 0: // Edit
-                            final View view = mCommentsListView.getChildAt(position
-                                    - mCommentsListView.getFirstVisiblePosition());
-                            View body = view.findViewById(R.id.body);
-                            body.setVisibility(View.GONE);
-                            final LinearLayout reply = (LinearLayout) view.findViewById(R.id.edited_text);
-                            final EditText replyBody = (EditText) view.findViewById(R.id.reply_body);
-                            final Button confirm = (Button) view.findViewById(R.id.confirm_reply);
-                            final Button cancel = (Button) view.findViewById(R.id.cancel_reply);
-                            v.setBeingEdited(true);
-                            replyBody.setText(v.getBody());
-                            reply.setVisibility(View.VISIBLE);
-                            confirm.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    v.setBody(replyBody.getText().toString());
-                                    new EditAsyncTask(v.getName(), position).execute();
-                                }
-                            });
-                            cancel.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    replyBody.setText("");
-                                    reply.setVisibility(View.GONE);
-                                }
-                            });
-
+                            if (position > 0 || position == 0 && mSubmission.isSelf()) {
+                                final View view = mCommentsListView.getChildAt(position
+                                        - mCommentsListView.getFirstVisiblePosition());
+                                View body = view.findViewById(R.id.body);
+                                body.setVisibility(View.GONE);
+                                final LinearLayout reply = (LinearLayout) view.findViewById(R.id.edited_text);
+                                final EditText replyBody = (EditText) view.findViewById(R.id.reply_body);
+                                final Button confirm = (Button) view.findViewById(R.id.confirm_reply);
+                                final Button cancel = (Button) view.findViewById(R.id.cancel_reply);
+                                v.setBeingEdited(true);
+                                replyBody.setText(v.getBody());
+                                reply.setVisibility(View.VISIBLE);
+                                confirm.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                        v.setBody(replyBody.getText().toString());
+                                        new EditAsyncTask(v.getName(), position).execute();
+                                    }
+                                });
+                                cancel.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View view) {
+                                        replyBody.setText("");
+                                        reply.setVisibility(View.GONE);
+                                    }
+                                });
+                            }
                             break;
                         case 1: // Delete
                             new DeleteAsyncTask(v.getName(), position).execute();
