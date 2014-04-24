@@ -9,7 +9,7 @@
         layout="@layout/list_item_post"
         android:id="@+id/submission"/>
 
-    <TextView android:id="@+id/self_text"
+    <TextView android:id="@+id/body"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textColor="@color/mid_gray"
@@ -29,6 +29,54 @@
         <Spinner android:id="@+id/sort_by"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/edited_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <EditText android:id="@+id/reply_body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/mid_gray"
+            android:hint="@string/reply_hint"/>
+
+        <View android:layout_marginTop="8dp"
+            android:layout_height="1dp"
+            android:layout_width="match_parent"
+            android:background="@color/dark_gray"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Button android:id="@+id/cancel_reply"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/cancel"
+                style="?android:buttonBarButtonStyle"
+                android:textColor="@color/mid_gray"/>
+
+            <View
+                android:layout_height="match_parent"
+                android:layout_width="1dp"
+                android:background="@color/dark_gray"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"/>
+
+            <Button android:id="@+id/confirm_reply"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/reply"
+                style="?android:buttonBarButtonStyle"
+                android:textColor="@color/mid_gray"/>
+
+        </LinearLayout>
 
     </LinearLayout>
 

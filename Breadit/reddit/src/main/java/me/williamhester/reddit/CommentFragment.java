@@ -139,7 +139,7 @@ public class CommentFragment extends Fragment {
     private View createHeaderView(LayoutInflater inflater) {
         View v = inflater.inflate(R.layout.view_comments_header, null);
 
-        TextView selfText = (TextView) v.findViewById(R.id.self_text);
+        TextView selfText = (TextView) v.findViewById(R.id.body);
 
         View subView = v.findViewById(R.id.submission);
 
@@ -154,6 +154,8 @@ public class CommentFragment extends Fragment {
         View spacer = subView.findViewById(R.id.spacer);
         mNumComments = (TextView) v.findViewById(R.id.num_comments);
         Spinner sortBy = (Spinner) v.findViewById(R.id.sort_by);
+        LinearLayout edit = (LinearLayout) v.findViewById(R.id.edited_text);
+        edit.setVisibility(View.GONE);
 
         // if the submission is a self post, we need to hide the thumbnail
         if (mSubmission.isSelf()) {
@@ -187,8 +189,8 @@ public class CommentFragment extends Fragment {
         domain.setText("(" + mSubmission.getDomain() + ")");
         points.setText(mSubmission.getScore() + " points by ");
 
-        if (mSubmission.isSelf() && mSubmission.getSelfTextHtml() != null) {
-            selfText.setText(Html.fromHtml(StringEscapeUtils.unescapeHtml4(mSubmission.getSelfTextHtml())));
+        if (mSubmission.isSelf() && mSubmission.getBodyHtml() != null) {
+            selfText.setText(Html.fromHtml(StringEscapeUtils.unescapeHtml4(mSubmission.getBodyHtml())));
             selfText.setMovementMethod(new CommentLinkMovementMethod(0));
         } else {
             selfText.setVisibility(View.GONE);
@@ -269,7 +271,7 @@ public class CommentFragment extends Fragment {
             TextView author = (TextView) convertView.findViewById(R.id.author);
             TextView score = (TextView) convertView.findViewById(R.id.points);
             TextView time = (TextView) convertView.findViewById(R.id.time);
-            TextView body = (TextView) convertView.findViewById(R.id.comment_text);
+            TextView body = (TextView) convertView.findViewById(R.id.body);
             View voteStatus = convertView.findViewById(R.id.vote_status);
             LinearLayout replyLayout = (LinearLayout) convertView.findViewById(R.id.edited_text);
             final EditText replyBody = (EditText) convertView.findViewById(R.id.reply_body);
@@ -482,6 +484,45 @@ public class CommentFragment extends Fragment {
         }
     }
 
+    private class EditAsyncTask extends AsyncTask<Void, Void, Void> {
+
+        private String mFullname;
+        private Votable mVotable;
+        private View mView;
+
+        public EditAsyncTask(String fullname, int position) {
+            mFullname = fullname;
+            if (position == 0) {
+                mVotable = mSubmission;
+            } else {
+                mVotable = mCommentsList.get(position - 1);
+            }
+            mView = mCommentsListView.getChildAt(position
+                    - mCommentsListView.getFirstVisiblePosition());
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            List<NameValuePair> apiParams = new ArrayList<NameValuePair>();
+            apiParams.add(new BasicNameValuePair("thing_id", mFullname));
+            apiParams.add(new BasicNameValuePair("text", mVotable.getBody()));
+            apiParams.add(new BasicNameValuePair("api_type", "json"));
+            Log.i("Edit", Utilities.post(apiParams, "http://www.reddit.com/api/editusertext", mAccount));
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            TextView body = (TextView) mView.findViewById(R.id.body);
+            LinearLayout reply = (LinearLayout) mView.findViewById(R.id.edited_text);
+            body.setVisibility(View.VISIBLE);
+            reply.setVisibility(View.GONE);
+            mVotable.setBeingEdited(false);
+            mVotable.setBodyHtml(mVotable.getBody());
+            body.setText(mVotable.getBody() + "\n\n");
+        }
+    }
+
     private class SwipeDetector extends GestureDetector.SimpleOnGestureListener {
 
         private static final int SWIPE_MIN_DISTANCE = 170;
@@ -493,7 +534,7 @@ public class CommentFragment extends Fragment {
             int position = mCommentsListView.pointToPosition((int) ev.getX(), (int) ev.getY());
             if (position > 0 && !mLinkIsPressed) {
                 View v = mCommentsListView.getChildAt(position - mCommentsListView.getFirstVisiblePosition());
-                TextView commentText = (TextView) v.findViewById(R.id.comment_text);
+                TextView commentText = (TextView) v.findViewById(R.id.body);
                 if (commentText.getVisibility() == View.VISIBLE) {
                     commentText.setVisibility(View.GONE);
                     mCommentAdapter.getItem(position - HEADER_VIEW_COUNT).setHidden(true);
@@ -581,6 +622,31 @@ public class CommentFragment extends Fragment {
                 public void onClick(DialogInterface dialogInterface, int which) {
                     switch (which + offset) {
                         case 0: // Edit
+                            final View view = mCommentsListView.getChildAt(position
+                                    - mCommentsListView.getFirstVisiblePosition());
+                            View body = view.findViewById(R.id.body);
+                            body.setVisibility(View.GONE);
+                            final LinearLayout reply = (LinearLayout) view.findViewById(R.id.edited_text);
+                            final EditText replyBody = (EditText) view.findViewById(R.id.reply_body);
+                            final Button confirm = (Button) view.findViewById(R.id.confirm_reply);
+                            final Button cancel = (Button) view.findViewById(R.id.cancel_reply);
+                            v.setBeingEdited(true);
+                            replyBody.setText(v.getBody());
+                            reply.setVisibility(View.VISIBLE);
+                            confirm.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    v.setBody(replyBody.getText().toString());
+                                    new EditAsyncTask(v.getName(), position).execute();
+                                }
+                            });
+                            cancel.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    replyBody.setText("");
+                                    reply.setVisibility(View.GONE);
+                                }
+                            });
 
                             break;
                         case 1: // Delete

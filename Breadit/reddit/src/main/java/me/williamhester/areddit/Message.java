@@ -90,6 +90,26 @@ public class Message implements Votable, Parcelable {
         return mBody;
     }
 
+    @Override
+    public void setBody(String body) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setBeingEdited(boolean b) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isBeingEdited() {
+        return false;
+    }
+
+    @Override
+    public void setBodyHtml(String body) {
+        throw new UnsupportedOperationException();
+    }
+
     public String getBodyHtml() {
         return mBodyHtml;
     }

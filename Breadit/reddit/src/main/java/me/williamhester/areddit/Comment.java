@@ -215,6 +215,11 @@ public class Comment extends Thing implements Parcelable, Votable {
         return mBody;
     }
 
+    @Override
+    public void setBody(String body) {
+       mBody = body;
+    }
+
     public String getSubreddit() {
         return mSubreddit;
     }
@@ -289,6 +294,11 @@ public class Comment extends Thing implements Parcelable, Votable {
 
     public boolean isBeingEdited() {
         return mIsBeingEdited;
+    }
+
+    @Override
+    public void setBodyHtml(String body) {
+        mBodyHtml = body;
     }
 
 //    public void setReplyText(String mReplyText) {

@@ -14,5 +14,10 @@ public interface Votable {
     public void setVoteStatus(int status);
     public long getScore();
     public String getAuthor();
+    public String getBody();
+    public void setBody(String body);
+    public void setBeingEdited(boolean b);
+    public boolean isBeingEdited();
+    public void setBodyHtml(String body);
 
 }

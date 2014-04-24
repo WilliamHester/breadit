@@ -64,6 +64,7 @@ public class Submission extends Thing implements Parcelable, Votable {
     private long mCreatedUtc;
     private long mUps;
     private long mDowns;
+    private boolean mIsBeingEdited = false;
 
     private Submission(JsonObject data) {
         super(data);
@@ -187,12 +188,20 @@ public class Submission extends Thing implements Parcelable, Votable {
         return mSubreddit;
     }
 
-    public String getSelfTextHtml() {
+    public String getBodyHtml() {
         return mSelftextHtml;
     }
 
-    public String getSelfText() {
+    public String getBody() {
         return mSelftext;
+    }
+
+    public void setBody(String body) {
+        mSelftext = body;
+    }
+
+    public void setBodyHtml(String body) {
+        mSelftextHtml = body;
     }
 
     public int getVoteStatus() {
@@ -250,6 +259,14 @@ public class Submission extends Thing implements Parcelable, Votable {
 
     public boolean isMeta() {
         return mUrl.contains("reddit.com") && mUrl.contains("comments");
+    }
+
+    public void setBeingEdited(boolean b) {
+        mIsBeingEdited = b;
+    }
+
+    public boolean isBeingEdited() {
+        return mIsBeingEdited;
     }
 
     /**

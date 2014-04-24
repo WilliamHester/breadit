@@ -11,9 +11,11 @@ public class Thing {
     protected Thing() { }
 
     protected Thing(JsonObject data) {
-        mId = data.getAsJsonObject("data").get("id").getAsString();
-        mName = data.getAsJsonObject("data").get("name").getAsString();
-        mKind = data.get("kind").getAsString();
+        if (data != null) {
+            mId = data.getAsJsonObject("data").get("id").getAsString();
+            mName = data.getAsJsonObject("data").get("name").getAsString();
+            mKind = data.get("kind").getAsString();
+        }
     }
 
     protected JsonObject mData;

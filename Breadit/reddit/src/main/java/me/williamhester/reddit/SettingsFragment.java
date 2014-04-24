@@ -25,7 +25,6 @@ public class SettingsFragment extends PreferenceFragment {
     private Preference mLogOut;
     private Preference mSwitchUsers;
     private Account mAccount;
-    private SharedPreferences mPrefs;
 
 
     public static SettingsFragment newInstance(Account account) {
@@ -42,7 +41,6 @@ public class SettingsFragment extends PreferenceFragment {
         getPreferenceManager().setSharedPreferencesName("preferences");
         // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.preferences);
-        mPrefs = getActivity().getSharedPreferences("preferences", Context.MODE_PRIVATE);
 
         mClearHistory = findPreference("pref_clear_history");
         mLogIn = findPreference("pref_login");

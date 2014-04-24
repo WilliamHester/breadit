@@ -34,15 +34,16 @@ public class Subreddit extends Thing implements Parcelable {
 
     public Subreddit(JsonObject data) {
         super(data);
-        data = data.get("data").getAsJsonObject();
+        if (data != null) {
+            data = data.get("data").getAsJsonObject();
 //        mAccountsActive = data.get("accounts_active").getAsInt();
 //        mCommentScoreHideMins = data.get("comment_score_hide_mins").getAsInt();
-        mCreated = data.get("created").getAsLong();
-        mCreatedUtc = data.get("created_utc").getAsLong();
-        mSubscribers = data.get("subscribers").getAsLong();
+            mCreated = data.get("created").getAsLong();
+            mCreatedUtc = data.get("created_utc").getAsLong();
+            mSubscribers = data.get("subscribers").getAsLong();
 //        mDescription = data.get("description").getAsString();
 //        mDescriptionHtml = data.get("description_html").getAsString();
-        mDisplayName = data.get("display_name").getAsString();
+            mDisplayName = data.get("display_name").getAsString();
 //        mHeaderImg = data.get("header_img").getAsString();
 //        mHeaderTitle = data.get("header_title").getAsString();
 //        mPublicDescription = data.get("public_description").getAsString();
@@ -50,15 +51,16 @@ public class Subreddit extends Thing implements Parcelable {
 //        mSubmitLinkLabel = data.get("submit_link_label").getAsString();
 //        mSubmitTextLabel = data.get("submit_text_label").getAsString();
 //        mSubredditType = data.get("subreddit_type").getAsString();
-        mTitle = data.get("title").getAsString();
-        mUrl = data.get("url").getAsString();
-        mOver18 = data.get("over18").getAsBoolean();
-        mPublicTraffic = data.get("public_traffic").getAsBoolean();
-        if (!data.get("user_is_banned").isJsonNull()) {
-            mUserIsBanned = data.get("user_is_banned").getAsBoolean();
-            mUserIsContributor = data.get("user_is_contributor").getAsBoolean();
-            mUserIsModerator = data.get("user_is_moderator").getAsBoolean();
-            mUserIsSubscriber = data.get("user_is_subscriber").getAsBoolean();
+            mTitle = data.get("title").getAsString();
+            mUrl = data.get("url").getAsString();
+            mOver18 = data.get("over18").getAsBoolean();
+            mPublicTraffic = data.get("public_traffic").getAsBoolean();
+            if (!data.get("user_is_banned").isJsonNull()) {
+                mUserIsBanned = data.get("user_is_banned").getAsBoolean();
+                mUserIsContributor = data.get("user_is_contributor").getAsBoolean();
+                mUserIsModerator = data.get("user_is_moderator").getAsBoolean();
+                mUserIsSubscriber = data.get("user_is_subscriber").getAsBoolean();
+            }
         }
     }
 

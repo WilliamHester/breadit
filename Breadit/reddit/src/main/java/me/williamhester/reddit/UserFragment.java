@@ -168,7 +168,7 @@ public class UserFragment extends Fragment {
                 TextView author = (TextView) convertView.findViewById(R.id.author);
                 TextView score = (TextView) convertView.findViewById(R.id.points);
                 TextView time = (TextView) convertView.findViewById(R.id.time);
-                TextView body = (TextView) convertView.findViewById(R.id.comment_text);
+                TextView body = (TextView) convertView.findViewById(R.id.body);
                 View voteStatus = convertView.findViewById(R.id.vote_status);
                 LinearLayout replyLayout = (LinearLayout) convertView.findViewById(R.id.edited_text);
 //                final EditText replyBody = (EditText) convertView.findViewById(R.id.reply_body);
