@@ -1,5 +1,6 @@
 package me.williamhester.areddit;
 
+import android.util.Log;
 import android.widget.ListView;
 
 /**
@@ -47,7 +48,7 @@ public class SubmissionsListViewHelper {
         } else if (subredditName.equals("")) {
             append = subredditName;
         } else {
-            append = "r/" + subredditName;
+            append = "r/" + subredditName + "/";
         }
 
         String urlString = "http://www.reddit.com/" + append;
@@ -100,6 +101,8 @@ public class SubmissionsListViewHelper {
         } else if (before != null) {
             urlString += "before=" + before;
         }
+
+        Log.i("Submission", urlString);
 
         mUrl = urlString;
         mAccount = account;

@@ -192,7 +192,7 @@ public class SetupActivity extends FragmentActivity {
                 b = new Bundle();
 
                 Account account = Account.newAccount(mUsername.getText().toString(),
-                        mPassword.getText().toString());
+                        mPassword.getText().toString(), mContext);
                 b.putParcelable("account", account);
                 return b;
             } catch (MalformedURLException e) {

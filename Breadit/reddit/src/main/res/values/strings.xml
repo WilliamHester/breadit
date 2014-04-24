@@ -89,7 +89,7 @@
     <string name="user_options">User Options</string>
     <string name="login">Log In</string>
     <string name="logout">Log Out</string>
-    <string name="switch_users">Switch Users</string>
+    <string name="switch_users">Switch users or log out</string>
     <string name="clear_history">Clear History</string>
     <string name="title_activity_settings">Settings</string>
     <string name="are_you_sure">Are you sure you want to clear your history?</string>

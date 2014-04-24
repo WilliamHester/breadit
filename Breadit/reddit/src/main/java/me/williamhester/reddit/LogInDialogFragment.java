@@ -60,12 +60,6 @@ public class LogInDialogFragment extends DialogFragment {
         return v;
     }
 
-    /*
-    @Override
-    public void onSavedInstanceState(Bundle savedInstanceState) {
-
-    }*/
-
     private class LoginUserTask extends AsyncTask<Void, Void, Account> {
         private Dialog mDialog;
 
@@ -89,7 +83,7 @@ public class LogInDialogFragment extends DialogFragment {
                 b = new Bundle();
 
                 Account account = Account.newAccount(mUsername.getText().toString(),
-                        mPassword.getText().toString());
+                        mPassword.getText().toString(), getActivity());
                 b.putParcelable("account", account);
                 return account;
             } catch (MalformedURLException e) {

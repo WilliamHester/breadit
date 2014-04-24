@@ -1,5 +1,6 @@
 package me.williamhester.areddit;
 
+import android.content.Context;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -22,6 +23,7 @@ import java.util.Scanner;
 import java.util.TreeSet;
 
 import me.williamhester.areddit.utils.Utilities;
+import me.williamhester.reddit.R;
 
 public class Account implements Parcelable {
 
@@ -151,7 +153,8 @@ public class Account implements Parcelable {
      *
      * @return returns a new Account object.
      */
-    public static Account newAccount(String username, String password) throws IOException{
+    public static Account newAccount(String username, String password, Context context)
+            throws IOException{
         Account a = new Account();
         a.mUsername = username;
         HashMap<String, String> hashCookiePair = hashCookiePair(username, password);
@@ -162,10 +165,19 @@ public class Account implements Parcelable {
         List<Subreddit> subs = a.getSubscribedSubreddits();
         a.mSubreddits = new ArrayList<String>();
         StringBuilder sb = new StringBuilder();
-        for (Subreddit s : subs) {
-            a.mSubreddits.add(s.getDisplayName());
-            sb.append(s.getDisplayName());
-            sb.append(',');
+        if (subs != null) {
+            for (Subreddit s : subs) {
+                a.mSubreddits.add(s.getDisplayName());
+                sb.append(s.getDisplayName());
+                sb.append(',');
+            }
+        } else {
+            String[] defaults = context.getResources().getStringArray(R.array.default_subreddits);
+            for (String s : defaults) {
+                a.mSubreddits.add(s);
+                sb.append(s);
+                sb.append(",");
+            }
         }
         a.mSubredditsString = sb.toString();
 
@@ -178,57 +190,6 @@ public class Account implements Parcelable {
         }
         return a;
     }
-
-	/**
-	 * This function submits a link to the specified subreddit.
-	 * 
-	 * @param title The title of the submission
-	 * @param link The link to the submission
-	 * @param subreddit The subreddit to submit to
-	 * @throws java.io.IOException If connection fails
-     *
-     * @return returns a boolean value representing the success of the submission
-	 */
-	public JsonObject submitLink(String title, String link, String subreddit)
-			throws IOException {
-		JsonObject object = new JsonParser().parse(submit(title, link, false, subreddit)).getAsJsonObject();
-		if (object.toString().contains(".error.USER_REQUIRED")) {
-//			Account not logged in
-            return null;
-		} else if (object.toString().contains(".error.RATELIMIT.field-ratelimit")) {
-//			Account hit ratelimit
-            return null;
-		} else if (object.toString().contains(".error.ALREADY_SUB.field-url")) {
-//			That link has already been submitted.
-            return null;
-		}
-        return object;
-	}
-
-	/**
-	 * This function submits a self post to the specified subreddit.
-	 * 
-	 * @param title The title of the submission
-	 * @param text The text of the submission
-	 * @param subreddit The subreddit to submit to
-	 * @throws java.io.IOException If connection fails
-     * @return returns the JsonObject of the submission that was created.
-	 */
-	public JsonObject submitSelfPost(String title, String text, String subreddit)
-			throws IOException {
-        JsonObject object = new JsonParser().parse(submit(title, text, true, subreddit)).getAsJsonObject();
-        if (object.toString().contains(".error.USER_REQUIRED")) {
-//			Account not logged in
-            return null;
-        } else if (object.toString().contains(".error.RATELIMIT.field-ratelimit")) {
-//			Account hit ratelimit
-            return null;
-        } else if (object.toString().contains(".error.ALREADY_SUB.field-url")) {
-//			That link has already been submitted.
-            return null;
-        }
-        return object;
-	}
 
 	public String getUsername() {
 		return mUsername;
@@ -355,36 +316,6 @@ public class Account implements Parcelable {
         return true;
     }
 
-	/**
-	 * This function submits a link or self post.
-	 * 
-	 * @param title The title of the submission
-	 * @param linkOrText The link of the submission or text
-	 * @param selfPost If this submission is a self post
-	 * @param subreddit Which subreddit to submit this to
-	 * @return a String that can be parsed into a JsonObject
-     *
-	 * @throws java.io.IOException If connection fails
-	 */
-	private String submit(String title, String linkOrText,
-			boolean selfPost, String subreddit) throws IOException {
-        List<NameValuePair> apiParams = new ArrayList<NameValuePair>();
-        apiParams.add(new BasicNameValuePair("title", title));
-        if (selfPost) {
-            apiParams.add(new BasicNameValuePair("text", linkOrText));
-            apiParams.add(new BasicNameValuePair("kind", "self"));
-        } else {
-            apiParams.add(new BasicNameValuePair("url", linkOrText));
-            apiParams.add(new BasicNameValuePair("kind", "link"));
-        }
-        apiParams.add(new BasicNameValuePair("sr", subreddit));
-        apiParams.add(new BasicNameValuePair("uh", mModhash));
-
-		return Utilities.post(apiParams, "http://www.reddit.com/api/submit", mCookie, mModhash);
-	}
-
-
-
     /**
      * This loads in all of the subreddits for a user, but due to the fact that Reddit limits the number that can be
      * loaded at one time to 25, it must be iterative.
@@ -400,7 +331,7 @@ public class Account implements Parcelable {
 
         JsonObject object = new JsonParser().parse(Utilities.get(null,
                 "http://www.reddit.com/subreddits/mine/subscriber.json",
-                getCookie(), getModhash())).getAsJsonObject();
+                this)).getAsJsonObject();
         JsonObject data = object.get("data").getAsJsonObject();
         JsonArray array = data.get("children").getAsJsonArray();
 
@@ -418,7 +349,7 @@ public class Account implements Parcelable {
 
             object = new JsonParser().parse(Utilities.get(null,
                     "http://www.reddit.com/subreddits/mine/subscriber.json?after=" + after,
-                    getCookie(), getModhash())).getAsJsonObject();
+                    this)).getAsJsonObject();
             data = object.get("data").getAsJsonObject();
             array = data.get("children").getAsJsonArray();
 
@@ -433,8 +364,10 @@ public class Account implements Parcelable {
             else
                 after = null;
         }
-
-        return subreddits;
+        if (subreddits.size() > 0)
+            return subreddits;
+        else
+            return null;
     }
 
     @Override

@@ -603,15 +603,18 @@ public class CommentFragment extends Fragment {
             if (mAccount != null && mAccount.getUsername().equals(v.getAuthor())) {
                 options.add(getResources().getString(R.string.edit));
                 options.add(getResources().getString(R.string.delete));
+                options.add(getResources().getString(R.string.reply));
+                options.add(getResources().getString(R.string.message_user));
+                options.add(getResources().getString(R.string.save));
                 offset = 0;
             } else if (mAccount != null) { // User logged in, but not OP
+                options.add(getResources().getString(R.string.reply));
+                options.add(getResources().getString(R.string.message_user));
+                options.add(getResources().getString(R.string.save));
                 offset = 2;
             } else { // User not logged in (so definitely not OP)
                 offset = 5;
             }
-            options.add(getResources().getString(R.string.reply));
-            options.add(getResources().getString(R.string.message_user));
-            options.add(getResources().getString(R.string.save));
             options.add(getResources().getString(R.string.view_profile));
             AlertDialog.Builder builder = new AlertDialog.Builder(mContext,
                     android.R.style.Theme_Holo_Dialog);

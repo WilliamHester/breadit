@@ -261,11 +261,14 @@ public class NavigationDrawerFragment extends Fragment {
             if (mAccount == null) {
                 mCheckbox.setVisibility(View.GONE);
             } else if (subreddit.equals("FrontPage") || subreddit.equals("")) {
-                mCallbacks.onNavigationDrawerItemSelected(null);
                 mCheckbox.setVisibility(View.GONE);
             } else {
-                mCallbacks.onNavigationDrawerItemSelected(subreddit);
                 mCheckbox.setVisibility(View.VISIBLE);
+            }
+            if (subreddit.equals("FrontPage") || subreddit.equals("")) {
+                mCallbacks.onNavigationDrawerItemSelected(null);
+            } else {
+                mCallbacks.onNavigationDrawerItemSelected(subreddit);
             }
             mCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
@@ -354,6 +357,8 @@ public class NavigationDrawerFragment extends Fragment {
                 }
                 return isNew;
             } catch (IOException e) {
+                e.printStackTrace();
+            } catch (NullPointerException e) {
                 e.printStackTrace();
             }
             return false;

@@ -25,11 +25,11 @@
             android:key="pref_hide_nsfw"
             android:title="@string/hide_nsfw"
             android:defaultValue="true" />
-        <CheckBoxPreference
-            android:key="pref_warn_nsfw"
-            android:title="@string/warn_nsfw_title"
-            android:summary="@string/warn_nsfw"
-            android:defaultValue="true" />
+        <!--<CheckBoxPreference-->
+            <!--android:key="pref_warn_nsfw"-->
+            <!--android:title="@string/warn_nsfw_title"-->
+            <!--android:summary="@string/warn_nsfw"-->
+            <!--android:defaultValue="true" />-->
     </PreferenceCategory>
     <PreferenceCategory
         android:title="@string/user_options"
@@ -37,9 +37,9 @@
         <Preference
             android:title="@string/login"
             android:key="pref_login" />
-        <Preference
-            android:title="@string/logout"
-            android:key="pref_logout" />
+        <!--<Preference-->
+            <!--android:title="@string/logout"-->
+            <!--android:key="pref_logout" />-->
         <Preference
             android:title="@string/switch_users"
             android:key="pref_switch_users" />

@@ -54,7 +54,6 @@ public class SettingsFragment extends PreferenceFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_settings, null, false);
     }
 
@@ -158,7 +157,7 @@ public class SettingsFragment extends PreferenceFragment {
             for (int i = 0; i < accounts.size(); i++) {
                 accountNames[i] = accounts.get(i).getUsername();
             }
-            accountNames[accounts.size()] = "Anonymous user (Logged out)";
+            accountNames[accounts.size()] = "Log out";
             final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(),
                     android.R.style.Theme_Holo_Dialog);
             int selection = 0;

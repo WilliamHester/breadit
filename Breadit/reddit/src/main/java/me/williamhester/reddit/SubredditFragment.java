@@ -85,8 +85,7 @@ public class SubredditFragment extends Fragment {
             mNames = new HashSet<String>();
             mSubmissionList = new ArrayList<Submission>();
         }
-        SharedPreferences prefs = mContext.getSharedPreferences("preferences", Context.MODE_PRIVATE);
-        mHideNsfw = prefs.getBoolean("pref_hide_nsfw", true);
+        loadPrefs();
     }
 
     @Override
@@ -193,10 +192,14 @@ public class SubredditFragment extends Fragment {
             } catch (NullPointerException e) {
                 Log.e("Breadit", "Error opening database");
             }
+        } else {
+            mAccount = null;
         }
-        mSubmissionsAdapter.notifyDataSetChanged();
+        if (getActivity() != null)
+            getActivity().invalidateOptionsMenu();
         if (oldId != id || oldHideViewed != mHideViewed) {
             new RefreshUserClass(true).execute();
+            mSubmissions.invalidateViews();
         }
     }
 
@@ -363,42 +366,50 @@ public class SubredditFragment extends Fragment {
 
         @Override
         protected void onPostExecute(List<Submission> result) {
-            if (result != null) {
-                if (mRefreshList) {
-                    mSubmissionList.clear();
-                    mNames.clear();
-                }
-                if (result.size() < 25) {
-                    mSubmissions.removeFooterView(mFooterView);
-                }
-                for (Submission s : result) {
-                    if (!mNames.contains(s.getName()) && (!mHideNsfw || !s.isNsfw())
-                            && !(mHideViewed && mAccount != null
-                            && mAccount.hasVisited(s.getName()))) {
-                        mSubmissionList.add(s);
-                        mNames.add(s.getName());
+            try {
+                if (result != null) {
+                    if (mRefreshList) {
+                        mSubmissionList.clear();
+                        mNames.clear();
                     }
+                    if (result.size() < 25) {
+                        mSubmissions.removeFooterView(mFooterView);
+                    }
+                    for (Submission s : result) {
+                        if (!mNames.contains(s.getName()) && (!mHideNsfw || !s.isNsfw())
+                                && !(mHideViewed && mAccount != null
+                                && mAccount.hasVisited(s.getName()))) {
+                            mSubmissionList.add(s);
+                            mNames.add(s.getName());
+                        }
+                    }
+                    mSubmissionsAdapter.notifyDataSetChanged();
+                } else if (mRefreshList) {
+                    try {
+                        Toast.makeText(mContext, R.string.failed_to_refresh, Toast.LENGTH_LONG).show();
+                    } catch (NullPointerException e) {
+                        Log.e("Breadit", "Something bad happened.");
+                    }
+                } else if (mNothingHere) {
+                    TextView loading = (TextView) mFooterView.findViewById(R.id.loading_text);
+                    if (loading != null)
+                        loading.setText(R.string.nothing_here);
+                    ProgressBar progressBar = (ProgressBar) mFooterView.findViewById(R.id.progress_bar);
+                    if (progressBar != null)
+                        progressBar.setVisibility(View.GONE);
+                } else if (mFailedToLoad) {
+                    TextView loading = (TextView) mFooterView.findViewById(R.id.loading_text);
+                    if (loading != null)
+                        loading.setText(R.string.failed_to_load);
+                    ProgressBar progressBar = (ProgressBar) mFooterView.findViewById(R.id.progress_bar);
+                    if (progressBar != null)
+                        progressBar.setVisibility(View.GONE);
+                    mFailedToLoad = true;
                 }
-                mSubmissionsAdapter.notifyDataSetChanged();
-            } else if (mRefreshList) {
-                Toast.makeText(mContext, R.string.failed_to_refresh, Toast.LENGTH_LONG).show();
-            } else if (mNothingHere) {
-                TextView loading = (TextView) mFooterView.findViewById(R.id.loading_text);
-                if (loading != null)
-                    loading.setText(R.string.nothing_here);
-                ProgressBar progressBar = (ProgressBar) mFooterView.findViewById(R.id.progress_bar);
-                if (progressBar != null)
-                    progressBar.setVisibility(View.GONE);
-            } else if (mFailedToLoad) {
-                TextView loading = (TextView) mFooterView.findViewById(R.id.loading_text);
-                if (loading != null)
-                    loading.setText(R.string.failed_to_load);
-                ProgressBar progressBar = (ProgressBar) mFooterView.findViewById(R.id.progress_bar);
-                if (progressBar != null)
-                    progressBar.setVisibility(View.GONE);
-                mFailedToLoad = true;
+                mSwipeRefreshLayout.setRefreshing(false);
+            } catch (NullPointerException e) {
+                Log.e("Breadit", "Something bad happened");
             }
-            mSwipeRefreshLayout.setRefreshing(false);
         }
     }
 

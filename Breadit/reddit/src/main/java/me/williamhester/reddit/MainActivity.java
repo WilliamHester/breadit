@@ -77,12 +77,27 @@ public class MainActivity extends Activity
 
         updateActionBar(null);
 
-        getFragmentManager().beginTransaction()
-                .replace(R.id.navigation_drawer_container, mNavigationDrawerFragment)
-                .commit();
-        getFragmentManager().beginTransaction()
-                .replace(R.id.container, mSubredditFragment)
-                .commit();
+//        if (getFragmentManager().findFragmentByTag("NavigationDrawer") != null) {
+//            getFragmentManager().beginTransaction()
+//                    .replace(R.id.navigation_drawer_container, getFragmentManager()
+//                            .findFragmentByTag("NavigationDrawer"), "NavigationDrawer")
+//                    .commit();
+//        } else {
+            getFragmentManager().beginTransaction()
+                    .add(R.id.navigation_drawer_container, mNavigationDrawerFragment,
+                            "NavigationDrawer")
+                    .commit();
+//        }
+        if (getFragmentManager().findFragmentByTag("SubredditFragment") != null) {
+            getFragmentManager().beginTransaction()
+                    .replace(R.id.container, getFragmentManager()
+                            .findFragmentByTag("SubredditFragment"), "SubredditFragment")
+                    .commit();
+        } else {
+            getFragmentManager().beginTransaction()
+                    .add(R.id.container, mSubredditFragment, "SubredditFragment")
+                    .commit();
+        }
     }
     @Override
     public void onResume() {
@@ -105,6 +120,7 @@ public class MainActivity extends Activity
 
     @Override
     public void onNavigationDrawerItemSelected(String subreddit) {
+        Log.i("Main", subreddit + " selected");
         if ((mSubreddit == null && subreddit == null)
                 || (mSubreddit != null && mSubreddit.equals(subreddit))) {
             mSubredditFragment.refreshData();
@@ -114,13 +130,13 @@ public class MainActivity extends Activity
             if (frag != null) {
                 getFragmentManager().beginTransaction()
                         .addToBackStack(subreddit)
-                        .replace(R.id.container, frag)
+                        .replace(R.id.container, frag, "SubredditFragment")
                         .commit();
             } else {
                 mSubredditFragment = SubredditFragment.newInstance(mAccount, subreddit);
                 getFragmentManager().beginTransaction()
                         .addToBackStack(subreddit)
-                        .replace(R.id.container, mSubredditFragment)
+                        .replace(R.id.container, mSubredditFragment, "SubredditFragment")
                         .commit();
             }
         }
