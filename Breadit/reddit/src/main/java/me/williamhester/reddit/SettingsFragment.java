@@ -91,7 +91,62 @@ public class SettingsFragment extends PreferenceFragment {
             fragment.show(getFragmentManager(), "login");
         }
         else if(preference == mLogOut) {
-
+            Log.i("SettingsFragment", "logout");
+            final List<Account> accounts;
+            AccountDataSource dataSource = new AccountDataSource(getActivity());
+            dataSource.open();
+            accounts = dataSource.getAllAccounts();
+            dataSource.close();
+            final String[] accountNames = new String[accounts.size() + 1];
+            for (int i = 0; i < accounts.size(); i++) {
+                accountNames[i] = accounts.get(i).getUsername();
+            }
+            final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(),
+                    android.R.style.Theme_Holo_Dialog);
+            int selection = 0;
+            final SharedPreferences prefs = getActivity()
+                    .getSharedPreferences("preferences", Context.MODE_PRIVATE);
+            long currentId = prefs.getLong("accountId", -1);
+            if (currentId != -1) {
+                for (int i = 0; i < accounts.size(); i++) {
+                    if (currentId == accounts.get(i).getId()) {
+                        selection = i;
+                    }
+                }
+            } else {
+                selection = accountNames.length - 1;
+            }
+            builder.setTitle(R.string.select_to_remove)
+                    .setSingleChoiceItems(accountNames, selection,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+//                            selection = i;
+                                }
+                            })
+                    .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            // Nothing
+                        }
+                    })
+                    .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            long id = -1;
+                            int selection = ((AlertDialog)dialogInterface)
+                                    .getListView().getCheckedItemPosition();
+                            if (selection < accounts.size()) {
+                                id = accounts.get(selection).getId();
+                            }
+                            SharedPreferences.Editor editor = prefs.edit();
+                            editor.putLong("accountId", id);
+                            editor.commit();
+                        }
+                    });
+            Dialog d = builder.create();
+            d.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            d.show();
         }
         else if(preference == mSwitchUsers) {
             final List<Account> accounts;
