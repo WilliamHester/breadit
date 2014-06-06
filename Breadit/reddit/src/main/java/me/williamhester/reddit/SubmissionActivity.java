@@ -138,9 +138,9 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
         mTabView = (TabView) v.findViewById(R.id.tabs);
         comments = new CommentFragment();
         comments.setArguments(args);
-        mTabView.addTab(comments, TabView.TAB_TYPE_MAIN, commentTab, "comments");
+        mTabView.addTab(comments, TabView.TAB_TYPE_MAIN, commentTab, COMMENT_TAB);
         if (mSubmission == null) {
-            mTabView.selectTab("comments");
+            mTabView.selectTab(COMMENT_TAB);
             comments.setOnSubmissionLoadedListener(new CommentFragment.OnSubmissionLoaded() {
                 @Override
                 public void onSubmissionLoaded(Submission submission) {
@@ -183,7 +183,7 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
             mTabView.addTab(content, TabView.TAB_TYPE_MAIN, contentTab, CONTENT_TAB);
             mTabView.selectTab(mCurrentTag);
         } else {
-            mTabView.selectTab("comments");
+            mTabView.selectTab(COMMENT_TAB);
         }
 
         ActionBar actionBar = getActionBar();

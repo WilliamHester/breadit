@@ -104,13 +104,11 @@ public class CommentFragment extends Fragment {
                 return mGestureDetector.onTouchEvent(motionEvent);
             }
         };
-        if (v != null) {
-            mCommentsListView = (ListView) v.findViewById(R.id.comments);
-        }
-        if (mHeaderView == null) {
+        mCommentsListView = (ListView) v.findViewById(R.id.comments);
+        if (mHeaderView == null && mSubmission != null) {
             mHeaderView = createHeaderView(inflater);
         }
-        if (mCommentsListView.getHeaderViewsCount() == 0) {
+        if (mCommentsListView.getHeaderViewsCount() == 0 && mHeaderView != null) {
             mCommentsListView.addHeaderView(mHeaderView);
         }
         mCommentAdapter = new CommentArrayAdapter(mContext);
@@ -250,7 +248,6 @@ public class CommentFragment extends Fragment {
     }
 
     public void scrollToTop() {
-        Log.i("CommentFragment", "" + mCommentsList.size());
         mCommentsListView.smoothScrollToPositionFromTop(0, 0,
                 mCommentsListView.getFirstVisiblePosition() * 5);
     }
