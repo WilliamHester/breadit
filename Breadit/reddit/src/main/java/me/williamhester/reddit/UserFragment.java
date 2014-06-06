@@ -54,8 +54,6 @@ public class UserFragment extends Fragment {
     private TextView mCommentKarma;
     private TextView mLinkKarma;
     private TextView mCakeDay;
-    private View mHeaderView;
-    private int mFilterType = Message.ALL;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -113,22 +111,22 @@ public class UserFragment extends Fragment {
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 switch (i) {
                     case 0:
-                        mFilterType = Message.ALL;
-                        break;
-                    case 1:
-                        mFilterType = Message.UNREAD;
-                        break;
-                    case 2:
-                        mFilterType = Message.MESSAGES;
-                        break;
-                    case 3:
-                        mFilterType = Message.COMMENT_REPLIES;
-                        break;
-                    case 4:
-                        mFilterType = Message.POST_REPLIES;
-                        break;
-                    case 5:
-                        mFilterType = Comment.OLD;
+//                        mFilterType = Message.ALL;
+//                        break;
+//                    case 1:
+//                        mFilterType = Message.UNREAD;
+//                        break;
+//                    case 2:
+//                        mFilterType = Message.MESSAGES;
+//                        break;
+//                    case 3:
+//                        mFilterType = Message.COMMENT_REPLIES;
+//                        break;
+//                    case 4:
+//                        mFilterType = Message.POST_REPLIES;
+//                        break;
+//                    case 5:
+//                        mFilterType = Comment.OLD;
                         break;
                 }
                 mSubmittedThings.clear();
@@ -171,41 +169,8 @@ public class UserFragment extends Fragment {
                 TextView body = (TextView) convertView.findViewById(R.id.body);
                 View voteStatus = convertView.findViewById(R.id.vote_status);
                 LinearLayout replyLayout = (LinearLayout) convertView.findViewById(R.id.edited_text);
-//                final EditText replyBody = (EditText) convertView.findViewById(R.id.reply_body);
-//                final Button confirm = (Button) convertView.findViewById(R.id.confirm_reply);
-//                final Button cancel = (Button) convertView.findViewById(R.id.cancel_reply);
-
-//                if (((Comment) getItem(position)).isBeingEdited()) {
-//                    confirm.setEnabled(true);
-//                    cancel.setEnabled(true);
-//                    replyBody.setEnabled(true);
-//                    body.setVisibility(View.GONE);
-//                    replyLayout.setVisibility(View.VISIBLE);
-//                    confirm.setOnClickListener(new View.OnClickListener() {
-//                        @Override
-//                        public void onClick(View view) {
-//                            if (position == 1)
-//                                new ReplyAsyncTask(replyBody.getText().toString(),
-//                                        mSubmission.getName()).execute();
-//                            else if (position > 1)
-//                                new ReplyAsyncTask(replyBody.getText().toString(),
-//                                        getItem(position - 1).getName()).execute();
-//                            confirm.setEnabled(false);
-//                            cancel.setEnabled(false);
-//                            replyBody.setEnabled(false);
-//                        }
-//                    });
-//                    cancel.setOnClickListener(new View.OnClickListener() {
-//                        @Override
-//                        public void onClick(View view) {
-//                            mCommentsList.remove(position);
-//                            mCommentAdapter.notifyDataSetChanged();
-//                        }
-//                    });
-//                } else {
-                    replyLayout.setVisibility(View.GONE);
-                    body.setVisibility(View.VISIBLE);
-//                }
+                replyLayout.setVisibility(View.GONE);
+                body.setVisibility(View.VISIBLE);
 
                 author.setText(Utilities.removeEndQuotes(((Comment) getItem(position))
                         .getAuthor()));
@@ -214,7 +179,6 @@ public class UserFragment extends Fragment {
                         .getCreatedUtc()));
                 body.setText(Html.fromHtml(StringEscapeUtils
                         .unescapeHtml4(((Comment)getItem(position)).getBodyHtml())));
-//                body.setMovementMethod(new CommentLinkMovementMethod(position + HEADER_VIEW_COUNT));
 
                 switch (((Comment)getItem(position)).getVoteStatus()) {
                     case Votable.DOWNVOTED:
@@ -322,10 +286,6 @@ public class UserFragment extends Fragment {
                 mCakeDay.setText(mUser.calculateCakeDay());
             }
             mSubmittedAdapter.notifyDataSetChanged();
-        }
-
-        private String formatDate(long epochTime) {
-            return null;
         }
     }
 

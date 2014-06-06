@@ -396,12 +396,6 @@ public class SubredditFragment extends Fragment {
                         }
                     }
                     mSubmissionsAdapter.notifyDataSetChanged();
-                } else if (mRefreshList) {
-                    try {
-                        Toast.makeText(mContext, R.string.failed_to_refresh, Toast.LENGTH_LONG).show();
-                    } catch (NullPointerException e) {
-                        Log.e("Breadit", "Something bad happened.");
-                    }
                 } else if (mNothingHere) {
                     TextView loading = (TextView) mFooterView.findViewById(R.id.loading_text);
                     if (loading != null)
@@ -505,9 +499,9 @@ public class SubredditFragment extends Fragment {
                 b.putParcelable("account", mAccount);
                 // Clicked on the image side
                 if (iv != null && x >= iv.getLeft() + mSubmissions.getLeft()) {
-                    b.putInt("tab", SubmissionActivity.CONTENT_TAB);
+                    b.putString("tab", SubmissionActivity.CONTENT_TAB);
                 } else { // Clicked on the text side
-                    b.putInt("tab", SubmissionActivity.COMMENT_TAB);
+                    b.putString("tab", SubmissionActivity.COMMENT_TAB);
                 }
                 i.putExtras(b);
                 mContext.startActivity(i);
@@ -530,22 +524,22 @@ public class SubredditFragment extends Fragment {
                 int position = mSubmissions.pointToPosition((int) e1.getX(), (int) e1.getY());
                 if (position > -1 && e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE
                         && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
-                    Submission s = mSubmissionsAdapter.getItem(position);
-                    if (s.getVoteStatus() == Submission.DOWNVOTED) {
-                        new VoteAsyncTask(s.getName(), mAccount, VoteAsyncTask.NEUTRAL).execute();
-                        s.setVoteStatus(Submission.NEUTRAL);
-                    } else {
-                        new VoteAsyncTask(s.getName(), mAccount, VoteAsyncTask.DOWNVOTE).execute();
-                        s.setVoteStatus(Submission.DOWNVOTED);
-                    }
-                    View v = mSubmissions.getChildAt(position - mSubmissions.getFirstVisiblePosition());
-                    View voteStatus = v.findViewById(R.id.vote_status);
-                    TextView points = (TextView) v.findViewById(R.id.points);
-                    switch (s.getVoteStatus()) {
-                        case Submission.DOWNVOTED:
-                            voteStatus.setVisibility(View.VISIBLE);
-                            voteStatus.setBackgroundColor(getResources().getColor(R.color.periwinkle));
-                            points.setText(s.getScore() + " points by ");
+                            Submission s = mSubmissionsAdapter.getItem(position);
+                            if (s.getVoteStatus() == Submission.DOWNVOTED) {
+                                new VoteAsyncTask(s.getName(), mAccount, VoteAsyncTask.NEUTRAL).execute();
+                                s.setVoteStatus(Submission.NEUTRAL);
+                            } else {
+                                new VoteAsyncTask(s.getName(), mAccount, VoteAsyncTask.DOWNVOTE).execute();
+                                s.setVoteStatus(Submission.DOWNVOTED);
+                            }
+                            View v = mSubmissions.getChildAt(position - mSubmissions.getFirstVisiblePosition());
+                            View voteStatus = v.findViewById(R.id.vote_status);
+                            TextView points = (TextView) v.findViewById(R.id.points);
+                            switch (s.getVoteStatus()) {
+                                case Submission.DOWNVOTED:
+                                    voteStatus.setVisibility(View.VISIBLE);
+                                    voteStatus.setBackgroundColor(getResources().getColor(R.color.periwinkle));
+                                    points.setText(s.getScore() + " points by ");
                             break;
                         default:
                             voteStatus.setVisibility(View.GONE);

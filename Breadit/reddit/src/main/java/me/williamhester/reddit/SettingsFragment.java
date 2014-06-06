@@ -58,6 +58,18 @@ public class SettingsFragment extends PreferenceFragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        SharedPreferences prefs = getActivity().getSharedPreferences("preferences",
+                Context.MODE_PRIVATE);
+        if (prefs.getLong("accountId", -1) != -1) {
+            mClearHistory.setEnabled(true);
+        } else {
+            mClearHistory.setEnabled(false);
+        }
+    }
+
+    @Override
     public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
 
         if (preference == mClearHistory) {
@@ -195,6 +207,11 @@ public class SettingsFragment extends PreferenceFragment {
                                     .getListView().getCheckedItemPosition();
                             if (selection < accounts.size()) {
                                 id = accounts.get(selection).getId();
+                            }
+                            if (id == -1) {
+                                mClearHistory.setEnabled(false);
+                            } else {
+                                mClearHistory.setEnabled(true);
                             }
                             SharedPreferences.Editor editor = prefs.edit();
                             editor.putLong("accountId", id);

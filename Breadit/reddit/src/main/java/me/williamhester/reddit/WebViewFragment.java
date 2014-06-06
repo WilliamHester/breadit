@@ -14,7 +14,8 @@ import me.williamhester.areddit.Submission;
 
 public class WebViewFragment extends Fragment {
 
-    public static String URI = "uri";
+    public static final String URI = "uri";
+    public static final String SUBMISSION = "submission";
 
     private WebView mWebView;
 
@@ -26,6 +27,7 @@ public class WebViewFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (savedInstanceState != null) {
             mUri = savedInstanceState.getString(URI);
+            mSubmission = savedInstanceState.getParcelable(SUBMISSION);
         } else if (getArguments() != null) {
             mSubmission = getArguments().getParcelable("submission");
             mUri = mSubmission.getUrl();
@@ -45,20 +47,22 @@ public class WebViewFragment extends Fragment {
         mWebView.getSettings().setLoadWithOverviewMode(true);
         mWebView.setBackgroundColor(0x00000000);
 
-        if (savedInstanceState != null)
+        if (savedInstanceState != null) {
             mWebView.restoreState(savedInstanceState);
-        else if (mSubmission.getUrl() != null)
+        } else if (mSubmission.getUrl() != null) {
             if (isYoutubeLink(mSubmission.getUrl())) {
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(mSubmission.getUrl()));
                 startActivity(browserIntent);
             } else {
                 mWebView.loadUrl(imgurOptimize(mSubmission.getUrl()));
             }
+        }
         return v;
     }
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        outState.putParcelable(SUBMISSION, mSubmission);
         outState.putString(URI, mUri);
         if (mWebView != null)
             mWebView.saveState(outState);

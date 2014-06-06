@@ -2,8 +2,6 @@ package me.williamhester.areddit.utils;
 
 import android.util.Log;
 
-
-//import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
@@ -13,7 +11,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -22,10 +19,6 @@ import java.util.List;
 
 import me.williamhester.areddit.Account;
 
-/**
- * Created by William on 1/5/14.
- *
- */
 public class Utilities {
 
     private static final String USER_AGENT = "Breadit_Android_App";
@@ -89,19 +82,19 @@ public class Utilities {
         return null;
     }
 
-    public static String imgurPostImage() {
-        DefaultHttpClient httpClient = new DefaultHttpClient();
-        HttpPost httpPost = new HttpPost("https://api.imgur.com/3/image");
-        httpPost.addHeader("User-Agent", USER_AGENT);
-        httpPost.addHeader("Authorization", "CLIENT-ID 2bdd3ec7a3fa918");
-
+//    public static String imgurPostImage() {
+//        DefaultHttpClient httpClient = new DefaultHttpClient();
+//        HttpPost httpPost = new HttpPost("https://api.imgur.com/3/image");
+//        httpPost.addHeader("User-Agent", USER_AGENT);
+//        httpPost.addHeader("Authorization", "CLIENT-ID 2bdd3ec7a3fa918");
+//
 //        BufferedImage image = ImageIO.read(file);
-        ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
+//        ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
 //        ImageIO.write(image, "png", byteArray);
-        byte[] byteImage = byteArray.toByteArray();
+//        byte[] byteImage = byteArray.toByteArray();
 //        String imageString = new Base64().encodeAsString(byteImage);
-        return null;
-    }
+//        return null;
+//    }
 
     private static String readStream(InputStream in) {
         BufferedReader reader = new BufferedReader(new InputStreamReader(in));
@@ -194,11 +187,6 @@ public class Utilities {
             sb.append(s.substring(end, s.length()));
         }
         return sb.toString();
-    }
-
-    public static interface UtilitiesAsyncHandler {
-        public void onTaskFinished();
-        public void onConnectionFailed();
     }
 
 }

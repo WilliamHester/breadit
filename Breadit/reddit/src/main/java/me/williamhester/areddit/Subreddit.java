@@ -77,7 +77,7 @@ public class Subreddit extends Thing implements Parcelable {
     public String getDisplayName() {
         return  mDisplayName;
     }
-
+//
     public String getHeaderImgUrl() {
         return  mHeaderImg;
     }
@@ -125,30 +125,30 @@ public class Subreddit extends Thing implements Parcelable {
     public long getCreated() {
         return  mCreated;
     }
-
-    public long getCreatedUtc() {
-        return  mCreatedUtc;
-    }
-
-    public boolean userIsContributor() {
-        return mUserIsContributor;
-    }
-
-    public String getPublicDescription() {
-        return  mPublicDescription;
-    }
-
-    public long getCommentScoreHideMins() {
-        return mCommentScoreHideMins;
-    }
-
-    public String getSubredditType() {
-        return  mSubredditType;
-    }
-
-    public String getSubmissionType() {
-        return  mSubmissionType;
-    }
+//
+//    public long getCreatedUtc() {
+//        return  mCreatedUtc;
+//    }
+//
+//    public boolean userIsContributor() {
+//        return mUserIsContributor;
+//    }
+//
+//    public String getPublicDescription() {
+//        return  mPublicDescription;
+//    }
+//
+//    public long getCommentScoreHideMins() {
+//        return mCommentScoreHideMins;
+//    }
+//
+//    public String getSubredditType() {
+//        return  mSubredditType;
+//    }
+//
+//    public String getSubmissionType() {
+//        return  mSubmissionType;
+//    }
 
     public boolean userIsSubscriber() {
         return mUserIsSubscriber;

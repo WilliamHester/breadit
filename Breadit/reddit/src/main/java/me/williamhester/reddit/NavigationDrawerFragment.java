@@ -29,7 +29,6 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.gson.JsonParseException;
 
@@ -438,17 +437,6 @@ public class NavigationDrawerFragment extends Fragment {
         mCurrentSubreddit = (TextView) v.findViewById(R.id.current_subreddit);
         mCurrentSubreddit.setText("Currently viewing " + mSubName);
         mCheckbox = (CheckBox) v.findViewById(R.id.subscribed_CheckBox);
-        mCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                if (b)
-                    Toast.makeText(mContext, "Subscribed to "
-                            + mCurrentSubreddit.getText().toString(), Toast.LENGTH_SHORT).show();
-                else
-                    Toast.makeText(mContext, "Unsubscribed from "
-                            + mCurrentSubreddit.getText().toString(), Toast.LENGTH_SHORT).show();
-            }
-        });
         mCheckbox.setVisibility(View.GONE);
 
         mSubSpinner = (Spinner) v.findViewById(R.id.header_spinner1);

@@ -8,6 +8,7 @@
     <string name="action_settings">Settings</string>
     <string name="action_my_account">My account</string>
     <string name="submit">Submit</string>
+    <string name="must_be_logged_in">You must be logged in to do that.</string>
 
     <!-- Welcome stuff -->
     <string name="welcome">Welcome to Breadit! Let\'s get started.</string>
@@ -27,7 +28,7 @@
     <!-- SubredditFragment stuff -->
     <string name="thumbnail_description">Thumbnail image for a post</string>
     <string name="failed_to_refresh">Could not refresh list.</string>
-    <string name="loading_submissions">Just a moment. Loading more submissions.</string>
+    <string name="loading_submissions">Hang on a second. Loading data from Reddit.</string>
     <string name="failed_to_load">Failed to load more submissions. Click to try again.</string>
     <string name="nothing_here">There\'s nothing here!</string>
 

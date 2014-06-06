@@ -90,16 +90,6 @@ public class AccountDataSource {
         mDatabase.update(AccountSqlHelper.TABLE_ACCOUNTS, values, where, sId);
     }
 
-    public void updateLoginInfo(String cookie, String modhash, long id) {
-        ContentValues values = new ContentValues();
-        values.put(AccountSqlHelper.COLUMN_COOKIE, cookie);
-        values.put(AccountSqlHelper.COLUMN_MODHASH, modhash);
-
-        String[] sId = { "" + id };
-        String where = AccountSqlHelper.COLUMN_ID + "=?";
-        mDatabase.update(AccountSqlHelper.TABLE_ACCOUNTS, values, where, sId);
-    }
-
     public ArrayList<Account> getAllAccounts() {
         ArrayList<Account> accounts = new ArrayList<Account>();
         Cursor cursor = mDatabase.query(AccountSqlHelper.TABLE_ACCOUNTS, AccountSqlHelper.ALL_COLUMNS,

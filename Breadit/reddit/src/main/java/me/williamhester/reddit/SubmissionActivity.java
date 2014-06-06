@@ -23,18 +23,15 @@ import me.williamhester.areddit.Submission;
 
 public class SubmissionActivity extends Activity implements TabView.TabSwitcher {
 
-    public static final int COMMENT_TAB = 0;
-    public static final int CONTENT_TAB = 1;
-
-    private ActionBar mAction;
+    public static final String COMMENT_TAB = "comments";
+    public static final String CONTENT_TAB = "content";
 
     private Context mContext = this;
     private Submission mSubmission;
     private TabView mTabView;
-    private Fragment mComments;
-    private Fragment mContent;
     private String mPermalink;
     private Account mAccount;
+    private String mCurrentTag;
 
 
     @Override
@@ -42,7 +39,9 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_content);
 
-        int selectedTab = 0;
+        if (savedInstanceState != null) {
+            mCurrentTag = savedInstanceState.getString("currentTag");
+        }
         if (getIntent().getAction() != null && getIntent().getAction().equals(Intent.ACTION_VIEW)) {
             mPermalink = getIntent().getDataString();
             mPermalink = "http://www.reddit.com" + mPermalink.substring(mPermalink.indexOf("/r/"));
@@ -59,17 +58,20 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
                     Log.e("Breadit", "error accessing database");
                 }
             }
-            setUpActionBarTabs(COMMENT_TAB);
+            mCurrentTag = COMMENT_TAB;
         } else if (getIntent().getExtras() != null) {
             mSubmission = getIntent().getExtras().getParcelable("submission");
             mAccount = getIntent().getExtras().getParcelable("account");
-            selectedTab = getIntent().getExtras().getInt("tab");
-            setUpActionBarTabs(selectedTab);
+            if (mCurrentTag == null) {
+                mCurrentTag = getIntent().getExtras().getString("tab");
+            }
         }
 
-        mAction = getActionBar();
-        if (mAction != null) {
-            mAction.setDisplayHomeAsUpEnabled(true);
+        setUpActionBarTabs();
+
+        ActionBar actionBar = getActionBar();
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
         }
     }
 
@@ -103,8 +105,14 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
         }
         return super.onOptionsItemSelected(item);
     }
+    
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("currentTag", mCurrentTag);
+    }
 
-    private void setUpActionBarTabs(int selectedTab) {
+    private void setUpActionBarTabs() {
         LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         View v = inflater.inflate(R.layout.actionbar_tabview, null);
 
@@ -113,79 +121,67 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
         commentTab.setTextColor(getResources().getColor(R.color.mid_gray));
         commentTab.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
         commentTab.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
-        TextView content = new TextView(this);
-        content.setText(R.string.content);
-        content.setTextColor(getResources().getColor(R.color.mid_gray));
-        content.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
-        content.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+        TextView contentTab = new TextView(this);
+        contentTab.setText(R.string.content);
+        contentTab.setTextColor(getResources().getColor(R.color.mid_gray));
+        contentTab.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
+        contentTab.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
 
         Bundle args = new Bundle();
         args.putString("permalink", mPermalink);
         args.putParcelable("submission", mSubmission);
         args.putParcelable("account", mAccount);
 
-        String tag;
-        switch (selectedTab) {
-            case COMMENT_TAB:
-                tag = "comments";
-                break;
-            case CONTENT_TAB:
-                tag = "content";
-                break;
-            default:
-                tag = "comments";
-        }
-
+        CommentFragment comments;
+        Fragment content;
+        
         mTabView = (TabView) v.findViewById(R.id.tabs);
-        mComments = new CommentFragment();
-        mComments.setArguments(args);
-        mTabView.addTab(mComments, TabView.TAB_TYPE_MAIN, commentTab, "comments");
+        comments = new CommentFragment();
+        comments.setArguments(args);
+        mTabView.addTab(comments, TabView.TAB_TYPE_MAIN, commentTab, "comments");
         if (mSubmission == null) {
             mTabView.selectTab("comments");
-            ((CommentFragment) mComments).setOnSubmissionLoadedListener(new CommentFragment.OnSubmissionLoaded() {
+            comments.setOnSubmissionLoadedListener(new CommentFragment.OnSubmissionLoaded() {
                 @Override
                 public void onSubmissionLoaded(Submission submission) {
                     mSubmission = submission;
 
-                    TextView content = new TextView(mContext);
-                    content.setText(R.string.content);
-                    content.setTextColor(getResources().getColor(R.color.mid_gray));
-                    content.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
-                    content.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+                    TextView contentTab = new TextView(mContext);
+                    contentTab.setText(R.string.content);
+                    contentTab.setTextColor(getResources().getColor(R.color.mid_gray));
+                    contentTab.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
+                    contentTab.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
 
                     if (!mSubmission.isMeta() && !mSubmission.isSelf()) {
                         Bundle args = new Bundle();
                         args.putParcelable("submission", mSubmission);
-                        mContent = new WebViewFragment();
-                        mContent.setArguments(args);
-                        mTabView.addTab(mContent, TabView.TAB_TYPE_MAIN, content, "content");
+                        Fragment content = new WebViewFragment();
+                        content.setArguments(args);
+                        mTabView.addTab(content, TabView.TAB_TYPE_MAIN, contentTab, CONTENT_TAB);
                     } else if (!mSubmission.isSelf()) {
                         Bundle args = new Bundle();
                         args.putParcelable("account", mAccount);
                         args.putString("permalink", mPermalink);
-                        mContent = new CommentFragment();
-                        mContent.setArguments(args);
-                        mTabView.addTab(mContent, TabView.TAB_TYPE_MAIN, content, "content");
+                        Fragment content = new CommentFragment();
+                        content.setArguments(args);
+                        mTabView.addTab(content, TabView.TAB_TYPE_MAIN, contentTab, CONTENT_TAB);
                     }
                 }
             });
         } else if (!mSubmission.isMeta() && !mSubmission.isSelf()) {
-            mContent = new WebViewFragment();
-            mContent.setArguments(args);
-            mTabView.addTab(mContent, TabView.TAB_TYPE_MAIN, content, "content");
-            if (!tag.equals("comments")) // Hotfix for the weird tab problem
-                mTabView.selectTab("comments");
-            mTabView.selectTab(tag);
+            content = new WebViewFragment();
+            content.setArguments(args);
+            mTabView.addTab(content, TabView.TAB_TYPE_MAIN, contentTab, CONTENT_TAB);
+
+            mTabView.selectTab(mCurrentTag);
         } else if (!mSubmission.isSelf()) {
             args = new Bundle();
             args.putParcelable("account", (Parcelable) getIntent().getExtras().get("account"));
             args.putString("permalink", mSubmission.getUrl());
-            mContent = new CommentFragment();
-            mContent.setArguments(args);
-            mTabView.addTab(mContent, TabView.TAB_TYPE_MAIN, content, "content");
-            if (!tag.equals("comments")) // Hotfix for the weird tab problem
-                mTabView.selectTab("comments");
-            mTabView.selectTab(tag);
+            content = new CommentFragment();
+            content.setArguments(args);
+            mTabView.addTab(content, TabView.TAB_TYPE_MAIN, contentTab, CONTENT_TAB);
+            mTabView.selectTab(mCurrentTag);
         } else {
             mTabView.selectTab("comments");
         }
@@ -201,15 +197,17 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
     @Override
     public void onTabSelected(String tag, Fragment fragment) {
         getFragmentManager().executePendingTransactions();
-        if (getFragmentManager().findFragmentByTag(tag) != null) {
+        Fragment f = getFragmentManager().findFragmentByTag(tag);
+        if (f != null) {
             getFragmentManager().beginTransaction()
-                    .replace(R.id.container, getFragmentManager().findFragmentByTag(tag), tag)
+                    .attach(f)
                     .commit();
         } else {
             getFragmentManager().beginTransaction()
                     .add(R.id.container, fragment, tag)
                     .commit();
         }
+        mCurrentTag = tag;
     }
 
     @Override
@@ -221,6 +219,13 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
 
     @Override
     public void onTabUnSelected(String tag) {
-
+        if (tag != null) {
+            Fragment f = getFragmentManager().findFragmentByTag(tag);
+            if (f != null) {
+                getFragmentManager().beginTransaction()
+                        .detach(f)
+                        .commit();
+            }
+        }
     }
 }

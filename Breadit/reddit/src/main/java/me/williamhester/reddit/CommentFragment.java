@@ -96,8 +96,7 @@ public class CommentFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_comment, null);
-        if (savedInstanceState != null)
-            mCommentsList = savedInstanceState.getParcelableArrayList("comments");
+
         mGestureDetector = new GestureDetector(mContext, new SwipeDetector());
         mGestureListener = new View.OnTouchListener() {
             @Override
@@ -105,15 +104,18 @@ public class CommentFragment extends Fragment {
                 return mGestureDetector.onTouchEvent(motionEvent);
             }
         };
-        if (v != null)
+        if (v != null) {
             mCommentsListView = (ListView) v.findViewById(R.id.comments);
-        if (mHeaderView == null && mSubmission != null) {
-            mHeaderView = createHeaderView(inflater);
-            mCommentsListView.addHeaderView(mHeaderView);
-            mCommentAdapter = new CommentArrayAdapter(mContext);
-            mCommentsListView.setAdapter(mCommentAdapter);
-            mCommentsListView.setOnTouchListener(mGestureListener);
         }
+        if (mHeaderView == null) {
+            mHeaderView = createHeaderView(inflater);
+        }
+        if (mCommentsListView.getHeaderViewsCount() == 0) {
+            mCommentsListView.addHeaderView(mHeaderView);
+        }
+        mCommentAdapter = new CommentArrayAdapter(mContext);
+        mCommentsListView.setAdapter(mCommentAdapter);
+        mCommentsListView.setOnTouchListener(mGestureListener);
         return v;
     }
 

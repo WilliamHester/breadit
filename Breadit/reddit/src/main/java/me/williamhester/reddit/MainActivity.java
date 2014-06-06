@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import me.williamhester.areddit.Account;
 
@@ -77,17 +78,11 @@ public class MainActivity extends Activity
 
         updateActionBar(null);
 
-//        if (getFragmentManager().findFragmentByTag("NavigationDrawer") != null) {
-//            getFragmentManager().beginTransaction()
-//                    .replace(R.id.navigation_drawer_container, getFragmentManager()
-//                            .findFragmentByTag("NavigationDrawer"), "NavigationDrawer")
-//                    .commit();
-//        } else {
         getFragmentManager().beginTransaction()
                 .add(R.id.navigation_drawer_container, mNavigationDrawerFragment,
                         "NavigationDrawer")
                 .commit();
-//        }
+
         if (getFragmentManager().findFragmentByTag("SubredditFragment") != null) {
             mSubredditFragment = getFragmentManager().findFragmentByTag("SubredditFragment");
             getFragmentManager().beginTransaction()
@@ -114,6 +109,11 @@ public class MainActivity extends Activity
     @Override
     public void onResume() {
         super.onResume();
+        mSubredditFragment = getFragmentManager().findFragmentByTag("SubredditFragment");
+        mSubreddit = ((SubredditFragment) mSubredditFragment).getSubreddit();
+        mNavigationDrawerFragment.setSubreddit(mSubreddit,
+                ((SubredditFragment) mSubredditFragment).getPrimarySortType(),
+                ((SubredditFragment) mSubredditFragment).getSecondarySortType());
         SharedPreferences prefs = getSharedPreferences("preferences", Context.MODE_PRIVATE);
         long id = prefs.getLong("accountId", -1);
         if (id != -1) {
@@ -125,6 +125,8 @@ public class MainActivity extends Activity
             } catch (NullPointerException e) {
                 Log.e("Breadit", "Error opening database");
             }
+        } else {
+            mAccount = null;
         }
         invalidateOptionsMenu();
     }
@@ -206,8 +208,12 @@ public class MainActivity extends Activity
             startActivity(i);
             return true;
         } else if (id == R.id.action_submit) {
-            SubmitDialogFragment sf = SubmitDialogFragment.newInstance(mAccount, mSubreddit);
-            sf.show(getFragmentManager(), "submit_fragment");
+            if (mAccount != null) {
+                SubmitDialogFragment sf = SubmitDialogFragment.newInstance(mAccount, mSubreddit);
+                sf.show(getFragmentManager(), "submit_fragment");
+            } else {
+                Toast.makeText(this, R.string.must_be_logged_in, Toast.LENGTH_SHORT).show();
+            }
         } else if (id == R.id.action_my_account) {
             Bundle b = new Bundle();
             b.putParcelable("account", mAccount);
