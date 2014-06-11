@@ -1,6 +1,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="me.williamhester.reddit.MainActivity" >
+    tools:context="me.williamhester.ui.activities.MainActivity" >
     <item android:id="@+id/action_my_account"
         android:title="@string/action_my_account"
         android:icon="@drawable/ic_action_person"

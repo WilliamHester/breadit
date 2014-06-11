@@ -35,7 +35,7 @@
                 android:layout_width="8dp"
                 android:layout_height="match_parent"/>
 
-            <me.williamhester.reddit.SquareImageView
+            <me.williamhester.ui.views.SquareImageView
                 android:id="@+id/thumbnail"
                 android:adjustViewBounds="false"
                 android:scaleType="centerCrop"
