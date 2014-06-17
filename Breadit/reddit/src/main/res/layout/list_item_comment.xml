@@ -1,68 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/root"
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <View android:id="@+id/vote_status"
-        android:layout_width="6dp"
-        android:layout_height="match_parent"/>
-
     <LinearLayout
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
+        android:paddingBottom="12dp"
+        android:paddingTop="8dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="@color/blackish">
 
-        <LinearLayout
-            android:padding="8dp"
+        <TextView android:id="@+id/comment_metadata"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-bold"
+            android:textSize="12sp"
+            android:textColor="@color/auburn"/>
+
+        <!--Todo: add an ImageView for if the account has a gilded comment-->
+
+        <TextView android:id="@+id/body"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:textSize="13sp"
+            android:textColor="@color/mid_gray" />
 
-            <TextView
-                android:id="@+id/points"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-condensed"
-                android:textColor="@color/auburn"/>
-
-            <!--Todo: make the next TextView a DistinguishedTextView-->
-
-            <TextView
-                android:id="@+id/author"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-condensed"
-                android:textColor="@color/auburn"/>
-
-            <TextView
-                android:id="@+id/time"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-condensed"
-                android:textColor="@color/auburn"/>
-
-            <!--Todo: add an ImageView for if the account has a gilded comment-->
-
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/body"
+        <LinearLayout android:id="@+id/edited_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/mid_gray"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp"
-            android:paddingBottom="8dp"/>
-
-        <LinearLayout
-            android:id="@+id/edited_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:paddingTop="8dp">
 
             <EditText android:id="@+id/reply_body"
                 android:layout_width="match_parent"
@@ -107,4 +80,9 @@
         </LinearLayout>
 
     </LinearLayout>
-</LinearLayout>
+
+    <View android:id="@+id/vote_status"
+        android:layout_width="6dp"
+        android:layout_height="match_parent"/>
+
+</FrameLayout>

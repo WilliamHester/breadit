@@ -4,31 +4,32 @@ import com.google.gson.JsonObject;
 
 public class Thing {
 
-    protected String mId;
-    protected String mName;
-    protected String mKind;
+    protected String id;
+    protected String name;
+    protected String kind;
+    protected Object data;
 
-    protected Thing() { }
+    public Thing() { }
 
     protected Thing(JsonObject data) {
         if (data != null) {
-            mId = data.getAsJsonObject("data").get("id").getAsString();
-            mName = data.getAsJsonObject("data").get("name").getAsString();
-            mKind = data.get("kind").getAsString();
+            id = data.getAsJsonObject("data").get("id").getAsString();
+            name = data.getAsJsonObject("data").get("name").getAsString();
+            kind = data.get("kind").getAsString();
         }
     }
 
     protected JsonObject mData;
 
     public String getId() {
-        return mId;
+        return id;
     }
 
     public String getName() { 
-        return mName;
+        return name;
     }
 
     public String getKind() {
-        return mKind;
+        return kind;
     }
 }

@@ -7,8 +7,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.stream.MalformedJsonException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -80,7 +78,7 @@ public class Comment extends Thing implements Parcelable, Votable {
 
     public static Comment fromJsonString(JsonObject data, int level) {
         Comment comment = new Comment(data, level);
-        if (!comment.mKind.equals("more")) {
+        if (!comment.kind.equals("more")) {
             if (!data.get("data").getAsJsonObject().get("approved_by").isJsonNull())
                 comment.mApprovedBy = data.get("data").getAsJsonObject().get("approved_by").getAsString();
             if (!data.get("data").getAsJsonObject().get("author").isJsonNull())
@@ -468,9 +466,9 @@ public class Comment extends Thing implements Parcelable, Votable {
         dest.writeByte(mIsHidden ? (byte) 1 : (byte) 0);
         dest.writeByte(mIsBeingEdited ? (byte) 1 : (byte) 0);
         dest.writeString(this.mReplyText);
-        dest.writeString(this.mId);
-        dest.writeString(this.mName);
-        dest.writeString(this.mKind);
+        dest.writeString(this.id);
+        dest.writeString(this.name);
+        dest.writeString(this.kind);
     }
 
     private Comment(Parcel in) {
@@ -502,9 +500,9 @@ public class Comment extends Thing implements Parcelable, Votable {
         this.mIsHidden = in.readByte() != 0;
         this.mIsBeingEdited = in.readByte() != 0;
         this.mReplyText = in.readString();
-        this.mId = in.readString();
-        this.mName = in.readString();
-        this.mKind = in.readString();
+        this.id = in.readString();
+        this.name = in.readString();
+        this.kind = in.readString();
     }
 
     public static Creator<Comment> CREATOR = new Creator<Comment>() {

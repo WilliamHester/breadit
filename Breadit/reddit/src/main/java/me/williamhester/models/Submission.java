@@ -13,6 +13,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,36 +36,39 @@ public class Submission extends Thing implements Parcelable, Votable {
 
     public static final int FRONTPAGE = 0;
 
-    private String mAuthor;
-    private String mAuthorFlairCss;
-    private String mAuthorFlairText;
-    private String mDomain;
-    private String mLinkFlairCss;
-    private String mLinkFlairText;
-    private String mPermalink;
-    private String mSelftext;
-    private String mSelftextHtml;
-    private String mSubreddit;
-    private String mSubredditId;
-    private String mThumbnail;
-    private String mTitle;
-    private String mUrl;
-    private String mDistinguished;
-    private boolean mClicked;
-    private boolean mEdited;
-    private boolean mHidden;
-    private boolean mIsSelf;
-    private boolean mOver18;
-    private boolean mSaved;
-    private boolean mStickied;
-    private int mCommentsCount;
-    private int mScore;
+    private String author;
+    private String author_flair_css_class;
+    private String author_flair_text;
+    private String domain;
+    private String link_flair_css_class;
+    private String link_flair_text;
+    private String permalink;
+    private String selftext;
+    private String selftext_html;
+    private String subreddit;
+    private String subreddit_id;
+    private String thumbnail;
+    private String title;
+    private String url;
+    private String distinguished;
+    private boolean clicked;
+    private String edited;
+    private boolean hidden;
+    private boolean is_self;
+    private boolean over_18;
+    private boolean saved;
+    private boolean stickied;
+    private int num_comments;
+    private int score;
+    private long created;
+    private long created_utc;
+    private long ups;
+    private long downs;
+    private Boolean likes;
     private int mVoteStatus;
-    private long mCreated;
-    private long mCreatedUtc;
-    private long mUps;
-    private long mDowns;
     private boolean mIsBeingEdited = false;
+
+    public Submission() { }
 
     private Submission(JsonObject data) {
         super(data);
@@ -72,75 +76,76 @@ public class Submission extends Thing implements Parcelable, Votable {
 
     public Submission(Parcel in) {
         Bundle b = in.readBundle();
-        mName = b.getString("name");
-        mAuthor = b.getString("author");
-        mAuthorFlairCss = b.getString("author_flair_css");
-        mAuthorFlairText = b.getString("author_flair_text");
-        mDomain = b.getString("domain");
-        mLinkFlairCss = b.getString("link_flair_css");
-        mLinkFlairText = b.getString("link_flair_text");
-        mPermalink = b.getString("permalink");
-        mSelftext = b.getString("selftext");
-        mSelftextHtml = b.getString("selftext_html");
-        mSubreddit = b.getString("subreddit");
-        mSubredditId = b.getString("subreddit_id");
-        mThumbnail = b.getString("thumbnail");
-        mTitle = b.getString("title");
-        mUrl = b.getString("url");
-        mDistinguished = b.getString("distinguished");
-        mClicked = b.getBoolean("clicked");
-        mHidden = b.getBoolean("hidden");
-        mIsSelf = b.getBoolean("is_self");
-        mOver18 = b.getBoolean("over_18");
-        mSaved = b.getBoolean("saved");
-        mStickied = b.getBoolean("stickied");
-        mEdited = b.getBoolean("edited");
-        mCommentsCount = b.getInt("comments_count");
-        mScore = b.getInt("score");
+        name = b.getString("name");
+        author = b.getString("author");
+        author_flair_css_class = b.getString("author_flair_css");
+        author_flair_text = b.getString("author_flair_text");
+        domain = b.getString("domain");
+        link_flair_css_class = b.getString("link_flair_css");
+        link_flair_text = b.getString("link_flair_text");
+        permalink = b.getString("permalink");
+        selftext = b.getString("selftext");
+        selftext_html = b.getString("selftext_html");
+        subreddit = b.getString("subreddit");
+        subreddit_id = b.getString("subreddit_id");
+        thumbnail = b.getString("thumbnail");
+        title = b.getString("title");
+        url = b.getString("url");
+        distinguished = b.getString("distinguished");
+        clicked = b.getBoolean("clicked");
+        hidden = b.getBoolean("hidden");
+        is_self = b.getBoolean("is_self");
+        over_18 = b.getBoolean("over_18");
+        saved = b.getBoolean("saved");
+        stickied = b.getBoolean("stickied");
+//        edited = b.getBoolean("edited");
+        num_comments = b.getInt("comments_count");
+        score = b.getInt("score");
         mVoteStatus = b.getInt("vote_status");
-        mCreated = b.getLong("created");
-        mCreatedUtc = b.getLong("created_utc");
-        mUps = b.getLong("ups");
-        mDowns = b.getLong("downs");
+        created = b.getLong("created");
+        created_utc = b.getLong("created_utc");
+        ups = b.getLong("ups");
+        downs = b.getLong("downs");
     }
 
+    @Deprecated
     public static Submission fromJsonString(JsonObject data) {
         Submission submission = new Submission(data);
         if (!data.get("data").getAsJsonObject().get("author").isJsonNull())
-            submission.mAuthor = data.get("data").getAsJsonObject().get("author").getAsString();
+            submission.author = data.get("data").getAsJsonObject().get("author").getAsString();
         if (!data.get("data").getAsJsonObject().get("author_flair_css_class").isJsonNull())
-            submission.mAuthorFlairCss = data.get("data").getAsJsonObject().get("author_flair_css_class").getAsString();
+            submission.author_flair_css_class = data.get("data").getAsJsonObject().get("author_flair_css_class").getAsString();
         if (!data.get("data").getAsJsonObject().get("author_flair_text").isJsonNull())
-            submission.mAuthorFlairText = data.get("data").getAsJsonObject().get("author_flair_text").getAsString();
-        submission.mDomain = data.get("data").getAsJsonObject().get("domain").getAsString();
+            submission.author_flair_text = data.get("data").getAsJsonObject().get("author_flair_text").getAsString();
+        submission.domain = data.get("data").getAsJsonObject().get("domain").getAsString();
         if (!data.get("data").getAsJsonObject().get("link_flair_css_class").isJsonNull())
-            submission.mLinkFlairCss = data.get("data").getAsJsonObject().get("link_flair_css_class").getAsString();
+            submission.link_flair_css_class = data.get("data").getAsJsonObject().get("link_flair_css_class").getAsString();
         if (!data.get("data").getAsJsonObject().get("link_flair_text").isJsonNull())
-            submission.mLinkFlairText = data.get("data").getAsJsonObject().get("link_flair_text").getAsString();
-        submission.mPermalink = data.get("data").getAsJsonObject().get("permalink").getAsString();
-        submission.mSelftext = data.get("data").getAsJsonObject().get("selftext").getAsString();
+            submission.link_flair_text = data.get("data").getAsJsonObject().get("link_flair_text").getAsString();
+        submission.permalink = data.get("data").getAsJsonObject().get("permalink").getAsString();
+        submission.selftext = data.get("data").getAsJsonObject().get("selftext").getAsString();
         if (!data.get("data").getAsJsonObject().get("selftext_html").isJsonNull())
-            submission.mSelftextHtml = data.get("data").getAsJsonObject().get("selftext_html").getAsString();
-        submission.mSubreddit = data.get("data").getAsJsonObject().get("subreddit").getAsString();
-        submission.mSubredditId = data.get("data").getAsJsonObject().get("subreddit_id").getAsString();
-        submission.mThumbnail = data.get("data").getAsJsonObject().get("thumbnail").getAsString();
-        submission.mTitle = data.get("data").getAsJsonObject().get("title").getAsString();
-        submission.mUrl = data.get("data").getAsJsonObject().get("url").getAsString();
+            submission.selftext_html = data.get("data").getAsJsonObject().get("selftext_html").getAsString();
+        submission.subreddit = data.get("data").getAsJsonObject().get("subreddit").getAsString();
+        submission.subreddit_id = data.get("data").getAsJsonObject().get("subreddit_id").getAsString();
+        submission.thumbnail = data.get("data").getAsJsonObject().get("thumbnail").getAsString();
+        submission.title = data.get("data").getAsJsonObject().get("title").getAsString();
+        submission.url = data.get("data").getAsJsonObject().get("url").getAsString();
         if (!data.get("data").getAsJsonObject().get("distinguished").isJsonNull())
-            submission.mDistinguished = data.get("data").getAsJsonObject().get("distinguished").getAsString();
-        submission.mClicked = data.get("data").getAsJsonObject().get("clicked").getAsBoolean();
-        submission.mHidden = data.get("data").getAsJsonObject().get("hidden").getAsBoolean();
-        submission.mIsSelf = data.get("data").getAsJsonObject().get("is_self").getAsBoolean();
-        submission.mOver18 = data.get("data").getAsJsonObject().get("over_18").getAsBoolean();
-        submission.mSaved = data.get("data").getAsJsonObject().get("saved").getAsBoolean();
-        submission.mStickied = data.get("data").getAsJsonObject().get("stickied").getAsBoolean();
-        submission.mCommentsCount = data.get("data").getAsJsonObject().get("num_comments").getAsInt();
-        submission.mScore = data.get("data").getAsJsonObject().get("score").getAsInt();
-        submission.mEdited = data.get("data").getAsJsonObject().get("edited").getAsBoolean();
-        submission.mCreated = data.get("data").getAsJsonObject().get("created").getAsLong();
-        submission.mCreatedUtc = data.get("data").getAsJsonObject().get("created_utc").getAsLong();
-        submission.mUps = data.get("data").getAsJsonObject().get("ups").getAsLong();
-        submission.mDowns = data.get("data").getAsJsonObject().get("downs").getAsLong();
+            submission.distinguished = data.get("data").getAsJsonObject().get("distinguished").getAsString();
+        submission.clicked = data.get("data").getAsJsonObject().get("clicked").getAsBoolean();
+        submission.hidden = data.get("data").getAsJsonObject().get("hidden").getAsBoolean();
+        submission.is_self = data.get("data").getAsJsonObject().get("is_self").getAsBoolean();
+        submission.over_18 = data.get("data").getAsJsonObject().get("over_18").getAsBoolean();
+        submission.saved = data.get("data").getAsJsonObject().get("saved").getAsBoolean();
+        submission.stickied = data.get("data").getAsJsonObject().get("stickied").getAsBoolean();
+        submission.num_comments = data.get("data").getAsJsonObject().get("num_comments").getAsInt();
+        submission.score = data.get("data").getAsJsonObject().get("score").getAsInt();
+//        submission.edited = data.get("data").getAsJsonObject().get("edited").getAsBoolean();
+        submission.created = data.get("data").getAsJsonObject().get("created").getAsLong();
+        submission.created_utc = data.get("data").getAsJsonObject().get("created_utc").getAsLong();
+        submission.ups = data.get("data").getAsJsonObject().get("ups").getAsLong();
+        submission.downs = data.get("data").getAsJsonObject().get("downs").getAsLong();
         JsonElement je = data.get("data").getAsJsonObject().get("likes");
         if (je.isJsonNull()) {
             submission.mVoteStatus = NEUTRAL;
@@ -153,112 +158,128 @@ public class Submission extends Thing implements Parcelable, Votable {
     }
 
     public String getUrl() { 
-        return mUrl;
+        return url;
     }
 
     public long getUpVotes() { 
-        return mUps;
+        return ups;
     }
 
     public long getDownVotes() { 
-        return mDowns;
+        return downs;
     }
 
     public long getScore() { 
-        return mScore;
+        return score;
     }
 
     public String getAuthor() { 
-        return mAuthor;
+        return author;
     }
 
     public String getTitle() { 
-        return mTitle;
+        return title;
     }
 
     public String getDomain() {
-        return mDomain;
+        return domain;
     }
 
     public String getPermalink() {
-        return mPermalink;
+        return permalink;
     }
 
     public String getSubredditName() {
-        return mSubreddit;
+        return subreddit;
     }
 
     public String getBodyHtml() {
-        return mSelftextHtml;
+        return selftext_html;
     }
 
     public String getBody() {
-        return mSelftext;
+        return selftext;
     }
 
     public void setBody(String body) {
-        mSelftext = body;
+        selftext = body;
     }
 
     public void setBodyHtml(String body) {
-        mSelftextHtml = body;
+        selftext_html = body;
     }
 
     public int getVoteStatus() {
-        return mVoteStatus;
+        if (likes == null) {
+            return NEUTRAL;
+        } else if (likes) {
+            return UPVOTED;
+        } else {
+            return DOWNVOTED;
+        }
     }
 
     public void setVoteStatus(int status) {
-        mScore -= mVoteStatus - status;
-        mVoteStatus = status;
+        score -= mVoteStatus - status;
+        switch (status) {
+            case NEUTRAL:
+                likes = null;
+                break;
+            case UPVOTED:
+                likes = true;
+                break;
+            case DOWNVOTED:
+                likes = false;
+                break;
+        }
     }
 
     public String getLinkFlairText() {
-        return mLinkFlairText;
+        return link_flair_text;
     }
 
     public boolean isNsfw() {
-        return mOver18;
+        return over_18;
     }
 
     public boolean isHidden() {
-        return mHidden;
+        return hidden;
     }
 
     public String getThumbnailUrl() {
-        return mThumbnail;
+        return thumbnail;
     }
 
     public String getSubredditId() {
-        return mSubredditId;
+        return subreddit_id;
     }
 
-    public boolean getEdited() {
-        return mEdited;
+    public String getEdited() {
+        return edited;
     }
 
     public boolean isSaved() {
-        return mSaved;
+        return saved;
     }
 
     public boolean isSelf() {
-        return mIsSelf;
+        return is_self;
     }
 
     public int getNumberOfComments() {
-        return mCommentsCount;
+        return num_comments;
     }
 
     public long getCreated() {
-        return mCreated;
+        return created;
     }
 
     public long getCreatedUtc() {
-        return mCreatedUtc;
+        return created_utc;
     }
 
     public boolean isMeta() {
-        return mUrl.contains("reddit.com") && mUrl.contains("comments");
+        return url.contains("reddit.com") && url.contains("comments");
     }
 
     public void setBeingEdited(boolean b) {
@@ -371,36 +392,36 @@ public class Submission extends Thing implements Parcelable, Votable {
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         Bundle b = new Bundle();
-        b.putString("name", mName);
-        b.putString("author", mAuthor);
-        b.putString("author_flair_css", mAuthorFlairCss);
-        b.putString("author_flair_text", mAuthorFlairText);
-        b.putString("domain", mDomain);
-        b.putString("link_flair_css", mLinkFlairCss);
-        b.putString("link_flair_text", mLinkFlairText);
-        b.putString("permalink", mPermalink);
-        b.putString("selftext", mSelftext);
-        b.putString("selftext_html", mSelftextHtml);
-        b.putString("subreddit", mSubreddit);
-        b.putString("subreddit_id", mSubredditId);
-        b.putString("thumbnail", mThumbnail);
-        b.putString("title", mTitle);
-        b.putString("url", mUrl);
-        b.putString("distinguished", mDistinguished);
-        b.putBoolean("clicked", mClicked);
-        b.putBoolean("edited", mEdited);
-        b.putBoolean("hidden", mHidden);
-        b.putBoolean("is_self", mIsSelf);
-        b.putBoolean("over_18", mOver18);
-        b.putBoolean("saved", mSaved);
-        b.putBoolean("stickied", mStickied);
-        b.putInt("comments_count", mCommentsCount);
-        b.putInt("score", mScore);
+        b.putString("name", name);
+        b.putString("author", author);
+        b.putString("author_flair_css", author_flair_css_class);
+        b.putString("author_flair_text", author_flair_text);
+        b.putString("domain", domain);
+        b.putString("link_flair_css", link_flair_css_class);
+        b.putString("link_flair_text", link_flair_text);
+        b.putString("permalink", permalink);
+        b.putString("selftext", selftext);
+        b.putString("selftext_html", selftext_html);
+        b.putString("subreddit", subreddit);
+        b.putString("subreddit_id", subreddit_id);
+        b.putString("thumbnail", thumbnail);
+        b.putString("title", title);
+        b.putString("url", url);
+        b.putString("distinguished", distinguished);
+        b.putBoolean("clicked", clicked);
+//        b.putBoolean("edited", edited);
+        b.putBoolean("hidden", hidden);
+        b.putBoolean("is_self", is_self);
+        b.putBoolean("over_18", over_18);
+        b.putBoolean("saved", saved);
+        b.putBoolean("stickied", stickied);
+        b.putInt("comments_count", num_comments);
+        b.putInt("score", score);
         b.putInt("vote_status", mVoteStatus);
-        b.putLong("created", mCreated);
-        b.putLong("created_utc", mCreatedUtc);
-        b.putLong("ups", mUps);
-        b.putLong("downs", mDowns);
+        b.putLong("created", created);
+        b.putLong("created_utc", created_utc);
+        b.putLong("ups", ups);
+        b.putLong("downs", downs);
         parcel.writeBundle(b);
     }
 

@@ -10,7 +10,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.Spannable;
-import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -50,6 +49,7 @@ import me.williamhester.databases.AccountDataSource;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.activities.UserActivity;
 import me.williamhester.databases.VoteAsyncTask;
+import me.williamhester.ui.views.CommentView;
 
 public class CommentFragment extends Fragment {
 
@@ -117,7 +117,7 @@ public class CommentFragment extends Fragment {
         }
         mCommentAdapter = new CommentArrayAdapter(mContext);
         mCommentsListView.setAdapter(mCommentAdapter);
-        mCommentsListView.setOnTouchListener(mGestureListener);
+//        mCommentsListView.setOnTouchListener(mGestureListener);
         return v;
     }
 
@@ -256,6 +256,72 @@ public class CommentFragment extends Fragment {
                 mCommentsListView.getFirstVisiblePosition() * 5);
     }
 
+    private class CommentEventListener implements CommentView.OnCommentMotionEventListener {
+
+        @Override
+        public void onSingleTap(CommentView commentView) {
+            if (!commentView.isHidden()) {
+                commentView.hide();
+                int position = mCommentAdapter.getPosition(commentView.getComment());
+                Log.d("CommentFragment", "position = " + position);
+                mHiddenComments.put(commentView.getComment().getName(),
+                        new HiddenComments(position));
+            } else {
+                commentView.show();
+                ArrayList<Comment> hc = mHiddenComments
+                        .get(commentView.getComment().getName())
+                        .getHiddenComments();
+                mHiddenComments.remove(commentView.getComment().getName());
+                int position = mCommentAdapter.getPosition(commentView.getComment());
+                for (Comment c : hc) {
+                    mCommentsList.add(++position, c);
+                }
+            }
+            mCommentAdapter.notifyDataSetChanged();
+        }
+
+        @Override
+        public void onLongPress(CommentView commentView) {
+
+        }
+
+        @Override
+        public void onDoubleTap(CommentView commentView) {
+
+        }
+
+        @Override
+        public boolean onUpVote(CommentView commentView) {
+            if (mAccount != null) {
+                Votable v = commentView.getComment();
+                new VoteAsyncTask(v.getName(), mAccount, VoteAsyncTask.UPVOTE).execute();
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public boolean onDownVote(CommentView commentView) {
+            if (mAccount != null) {
+                Votable v = commentView.getComment();
+                new VoteAsyncTask(v.getName(), mAccount, VoteAsyncTask.DOWNVOTE).execute();
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public boolean onNeutralVote(CommentView commentView) {
+            if (mAccount != null) {
+                Votable v = commentView.getComment();
+                new VoteAsyncTask(v.getName(), mAccount, VoteAsyncTask.NEUTRAL).execute();
+                return true;
+            }
+            return false;
+        }
+
+    }
+
     private class CommentArrayAdapter extends ArrayAdapter<Comment> {
 
         public CommentArrayAdapter(Context context) {
@@ -264,114 +330,17 @@ public class CommentFragment extends Fragment {
         }
 
         public View getView(final int position, View convertView, ViewGroup parent) {
-            LayoutInflater inflater = (LayoutInflater)
-                    mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-            if (convertView == null)
-                convertView = inflater.inflate(R.layout.list_item_comment, parent, false);
-
-            LinearLayout root = (LinearLayout) convertView.findViewById(R.id.root);
-            TextView author = (TextView) convertView.findViewById(R.id.author);
-            TextView score = (TextView) convertView.findViewById(R.id.points);
-            TextView time = (TextView) convertView.findViewById(R.id.time);
-            TextView body = (TextView) convertView.findViewById(R.id.body);
-            View voteStatus = convertView.findViewById(R.id.vote_status);
-            LinearLayout replyLayout = (LinearLayout) convertView.findViewById(R.id.edited_text);
-            final EditText replyBody = (EditText) convertView.findViewById(R.id.reply_body);
-            final Button confirm = (Button) convertView.findViewById(R.id.confirm_reply);
-            final Button cancel = (Button) convertView.findViewById(R.id.cancel_reply);
-
-            if (getItem(position).isBeingEdited()) {
-                confirm.setEnabled(true);
-                cancel.setEnabled(true);
-                replyBody.setEnabled(true);
-                body.setVisibility(View.GONE);
-                replyLayout.setVisibility(View.VISIBLE);
-                confirm.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        if (position == 1)
-                            new ReplyAsyncTask(replyBody.getText().toString(),
-                                    mSubmission.getName()).execute();
-                        else if (position > 1)
-                            new ReplyAsyncTask(replyBody.getText().toString(),
-                                    getItem(position - 1).getName()).execute();
-                        confirm.setEnabled(false);
-                        cancel.setEnabled(false);
-                        replyBody.setEnabled(false);
-                    }
-                });
-                cancel.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        mCommentsList.remove(position);
-                        mCommentAdapter.notifyDataSetChanged();
-                    }
-                });
+            if (convertView == null) {
+                convertView = new CommentView(getActivity(), getItem(position));
+                convertView.setTag(getItem(position).getAuthor().equals(mSubmission.getAuthor()));
+                ((CommentView) convertView).setOnCommentMotionEventListener(new CommentEventListener());
             } else {
-                replyLayout.setVisibility(View.GONE);
-                body.setVisibility(View.VISIBLE);
+                ((CommentView) convertView).setComment(getItem(position));
             }
-
-            root.setPadding((int) (getResources().getDisplayMetrics().density
-                    * 12 * getItem(position).getLevel()), 0, 0, 0);
-            author.setText(getItem(position).getAuthor());
-            if (getItem(position).getAuthor().equals(mSubmission.getAuthor())) {
-                author.setTextColor(getResources().getColor(R.color.op));
-            } else {
-                author.setTextColor(getResources().getColor(R.color.auburn));
-            }
-
-            if (getItem(position).getScore() != 1)
-                score.setText(getItem(position).getScore() + " points by ");
-            else
-                score.setText("1 point by ");
-            time.setText(" " + Utilities.calculateTimeShort(getItem(position).getCreatedUtc()));
-            String bodyText = formatHtmlForMeta(getItem(position).getBodyHtml());
-            Spanned text = Html.fromHtml(StringEscapeUtils.unescapeHtml4(bodyText));
-            body.setText(text);
-
-            body.setMovementMethod(new CommentLinkMovementMethod(position + HEADER_VIEW_COUNT));
-
-            switch (getItem(position).getVoteStatus()) {
-                case Votable.DOWNVOTED:
-                    voteStatus.setVisibility(View.VISIBLE);
-                    voteStatus.setBackgroundColor(getResources().getColor(R.color.periwinkle));
-                    break;
-                case Votable.UPVOTED:
-                    voteStatus.setVisibility(View.VISIBLE);
-                    voteStatus.setBackgroundColor(getResources().getColor(R.color.orangered));
-                    break;
-                default:
-                    voteStatus.setVisibility(View.GONE);
-                    break;
-            }
-            if (getItem(position).isHidden())
-                body.setVisibility(View.GONE);
-            else
-                body.setVisibility(View.VISIBLE);
 
             return convertView;
         }
-    }
-
-    /**
-     * A somewhat hackish way to stop the app from crashing and opening the link properly
-     * @param html
-     * @return
-     */
-    private String formatHtmlForMeta(String html) {
-        if (html.contains("href=\"")) {
-            html = html.replace("&lt;a href=\"/r/", "&lt;a href=\"me.williamhester.breadit://subreddit/");
-            html = html.replace("&lt;a href=\"/u/", "&lt;a href=\"me.williamhester.breadit://user/");
-            html = html.replace("&lt;a href=\"http://www.reddit.com/u/", "&lt;a href=\"me.williamhester.breadit://user/");
-            html = html.replace("&lt;a href=\"http://reddit.com/u/", "&lt;a href=\"me.williamhester.breadit://user/");
-            if (html.contains("reddit.com/r/")) {
-                return Utilities.formatHtml(html);
-            }
-            return html;
-        }
-        return html;
     }
 
     private class CommentLoaderTask extends AsyncTask<Void, Void, List<Thing>> {
@@ -408,7 +377,7 @@ public class CommentFragment extends Fragment {
                     }
                     mCommentAdapter = new CommentArrayAdapter(mContext);
                     mCommentsListView.setAdapter(mCommentAdapter);
-                    mCommentsListView.setOnTouchListener(mGestureListener);
+//                    mCommentsListView.setOnTouchListener(mGestureListener);
                 }
                 for (Thing comment : result) {
                     if (comment != null && comment instanceof Comment) {
@@ -707,6 +676,7 @@ public class CommentFragment extends Fragment {
                 }
             });
             Dialog d = builder.create();
+            //noinspection ResourceType
             d.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
             d.show();
         }
@@ -825,30 +795,18 @@ public class CommentFragment extends Fragment {
 
     private class HiddenComments {
 
-        private int mBelowPosition; // The position of the comment that is being collapsed
         private ArrayList<Comment> mHiddenCommentsList = new ArrayList<Comment>();
 
         public HiddenComments(int position) {
-            mBelowPosition = position;
-            int level = mCommentsList.get(position - HEADER_VIEW_COUNT).getLevel();
+            int level = mCommentsList.get(position).getLevel();
             position++;
-            while (position <= mCommentsList.size() && mCommentsList.get(position - HEADER_VIEW_COUNT).getLevel() > level) {
-                mHiddenCommentsList.add(mCommentsList.remove(position - HEADER_VIEW_COUNT));
+            while (position < mCommentsList.size() && mCommentsList.get(position).getLevel() > level) {
+                mHiddenCommentsList.add(mCommentsList.remove(position));
             }
         }
 
         public ArrayList<Comment> getHiddenComments() {
             return mHiddenCommentsList;
-        }
-
-        public int getBelowPosition() {
-            return mBelowPosition;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            return o instanceof HiddenComments
-                    && ((HiddenComments) o).getBelowPosition() == mBelowPosition;
         }
 
     }

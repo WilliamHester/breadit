@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
@@ -9,24 +8,35 @@
 
     <LinearLayout
         android:layout_height="wrap_content"
-        android:layout_width="match_parent" >
-        <!--<ImageView-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:background="@android:drawable/ic_search_category_default"-->
-            <!--android:paddingLeft="6dp"/>-->
+        android:layout_width="match_parent"
+        android:paddingBottom="8dp">
 
-        <EditText
-            android:id="@+id/search_subreddit"
+        <FrameLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:paddingRight="6dp"
-            android:paddingLeft="6dp"
-            android:drawableLeft="@android:drawable/ic_search_category_default"
-            android:textColor="@color/ghostwhite"
-            android:hint="@string/search_sub_hint"/>
+            android:layout_weight="1">
 
+            <EditText
+                android:id="@+id/search_subreddit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:imeOptions="actionGo"
+                android:imeActionLabel="@string/go"
+                android:textColor="@color/mid_gray"
+                android:hint="@string/search_sub_hint"/>
+
+            <ImageButton android:id="@+id/clear"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:scaleType="fitCenter"
+                android:background="@android:color/transparent"
+                android:src="@android:drawable/ic_menu_close_clear_cancel"
+                android:paddingRight="8dp"
+                android:layout_gravity="right|center_vertical"
+                android:layout_marginRight="8dp" />
+
+        </FrameLayout>
 
         <ImageButton
             android:layout_width="wrap_content"
@@ -37,26 +47,14 @@
 
     </LinearLayout>
 
-
-
-
     <TextView
-          android:id="@+id/current_subreddit"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:textColor="@color/orangered"
-          android:textSize="25sp"
-          android:padding="6dp"/>
+        android:id="@+id/current_subreddit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/orangered"
+        android:fontFamily="sans-serif-condensed"
+        android:textSize="16sp"/>
 
-
-    <CheckBox
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content"
-         android:text="@string/subscribe"
-         android:textSize="20sp"
-         android:textColor="@color/ghostwhite"
-         android:id="@+id/subscribed_CheckBox"
-         android:checked="true"/>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -65,35 +63,36 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/sort_by"
-            android:textColor="@color/ghostwhite"
-            android:textSize="20sp"
-            android:padding="6dp"
-            />
+            android:textColor="@color/mid_gray"
+            android:textSize="16sp"
+            android:fontFamily="sans-serif-condensed"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp" />
 
-        <Spinner
+        <Spinner android:id="@+id/header_spinner1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/header_spinner1"
-            android:layout_weight="1"
             android:visibility="visible"
-            android:padding="6dp"
-            />
+            android:paddingTop="8dp"
+            android:paddingLeft="8dp"
+            android:paddingBottom="8dp" />
 
-        <Spinner
+        <Spinner android:id="@+id/header_spinner2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/header_spinner2"
-            android:layout_weight="1"
             android:visibility="visible"
-            android:padding="6dp"
-
-        />
+            android:paddingTop="8dp"
+            android:paddingLeft="8dp"
+            android:paddingBottom="8dp" />
 
     </LinearLayout>
 
-
-
-
-
-
+    <CheckBox android:id="@+id/subscribed_CheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/subscribe"
+        android:textSize="16sp"
+        android:fontFamily="sans-serif-condensed"
+        android:textColor="@color/mid_gray"
+        android:checked="true"/>
 </LinearLayout>

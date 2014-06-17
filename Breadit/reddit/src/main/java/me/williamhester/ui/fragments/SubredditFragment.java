@@ -21,7 +21,9 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
@@ -347,7 +349,7 @@ public class SubredditFragment extends Fragment {
 
         @Override
         protected List<Submission> doInBackground(SubmissionsListViewHelper... submissionsList) {
-            List<Submission> submissions;
+            List<Submission> submissions = null;
             try {
                 mSwipeRefreshLayout.setRefreshing(true);
                 String data;
@@ -362,8 +364,10 @@ public class SubredditFragment extends Fragment {
 
                 submissions = new ArrayList<Submission>();
                 for (int i = 0; i < array.size(); i++) {
-                    JsonObject jsonData = array.get(i).getAsJsonObject();
-                    submissions.add(Submission.fromJsonString(jsonData));
+                    array.get(i);
+                    Gson gson = new Gson();
+                    JsonElement element = array.get(i).getAsJsonObject().get("data");
+                    submissions.add(gson.fromJson(element, Submission.class));
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -372,9 +376,10 @@ public class SubredditFragment extends Fragment {
                 e.printStackTrace();
                 return null;
             } catch (JsonSyntaxException e) {
+//                Log.d("SubredditFragmnent", "jsonException");
                 mNothingHere = true;
                 e.printStackTrace();
-                return null;
+                return submissions;
             }
             return submissions;
         }

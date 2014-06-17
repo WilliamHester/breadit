@@ -12,6 +12,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -347,9 +348,17 @@ public class Account implements Parcelable {
 
         while (after != null) {
 
-            object = new JsonParser().parse(Utilities.get(null,
-                    "http://www.reddit.com/subreddits/mine/subscriber.json?after=" + after,
-                    this)).getAsJsonObject();
+            try {
+                String json = Utilities.get(null,
+                        "http://www.reddit.com/subreddits/mine/subscriber.json?after=" + after,
+                        this);
+                Log.d("Account", json);
+                object = new JsonParser().parse(json).getAsJsonObject();
+            } catch (IllegalStateException e) {
+                break;
+            } catch (JsonSyntaxException e) {
+                break;
+            }
             data = object.get("data").getAsJsonObject();
             array = data.get("children").getAsJsonArray();
 

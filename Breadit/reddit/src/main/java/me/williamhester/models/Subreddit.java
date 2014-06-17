@@ -184,9 +184,9 @@ public class Subreddit extends Thing implements Parcelable {
         dest.writeByte(mUserIsContributor ? (byte) 1 : (byte) 0);
         dest.writeByte(mUserIsModerator ? (byte) 1 : (byte) 0);
         dest.writeByte(mUserIsSubscriber ? (byte) 1 : (byte) 0);
-        dest.writeString(this.mId);
-        dest.writeString(this.mName);
-        dest.writeString(this.mKind);
+        dest.writeString(this.id);
+        dest.writeString(this.name);
+        dest.writeString(this.kind);
     }
 
     private Subreddit(Parcel in) {
@@ -213,9 +213,9 @@ public class Subreddit extends Thing implements Parcelable {
         this.mUserIsContributor = in.readByte() != 0;
         this.mUserIsModerator = in.readByte() != 0;
         this.mUserIsSubscriber = in.readByte() != 0;
-        this.mId = in.readString();
-        this.mName = in.readString();
-        this.mKind = in.readString();
+        this.id = in.readString();
+        this.name = in.readString();
+        this.kind = in.readString();
     }
 
     public static Creator<Subreddit> CREATOR = new Creator<Subreddit>() {

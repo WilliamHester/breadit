@@ -403,7 +403,7 @@ public class NavigationDrawerFragment extends Fragment {
     };
 
     private View createHeaderView(LayoutInflater inflater) {
-        View v = inflater.inflate(R.layout.header_drawer_2, null);
+        View v = inflater.inflate(R.layout.header_drawer, null);
         final EditText subredditSearch = (EditText) v.findViewById(R.id.search_subreddit);
         final ImageButton search = (ImageButton) v.findViewById(R.id.search_button);
         ImageButton clear = (ImageButton) v.findViewById(R.id.clear);
