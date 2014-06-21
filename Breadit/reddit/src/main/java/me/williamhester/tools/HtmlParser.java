@@ -1,11 +1,19 @@
 package me.williamhester.tools;
 
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
+import android.text.style.BulletSpan;
+import android.text.style.ClickableSpan;
+import android.text.style.QuoteSpan;
+import android.text.style.StrikethroughSpan;
 import android.text.style.StyleSpan;
+import android.text.style.SuperscriptSpan;
+import android.text.style.TypefaceSpan;
 import android.util.Log;
+import android.view.View;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -17,6 +25,9 @@ import org.jsoup.select.Elements;
 import java.util.List;
 import java.util.Stack;
 
+import me.williamhester.reddit.R;
+import me.williamhester.ui.text.LinkSpan;
+
 /**
  * Created by William on 6/15/14.
  */
@@ -24,47 +35,69 @@ public class HtmlParser {
 
     public static SpannableStringBuilder parseHtml(String html) {
         Document document = Jsoup.parse(html);
-        return generateString(document);
+        return generateString(document).delete(0, 1);
     }
 
     public static SpannableStringBuilder generateString(Node node) {
+        return generateString(node, new SpannableStringBuilder());
+    }
+
+    private static SpannableStringBuilder generateString(Node node, SpannableStringBuilder sb) {
         if (node instanceof TextNode) {
             return new SpannableStringBuilder(((TextNode) node).text());
         }
-        SpannableStringBuilder sb = new SpannableStringBuilder();
+
+        insertNewLine(node, sb);
+
         List<Node> children = node.childNodes();
         for (Node n : children) {
-            sb.append(generateString(n)).setSpan(getSpanFromTag(node), 0, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            sb.append(generateString(n));
+        }
+
+        if (sb.length() > 0) {
+            sb.setSpan(getSpanFromTag(node), 0, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
 
         return sb;
     }
 
-    public static Object getSpanFromTag(Node node) {
+    private static Object getSpanFromTag(Node node) {
         if (node instanceof Element) {
             String tag = ((Element) node).tag().getName();
-            if (tag.equalsIgnoreCase("p")) {
-
-            } else if (tag.equalsIgnoreCase("pre")) {
-
+            if (tag.equalsIgnoreCase("code")) {
+                return new TypefaceSpan("monospace");
             } else if (tag.equalsIgnoreCase("del")) {
-
+                return new StrikethroughSpan();
             } else if (tag.equalsIgnoreCase("strong")) {
                 return new StyleSpan(Typeface.BOLD);
             } else if (tag.equalsIgnoreCase("em")) {
                 return new StyleSpan(Typeface.ITALIC);
             } else if (tag.equalsIgnoreCase("blockquote")) {
-
+                return new QuoteSpan(Color.rgb(246, 128, 38));
+            } else if (tag.equalsIgnoreCase("sup")) {
+                return new SuperscriptSpan();
             } else if (tag.equalsIgnoreCase("a")) {
-                Log.d("HtmlParser", node.attr("href"));
-
-            } else if (tag.equalsIgnoreCase("ol")) {
-
+                return new LinkSpan(node.attr("href"));
             } else if (tag.equalsIgnoreCase("li")) {
-
+                return new BulletSpan(BulletSpan.STANDARD_GAP_WIDTH, Color.CYAN);
             }
         }
         return null;
+    }
+
+    private static void insertNewLine(Node node, SpannableStringBuilder sb) {
+        if (node instanceof Element) {
+            if (((Element) node).tagName().equalsIgnoreCase("li")
+                    && (!(node.childNode(0) instanceof Element)
+                    || !((Element) node.childNode(0)).tagName().equalsIgnoreCase("p"))) {
+                sb.append("\n");
+            } else if (((Element) node).tagName().equalsIgnoreCase("code")) {
+                sb.append("    ");
+            } else if (((Element) node).tagName().equalsIgnoreCase("p")
+                    || ((Element) node).tagName().equalsIgnoreCase("pre")) {
+                sb.append("\n");
+            }
+        }
     }
 
 }
