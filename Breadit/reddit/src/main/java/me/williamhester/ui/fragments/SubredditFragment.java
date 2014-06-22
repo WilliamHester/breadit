@@ -196,11 +196,13 @@ public class SubredditFragment extends Fragment {
     private void loadPrefs() {
         SharedPreferences prefs = mContext.getSharedPreferences("preferences", Context.MODE_PRIVATE);
         boolean oldHideViewed = mHideViewed;
-        long oldId = -1;
+        long oldId;
+        long id = prefs.getLong("accountId", -1);
         if (mAccount != null) {
             oldId = mAccount.getId();
+        } else {
+            oldId = id;
         }
-        long id = prefs.getLong("accountId", -1);
         if (mSubredditName != null) {
             mHideViewed = prefs.getBoolean("pref_remove_viewed_sub", false);
         } else {
@@ -220,8 +222,7 @@ public class SubredditFragment extends Fragment {
         }
         if (getActivity() != null)
             getActivity().invalidateOptionsMenu();
-        if (oldId != id || oldHideViewed != mHideViewed) {
-            Log.d("SubredditFragment", "loadPrefsf");
+        if (mSubmissions != null && oldId != id || oldHideViewed != mHideViewed) {
             new RefreshUserClass(true).execute();
             mSubmissions.invalidateViews();
         }
@@ -438,25 +439,24 @@ public class SubredditFragment extends Fragment {
 
         private final int VISIBLE_THRESHOLD = 5;
         private int previousTotal = 0;
-
-        public InfiniteLoadingScrollListener() {
-        }
+        private boolean loading = true;
 
         @Override
         public void onScroll(AbsListView view, int firstVisibleItem,
                              int visibleItemCount, int totalItemCount) {
-            if (mSwipeRefreshLayout.isRefreshing()) {
+            if (loading) {
                 if (totalItemCount > previousTotal) {
                     previousTotal = totalItemCount;
+                    loading = false;
                 }
-            }
-            if (!mSwipeRefreshLayout.isRefreshing() && mSubmissionList.size() > 0
+            } else if (mSubmissionList.size() > 0
                     && (totalItemCount - visibleItemCount) <= (firstVisibleItem + VISIBLE_THRESHOLD)) {
                 SubmissionsListViewHelper list = new SubmissionsListViewHelper(mSubredditName,
                         mPrimarySortType, mSecondarySortType, null,
                         mSubmissionList.get(mSubmissionList.size() - 1).getName(),
                         mAccount, mSubmissions);
                 new RetrieveSubmissionsTask().execute(list);
+                loading = true;
             }
         }
 

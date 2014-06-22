@@ -130,6 +130,7 @@ public class NavigationDrawerFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        Log.d("NDF", "onResume");
         SharedPreferences prefs = mContext
                 .getSharedPreferences("preferences", Context.MODE_PRIVATE);
         long id = prefs.getLong("accountId", -1);
@@ -187,7 +188,6 @@ public class NavigationDrawerFragment extends Fragment {
             mSubredditList.add(0, "FrontPage");
             mSubredditArrayAdapter = new SubredditAdapter(mSubredditList);
             mDrawerListView.setAdapter(mSubredditArrayAdapter);
-            new GetUserSubreddits().execute();
         } else {
             mSubredditList = new ArrayList<String>();
             String[] subs = getResources().getStringArray(R.array.default_subreddits);

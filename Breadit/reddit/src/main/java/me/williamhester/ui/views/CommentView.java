@@ -47,6 +47,9 @@ public class CommentView extends RelativeLayout {
     private Button mConfirm;
     private OnCommentMotionEventListener mEventListener;
     private GestureDetector mGestureDetector;
+    private LinkMovementMethod mLinkMovementMethod;
+    private SpannableStringBuilder mSpannable;
+    private SwipeDetector mSwipeDetector;
 
     private CommentView mThis = this;
 
@@ -59,9 +62,11 @@ public class CommentView extends RelativeLayout {
         setupViews();
         loadData();
 
-        mGestureDetector = new GestureDetector(context, new SwipeDetector());
+        mSwipeDetector = new SwipeDetector();
+        mGestureDetector = new GestureDetector(context, mSwipeDetector);
 
         setOnTouchListener(mTouchListener);
+        mLinkMovementMethod = new CommentLinkMovementMethod();
     }
 
     public void setComment(Comment comment) {
@@ -139,9 +144,17 @@ public class CommentView extends RelativeLayout {
         }
 
         String bodyText = formatHtmlForMeta(mComment.getBodyHtml());
-        SpannableStringBuilder text = HtmlParser.parseHtml(StringEscapeUtils.unescapeHtml4(bodyText));
-        mBody.setText(text);
-        mBody.setMovementMethod(new LinkMovementMethod());
+        mSpannable = HtmlParser.parseHtml(StringEscapeUtils.unescapeHtml4(bodyText));
+        mBody.setText(mSpannable);
+        mBody.setMovementMethod(mLinkMovementMethod);
+        mBody.setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                boolean ret = mLinkMovementMethod.onTouchEvent((TextView) view, mSpannable, motionEvent);
+                ret = mGestureDetector.onTouchEvent(motionEvent) || ret;
+                return ret;
+            }
+        });
     }
 
     private void setMetadata() {
@@ -245,36 +258,18 @@ public class CommentView extends RelativeLayout {
         }
     };
 
-    private static class CommentLinkMovementMethod extends LinkMovementMethod {
+    private class CommentLinkMovementMethod extends LinkMovementMethod {
 
         @Override
         public boolean onTouchEvent(TextView widget, Spannable buffer, MotionEvent event) {
             if (event.getAction() == MotionEvent.ACTION_UP) {
-//                if (super.onTouchEvent(widget, buffer, event)) {
-//                    mLinkIsPressed = true; // Really horrible hack to prevent the onLongPress()
-//                    //    method from being called
-//                }
-//                View v = mCommentsListView.getChildAt(mPosition
-//                        - mCommentsListView.getFirstVisiblePosition());
-//                if (v != null)
-//                    event.setLocation(event.getX(), event.getY() + v.getY());
-//                return mGestureDetector.onTouchEvent(event);
-//            } else if (event.getAction() == MotionEvent.ACTION_DOWN) {
-//                boolean ret = super.onTouchEvent(widget, buffer, event);
-//                View v = mCommentsListView.getChildAt(mPosition
-//                        - mCommentsListView.getFirstVisiblePosition());
-//                if (v != null)
-//                    event.setLocation(event.getX(), event.getY() + v.getY());
-//                mGestureDetector.onTouchEvent(event);
-//                return ret;
-//            } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
-//                View v = mCommentsListView.getChildAt(mPosition
-//                        - mCommentsListView.getFirstVisiblePosition());
-//                if (v != null)
-//                    event.setLocation(event.getX(), event.getY() + v.getY());
-//                mGestureDetector.onTouchEvent(event);
+                if (super.onTouchEvent(widget, buffer, event)) {
+                    mSwipeDetector.ignoreNextEvent();
+                    return true;
+                }
+                return false;
             }
-            return false;
+            return super.onTouchEvent(widget, buffer, event);
         }
     }
 
@@ -282,14 +277,19 @@ public class CommentView extends RelativeLayout {
 
         private static final int SWIPE_MIN_DISTANCE = 170;
         private static final int SWIPE_MAX_OFF_PATH = 250;
-        private static final int SWIPE_THRESHOLD_VELOCITY = 200;
+        private static final int SWIPE_THRESHOLD_VELOCITY = 150;
+
+        private boolean mIgnoreNext = false;
 
         @Override
         public boolean onSingleTapConfirmed(MotionEvent ev) {
-            if (mEventListener != null) {
+            Log.d("CommentView", "SingleTapConfirmed");
+            if (!mIgnoreNext && mEventListener != null) {
+                Log.d("CommentView", "entered");
                 mEventListener.onSingleTap(mThis);
                 return true;
             }
+            mIgnoreNext = false;
             return false;
         }
 
@@ -344,8 +344,17 @@ public class CommentView extends RelativeLayout {
         }
 
         @Override
+        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+            return Math.abs(distanceX) > Math.abs(distanceY);
+        }
+
+        @Override
         public boolean onDown(MotionEvent event) {
             return true;
+        }
+
+        public void ignoreNextEvent() {
+            mIgnoreNext = true;
         }
     }
 }

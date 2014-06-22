@@ -347,12 +347,10 @@ public class Account implements Parcelable {
             after = je.getAsString();
 
         while (after != null) {
-
             try {
                 String json = Utilities.get(null,
                         "http://www.reddit.com/subreddits/mine/subscriber.json?after=" + after,
                         this);
-                Log.d("Account", json);
                 object = new JsonParser().parse(json).getAsJsonObject();
             } catch (IllegalStateException e) {
                 break;
