@@ -111,6 +111,7 @@ public class SubredditFragment extends Fragment {
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+                Log.d("SubredditFragment", "onRefresh");
                 new RefreshUserClass(true).execute();
             }
         });
@@ -144,13 +145,17 @@ public class SubredditFragment extends Fragment {
     }
 
     public void setPrimarySort(int sortType) {
-        mPrimarySortType = sortType;
-        refreshData();
+        if (mPrimarySortType != sortType) {
+            mPrimarySortType = sortType;
+            refreshData();
+        }
     }
 
     public void setSecondarySort(int sortType) {
-        mSecondarySortType = sortType;
-        refreshData();
+        if (mSecondarySortType != sortType) {
+            mSecondarySortType = sortType;
+            refreshData();
+        }
     }
 
     public int getPrimarySortType() {
@@ -166,6 +171,7 @@ public class SubredditFragment extends Fragment {
     }
 
     public void refreshData() {
+        Log.d("SubredditFragment", "refreshData");
         new RefreshUserClass(true).execute();
     }
 
@@ -215,6 +221,7 @@ public class SubredditFragment extends Fragment {
         if (getActivity() != null)
             getActivity().invalidateOptionsMenu();
         if (oldId != id || oldHideViewed != mHideViewed) {
+            Log.d("SubredditFragment", "loadPrefsf");
             new RefreshUserClass(true).execute();
             mSubmissions.invalidateViews();
         }
@@ -229,6 +236,7 @@ public class SubredditFragment extends Fragment {
         mSubmissions.setAdapter(mSubmissionsAdapter);
         mSubmissions.setOnTouchListener(mGestureListener);
         mSubmissions.setOnScrollListener(new InfiniteLoadingScrollListener());
+        Log.d("SubredditFragment", "populateSubmissions");
         new RefreshUserClass().execute();
     }
 
@@ -376,7 +384,6 @@ public class SubredditFragment extends Fragment {
                 e.printStackTrace();
                 return null;
             } catch (JsonSyntaxException e) {
-//                Log.d("SubredditFragmnent", "jsonException");
                 mNothingHere = true;
                 e.printStackTrace();
                 return submissions;
@@ -431,7 +438,6 @@ public class SubredditFragment extends Fragment {
 
         private final int VISIBLE_THRESHOLD = 5;
         private int previousTotal = 0;
-        private boolean loading = true;
 
         public InfiniteLoadingScrollListener() {
         }
@@ -439,20 +445,18 @@ public class SubredditFragment extends Fragment {
         @Override
         public void onScroll(AbsListView view, int firstVisibleItem,
                              int visibleItemCount, int totalItemCount) {
-            if (loading) {
+            if (mSwipeRefreshLayout.isRefreshing()) {
                 if (totalItemCount > previousTotal) {
-                    loading = false;
                     previousTotal = totalItemCount;
                 }
             }
-            if (!loading && mSubmissionList.size() > 0
+            if (!mSwipeRefreshLayout.isRefreshing() && mSubmissionList.size() > 0
                     && (totalItemCount - visibleItemCount) <= (firstVisibleItem + VISIBLE_THRESHOLD)) {
                 SubmissionsListViewHelper list = new SubmissionsListViewHelper(mSubredditName,
                         mPrimarySortType, mSecondarySortType, null,
                         mSubmissionList.get(mSubmissionList.size() - 1).getName(),
                         mAccount, mSubmissions);
                 new RetrieveSubmissionsTask().execute(list);
-                loading = true;
             }
         }
 
@@ -474,6 +478,7 @@ public class SubredditFragment extends Fragment {
             if (position == mSubmissionList.size()) {
                 if (mFailedToLoad) {
                     mFailedToLoad = false;
+                    Log.d("SubredditFragment", "onSingleTapUp");
                     new RefreshUserClass().execute();
                     TextView loading = (TextView) mFooterView.findViewById(R.id.loading_text);
                     loading.setText(R.string.loading_submissions);
