@@ -35,7 +35,11 @@ public class HtmlParser {
 
     public static SpannableStringBuilder parseHtml(String html) {
         Document document = Jsoup.parse(html);
-        return generateString(document).delete(0, 1);
+        SpannableStringBuilder sb = generateString(document);
+        while (sb.charAt(0) == '\n' || sb.charAt(0) == ' ') {
+            sb.delete(0, 1);
+        }
+        return sb;
     }
 
     public static SpannableStringBuilder generateString(Node node) {

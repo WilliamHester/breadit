@@ -1,15 +1,11 @@
 package me.williamhester.ui.views;
 
 import android.content.Context;
-import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
-import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
-import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -225,7 +221,6 @@ public class CommentView extends RelativeLayout {
 
     public void setVoteStatus(int status) {
         mComment.setVoteStatus(status);
-        Log.d("CommentView", "Setting vote status " + status);
         switch (mComment.getVoteStatus()) {
             case Votable.UPVOTED:
                 mVoteIndicator.setVisibility(View.VISIBLE);
@@ -283,9 +278,7 @@ public class CommentView extends RelativeLayout {
 
         @Override
         public boolean onSingleTapConfirmed(MotionEvent ev) {
-            Log.d("CommentView", "SingleTapConfirmed");
             if (!mIgnoreNext && mEventListener != null) {
-                Log.d("CommentView", "entered");
                 mEventListener.onSingleTap(mThis);
                 return true;
             }
@@ -316,7 +309,6 @@ public class CommentView extends RelativeLayout {
                     && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY
                     && Math.abs(velocityX) > Math.abs(velocityY)) {
                 if (ev1.getX() < ev2.getX()) {
-                    Log.d("CommentView", "Right swipe");
                     if (mComment.getVoteStatus() == Votable.UPVOTED) {
                         if (mEventListener.onNeutralVote(mThis)) {
                             setVoteStatus(Votable.NEUTRAL);
@@ -327,7 +319,6 @@ public class CommentView extends RelativeLayout {
                         }
                     }
                 } else {
-                    Log.d("CommentView", "Left swipe");
                     if (mComment.getVoteStatus() == Votable.DOWNVOTED) {
                         if (mEventListener.onNeutralVote(mThis)) {
                             setVoteStatus(Votable.NEUTRAL);
