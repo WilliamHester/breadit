@@ -11,7 +11,7 @@
         android:id="@+id/comments"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:dividerHeight="4dp"
+        android:dividerHeight="1px"
         android:divider="@android:color/black"
         android:descendantFocusability="afterDescendants"/>
 

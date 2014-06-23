@@ -7,9 +7,9 @@
     android:layout_height="wrap_content">
 
     <LinearLayout
-        android:paddingLeft="12dp"
-        android:paddingRight="12dp"
-        android:paddingBottom="12dp"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:paddingBottom="8dp"
         android:paddingTop="8dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -29,6 +29,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="13sp"
+            android:paddingTop="1dp"
             android:textColor="@color/mid_gray" />
 
         <LinearLayout android:id="@+id/edited_text"
@@ -82,7 +83,7 @@
     </LinearLayout>
 
     <View android:id="@+id/vote_status"
-        android:layout_width="6dp"
+        android:layout_width="4dp"
         android:layout_height="match_parent"/>
 
 </FrameLayout>
