@@ -10,6 +10,8 @@ import android.widget.VideoView;
 
 import com.koushikdutta.async.future.FutureCallback;
 
+import java.io.File;
+
 import me.williamhester.reddit.R;
 
 /**
@@ -28,15 +30,15 @@ public class GfycatFragment extends Fragment {
         VideoView gif = (VideoView) v.findViewById(R.id.gif_view);
         ProgressBar progressBar = (ProgressBar) v.findViewById(R.id.progress_bar);
 
-
-
-        return null;
+        return v;
     }
 
-    private FutureCallback<Object> mFutureCallback = new FutureCallback<Object>() {
+    private FutureCallback<File> mFutureCallback = new FutureCallback<File>() {
         @Override
-        public void onCompleted(Exception e, Object result) {
-
+        public void onCompleted(Exception e, File result) {
+            VideoView gif = (VideoView) getView().findViewById(R.id.gif_view);
+            gif.setVideoPath(result.getPath());
+            gif.start();
         }
     };
 

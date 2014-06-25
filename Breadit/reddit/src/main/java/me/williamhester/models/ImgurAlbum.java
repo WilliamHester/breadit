@@ -21,6 +21,10 @@ public class ImgurAlbum {
     private int cover_height;
     private int ivews;
     private int images_count;
-    private List<ResponseImgurImage> images;
+    private List<ImgurImage> images;
+
+    public List<ImgurImage> getImages() {
+        return images;
+    }
 
 }

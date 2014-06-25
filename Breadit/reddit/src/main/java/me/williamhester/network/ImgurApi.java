@@ -2,6 +2,7 @@ package me.williamhester.network;
 
 import android.content.Context;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
@@ -38,10 +39,11 @@ public class ImgurApi {
                 .setCallback(callback);
     }
 
-    public static void loadImage(String url, ImageView imageView) {
+    public static void loadImage(String url, ImageView imageView, ProgressBar progressBar, FutureCallback<ImageView> callback) {
         Ion.with(imageView)
                 .animateIn(android.R.anim.fade_in)
-                .load(url);
+                .load(url)
+                .setCallback(callback);
     }
 
 }

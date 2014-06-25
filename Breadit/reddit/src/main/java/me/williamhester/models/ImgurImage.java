@@ -19,4 +19,12 @@ public class ImgurImage {
     private int views;
     private int bandwidth;
 
+    public boolean isAnimated() {
+        return animated;
+    }
+
+    public String getUrl() {
+        return link;
+    }
+
 }
