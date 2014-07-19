@@ -504,7 +504,7 @@ public class NavigationDrawerFragment extends Fragment {
                         .inflate(R.layout.list_item_subreddit, null);
             }
             if (position == mDrawerListView.getSelectedItemPosition())
-                v.setBackgroundColor(getResources().getColor(R.color.auburn));
+                v.setBackgroundColor(getResources().getColor(R.color.auburn_orange));
             String subreddit = mSubredditList.get(position);
             TextView subredditName = (TextView)v.findViewById(R.id.subreddit_list_item_title);
             subredditName.setText(subreddit);

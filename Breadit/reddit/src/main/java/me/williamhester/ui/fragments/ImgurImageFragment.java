@@ -45,9 +45,7 @@ public class ImgurImageFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_imgur_image, root, false);
         ImageView imageView = (ImageView) v.findViewById(R.id.image);
-        ProgressBar progressBar = (ProgressBar) v.findViewById(R.id.progress_bar);
-
-        ImgurApi.loadImage(mUrl, imageView, progressBar, new ImageLoadedCallback());
+        ImgurApi.loadImage(mUrl, imageView, new ImageLoadedCallback());
 
         return v;
     }

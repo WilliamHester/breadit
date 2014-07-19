@@ -10,7 +10,7 @@
     <TextView android:id="@+id/username"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/auburn"
+        android:textColor="@color/auburn_orange"
         android:textSize="30sp"
         android:fontFamily="sans-serif-condensed"
         android:paddingBottom="8dp"/>

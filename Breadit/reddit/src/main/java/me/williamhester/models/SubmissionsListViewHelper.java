@@ -21,7 +21,6 @@ public class SubmissionsListViewHelper {
     public static final int YEAR = 4;
     public static final int ALL = 5;
 
-    private ListView mListView;
     private String mUrl;
     private Account mAccount;
 
@@ -40,7 +39,7 @@ public class SubmissionsListViewHelper {
      * @return The list containing submissions
      */
     public SubmissionsListViewHelper(String subredditName, int sortType, int typeArgs, String before,
-                                     String after, Account account, ListView list) {
+                                     String after, Account account) {
 
         String append;
         if (subredditName == null) {
@@ -106,7 +105,6 @@ public class SubmissionsListViewHelper {
 
         mUrl = urlString;
         mAccount = account;
-        mListView = list;
     }
 
     public String getUrl() {
@@ -115,9 +113,5 @@ public class SubmissionsListViewHelper {
 
     public Account getAccount() {
         return mAccount;
-    }
-
-    public ListView getListView() {
-        return mListView;
     }
 }

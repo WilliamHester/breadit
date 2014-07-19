@@ -10,7 +10,7 @@
     <TextView android:id="@+id/subreddit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@color/auburn"
+        android:textColor="@color/auburn_orange"
         android:fontFamily="sans-serif-condensed"
         android:textStyle="bold"
         android:textSize="18sp"/>

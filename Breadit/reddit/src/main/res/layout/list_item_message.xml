@@ -24,7 +24,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-condensed"
-            android:textColor="@color/auburn"/>
+            android:textColor="@color/auburn_orange"/>
 
         <LinearLayout
             android:padding="8dp"
@@ -37,7 +37,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif-condensed"
-                android:textColor="@color/auburn"/>
+                android:textColor="@color/auburn_orange"/>
 
             <!--Todo: make the next TextView a DistinguishedTextView-->
             <TextView
@@ -45,14 +45,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif-condensed"
-                android:textColor="@color/auburn"/>
+                android:textColor="@color/auburn_orange"/>
 
             <TextView
                 android:id="@+id/metadata"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif-condensed"
-                android:textColor="@color/auburn"/>
+                android:textColor="@color/auburn_orange"/>
 
         </LinearLayout>
 

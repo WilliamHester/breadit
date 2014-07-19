@@ -1,5 +1,6 @@
 package me.williamhester.ui.activities;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -28,6 +29,7 @@ public class MainActivity extends Activity
     private Account mAccount;
     private String mSubreddit;
 
+    @SuppressLint("CommitPrefEdits")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -27,4 +27,8 @@ public class ImgurImage {
         return link;
     }
 
+    public String getHugeThumbnail() {
+        return link.replace(".", "h.");
+    }
+
 }

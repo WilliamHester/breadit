@@ -10,4 +10,16 @@ public class ResponseImgurWrapper<T> {
     private boolean success;
     private int status;
 
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public T getData() {
+        return data;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
 }

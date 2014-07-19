@@ -213,21 +213,10 @@ public class UserFragment extends Fragment {
                 TextView nameAndTime
                         = (TextView) convertView.findViewById(R.id.subreddit_name_and_time);
                 TextView author = (TextView) convertView.findViewById(R.id.author);
-                ImageView thumbnail = (ImageView) convertView.findViewById(R.id.thumbnail);
+//                ImageView thumbnail = (ImageView) convertView.findViewById(R.id.thumbnail);
                 TextView title = (TextView) convertView.findViewById(R.id.title);
                 TextView domain = (TextView) convertView.findViewById(R.id.domain);
                 final TextView points = (TextView) convertView.findViewById(R.id.points);
-                View spacer = convertView.findViewById(R.id.spacer);
-
-                // if the submission is a self post, we need to hide the thumbnail
-                if (s.isSelf()) {
-                    thumbnail.setVisibility(View.GONE);
-                    spacer.setVisibility(View.GONE);
-                } else {
-                    thumbnail.setVisibility(View.VISIBLE);
-                    spacer.setVisibility(View.VISIBLE);
-                    UrlImageViewHelper.setUrlDrawable(thumbnail, s.getThumbnailUrl());
-                }
 
                 nameAndTime.setText(" in " + s.getSubredditName() + " "
                         + Utilities.calculateTimeShort(s.getCreatedUtc()));

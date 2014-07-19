@@ -151,25 +151,14 @@ public class CommentFragment extends Fragment {
         TextView nameAndTime
                 = (TextView) subView.findViewById(R.id.subreddit_name_and_time);
         TextView author = (TextView) subView.findViewById(R.id.author);
-        ImageView thumbnail = (ImageView) subView.findViewById(R.id.thumbnail);
+//        ImageView thumbnail = (ImageView) subView.findViewById(R.id.thumbnail);
         TextView title = (TextView) subView.findViewById(R.id.title);
         TextView domain = (TextView) subView.findViewById(R.id.domain);
         final TextView points = (TextView) subView.findViewById(R.id.points);
-        View spacer = subView.findViewById(R.id.spacer);
         mNumComments = (TextView) v.findViewById(R.id.num_comments);
         Spinner sortBy = (Spinner) v.findViewById(R.id.sort_by);
         LinearLayout edit = (LinearLayout) v.findViewById(R.id.edited_text);
         edit.setVisibility(View.GONE);
-
-        // if the submission is a self post, we need to hide the thumbnail
-        if (mSubmission.isSelf()) {
-            thumbnail.setVisibility(View.GONE);
-            spacer.setVisibility(View.GONE);
-        } else {
-            thumbnail.setVisibility(View.VISIBLE);
-            spacer.setVisibility(View.VISIBLE);
-            UrlImageViewHelper.setUrlDrawable(thumbnail, mSubmission.getThumbnailUrl());
-        }
 
         nameAndTime.setText(" in " + mSubmission.getSubredditName() + " "
                 + Utilities.calculateTimeShort(mSubmission.getCreatedUtc()));
