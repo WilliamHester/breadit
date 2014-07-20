@@ -2,10 +2,15 @@ package me.williamhester.ui.fragments;
 
 import android.app.Fragment;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.TextView;
 
 import com.koushikdutta.async.future.FutureCallback;
 
@@ -13,43 +18,110 @@ import me.williamhester.models.ImgurAlbum;
 import me.williamhester.models.ImgurImage;
 import me.williamhester.models.ResponseImgurWrapper;
 import me.williamhester.reddit.R;
+import me.williamhester.ui.adapters.ImgurAlbumAdapter;
 
 /**
  * Created by william on 6/24/14.
  */
 public class ImagePagerFragment extends Fragment {
 
+    private static final String IMAGE = "image";
+    private static final String ALBUM = "album";
+
+    private ImgurAlbumAdapter mAdapter;
+    private Handler mAnimHandler;
+    private Runnable mAnimRunnable;
+
+    public static ImagePagerFragment newInstance(ImgurImage image) {
+        Bundle args = new Bundle();
+        args.putSerializable(IMAGE, image);
+        ImagePagerFragment fragment = new ImagePagerFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static ImagePagerFragment newInstance(ImgurAlbum album) {
+        Bundle args = new Bundle();
+        args.putSerializable(ALBUM, album);
+        ImagePagerFragment fragment = new ImagePagerFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
+        if (getArguments() != null) {
+            if (getArguments().containsKey(IMAGE)) {
+                mAdapter = new ImgurAlbumAdapter(getFragmentManager(),
+                        (ImgurImage) getArguments().getSerializable(IMAGE));
+            } else if (getArguments().containsKey(ALBUM)) {
+                mAdapter = new ImgurAlbumAdapter(getFragmentManager(),
+                        (ImgurAlbum) getArguments().getSerializable(ALBUM));
+            }
+        }
+        mAnimHandler = new Handler();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_image_pager, root, false);
+        final TextView indicator = (TextView) v.findViewById(R.id.pager_indicator);
+        if (mAdapter.getCount() < 2) {
+            indicator.setVisibility(View.INVISIBLE);
+        } else {
+            mAnimRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    indicator.setText((1) + " of " + mAdapter.getCount());
+                    Animation fadeOut = AnimationUtils.loadAnimation(getActivity(), android.R.anim.fade_out);
+                    fadeOut.setAnimationListener(new Animation.AnimationListener() {
+                        @Override
+                        public void onAnimationStart(Animation animation) {
+
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animation animation) {
+                            indicator.setVisibility(View.INVISIBLE);
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animation animation) {
+
+                        }
+                    });
+                    indicator.startAnimation(fadeOut);
+                }
+            };
+            indicator.setVisibility(View.VISIBLE);
+            mAnimHandler.postDelayed(mAnimRunnable, 500);
+        }
         ViewPager pager = (ViewPager) v.findViewById(R.id.view_pager);
+        pager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int i, float v, int i2) { }
+
+            @Override
+            public void onPageSelected(int i) {
+                indicator.setVisibility(View.VISIBLE);
+                mAnimHandler.postDelayed(mAnimRunnable, 500);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int i) { }
+        });
+        pager.setAdapter(mAdapter);
         return v;
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        // Do the network calls
-    }
+    public void onDestroyView() {
+        super.onDestroyView();
 
-    private class ImgurImageCallback implements FutureCallback<ResponseImgurWrapper<ImgurImage>> {
-        @Override
-        public void onCompleted(Exception e, ResponseImgurWrapper<ImgurImage> result) {
-
-        }
-    }
-
-    private class ImgurAlbumCallback implements FutureCallback<ResponseImgurWrapper<ImgurAlbum>> {
-        @Override
-        public void onCompleted(Exception e, ResponseImgurWrapper<ImgurAlbum> result) {
-
-        }
+        mAdapter = null;
+        mAnimHandler.removeCallbacks(mAnimRunnable);
     }
 
 }

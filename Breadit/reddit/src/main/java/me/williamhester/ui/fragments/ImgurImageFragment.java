@@ -23,6 +23,7 @@ public class ImgurImageFragment extends Fragment {
     private static final String IMAGE_URL_KEY = "imageUrl";
 
     private String mUrl;
+    private PhotoViewAttacher mAttacher;
 
     public static ImgurImageFragment newInstance(String url) {
         ImgurImageFragment fragment = new ImgurImageFragment();
@@ -45,19 +46,24 @@ public class ImgurImageFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_imgur_image, root, false);
         ImageView imageView = (ImageView) v.findViewById(R.id.image);
-        ImgurApi.loadImage(mUrl, imageView, new ImageLoadedCallback());
+        ImgurApi.loadImage(mUrl, imageView, new FutureCallback<ImageView>() {
+            @Override
+            public void onCompleted(Exception e, ImageView result) {
+                mAttacher = new PhotoViewAttacher(result);
+                if (getView() != null) {
+                    ProgressBar progressBar = (ProgressBar) getView().findViewById(R.id.progress_bar);
+                    progressBar.setVisibility(View.GONE);
+                }
+            }
+        });
 
         return v;
     }
 
-    private class ImageLoadedCallback implements FutureCallback<ImageView> {
-        @Override
-        public void onCompleted(Exception e, ImageView result) {
-            PhotoViewAttacher attacher = new PhotoViewAttacher(result);
-            if (getView() != null) {
-                ProgressBar progressBar = (ProgressBar) getView().findViewById(R.id.progress_bar);
-                progressBar.setVisibility(View.GONE);
-            }
-        }
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        mAttacher = null;
     }
 }

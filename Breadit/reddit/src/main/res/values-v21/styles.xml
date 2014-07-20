@@ -1,8 +1,9 @@
 <resources>
-
     <style name="_Breadit" parent="android:Theme.Material">
         <item name="android:colorPrimary">@color/dark_gray</item>
         <item name="android:colorPrimaryDark">@color/darkest_gray</item>
         <item name="android:colorAccent">@color/auburn_orange</item>
+
+        <item name="android:windowBackground">@color/darker_gray</item>
     </style>
 </resources>

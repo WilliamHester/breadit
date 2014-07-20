@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import me.williamhester.models.ImgurAlbum;
+import me.williamhester.models.ImgurImage;
 import me.williamhester.models.Submission;
 import me.williamhester.models.SubmissionsListViewHelper;
 import me.williamhester.models.Account;
@@ -33,7 +35,7 @@ import me.williamhester.databases.AccountDataSource;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.adapters.SubmissionsRecyclerAdapter;
 
-public class SubredditFragment extends Fragment {
+public class SubredditFragment extends Fragment implements SubmissionsRecyclerAdapter.AdapterCallbacks {
 
     public static final int HISTORY = 0;
     public static final int SAVED = 1;
@@ -48,8 +50,9 @@ public class SubredditFragment extends Fragment {
 
     private RecyclerView mSubmissionsView;
 
+    private SubredditFragment mThis = this;
     private boolean mFailedToLoad = false;
-    private boolean mHideNsfw = true;
+    private boolean mHideNsfw = false;
     private boolean mHideViewed = false;
     private int mPrimarySortType = Submission.HOT;
     private int mSecondarySortType = Submission.ALL;
@@ -74,7 +77,7 @@ public class SubredditFragment extends Fragment {
             mNames = new HashSet<>();
             mSubmissionList = new ArrayList<>();
         }
-        mSubmissionsAdapter = new SubmissionsRecyclerAdapter(mSubmissionList);
+        mSubmissionsAdapter = new SubmissionsRecyclerAdapter(mSubmissionList, this);
         loadPrefs();
     }
 
@@ -213,7 +216,7 @@ public class SubredditFragment extends Fragment {
      *     when the SwipeRefreshLayout's onRefresh method is called.
      */
     private void populateSubmissions() {
-        mSubmissionsAdapter = new SubmissionsRecyclerAdapter(mSubmissionList);
+        mSubmissionsAdapter = new SubmissionsRecyclerAdapter(mSubmissionList, this);
         mSubmissionsView.setOnScrollListener(new InfiniteLoadingScrollListener());
         Log.d("SubredditFragment", "populateSubmissions");
         new RefreshUserClass().execute();
@@ -222,6 +225,22 @@ public class SubredditFragment extends Fragment {
     private View createFooterView(LayoutInflater inflater) {
         View v = inflater.inflate(R.layout.footer_subreddit_fragment, null);
         return v;
+    }
+
+    @Override
+    public void onImageViewClicked(ImgurImage image) {
+        getFragmentManager().beginTransaction()
+                .add(R.id.container, ImagePagerFragment.newInstance(image), "ImagePagerFragment")
+                .addToBackStack("ImagePagerFragment")
+                .commit();
+    }
+
+    @Override
+    public void onImageViewClicked(ImgurAlbum album) {
+        getFragmentManager().beginTransaction()
+                .add(R.id.container, ImagePagerFragment.newInstance(album), "ImagePagerFragment")
+                .addToBackStack("ImagePagerFragment")
+                .commit();
     }
 
     private class RefreshUserClass extends AsyncTask<Void, Void, Void> {
@@ -305,7 +324,9 @@ public class SubredditFragment extends Fragment {
                         mSubmissionList.clear();
                         mNames.clear();
                     }
+                    int i = 0;
                     for (Submission s : result) {
+                        Log.d("SubredditFragment", "" + i++);
                         if (!mNames.contains(s.getName()) && (!mHideNsfw || !s.isNsfw())
                                 && !(mHideViewed && mAccount != null
                                 && mAccount.hasVisited(s.getName()))) {
@@ -314,7 +335,7 @@ public class SubredditFragment extends Fragment {
                         }
                     }
                     Log.d("SubredditFragment", "Went here " + mSubmissionList.size());
-                    mSubmissionsView.setAdapter(new SubmissionsRecyclerAdapter(mSubmissionList));
+                    mSubmissionsView.setAdapter(new SubmissionsRecyclerAdapter(mSubmissionList, mThis));
                     mSubmissionsAdapter.notifyDataSetChanged();
                 } else if (mNothingHere) {
 

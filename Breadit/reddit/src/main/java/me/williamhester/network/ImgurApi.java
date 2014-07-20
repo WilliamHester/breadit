@@ -1,6 +1,7 @@
 package me.williamhester.network;
 
 import android.content.Context;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
@@ -31,7 +32,7 @@ public class ImgurApi {
     public static void getImageDetails(String id, Context context,
                                        FutureCallback<ResponseImgurWrapper<ImgurImage>> callback) {
         Ion.with(context)
-                .load("http://api.imgur.com/3/image/" + id)
+                .load("https://api.imgur.com/3/image/" + id)
                 .addHeader(AUTHORIZATION, CLIENT_ID)
                 .as(new TypeToken<ResponseImgurWrapper<ImgurImage>>(){})
                 .setCallback(callback);
@@ -40,7 +41,7 @@ public class ImgurApi {
     public static void getAlbumDetails(String id, Context context,
                                        FutureCallback<ResponseImgurWrapper<ImgurAlbum>> callback) {
         Ion.with(context)
-                .load("http://api.imgur.com/3/album/" + id)
+                .load("https://api.imgur.com/3/album/" + id)
                 .addHeader(AUTHORIZATION, CLIENT_ID)
                 .as(new TypeToken<ResponseImgurWrapper<ImgurAlbum>>(){})
                 .setCallback(callback);
@@ -53,15 +54,53 @@ public class ImgurApi {
                 .setCallback(callback);
     }
 
-    public static String getImageIdFromUrl(String url) {
-        int end = url.indexOf('.', url.indexOf(".com") + 4);
-        end = end != -1 ? end : url.length();
-        int start = end;
-        while (url.charAt(start) != '/') {
-            start--;
+    public static class ImgurLinkDetails {
+
+        private String mUrl;
+        private String mId;
+        private int mType;
+
+        public static final int IMAGE = 0;
+        public static final int ALBUM = 1;
+        public static final int GALLERY = 2;
+
+        public ImgurLinkDetails(String url) {
+            mUrl = url;
+            generateDetails();
         }
-        start++;
-        return url.substring(start, end);
+
+        private void generateDetails() {
+            int end = mUrl.indexOf('.', mUrl.indexOf(".com") + 4);
+            end = end != -1 ? end : mUrl.length();
+            int start = end - 1;
+            while (mUrl.charAt(start) != '/') {
+                start--;
+            }
+            mId = mUrl.substring(start + 1, end);
+            while (mUrl.charAt(start) == '/') {
+                start--;
+            }
+            char c = mUrl.charAt(start);
+            switch (c) {
+                case 'm': // imgur.com
+                    mType = IMAGE;
+                    break;
+                case 'a': // imgur.com/a/
+                    mType = ALBUM;
+                    break;
+                case 'y': // imgur.com/gallery/
+                    mType = GALLERY;
+                    break;
+            }
+        }
+
+        public String getLinkId() {
+            return mId;
+        }
+
+        public int getType() {
+            return mType;
+        }
     }
 
 }

@@ -1,9 +1,13 @@
 package me.williamhester.models;
 
+import java.io.Serializable;
+
 /**
  * Created by william on 6/22/14.
  */
-public class ImgurImage {
+public class ImgurImage implements Serializable {
+
+    private static final long serialVersionUID = 5186779065758496400L;
 
     private String id;
     private String title;
@@ -15,9 +19,13 @@ public class ImgurImage {
     private boolean animated;
     private int width;
     private int height;
-    private int size;
-    private int views;
-    private int bandwidth;
+    private long size;
+    private long views;
+    private long bandwidth;
+
+    public String getId() {
+        return id;
+    }
 
     public boolean isAnimated() {
         return animated;
@@ -29,6 +37,11 @@ public class ImgurImage {
 
     public String getHugeThumbnail() {
         return link.replace(".", "h.");
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o != null && o instanceof ImgurImage && ((ImgurImage) o).id.equals(id);
     }
 
 }
