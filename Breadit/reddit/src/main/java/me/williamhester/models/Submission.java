@@ -19,7 +19,7 @@ import java.util.List;
 
 import me.williamhester.models.utils.Utilities;
 
-public class Submission extends Thing implements Parcelable, Votable {
+public class Submission extends Thing implements Parcelable, Votable, Serializable {
 
     public static final int HOT = 0;
     public static final int NEW = 1;
@@ -34,7 +34,7 @@ public class Submission extends Thing implements Parcelable, Votable {
     public static final int YEAR = 4;
     public static final int ALL = 5;
 
-    public static final int FRONTPAGE = 0;
+    private static final long serialVersionUID = -112181006397201414L;
 
     private String author;
     private String author_flair_css_class;
@@ -67,6 +67,7 @@ public class Submission extends Thing implements Parcelable, Votable {
     private Boolean likes;
     private int mVoteStatus;
     private boolean mIsBeingEdited = false;
+    private Object mImgurData;
 
     public Submission() { }
 
@@ -288,6 +289,14 @@ public class Submission extends Thing implements Parcelable, Votable {
 
     public boolean isBeingEdited() {
         return mIsBeingEdited;
+    }
+
+    public void setImgurData(Object data) {
+        mImgurData = data;
+    }
+
+    public Object getImgurData() {
+        return mImgurData;
     }
 
     /**

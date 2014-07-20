@@ -21,13 +21,10 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
-
-import com.koushikdutta.urlimageviewhelper.UrlImageViewHelper;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.http.NameValuePair;
@@ -148,20 +145,20 @@ public class CommentFragment extends Fragment {
         View subView = v.findViewById(R.id.submission);
 
         final View voteStatus = v.findViewById(R.id.vote_status);
-        TextView nameAndTime
-                = (TextView) subView.findViewById(R.id.subreddit_name_and_time);
+//        TextView nameAndTime
+//                = (TextView) subView.findViewById(R.id.subreddit_name_and_time);
         TextView author = (TextView) subView.findViewById(R.id.author);
 //        ImageView thumbnail = (ImageView) subView.findViewById(R.id.thumbnail);
         TextView title = (TextView) subView.findViewById(R.id.title);
         TextView domain = (TextView) subView.findViewById(R.id.domain);
-        final TextView points = (TextView) subView.findViewById(R.id.points);
+        final TextView points = (TextView) subView.findViewById(R.id.post_data);
         mNumComments = (TextView) v.findViewById(R.id.num_comments);
         Spinner sortBy = (Spinner) v.findViewById(R.id.sort_by);
         LinearLayout edit = (LinearLayout) v.findViewById(R.id.edited_text);
         edit.setVisibility(View.GONE);
 
-        nameAndTime.setText(" in " + mSubmission.getSubredditName() + " "
-                + Utilities.calculateTimeShort(mSubmission.getCreatedUtc()));
+//        nameAndTime.setText(" in " + mSubmission.getSubredditName() + " "
+//                + Utilities.calculateTimeShort(mSubmission.getCreatedUtc()));
 
         switch (mSubmission.getVoteStatus()) {
             case Votable.DOWNVOTED:
@@ -178,7 +175,7 @@ public class CommentFragment extends Fragment {
         }
 
         title.setText(StringEscapeUtils.unescapeHtml4(mSubmission.getTitle()));
-        author.setText(mSubmission.getAuthor());
+//        author.setText(mSubmission.getAuthor());
         domain.setText("(" + mSubmission.getDomain() + ")");
         points.setText(mSubmission.getScore() + " points by ");
 
@@ -356,7 +353,7 @@ public class CommentFragment extends Fragment {
             if (result != null) {
                 mCommentsList.clear();
                 if (mSubmission == null) {
-                    if (result.get(0) instanceof Submission) {
+                    if (result.size() > 0 && result.get(0) instanceof Submission) {
                         mSubmission = (Submission) result.get(0);
                         mHeaderView = createHeaderView();
                         mCommentsListView.addHeaderView(mHeaderView);
@@ -722,7 +719,7 @@ public class CommentFragment extends Fragment {
             if (votable != null) {
                 View v = mCommentsListView.getChildAt(position - mCommentsListView.getFirstVisiblePosition());
                 View voteStatus = v.findViewById(R.id.vote_status);
-                TextView points = (TextView) v.findViewById(R.id.points);
+                TextView points = (TextView) v.findViewById(R.id.post_data);
                 switch (votable.getVoteStatus()) {
                     case Votable.UPVOTED:
                         voteStatus.setVisibility(View.VISIBLE);

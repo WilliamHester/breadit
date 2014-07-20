@@ -14,7 +14,7 @@
         android:layout_width="4dp"
         android:layout_height="match_parent"/>
 
-    <LinearLayout
+    <RelativeLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -33,58 +33,46 @@
         <TextView
             android:id="@+id/title"
             android:layout_width="match_parent"
-            android:layout_weight="1"
-            android:layout_height="0dp"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp"
-            android:textSize="14sp"
-            android:fontFamily="sans-serif-condensed-light"
-            android:textColor="@color/mid_gray"/>
-
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingLeft="8dp"
             android:paddingRight="8dp"
-            android:paddingBottom="8dp">
+            android:textSize="16sp"
+            android:fontFamily="sans-serif-condensed-light"
+            android:textColor="@color/mid_gray"
+            android:layout_below="@id/subreddit_title"/>
 
-            <TextView android:id="@+id/points"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="10sp"
-                android:fontFamily="sans-serif-condensed"
-                android:textColor="@color/auburn_orange"/>
+        <TextView android:id="@+id/post_data"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="10sp"
+            android:paddingLeft="8dp"
+            android:fontFamily="sans-serif-condensed"
+            android:textColor="@color/auburn_orange"
+            android:layout_below="@id/title"/>
 
-            <!--Todo: change this TextView to a DistinguishedTextView to denote if the author is a mod, OP, etc-->
-            <TextView android:id="@+id/author"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="10sp"
-                android:fontFamily="sans-serif-condensed"
-                android:textColor="@color/auburn_orange"/>
+        <TextView android:id="@+id/domain"
+            android:paddingRight="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="10sp"
+            android:fontFamily="sans-serif-condensed"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/post_data"/>
 
-            <TextView android:id="@+id/subreddit_name_and_time"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="10sp"
-                android:fontFamily="sans-serif-condensed"
-                android:textColor="@color/auburn_orange" />
-
-            <TextView android:id="@+id/domain"
-                android:paddingLeft="8dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="10sp"
-                android:fontFamily="sans-serif-condensed"
-                android:ellipsize="end"
-                android:textColor="@color/dark_gray"/>
-
-        </LinearLayout>
+        <TextView android:id="@+id/comment_data"
+            android:paddingLeft="8dp"
+            android:paddingBottom="6dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="10sp"
+            android:fontFamily="sans-serif-condensed"
+            android:layout_below="@id/post_data"/>
 
         <FrameLayout android:id="@+id/content_preview"
+            android:paddingTop="2dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_below="@id/comment_data">
 
             <ImageView android:id="@+id/image"
                 android:layout_width="match_parent"
@@ -97,5 +85,5 @@
                 android:background="?android:activatedBackgroundIndicator"/>
 
         </FrameLayout>
-    </LinearLayout>
+    </RelativeLayout>
 </android.support.v7.widget.CardView>

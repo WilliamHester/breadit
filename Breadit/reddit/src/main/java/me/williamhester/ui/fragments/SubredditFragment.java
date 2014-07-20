@@ -2,6 +2,7 @@ package me.williamhester.ui.fragments;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -33,6 +34,7 @@ import me.williamhester.models.Account;
 import me.williamhester.models.utils.Utilities;
 import me.williamhester.databases.AccountDataSource;
 import me.williamhester.reddit.R;
+import me.williamhester.ui.activities.SubmissionActivity;
 import me.williamhester.ui.adapters.SubmissionsRecyclerAdapter;
 
 public class SubredditFragment extends Fragment implements SubmissionsRecyclerAdapter.AdapterCallbacks {
@@ -241,6 +243,17 @@ public class SubredditFragment extends Fragment implements SubmissionsRecyclerAd
                 .add(R.id.container, ImagePagerFragment.newInstance(album), "ImagePagerFragment")
                 .addToBackStack("ImagePagerFragment")
                 .commit();
+    }
+
+    @Override
+    public void onCardClicked(Submission submission) {
+        Intent i = new Intent(getActivity(), SubmissionActivity.class);
+        Bundle args = new Bundle();
+        args.putParcelable(SubmissionActivity.SUBMISSION, submission);
+        args.putParcelable(SubmissionActivity.ACCOUNT, mAccount);
+        args.putString(SubmissionActivity.TAB, SubmissionActivity.COMMENT_TAB);
+        i.putExtras(args);
+        getActivity().startActivity(i);
     }
 
     private class RefreshUserClass extends AsyncTask<Void, Void, Void> {

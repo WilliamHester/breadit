@@ -12,7 +12,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
@@ -22,7 +21,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.koushikdutta.urlimageviewhelper.UrlImageViewHelper;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 
@@ -164,7 +162,7 @@ public class UserFragment extends Fragment {
                 }
                 LinearLayout root = (LinearLayout) convertView.findViewById(R.id.root);
                 TextView author = (TextView) convertView.findViewById(R.id.author);
-                TextView score = (TextView) convertView.findViewById(R.id.points);
+                TextView score = (TextView) convertView.findViewById(R.id.post_data);
                 TextView time = (TextView) convertView.findViewById(R.id.time);
                 TextView body = (TextView) convertView.findViewById(R.id.body);
                 View voteStatus = convertView.findViewById(R.id.vote_status);
@@ -210,16 +208,16 @@ public class UserFragment extends Fragment {
                 convertView.invalidate();
 
                 final View voteStatus = convertView.findViewById(R.id.vote_status);
-                TextView nameAndTime
-                        = (TextView) convertView.findViewById(R.id.subreddit_name_and_time);
-                TextView author = (TextView) convertView.findViewById(R.id.author);
+//                TextView nameAndTime
+//                        = (TextView) convertView.findViewById(R.id.subreddit_name_and_time);
+//                TextView author = (TextView) convertView.findViewById(R.id.author);
 //                ImageView thumbnail = (ImageView) convertView.findViewById(R.id.thumbnail);
                 TextView title = (TextView) convertView.findViewById(R.id.title);
                 TextView domain = (TextView) convertView.findViewById(R.id.domain);
-                final TextView points = (TextView) convertView.findViewById(R.id.points);
+                final TextView points = (TextView) convertView.findViewById(R.id.post_data);
 
-                nameAndTime.setText(" in " + s.getSubredditName() + " "
-                        + Utilities.calculateTimeShort(s.getCreatedUtc()));
+//                nameAndTime.setText(" in " + s.getSubredditName() + " "
+//                        + Utilities.calculateTimeShort(s.getCreatedUtc()));
                 switch (s.getVoteStatus()) {
                     case Votable.DOWNVOTED:
                         voteStatus.setVisibility(View.VISIBLE);
@@ -235,7 +233,7 @@ public class UserFragment extends Fragment {
                 }
 
                 title.setText(StringEscapeUtils.unescapeHtml4(s.getTitle()));
-                author.setText(s.getAuthor());
+//                author.setText(s.getAuthor());
                 domain.setText("(" + s.getDomain() + ")");
                 points.setText(s.getScore() + " points by ");
 

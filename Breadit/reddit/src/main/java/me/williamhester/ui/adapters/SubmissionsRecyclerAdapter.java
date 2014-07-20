@@ -64,16 +64,19 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
+        private Submission mSubmission;
+
         public ViewHolder(View itemView) {
             super(itemView);
         }
         
         private void setContent(final Submission s) {
+            mSubmission = s;
             final View voteStatus = itemView.findViewById(R.id.vote_status);
-            TextView author = (TextView) itemView.findViewById(R.id.author);
             TextView title = (TextView) itemView.findViewById(R.id.title);
             TextView domain = (TextView) itemView.findViewById(R.id.domain);
-            final TextView points = (TextView) itemView.findViewById(R.id.points);
+            final TextView metaData = (TextView) itemView.findViewById(R.id.post_data);
+            TextView commentData = (TextView) itemView.findViewById(R.id.comment_data);
 
             switch (s.getVoteStatus()) {
                 case Votable.DOWNVOTED:
@@ -90,9 +93,17 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
             }
 
             title.setText(StringEscapeUtils.unescapeHtml4(s.getTitle()));
-            author.setText(s.getAuthor());
-            domain.setText("(" + s.getDomain() + ")");
-            points.setText(s.getScore() + " points by ");
+            domain.setText(s.getDomain());
+            metaData.setText(s.getScore() + " points by " + s.getAuthor());
+            commentData.setText(s.getNumberOfComments() + " comments");
+
+            title.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Log.d("SubmissionsRecyclerActivity", "clicked card");
+                    mCallback.onCardClicked(mSubmission);
+                }
+            });
 
             TextView subreddit = (TextView) itemView.findViewById(R.id.subreddit_title);
             subreddit.setText("/r/" + s.getSubredditName());
@@ -105,9 +116,15 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
                 container.setVisibility(View.VISIBLE);
                 String id = linkDetails.getLinkId();
                 if (linkDetails.getType() == UrlParser.IMGUR_IMAGE) {
-                    ImgurApi.getImageDetails(id, imageView.getContext(), new ImgurImageFuture());
+                    if (!setImagePreview()) {
+                        imageView.setImageDrawable(null);
+                        ImgurApi.getImageDetails(id, imageView.getContext(), new ImgurImageFuture());
+                    }
                 } else if (linkDetails.getType() == UrlParser.IMGUR_ALBUM) {
-                    ImgurApi.getAlbumDetails(id, imageView.getContext(), new ImgurAlbumFuture());
+                    if (!setImagePreview()) {
+                        imageView.setImageDrawable(null);
+                        ImgurApi.getAlbumDetails(id, imageView.getContext(), new ImgurAlbumFuture());
+                    }
                 } else if (linkDetails.getType() == UrlParser.YOUTUBE) {
                     String url = "http://img.youtube.com/vi/" + linkDetails.getLinkId() + "/maxresdefault.jpg";
                     ImgurApi.loadImage(url, imageView, null);
@@ -133,17 +150,8 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
             @Override
             public void onCompleted(Exception e, final ResponseImgurWrapper<ImgurAlbum> result) {
                 if (result != null && result.isSuccess()) {
-                    ImageView imageView = (ImageView) itemView.findViewById(R.id.image);
-                    ImgurApi.loadImage(result.getData().getImages().get(0).getUrl(), imageView, null);
-                    ImageButton button = (ImageButton) itemView.findViewById(R.id.preview_button);
-                    button.setVisibility(View.INVISIBLE);
-                    imageView.setAlpha(1f);
-                    imageView.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            mCallback.onImageViewClicked(result.getData());
-                        }
-                    });
+                    mSubmission.setImgurData(result);
+                    setImagePreview();
                 } else if (result != null) {
                     Log.e("SubmissionsRecyclerAdapter", "failed, status = " + result.getStatus());
                 } else {
@@ -156,16 +164,8 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
             @Override
             public void onCompleted(Exception e, final ResponseImgurWrapper<ImgurImage> result) {
                 if (result != null && result.isSuccess()) {
-                    ImageView imageView = (ImageView) itemView.findViewById(R.id.image);
-                    ImgurApi.loadImage(result.getData().getUrl(), imageView, null);
-                    ImageButton button = (ImageButton) itemView.findViewById(R.id.preview_button);
-                    button.setVisibility(View.INVISIBLE);
-                    imageView.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            mCallback.onImageViewClicked(result.getData());
-                        }
-                    });
+                    mSubmission.setImgurData(result.getData());
+                    setImagePreview();
                 } else if (result != null) {
                     Log.e("SubmissionsRecyclerAdapter", "failed, status = " + result.getStatus());
                 } else {
@@ -173,10 +173,47 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
                 }
             }
         }
+
+        /**
+         * Attempts to set the image preview
+         *
+         * @return returns whether or not the data has been set.
+         */
+        private boolean setImagePreview() {
+            if (mSubmission.getImgurData() == null) {
+                return false;
+            }
+            ImgurImage image = null;
+            if (mSubmission.getImgurData() instanceof ImgurAlbum) {
+                image = ((ImgurAlbum) mSubmission.getImgurData()).getImages().get(0);
+            } else if (mSubmission.getImgurData() instanceof ImgurImage) {
+                image = (ImgurImage) mSubmission.getImgurData();
+            }
+            ImageView imageView = (ImageView) itemView.findViewById(R.id.image);
+            if (image != null && !image.isAnimated()) {
+                ImgurApi.loadImage(image.getUrl(), imageView, null);
+                ImageButton button = (ImageButton) itemView.findViewById(R.id.preview_button);
+                button.setVisibility(View.INVISIBLE);
+                imageView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if (mSubmission.getImgurData() instanceof ImgurImage) {
+                            mCallback.onImageViewClicked((ImgurImage) mSubmission.getImgurData());
+                        } else if (mSubmission.getImgurData() instanceof ImgurAlbum) {
+                            mCallback.onImageViewClicked((ImgurAlbum) mSubmission.getImgurData());
+                        }
+                    }
+                });
+            } else {
+                itemView.findViewById(R.id.content_preview).setVisibility(View.GONE);
+            }
+            return true;
+        }
     }
 
     public interface AdapterCallbacks {
         public void onImageViewClicked(ImgurImage image);
         public void onImageViewClicked(ImgurAlbum album);
+        public void onCardClicked(Submission submission);
     }
 }

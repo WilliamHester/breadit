@@ -28,8 +28,11 @@ import me.williamhester.ui.views.TabView;
 
 public class SubmissionActivity extends Activity implements TabView.TabSwitcher {
 
+    public static final String ACCOUNT = "account";
     public static final String COMMENT_TAB = "comments";
     public static final String CONTENT_TAB = "content";
+    public static final String SUBMISSION = "submission";
+    public static final String TAB = "tab";
 
     private Context mContext = this;
     private Submission mSubmission;
@@ -65,10 +68,10 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
             }
             mCurrentTag = COMMENT_TAB;
         } else if (getIntent().getExtras() != null) {
-            mSubmission = getIntent().getExtras().getParcelable("submission");
-            mAccount = getIntent().getExtras().getParcelable("account");
+            mSubmission = getIntent().getExtras().getParcelable(SUBMISSION);
+            mAccount = getIntent().getExtras().getParcelable(ACCOUNT);
             if (mCurrentTag == null) {
-                mCurrentTag = getIntent().getExtras().getString("tab");
+                mCurrentTag = getIntent().getExtras().getString(TAB);
             }
         }
 

@@ -4,7 +4,6 @@ import android.app.Fragment;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,11 +11,8 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
-import com.koushikdutta.async.future.FutureCallback;
-
 import me.williamhester.models.ImgurAlbum;
 import me.williamhester.models.ImgurImage;
-import me.williamhester.models.ResponseImgurWrapper;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.adapters.ImgurAlbumAdapter;
 
@@ -31,6 +27,7 @@ public class ImagePagerFragment extends Fragment {
     private ImgurAlbumAdapter mAdapter;
     private Handler mAnimHandler;
     private Runnable mAnimRunnable;
+    private int mCurrentPosition;
 
     public static ImagePagerFragment newInstance(ImgurImage image) {
         Bundle args = new Bundle();
@@ -54,10 +51,10 @@ public class ImagePagerFragment extends Fragment {
 
         if (getArguments() != null) {
             if (getArguments().containsKey(IMAGE)) {
-                mAdapter = new ImgurAlbumAdapter(getFragmentManager(),
+                mAdapter = new ImgurAlbumAdapter(getChildFragmentManager(),
                         (ImgurImage) getArguments().getSerializable(IMAGE));
             } else if (getArguments().containsKey(ALBUM)) {
-                mAdapter = new ImgurAlbumAdapter(getFragmentManager(),
+                mAdapter = new ImgurAlbumAdapter(getChildFragmentManager(),
                         (ImgurAlbum) getArguments().getSerializable(ALBUM));
             }
         }
@@ -74,7 +71,6 @@ public class ImagePagerFragment extends Fragment {
             mAnimRunnable = new Runnable() {
                 @Override
                 public void run() {
-                    indicator.setText((1) + " of " + mAdapter.getCount());
                     Animation fadeOut = AnimationUtils.loadAnimation(getActivity(), android.R.anim.fade_out);
                     fadeOut.setAnimationListener(new Animation.AnimationListener() {
                         @Override
@@ -95,7 +91,6 @@ public class ImagePagerFragment extends Fragment {
                     indicator.startAnimation(fadeOut);
                 }
             };
-            indicator.setVisibility(View.VISIBLE);
             mAnimHandler.postDelayed(mAnimRunnable, 500);
         }
         ViewPager pager = (ViewPager) v.findViewById(R.id.view_pager);
@@ -106,7 +101,9 @@ public class ImagePagerFragment extends Fragment {
             @Override
             public void onPageSelected(int i) {
                 indicator.setVisibility(View.VISIBLE);
-                mAnimHandler.postDelayed(mAnimRunnable, 500);
+                mAnimHandler.postDelayed(mAnimRunnable, 1000);
+                mCurrentPosition = i;
+                indicator.setText((mCurrentPosition + 1) + " of " + mAdapter.getCount());
             }
 
             @Override
