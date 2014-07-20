@@ -75,8 +75,8 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
             final View voteStatus = itemView.findViewById(R.id.vote_status);
             TextView title = (TextView) itemView.findViewById(R.id.title);
             TextView domain = (TextView) itemView.findViewById(R.id.domain);
-            final TextView metaData = (TextView) itemView.findViewById(R.id.post_data);
-            TextView commentData = (TextView) itemView.findViewById(R.id.comment_data);
+            final TextView metaData = (TextView) itemView.findViewById(R.id.metadata);
+            TextView commentData = (TextView) itemView.findViewById(R.id.num_comments);
 
             switch (s.getVoteStatus()) {
                 case Votable.DOWNVOTED:
@@ -96,8 +96,9 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
             domain.setText(s.getDomain());
             metaData.setText(s.getScore() + " points by " + s.getAuthor());
             commentData.setText(s.getNumberOfComments() + " comments");
+            View submissionData = itemView.findViewById(R.id.submission_data);
 
-            title.setOnClickListener(new View.OnClickListener() {
+            submissionData.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     Log.d("SubmissionsRecyclerActivity", "clicked card");

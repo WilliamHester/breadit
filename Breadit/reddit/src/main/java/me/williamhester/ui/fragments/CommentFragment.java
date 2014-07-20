@@ -151,7 +151,7 @@ public class CommentFragment extends Fragment {
 //        ImageView thumbnail = (ImageView) subView.findViewById(R.id.thumbnail);
         TextView title = (TextView) subView.findViewById(R.id.title);
         TextView domain = (TextView) subView.findViewById(R.id.domain);
-        final TextView points = (TextView) subView.findViewById(R.id.post_data);
+        final TextView points = (TextView) subView.findViewById(R.id.metadata);
         mNumComments = (TextView) v.findViewById(R.id.num_comments);
         Spinner sortBy = (Spinner) v.findViewById(R.id.sort_by);
         LinearLayout edit = (LinearLayout) v.findViewById(R.id.edited_text);
@@ -719,7 +719,7 @@ public class CommentFragment extends Fragment {
             if (votable != null) {
                 View v = mCommentsListView.getChildAt(position - mCommentsListView.getFirstVisiblePosition());
                 View voteStatus = v.findViewById(R.id.vote_status);
-                TextView points = (TextView) v.findViewById(R.id.post_data);
+                TextView points = (TextView) v.findViewById(R.id.metadata);
                 switch (votable.getVoteStatus()) {
                     case Votable.UPVOTED:
                         voteStatus.setVisibility(View.VISIBLE);

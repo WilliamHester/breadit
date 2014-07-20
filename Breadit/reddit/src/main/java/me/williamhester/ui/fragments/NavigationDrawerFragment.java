@@ -88,7 +88,6 @@ public class NavigationDrawerFragment extends Fragment {
     private boolean mIsOpen = false;
     private Account mAccount;
     private Context mContext;
-    private TextView mCurrentSubreddit;
     private CheckBox mCheckbox;
     private Subreddit mSubreddit;
     private Spinner mFilterSpinner;
@@ -281,11 +280,6 @@ public class NavigationDrawerFragment extends Fragment {
                 new SubscribeAsyncTask(b).execute();
             }
         });
-        if (subreddit != null) {
-            mCurrentSubreddit.setText("Currently viewing " + subreddit);
-        } else {
-            mCurrentSubreddit.setText("Currently viewing FrontPage");
-        }
         mSubSpinner.setSelection(primarySort);
         mFilterSpinner.setSelection(secondarySort);
     }
@@ -436,8 +430,6 @@ public class NavigationDrawerFragment extends Fragment {
                 subredditSearch.setText("");
             }
         });
-        mCurrentSubreddit = (TextView) v.findViewById(R.id.current_subreddit);
-        mCurrentSubreddit.setText("Currently viewing " + mSubName);
         mCheckbox = (CheckBox) v.findViewById(R.id.subscribed_CheckBox);
         mCheckbox.setVisibility(View.GONE);
 
@@ -507,7 +499,11 @@ public class NavigationDrawerFragment extends Fragment {
                 v.setBackgroundColor(getResources().getColor(R.color.auburn_orange));
             String subreddit = mSubredditList.get(position);
             TextView subredditName = (TextView)v.findViewById(R.id.subreddit_list_item_title);
-            subredditName.setText(subreddit);
+            if (!subreddit.equals("FrontPage")) {
+                subredditName.setText("/r/" + subreddit);
+            } else {
+                subredditName.setText(subreddit);
+            }
             return v;
         }
     }

@@ -162,7 +162,7 @@ public class UserFragment extends Fragment {
                 }
                 LinearLayout root = (LinearLayout) convertView.findViewById(R.id.root);
                 TextView author = (TextView) convertView.findViewById(R.id.author);
-                TextView score = (TextView) convertView.findViewById(R.id.post_data);
+                TextView score = (TextView) convertView.findViewById(R.id.metadata);
                 TextView time = (TextView) convertView.findViewById(R.id.time);
                 TextView body = (TextView) convertView.findViewById(R.id.body);
                 View voteStatus = convertView.findViewById(R.id.vote_status);
@@ -214,7 +214,7 @@ public class UserFragment extends Fragment {
 //                ImageView thumbnail = (ImageView) convertView.findViewById(R.id.thumbnail);
                 TextView title = (TextView) convertView.findViewById(R.id.title);
                 TextView domain = (TextView) convertView.findViewById(R.id.domain);
-                final TextView points = (TextView) convertView.findViewById(R.id.post_data);
+                final TextView points = (TextView) convertView.findViewById(R.id.metadata);
 
 //                nameAndTime.setText(" in " + s.getSubredditName() + " "
 //                        + Utilities.calculateTimeShort(s.getCreatedUtc()));
