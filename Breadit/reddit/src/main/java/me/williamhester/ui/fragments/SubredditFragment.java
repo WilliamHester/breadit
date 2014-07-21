@@ -247,6 +247,14 @@ public class SubredditFragment extends Fragment implements SubmissionsRecyclerAd
     }
 
     @Override
+    public void onImageViewClicked(String imageUrl) {
+        getFragmentManager().beginTransaction()
+                .add(R.id.container, ImagePagerFragment.newInstance(imageUrl), "ImagePagerFragment")
+                .addToBackStack("ImagePagerFragment")
+                .commit();
+    }
+
+    @Override
     public void onCardClicked(Submission submission) {
         Intent i = new Intent(getActivity(), SubmissionActivity.class);
         Bundle args = new Bundle();

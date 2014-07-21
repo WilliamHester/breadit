@@ -22,7 +22,7 @@ import uk.co.senab.photoview.PhotoViewAttacher;
 /**
  * Created by William on 6/24/14.
  */
-public class ImgurImageFragment extends Fragment {
+public class ImageFragment extends Fragment {
 
     private static final String IMAGE_URL_KEY = "imageUrl";
     private static final String IMGUR_IMAGE_KEY = "imgurImage";
@@ -31,16 +31,16 @@ public class ImgurImageFragment extends Fragment {
     private String mUrl;
     private PhotoViewAttacher mAttacher;
 
-    public static ImgurImageFragment newInstance(String url) {
-        ImgurImageFragment fragment = new ImgurImageFragment();
+    public static ImageFragment newInstance(String url) {
+        ImageFragment fragment = new ImageFragment();
         Bundle args = new Bundle();
         args.putString(IMAGE_URL_KEY, url);
         fragment.setArguments(args);
         return fragment;
     }
 
-    public static ImgurImageFragment newInstance(ImgurImage image) {
-        ImgurImageFragment fragment = new ImgurImageFragment();
+    public static ImageFragment newInstance(ImgurImage image) {
+        ImageFragment fragment = new ImageFragment();
         Bundle args = new Bundle();
         args.putSerializable(IMGUR_IMAGE_KEY, image);
         fragment.setArguments(args);
@@ -54,6 +54,9 @@ public class ImgurImageFragment extends Fragment {
         if (getArguments() != null) {
             mUrl = getArguments().getString(IMAGE_URL_KEY);
             mImgurImage = (ImgurImage) getArguments().getSerializable(IMGUR_IMAGE_KEY);
+            if (mImgurImage != null) {
+                mUrl = mImgurImage.getUrl();
+            }
         }
         if (mImgurImage != null && mImgurImage.getDescription() != null) {
             setHasOptionsMenu(true);
@@ -65,8 +68,11 @@ public class ImgurImageFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_imgur_image, root, false);
         ImageView imageView = (ImageView) v.findViewById(R.id.image);
         TextView description = (TextView) v.findViewById(R.id.description);
-        description.setText(mImgurImage.getDescription());
-        ImgurApi.loadImage(mImgurImage.getUrl(), imageView, new FutureCallback<ImageView>() {
+        if (mImgurImage != null && mImgurImage.getDescription() != null) {
+            description.setText(mImgurImage.getDescription());
+            description.setVisibility(View.VISIBLE);
+        }
+        ImgurApi.loadImage(mUrl, imageView, new FutureCallback<ImageView>() {
             @Override
             public void onCompleted(Exception e, ImageView result) {
                 mAttacher = new PhotoViewAttacher(result);

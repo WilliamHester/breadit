@@ -101,7 +101,6 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
             submissionData.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Log.d("SubmissionsRecyclerActivity", "clicked card");
                     mCallback.onCardClicked(mSubmission);
                 }
             });
@@ -140,6 +139,15 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
                         public void onClick(View view) {
                             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(s.getUrl()));
                             view.getContext().startActivity(browserIntent);
+                        }
+                    });
+                } else if (linkDetails.getType() == UrlParser.NORMAL_IMAGE) {
+                    ImgurApi.loadImage(s.getUrl(), imageView, null);
+                    button.setVisibility(View.GONE);
+                    imageView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            mCallback.onImageViewClicked(mSubmission.getUrl());
                         }
                     });
                 }
@@ -217,6 +225,7 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
     public interface AdapterCallbacks {
         public void onImageViewClicked(ImgurImage image);
         public void onImageViewClicked(ImgurAlbum album);
+        public void onImageViewClicked(String imageUrl);
         public void onCardClicked(Submission submission);
     }
 }

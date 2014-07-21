@@ -3,6 +3,7 @@ package me.williamhester.ui.fragments;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +16,7 @@ import me.williamhester.models.ImgurAlbum;
 import me.williamhester.models.ImgurImage;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.adapters.ImgurAlbumAdapter;
+import me.williamhester.ui.adapters.SingleImageAdapter;
 
 /**
  * Created by william on 6/24/14.
@@ -23,8 +25,9 @@ public class ImagePagerFragment extends Fragment {
 
     private static final String IMAGE = "image";
     private static final String ALBUM = "album";
+    private static final String IMAGE_URL = "imageUrl";
 
-    private ImgurAlbumAdapter mAdapter;
+    private FragmentPagerAdapter mAdapter;
     private Handler mAnimHandler;
     private Runnable mAnimRunnable;
     private String mTitle;
@@ -46,6 +49,14 @@ public class ImagePagerFragment extends Fragment {
         return fragment;
     }
 
+    public static ImagePagerFragment newInstance(String imageUrl) {
+        Bundle args = new Bundle();
+        args.putString(IMAGE_URL, imageUrl);
+        ImagePagerFragment fragment = new ImagePagerFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,6 +70,9 @@ public class ImagePagerFragment extends Fragment {
                 ImgurAlbum album = (ImgurAlbum) getArguments().getSerializable(ALBUM);
                 mAdapter = new ImgurAlbumAdapter(getChildFragmentManager(), album);
                 mTitle = album.getTitle();
+            } else if (getArguments().containsKey(IMAGE_URL)) {
+                String imageUrl = getArguments().getString(IMAGE_URL);
+                mAdapter = new SingleImageAdapter(getChildFragmentManager(), imageUrl);
             }
         }
         mAnimHandler = new Handler();

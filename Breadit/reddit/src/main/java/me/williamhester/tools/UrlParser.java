@@ -10,6 +10,7 @@ public class UrlParser {
     public static final int IMGUR_ALBUM = 2;
     public static final int IMGUR_GALLERY = 3;
     public static final int YOUTUBE = 4;
+    public static final int NORMAL_IMAGE = 6;
 
     private String mUrl;
     private String mId;
@@ -25,6 +26,8 @@ public class UrlParser {
             generateImgurDetails();
         } else if (mIsYoutube) {
             generateYoutubeDetails();
+        } else if (isDirectImageLink()) {
+            mType = NORMAL_IMAGE;
         } else {
             mType = NOT_SPECIAL;
         }
@@ -81,6 +84,19 @@ public class UrlParser {
         start += 1;
         mId = mUrl.substring(start, end);
         mType = YOUTUBE;
+    }
+
+    private boolean isDirectImageLink() {
+        int start = mUrl.length() - 2;
+        while (mUrl.charAt(start) != '.') {
+            start--;
+        }
+        String suffix = mUrl.substring(start + 1);
+        if (suffix.equalsIgnoreCase("png") || suffix.equalsIgnoreCase("jpg")
+                || suffix.equalsIgnoreCase("jpeg") || suffix.equalsIgnoreCase("bmp")) {
+            return true;
+        }
+        return false;
     }
 
     public String getLinkId() {
