@@ -27,6 +27,7 @@ import java.util.Stack;
 
 import me.williamhester.reddit.R;
 import me.williamhester.ui.text.LinkSpan;
+import me.williamhester.ui.text.SpoilerSpan;
 
 /**
  * Created by William on 6/15/14.
@@ -81,7 +82,12 @@ public class HtmlParser {
             } else if (tag.equalsIgnoreCase("sup")) {
                 return new SuperscriptSpan();
             } else if (tag.equalsIgnoreCase("a")) {
-                return new LinkSpan(node.attr("href"));
+                String url = node.attr("href");
+                if (url.equals("/spoiler")) {
+                    return new SpoilerSpan();
+                } else {
+                    return new LinkSpan(node.attr("href"));
+                }
             } else if (tag.equalsIgnoreCase("li")) {
                 return new BulletSpan(BulletSpan.STANDARD_GAP_WIDTH, Color.CYAN);
             }
