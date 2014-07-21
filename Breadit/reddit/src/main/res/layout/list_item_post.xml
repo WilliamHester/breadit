@@ -43,7 +43,7 @@
                 android:paddingRight="8dp"
                 android:textSize="16sp"
                 android:fontFamily="sans-serif-condensed-light"
-                android:textColor="@color/mid_gray"
+                android:textColor="@color/ghostwhite"
                 android:layout_below="@id/subreddit_title"/>
 
             <TextView android:id="@+id/metadata"

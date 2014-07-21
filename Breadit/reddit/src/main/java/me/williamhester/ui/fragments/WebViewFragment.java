@@ -7,8 +7,10 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ProgressBar;
 
 import me.williamhester.models.Submission;
 import me.williamhester.reddit.R;
@@ -48,6 +50,8 @@ public class WebViewFragment extends Fragment {
         mWebView.getSettings().setLoadWithOverviewMode(true);
         mWebView.setBackgroundColor(0x00000000);
 
+        final ProgressBar progressBar = (ProgressBar) v.findViewById(R.id.progress_bar);
+
         if (savedInstanceState != null) {
             mWebView.restoreState(savedInstanceState);
         } else if (mSubmission.getUrl() != null) {
@@ -56,6 +60,18 @@ public class WebViewFragment extends Fragment {
                 startActivity(browserIntent);
             } else {
                 mWebView.loadUrl(imgurOptimize(mSubmission.getUrl()));
+                mWebView.setWebChromeClient(new WebChromeClient() {
+                    @Override
+                    public void onProgressChanged(WebView view, int progress) {
+                        if (progress < 100 && progressBar.getVisibility() == View.GONE){
+                            progressBar.setVisibility(View.VISIBLE);
+                        }
+                        progressBar.setProgress(progress);
+                        if (progress == 100) {
+                            progressBar.setVisibility(ProgressBar.GONE);
+                        }
+                    }
+                });
             }
         }
         return v;
