@@ -80,6 +80,7 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
         ActionBar actionBar = getActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setDisplayShowTitleEnabled(false);
         }
     }
 
@@ -126,12 +127,12 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
 
         TextView commentTab = new TextView(this);
         commentTab.setText(R.string.comments);
-        commentTab.setTextColor(getResources().getColor(R.color.mid_gray));
+        commentTab.setTextColor(getResources().getColor(R.color.ghostwhite));
         commentTab.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
         commentTab.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
         TextView contentTab = new TextView(this);
         contentTab.setText(R.string.content);
-        contentTab.setTextColor(getResources().getColor(R.color.mid_gray));
+        contentTab.setTextColor(getResources().getColor(R.color.ghostwhite));
         contentTab.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
         contentTab.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
 
@@ -156,7 +157,7 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
 
                     TextView contentTab = new TextView(mContext);
                     contentTab.setText(R.string.content);
-                    contentTab.setTextColor(getResources().getColor(R.color.mid_gray));
+                    contentTab.setTextColor(getResources().getColor(R.color.ghostwhite));
                     contentTab.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
                     contentTab.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
 

@@ -26,6 +26,10 @@ public class ImgurAlbum implements Serializable {
     private int images_count;
     private List<ImgurImage> images;
 
+    public String getTitle() {
+        return title;
+    }
+
     public List<ImgurImage> getImages() {
         return images;
     }

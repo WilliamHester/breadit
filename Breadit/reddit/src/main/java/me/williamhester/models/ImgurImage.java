@@ -35,6 +35,14 @@ public class ImgurImage implements Serializable {
         return link;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
     public String getHugeThumbnail() {
         return link.replace(".", "h.");
     }

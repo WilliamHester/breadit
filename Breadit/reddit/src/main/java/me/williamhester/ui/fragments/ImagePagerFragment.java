@@ -27,6 +27,7 @@ public class ImagePagerFragment extends Fragment {
     private ImgurAlbumAdapter mAdapter;
     private Handler mAnimHandler;
     private Runnable mAnimRunnable;
+    private String mTitle;
     private int mCurrentPosition;
 
     public static ImagePagerFragment newInstance(ImgurImage image) {
@@ -51,11 +52,13 @@ public class ImagePagerFragment extends Fragment {
 
         if (getArguments() != null) {
             if (getArguments().containsKey(IMAGE)) {
-                mAdapter = new ImgurAlbumAdapter(getChildFragmentManager(),
-                        (ImgurImage) getArguments().getSerializable(IMAGE));
+                ImgurImage image = (ImgurImage) getArguments().getSerializable(IMAGE);
+                mAdapter = new ImgurAlbumAdapter(getChildFragmentManager(), image);
+                mTitle = image.getTitle();
             } else if (getArguments().containsKey(ALBUM)) {
-                mAdapter = new ImgurAlbumAdapter(getChildFragmentManager(),
-                        (ImgurAlbum) getArguments().getSerializable(ALBUM));
+                ImgurAlbum album = (ImgurAlbum) getArguments().getSerializable(ALBUM);
+                mAdapter = new ImgurAlbumAdapter(getChildFragmentManager(), album);
+                mTitle = album.getTitle();
             }
         }
         mAnimHandler = new Handler();
@@ -65,6 +68,8 @@ public class ImagePagerFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_image_pager, root, false);
         final TextView indicator = (TextView) v.findViewById(R.id.pager_indicator);
+        TextView title = (TextView) v.findViewById(R.id.album_title);
+        title.setText(mTitle);
         if (mAdapter.getCount() < 2) {
             indicator.setVisibility(View.INVISIBLE);
         } else {

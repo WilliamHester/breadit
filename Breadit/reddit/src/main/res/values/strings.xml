@@ -120,4 +120,7 @@
     <!-- NavigationDrawerFragment -->
     <string name="go">Go</string>
 
+    <!-- ImgurImageFragment -->
+    <string name="toggle_description">Toggle description</string>
+
 </resources>

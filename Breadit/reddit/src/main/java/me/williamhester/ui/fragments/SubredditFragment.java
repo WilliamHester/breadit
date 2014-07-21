@@ -51,10 +51,10 @@ public class SubredditFragment extends Fragment implements SubmissionsRecyclerAd
     private Account mAccount;
 
     private RecyclerView mSubmissionsView;
+    private LinearLayoutManager mLayoutManager;
 
-    private SubredditFragment mThis = this;
     private boolean mFailedToLoad = false;
-    private boolean mHideNsfw = false;
+    private boolean mHideNsfw = true;
     private boolean mHideViewed = false;
     private int mPrimarySortType = Submission.HOT;
     private int mSecondarySortType = Submission.ALL;
@@ -89,9 +89,10 @@ public class SubredditFragment extends Fragment implements SubmissionsRecyclerAd
 
         mSubmissionsView = (RecyclerView) v.findViewById(R.id.Submissions_recycler);
         mSubmissionsView.setHasFixedSize(false);
-        RecyclerView.LayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
-        mSubmissionsView.setLayoutManager(linearLayoutManager);
+        mLayoutManager = new LinearLayoutManager(getActivity());
+        mSubmissionsView.setLayoutManager(mLayoutManager);
         mSubmissionsView.setAdapter(mSubmissionsAdapter);
+        mSubmissionsView.setOnScrollListener(new InfiniteLoadingScrollListener());
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.swipe_refresh);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -103,7 +104,9 @@ public class SubredditFragment extends Fragment implements SubmissionsRecyclerAd
 
         mSwipeRefreshLayout.setColorSchemeResources(R.color.orangered, R.color.periwinkle,
                 R.color.orangered, R.color.periwinkle);
-        populateSubmissions();
+        if (mSubmissionList.size() == 0) {
+            populateSubmissions();
+        }
         return v;
     }
 
@@ -194,6 +197,7 @@ public class SubredditFragment extends Fragment implements SubmissionsRecyclerAd
         } else {
             mHideViewed = prefs.getBoolean("pref_remove_viewed_front", false);
         }
+        mHideNsfw = prefs.getBoolean("pref_hide_nsfw", true);
         if (id != -1) {
             try {
                 AccountDataSource dataSource = new AccountDataSource(mContext);
@@ -218,9 +222,6 @@ public class SubredditFragment extends Fragment implements SubmissionsRecyclerAd
      *     when the SwipeRefreshLayout's onRefresh method is called.
      */
     private void populateSubmissions() {
-        mSubmissionsAdapter = new SubmissionsRecyclerAdapter(mSubmissionList, this);
-        mSubmissionsView.setOnScrollListener(new InfiniteLoadingScrollListener());
-        Log.d("SubredditFragment", "populateSubmissions");
         new RefreshUserClass().execute();
     }
 
@@ -348,7 +349,6 @@ public class SubredditFragment extends Fragment implements SubmissionsRecyclerAd
                         }
                     }
                     Log.d("SubredditFragment", "Went here " + mSubmissionList.size());
-                    mSubmissionsView.setAdapter(new SubmissionsRecyclerAdapter(mSubmissionList, mThis));
                     mSubmissionsAdapter.notifyDataSetChanged();
                 } else if (mNothingHere) {
 
@@ -368,25 +368,6 @@ public class SubredditFragment extends Fragment implements SubmissionsRecyclerAd
         private int previousTotal = 0;
         private boolean loading = true;
 
-//        @Override
-//        public void onScroll(AbsListView view, int firstVisibleItem,
-//                             int visibleItemCount, int totalItemCount) {
-//            if (loading) {
-//                if (totalItemCount > previousTotal) {
-//                    previousTotal = totalItemCount;
-//                    loading = false;
-//                }
-//            } else if (mSubmissionList.size() > 0
-//                    && (totalItemCount - visibleItemCount) <= (firstVisibleItem + VISIBLE_THRESHOLD)) {
-//                SubmissionsListViewHelper list = new SubmissionsListViewHelper(mSubredditName,
-//                        mPrimarySortType, mSecondarySortType, null,
-//                        mSubmissionList.get(mSubmissionList.size() - 1).getName(),
-//                        mAccount);
-//                new RetrieveSubmissionsTask().execute(list);
-//                loading = true;
-//            }
-//        }
-
         @Override
         public void onScrollStateChanged(int i) {
             // Don't care
@@ -394,7 +375,21 @@ public class SubredditFragment extends Fragment implements SubmissionsRecyclerAd
 
         @Override
         public void onScrolled(int i, int i2) {
-
+            if (loading) {
+                if (mSubmissionsAdapter.getItemCount() > previousTotal) {
+                    previousTotal = mSubmissionsAdapter.getItemCount();
+                    loading = false;
+                }
+            } else if (mSubmissionList.size() > 0
+                    && (mSubmissionsAdapter.getItemCount() - mLayoutManager.getChildCount()) // 25 - 4 = 21
+                    <= (mLayoutManager.findFirstVisibleItemPosition() + VISIBLE_THRESHOLD)) { // 20 + 5 = 25
+                SubmissionsListViewHelper list = new SubmissionsListViewHelper(mSubredditName,
+                        mPrimarySortType, mSecondarySortType, null,
+                        mSubmissionList.get(mSubmissionList.size() - 1).getName(),
+                        mAccount);
+                new RetrieveSubmissionsTask().execute(list);
+                loading = true;
+            }
         }
     }
 }

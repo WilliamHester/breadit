@@ -8,7 +8,8 @@
     android:layout_marginTop="8dp"
     android:layout_marginLeft="8dp"
     android:layout_marginRight="8dp"
-    card_view:cardCornerRadius="2dp">
+    card_view:cardCornerRadius="2dp"
+    card_view:cardBackgroundColor="@color/darker_gray">
 
     <View android:id="@+id/vote_status"
         android:layout_width="4dp"
@@ -23,7 +24,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="6dp"
-            android:background="?android:activatedBackgroundIndicator"
             tools:ignore="SmallSp">
 
             <TextView android:id="@+id/subreddit_title"

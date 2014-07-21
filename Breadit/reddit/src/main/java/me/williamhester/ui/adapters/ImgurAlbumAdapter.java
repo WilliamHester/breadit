@@ -57,7 +57,7 @@ public class ImgurAlbumAdapter extends FragmentPagerAdapter {
         if (mImages.get(position).isAnimated()) {
             return GfycatFragment.newInstance(mImages.get(position).getUrl());
         }
-        return ImgurImageFragment.newInstance(mImages.get(position).getUrl());
+        return ImgurImageFragment.newInstance(mImages.get(position));
     }
 
     @Override

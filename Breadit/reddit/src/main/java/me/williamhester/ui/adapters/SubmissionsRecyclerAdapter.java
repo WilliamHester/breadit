@@ -111,6 +111,7 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
 
             View container = itemView.findViewById(R.id.content_preview);
             ImageView imageView = (ImageView) itemView.findViewById(R.id.image);
+            ImageButton button = (ImageButton) itemView.findViewById(R.id.preview_button);
 
             final UrlParser linkDetails = new UrlParser(s.getUrl());
             if (linkDetails.getType() != UrlParser.NOT_SPECIAL) {
@@ -119,17 +120,18 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
                 if (linkDetails.getType() == UrlParser.IMGUR_IMAGE) {
                     if (!setImagePreview()) {
                         imageView.setImageDrawable(null);
+                        button.setVisibility(View.GONE);
                         ImgurApi.getImageDetails(id, imageView.getContext(), new ImgurImageFuture());
                     }
                 } else if (linkDetails.getType() == UrlParser.IMGUR_ALBUM) {
                     if (!setImagePreview()) {
                         imageView.setImageDrawable(null);
+                        button.setVisibility(View.GONE);
                         ImgurApi.getAlbumDetails(id, imageView.getContext(), new ImgurAlbumFuture());
                     }
                 } else if (linkDetails.getType() == UrlParser.YOUTUBE) {
                     String url = "http://img.youtube.com/vi/" + linkDetails.getLinkId() + "/maxresdefault.jpg";
                     ImgurApi.loadImage(url, imageView, null);
-                    ImageButton button = (ImageButton) itemView.findViewById(R.id.preview_button);
                     button.setImageResource(android.R.drawable.ic_media_play);
                     button.setVisibility(View.VISIBLE);
                     imageView.setAlpha(0.8f);
@@ -151,7 +153,7 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
             @Override
             public void onCompleted(Exception e, final ResponseImgurWrapper<ImgurAlbum> result) {
                 if (result != null && result.isSuccess()) {
-                    mSubmission.setImgurData(result);
+                    mSubmission.setImgurData(result.getData());
                     setImagePreview();
                 } else if (result != null) {
                     Log.e("SubmissionsRecyclerAdapter", "failed, status = " + result.getStatus());

@@ -1,5 +1,6 @@
 package me.williamhester.ui.fragments;
 
+import android.annotation.SuppressLint;
 import android.app.Fragment;
 import android.content.Intent;
 import android.net.Uri;
@@ -37,6 +38,7 @@ public class WebViewFragment extends Fragment {
         }
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_webview, null);
@@ -48,7 +50,6 @@ public class WebViewFragment extends Fragment {
         mWebView.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
         mWebView.getSettings().setUseWideViewPort(true);
         mWebView.getSettings().setLoadWithOverviewMode(true);
-        mWebView.setBackgroundColor(0x00000000);
 
         final ProgressBar progressBar = (ProgressBar) v.findViewById(R.id.progress_bar);
 
