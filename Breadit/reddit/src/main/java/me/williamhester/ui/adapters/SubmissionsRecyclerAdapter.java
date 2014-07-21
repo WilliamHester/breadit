@@ -77,6 +77,13 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
             TextView domain = (TextView) itemView.findViewById(R.id.domain);
             final TextView metaData = (TextView) itemView.findViewById(R.id.metadata);
             TextView commentData = (TextView) itemView.findViewById(R.id.num_comments);
+            View nsfwWarning = itemView.findViewById(R.id.nsfw_warning);
+
+            if (mSubmission.isNsfw()) {
+                nsfwWarning.setVisibility(View.VISIBLE);
+            } else {
+                nsfwWarning.setVisibility(View.GONE);
+            }
 
             switch (s.getVoteStatus()) {
                 case Votable.DOWNVOTED:
@@ -110,22 +117,46 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
 
             View container = itemView.findViewById(R.id.content_preview);
             ImageView imageView = (ImageView) itemView.findViewById(R.id.image);
-            ImageButton button = (ImageButton) itemView.findViewById(R.id.preview_button);
+            final ImageButton button = (ImageButton) itemView.findViewById(R.id.preview_button);
 
             final UrlParser linkDetails = new UrlParser(s.getUrl());
             if (linkDetails.getType() != UrlParser.NOT_SPECIAL) {
                 container.setVisibility(View.VISIBLE);
                 String id = linkDetails.getLinkId();
                 if (linkDetails.getType() == UrlParser.IMGUR_IMAGE) {
+                    if (s.isNsfw()) {
+                        button.setVisibility(View.VISIBLE);
+                        button.setBackgroundColor(button.getContext().getResources()
+                                .getColor(android.R.color.black));
+                        button.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                button.setVisibility(View.GONE);
+                            }
+                        });
+                    } else {
+                        button.setVisibility(View.GONE);
+                    }
                     if (!setImagePreview()) {
                         imageView.setImageDrawable(null);
-                        button.setVisibility(View.GONE);
                         ImgurApi.getImageDetails(id, imageView.getContext(), new ImgurImageFuture());
                     }
                 } else if (linkDetails.getType() == UrlParser.IMGUR_ALBUM) {
+                    if (s.isNsfw()) {
+                        button.setVisibility(View.VISIBLE);
+                        button.setBackgroundColor(button.getContext().getResources()
+                                .getColor(android.R.color.black));
+                        button.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                button.setVisibility(View.GONE);
+                            }
+                        });
+                    } else {
+                        button.setVisibility(View.GONE);
+                    }
                     if (!setImagePreview()) {
                         imageView.setImageDrawable(null);
-                        button.setVisibility(View.GONE);
                         ImgurApi.getAlbumDetails(id, imageView.getContext(), new ImgurAlbumFuture());
                     }
                 } else if (linkDetails.getType() == UrlParser.YOUTUBE) {
@@ -143,7 +174,19 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
                     });
                 } else if (linkDetails.getType() == UrlParser.NORMAL_IMAGE) {
                     ImgurApi.loadImage(s.getUrl(), imageView, null);
-                    button.setVisibility(View.GONE);
+                    if (s.isNsfw()) {
+                        button.setVisibility(View.VISIBLE);
+                        button.setBackgroundColor(button.getContext().getResources()
+                                .getColor(android.R.color.black));
+                        button.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                button.setVisibility(View.GONE);
+                            }
+                        });
+                    } else {
+                        button.setVisibility(View.GONE);
+                    }
                     imageView.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {

@@ -32,8 +32,20 @@
                 android:textAllCaps="true"
                 android:fontFamily="sans-serif-condensed"
                 android:textSize="10sp"
-                android:paddingLeft="8dp"
-                android:paddingRight="8dp"/>
+                android:paddingLeft="8dp"/>
+
+            <TextView android:id="@+id/nsfw_warning"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:textAllCaps="true"
+                android:fontFamily="sans-serif-condensed"
+                android:text="@string/nsfw"
+                android:textColor="@color/nsfw_red"
+                android:textSize="10sp"
+                android:layout_marginRight="8dp"/>
+                <!--android:background="@drawable/nsfw_background"/>-->
 
             <TextView
                 android:id="@+id/title"
