@@ -7,6 +7,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.ScaleAnimation;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -15,6 +18,7 @@ import com.koushikdutta.async.future.FutureCallback;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import me.williamhester.models.ImgurAlbum;
@@ -24,6 +28,7 @@ import me.williamhester.models.Submission;
 import me.williamhester.models.Votable;
 import me.williamhester.network.ImgurApi;
 import me.williamhester.reddit.R;
+import me.williamhester.tools.HtmlParser;
 import me.williamhester.tools.UrlParser;
 
 /**
@@ -32,6 +37,7 @@ import me.williamhester.tools.UrlParser;
 public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<SubmissionsRecyclerAdapter.ViewHolder> {
 
     private List<Submission> mSubmissions;
+    private final List<String> mExpandedSubmissions = new ArrayList<>();
     private AdapterCallbacks mCallback;
 
     public SubmissionsRecyclerAdapter(List<Submission> submissions, AdapterCallbacks callbacks) {
@@ -41,20 +47,13 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
 
     @Override
     public SubmissionsRecyclerAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int position) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_post, parent, false);
-
+        final View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_post, parent, false);
         return new ViewHolder(v);
     }
 
     @Override
     public void onBindViewHolder(SubmissionsRecyclerAdapter.ViewHolder viewHolder, int position) {
         viewHolder.setContent(mSubmissions.get(position));
-        viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                
-            }
-        });
     }
 
     @Override
@@ -78,6 +77,8 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
             final TextView metaData = (TextView) itemView.findViewById(R.id.metadata);
             TextView commentData = (TextView) itemView.findViewById(R.id.num_comments);
             View nsfwWarning = itemView.findViewById(R.id.nsfw_warning);
+            View expandButton = itemView.findViewById(R.id.expand_self_text);
+            expandButton.setOnClickListener(mExpandListener);
 
             if (mSubmission.isNsfw()) {
                 nsfwWarning.setVisibility(View.VISIBLE);
@@ -119,85 +120,111 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
             ImageView imageView = (ImageView) itemView.findViewById(R.id.image);
             final ImageButton button = (ImageButton) itemView.findViewById(R.id.preview_button);
 
-            final UrlParser linkDetails = new UrlParser(s.getUrl());
-            if (linkDetails.getType() != UrlParser.NOT_SPECIAL) {
-                container.setVisibility(View.VISIBLE);
-                String id = linkDetails.getLinkId();
-                if (linkDetails.getType() == UrlParser.IMGUR_IMAGE) {
-                    if (s.isNsfw()) {
-                        button.setVisibility(View.VISIBLE);
-                        button.setBackgroundColor(button.getContext().getResources()
-                                .getColor(android.R.color.black));
-                        button.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                button.setVisibility(View.GONE);
-                            }
-                        });
-                    } else {
-                        button.setVisibility(View.GONE);
-                    }
-                    if (!setImagePreview()) {
-                        imageView.setImageDrawable(null);
-                        ImgurApi.getImageDetails(id, imageView.getContext(), new ImgurImageFuture());
-                    }
-                } else if (linkDetails.getType() == UrlParser.IMGUR_ALBUM) {
-                    if (s.isNsfw()) {
-                        button.setVisibility(View.VISIBLE);
-                        button.setBackgroundColor(button.getContext().getResources()
-                                .getColor(android.R.color.black));
-                        button.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                button.setVisibility(View.GONE);
-                            }
-                        });
-                    } else {
-                        button.setVisibility(View.GONE);
-                    }
-                    if (!setImagePreview()) {
-                        imageView.setImageDrawable(null);
-                        ImgurApi.getAlbumDetails(id, imageView.getContext(), new ImgurAlbumFuture());
-                    }
-                } else if (linkDetails.getType() == UrlParser.YOUTUBE) {
-                    String url = "http://img.youtube.com/vi/" + linkDetails.getLinkId() + "/maxresdefault.jpg";
-                    ImgurApi.loadImage(url, imageView, null);
-                    button.setImageResource(android.R.drawable.ic_media_play);
-                    button.setVisibility(View.VISIBLE);
-                    imageView.setAlpha(0.8f);
-                    button.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(s.getUrl()));
-                            view.getContext().startActivity(browserIntent);
-                        }
-                    });
-                } else if (linkDetails.getType() == UrlParser.NORMAL_IMAGE) {
-                    ImgurApi.loadImage(s.getUrl(), imageView, null);
-                    if (s.isNsfw()) {
-                        button.setVisibility(View.VISIBLE);
-                        button.setBackgroundColor(button.getContext().getResources()
-                                .getColor(android.R.color.black));
-                        button.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                button.setVisibility(View.GONE);
-                            }
-                        });
-                    } else {
-                        button.setVisibility(View.GONE);
-                    }
-                    imageView.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            mCallback.onImageViewClicked(mSubmission.getUrl());
-                        }
-                    });
-                }
+            if (mSubmission.isSelf()) {
+                showSelfText(expandButton, container, imageView, button);
             } else {
-                container.setVisibility(View.GONE);
+                itemView.findViewById(R.id.show_self_text).setVisibility(View.GONE);
+                itemView.findViewById(R.id.self_text).setVisibility(View.GONE);
+                final UrlParser linkDetails = new UrlParser(s.getUrl());
+                if (linkDetails.getType() != UrlParser.NOT_SPECIAL) {
+                    container.setVisibility(View.VISIBLE);
+                    String id = linkDetails.getLinkId();
+                    if (linkDetails.getType() == UrlParser.IMGUR_IMAGE) {
+                        if (s.isNsfw()) {
+                            button.setVisibility(View.VISIBLE);
+                            button.setBackgroundColor(button.getContext().getResources()
+                                    .getColor(android.R.color.black));
+                            button.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    button.setVisibility(View.GONE);
+                                }
+                            });
+                        } else {
+                            button.setVisibility(View.GONE);
+                        }
+                        if (!setImagePreview()) {
+                            imageView.setImageDrawable(null);
+                            ImgurApi.getImageDetails(id, imageView.getContext(), new ImgurImageFuture());
+                        }
+                    } else if (linkDetails.getType() == UrlParser.IMGUR_ALBUM) {
+                        if (s.isNsfw()) {
+                            button.setVisibility(View.VISIBLE);
+                            button.setBackgroundColor(button.getContext().getResources()
+                                    .getColor(android.R.color.black));
+                            button.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    button.setVisibility(View.GONE);
+                                }
+                            });
+                        } else {
+                            button.setVisibility(View.GONE);
+                        }
+                        if (!setImagePreview()) {
+                            imageView.setImageDrawable(null);
+                            ImgurApi.getAlbumDetails(id, imageView.getContext(), new ImgurAlbumFuture());
+                        }
+                    } else if (linkDetails.getType() == UrlParser.YOUTUBE) {
+                        ImgurApi.loadImage(linkDetails.getUrl(), imageView, null);
+                        button.setImageResource(android.R.drawable.ic_media_play);
+                        button.setVisibility(View.VISIBLE);
+                        imageView.setAlpha(0.8f);
+                        button.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(s.getUrl()));
+                                view.getContext().startActivity(browserIntent);
+                            }
+                        });
+                    } else if (linkDetails.getType() == UrlParser.NORMAL_IMAGE) {
+                        ImgurApi.loadImage(linkDetails.getUrl(), imageView, null);
+                        if (s.isNsfw()) {
+                            button.setVisibility(View.VISIBLE);
+                            button.setBackgroundColor(button.getContext().getResources()
+                                    .getColor(android.R.color.black));
+                            button.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    button.setVisibility(View.GONE);
+                                }
+                            });
+                        } else {
+                            button.setVisibility(View.GONE);
+                        }
+                        imageView.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                mCallback.onImageViewClicked(mSubmission.getUrl());
+                            }
+                        });
+                    }
+                } else {
+                    container.setVisibility(View.GONE);
+                }
             }
             itemView.invalidate();
+        }
+
+        private void showSelfText(View expandButton, View container, ImageView imageView, ImageButton button) {
+            if (mSubmission.getBodyHtml() != null) {
+                itemView.findViewById(R.id.show_self_text).setVisibility(View.VISIBLE);
+                container.setVisibility(View.VISIBLE);
+                TextView content = (TextView) itemView.findViewById(R.id.self_text);
+                if (mExpandedSubmissions.contains(mSubmission.getName())) {
+                    expandButton.setRotation(-180f);
+                    content.setVisibility(View.VISIBLE);
+                } else {
+                    expandButton.setRotation(0f);
+                    content.setVisibility(View.GONE);
+                }
+                imageView.setVisibility(View.GONE);
+                button.setVisibility(View.GONE);
+                content.setText(HtmlParser.parseHtml(StringEscapeUtils.unescapeHtml4(mSubmission.getBodyHtml())));
+            } else {
+                itemView.findViewById(R.id.show_self_text).setVisibility(View.GONE);
+                container.setVisibility(View.GONE);
+            }
         }
 
         private class ImgurAlbumFuture implements FutureCallback<ResponseImgurWrapper<ImgurAlbum>> {
@@ -227,6 +254,34 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
                 }
             }
         }
+
+        private View.OnClickListener mExpandListener = new View.OnClickListener() {
+
+            private View mTextView = itemView.findViewById(R.id.self_text);
+
+            @Override
+            public void onClick(final View view) {
+                Animation anim;
+                Animation textAnim;
+                final boolean expanded = mExpandedSubmissions.contains(mSubmission.getName());
+                if (expanded) {
+                    anim = AnimationUtils.loadAnimation(view.getContext(), R.anim.rotate_left);
+                    mTextView.setVisibility(View.GONE);
+                    mExpandedSubmissions.remove(mSubmission.getName());
+                } else {
+                    anim = AnimationUtils.loadAnimation(view.getContext(), R.anim.rotate_right);
+                    textAnim = new ScaleAnimation(1, 1, 0, 1);
+                    textAnim.setFillAfter(true);
+                    textAnim.setDuration(300l);
+                    mTextView.setVisibility(View.VISIBLE);
+                    mTextView.startAnimation(textAnim);
+                    mExpandedSubmissions.add(mSubmission.getName());
+                }
+                anim.setFillBefore(true);
+                anim.setFillAfter(true);
+                view.startAnimation(anim);
+            }
+        };
 
         /**
          * Attempts to set the image preview

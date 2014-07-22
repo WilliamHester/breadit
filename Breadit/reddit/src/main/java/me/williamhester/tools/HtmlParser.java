@@ -35,12 +35,15 @@ import me.williamhester.ui.text.SpoilerSpan;
 public class HtmlParser {
 
     public static SpannableStringBuilder parseHtml(String html) {
-        Document document = Jsoup.parse(html);
-        SpannableStringBuilder sb = generateString(document);
-        while (sb.charAt(0) == '\n' || sb.charAt(0) == ' ') {
-            sb.delete(0, 1);
+        if (html != null) {
+            Document document = Jsoup.parse(html);
+            SpannableStringBuilder sb = generateString(document);
+            while (sb.charAt(0) == '\n' || sb.charAt(0) == ' ') {
+                sb.delete(0, 1);
+            }
+            return sb;
         }
-        return sb;
+        return new SpannableStringBuilder().append("");
     }
 
     public static SpannableStringBuilder generateString(Node node) {

@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -93,6 +94,7 @@ public class SubredditFragment extends Fragment implements SubmissionsRecyclerAd
         mSubmissionsView.setLayoutManager(mLayoutManager);
         mSubmissionsView.setAdapter(mSubmissionsAdapter);
         mSubmissionsView.setOnScrollListener(new InfiniteLoadingScrollListener());
+        mSubmissionsView.setItemAnimator(new DefaultItemAnimator());
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.swipe_refresh);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {

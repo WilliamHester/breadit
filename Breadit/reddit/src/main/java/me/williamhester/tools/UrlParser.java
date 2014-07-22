@@ -28,6 +28,12 @@ public class UrlParser {
             generateYoutubeDetails();
         } else if (isDirectImageLink()) {
             mType = NORMAL_IMAGE;
+        } else if (mUrl.toLowerCase().contains("livememe.com")) {
+            mType = NORMAL_IMAGE;
+            generateLiveMemeDetails();
+        } else if (mUrl.toLowerCase().contains("imgflip.com")) {
+            mType = NORMAL_IMAGE;
+            generateImgFlipDetails();
         } else {
             mType = NOT_SPECIAL;
         }
@@ -84,6 +90,20 @@ public class UrlParser {
         start += 1;
         mId = mUrl.substring(start, end);
         mType = YOUTUBE;
+        mUrl = "http://img.youtube.com/vi/" + mId + "/maxresdefault.jpg";
+    }
+
+    private void generateLiveMemeDetails() {
+        mUrl += ".jpg";
+    }
+
+    private void generateImgFlipDetails() {
+        int start = mUrl.length() - 2;
+        while (mUrl.charAt(start - 1) != '/') {
+            start--;
+        }
+        mId = mUrl.substring(start);
+        mUrl = "http://i.imgflip.com/" + mId + ".jpg";
     }
 
     private boolean isDirectImageLink() {
@@ -105,5 +125,9 @@ public class UrlParser {
 
     public int getType() {
         return mType;
+    }
+
+    public String getUrl() {
+        return mUrl;
     }
 }
