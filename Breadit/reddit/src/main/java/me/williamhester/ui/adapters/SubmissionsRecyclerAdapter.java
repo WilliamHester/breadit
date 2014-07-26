@@ -21,15 +21,18 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import me.williamhester.models.Account;
 import me.williamhester.models.ImgurAlbum;
 import me.williamhester.models.ImgurImage;
 import me.williamhester.models.ResponseImgurWrapper;
 import me.williamhester.models.Submission;
 import me.williamhester.models.Votable;
 import me.williamhester.network.ImgurApi;
+import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 import me.williamhester.tools.HtmlParser;
 import me.williamhester.tools.UrlParser;
+import me.williamhester.ui.views.SwipeView;
 
 /**
  * Created by william on 6/27/14.
@@ -71,7 +74,31 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
         
         private void setContent(final Submission s) {
             mSubmission = s;
-            final View voteStatus = itemView.findViewById(R.id.vote_status);
+            final View upVoteView = itemView.findViewById(R.id.vote_background);
+            final View downVoteView = itemView.findViewById(R.id.vote_foreground);
+            final SwipeView swipeView = (SwipeView) itemView.findViewById(R.id.swipe_view);
+            swipeView.setVoteViews(upVoteView, downVoteView);
+            swipeView.setVotable(mSubmission);
+            swipeView.setAccount(mCallback.getAccount());
+            swipeView.setSwipeListener(new SwipeView.SwipeListener() {
+                @Override
+                public void onRightToLeftSwipe() {
+                    if (mSubmission.getVoteStatus() == Votable.DOWNVOTED) {
+                        RedditApi.vote(swipeView.getContext(), mSubmission, mCallback.getAccount(), Votable.NEUTRAL);
+                    } else {
+                        RedditApi.vote(swipeView.getContext(), mSubmission, mCallback.getAccount(), Votable.DOWNVOTED);
+                    }
+                }
+
+                @Override
+                public void onLeftToRightSwipe() {
+                    if (mSubmission.getVoteStatus() == Votable.DOWNVOTED) {
+                        RedditApi.vote(swipeView.getContext(), mSubmission, mCallback.getAccount(), Votable.NEUTRAL);
+                    } else {
+                        RedditApi.vote(swipeView.getContext(), mSubmission, mCallback.getAccount(), Votable.UPVOTED);
+                    }
+                }
+            });
             TextView title = (TextView) itemView.findViewById(R.id.title);
             TextView domain = (TextView) itemView.findViewById(R.id.domain);
             final TextView metaData = (TextView) itemView.findViewById(R.id.metadata);
@@ -88,15 +115,16 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
 
             switch (s.getVoteStatus()) {
                 case Votable.DOWNVOTED:
-                    voteStatus.setVisibility(View.VISIBLE);
-                    voteStatus.setBackgroundColor(itemView.getResources().getColor(R.color.periwinkle));
+                    downVoteView.setVisibility(View.VISIBLE);
+                    upVoteView.setVisibility(View.GONE);
                     break;
                 case Votable.UPVOTED:
-                    voteStatus.setVisibility(View.VISIBLE);
-                    voteStatus.setBackgroundColor(itemView.getResources().getColor(R.color.orangered));
+                    upVoteView.setVisibility(View.VISIBLE);
+                    downVoteView.setVisibility(View.GONE);
                     break;
                 default:
-                    voteStatus.setVisibility(View.GONE);
+                    upVoteView.setVisibility(View.GONE);
+                    downVoteView.setVisibility(View.GONE);
                     break;
             }
 
@@ -325,5 +353,6 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
         public void onImageViewClicked(ImgurAlbum album);
         public void onImageViewClicked(String imageUrl);
         public void onCardClicked(Submission submission);
+        public Account getAccount();
     }
 }

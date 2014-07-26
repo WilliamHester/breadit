@@ -267,6 +267,11 @@ public class SubredditFragment extends Fragment implements SubmissionsRecyclerAd
         getActivity().startActivity(i);
     }
 
+    @Override
+    public Account getAccount() {
+        return mAccount;
+    }
+
     private class RefreshUserClass extends AsyncTask<Void, Void, Void> {
         private boolean mRefreshList;
 

@@ -43,9 +43,9 @@ import me.williamhester.models.Thing;
 import me.williamhester.models.Votable;
 import me.williamhester.models.utils.Utilities;
 import me.williamhester.databases.AccountDataSource;
+import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.activities.UserActivity;
-import me.williamhester.databases.VoteAsyncTask;
 import me.williamhester.ui.views.CommentView;
 
 public class CommentFragment extends Fragment {
@@ -89,9 +89,9 @@ public class CommentFragment extends Fragment {
                 mPermalink = args.getString("permalink");
                 new CommentLoaderTask().execute();
             }
-            mCommentsList = new ArrayList<Comment>();
+            mCommentsList = new ArrayList<>();
         }
-        mHiddenComments = new HashMap<String, HiddenComments>();
+        mHiddenComments = new HashMap<>();
     }
 
     @Override
@@ -156,23 +156,6 @@ public class CommentFragment extends Fragment {
         Spinner sortBy = (Spinner) v.findViewById(R.id.sort_by);
         LinearLayout edit = (LinearLayout) v.findViewById(R.id.edited_text);
         edit.setVisibility(View.GONE);
-
-//        nameAndTime.setText(" in " + mSubmission.getSubredditName() + " "
-//                + Utilities.calculateTimeShort(mSubmission.getCreatedUtc()));
-
-        switch (mSubmission.getVoteStatus()) {
-            case Votable.DOWNVOTED:
-                voteStatus.setVisibility(View.VISIBLE);
-                voteStatus.setBackgroundColor(getResources().getColor(R.color.periwinkle));
-                break;
-            case Votable.UPVOTED:
-                voteStatus.setVisibility(View.VISIBLE);
-                voteStatus.setBackgroundColor(getResources().getColor(R.color.orangered));
-                break;
-            default:
-                voteStatus.setVisibility(View.GONE);
-                break;
-        }
 
         title.setText(StringEscapeUtils.unescapeHtml4(mSubmission.getTitle()));
 //        author.setText(mSubmission.getAuthor());
@@ -280,7 +263,7 @@ public class CommentFragment extends Fragment {
         public boolean onUpVote(CommentView commentView) {
             if (mAccount != null) {
                 Votable v = commentView.getComment();
-                new VoteAsyncTask(v.getName(), mAccount, VoteAsyncTask.UPVOTE).execute();
+                RedditApi.vote(getActivity(), v, mAccount, Votable.UPVOTED);
                 return true;
             }
             return false;
@@ -290,7 +273,7 @@ public class CommentFragment extends Fragment {
         public boolean onDownVote(CommentView commentView) {
             if (mAccount != null) {
                 Votable v = commentView.getComment();
-                new VoteAsyncTask(v.getName(), mAccount, VoteAsyncTask.DOWNVOTE).execute();
+                RedditApi.vote(getActivity(), v, mAccount, Votable.DOWNVOTED);
                 return true;
             }
             return false;
@@ -300,7 +283,7 @@ public class CommentFragment extends Fragment {
         public boolean onNeutralVote(CommentView commentView) {
             if (mAccount != null) {
                 Votable v = commentView.getComment();
-                new VoteAsyncTask(v.getName(), mAccount, VoteAsyncTask.NEUTRAL).execute();
+                RedditApi.vote(getActivity(), v, mAccount, Votable.NEUTRAL);
                 return true;
             }
             return false;
@@ -685,10 +668,10 @@ public class CommentFragment extends Fragment {
                     } else if (position > 0) {
                         v = mCommentAdapter.getItem(position - HEADER_VIEW_COUNT);
                         if (v.getVoteStatus() == Comment.DOWNVOTED) {
-                            new VoteAsyncTask(v.getName(), mAccount, VoteAsyncTask.NEUTRAL).execute();
+                            RedditApi.vote(getActivity(), v, mAccount, Votable.NEUTRAL);
                             v.setVoteStatus(Votable.NEUTRAL);
                         } else {
-                            new VoteAsyncTask(v.getName(), mAccount, VoteAsyncTask.DOWNVOTE).execute();
+                            RedditApi.vote(getActivity(), v, mAccount, Votable.DOWNVOTED);
                             v.setVoteStatus(Votable.DOWNVOTED);
                         }
                     }
@@ -701,10 +684,10 @@ public class CommentFragment extends Fragment {
                     } else if (position > 0) {
                         v = mCommentAdapter.getItem(position - HEADER_VIEW_COUNT);
                         if (v.getVoteStatus() == Comment.UPVOTED) {
-                            new VoteAsyncTask(v.getName(), mAccount, VoteAsyncTask.NEUTRAL).execute();
+                            RedditApi.vote(getActivity(), v, mAccount, Votable.NEUTRAL);
                             v.setVoteStatus(Votable.NEUTRAL);
                         } else {
-                            new VoteAsyncTask(v.getName(), mAccount, VoteAsyncTask.UPVOTE).execute();
+                            RedditApi.vote(getActivity(), v, mAccount, Votable.UPVOTED);
                             v.setVoteStatus(Votable.UPVOTED);
                         }
                     }
