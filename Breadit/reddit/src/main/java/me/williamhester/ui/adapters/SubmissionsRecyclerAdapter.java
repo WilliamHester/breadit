@@ -1,5 +1,6 @@
 package me.williamhester.ui.adapters;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
@@ -42,10 +43,13 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
     private List<Submission> mSubmissions;
     private final List<String> mExpandedSubmissions = new ArrayList<>();
     private AdapterCallbacks mCallback;
+    private Context mContext;
 
-    public SubmissionsRecyclerAdapter(List<Submission> submissions, AdapterCallbacks callbacks) {
+    public SubmissionsRecyclerAdapter(List<Submission> submissions, AdapterCallbacks callbacks, 
+                                      Context context) {
         mSubmissions = submissions;
         mCallback = callbacks;
+        mContext = context;
     }
 
     @Override
@@ -66,72 +70,32 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
+        private TextView mTitle;
+        private TextView mDomain;
+        private TextView mMetadata;
+        private TextView mCommentData;
+        private TextView mSubreddit;
+        private View mNsfwWarning;
+        private View mExpandButton;
+        private View mBackgroundVoteView;
+        private View mForegroundVoteView;
+        private SwipeView mSwipeView;
+
         private Submission mSubmission;
 
         public ViewHolder(View itemView) {
             super(itemView);
-        }
-        
-        private void setContent(final Submission s) {
-            mSubmission = s;
-            final View upVoteView = itemView.findViewById(R.id.vote_background);
-            final View downVoteView = itemView.findViewById(R.id.vote_foreground);
-            final SwipeView swipeView = (SwipeView) itemView.findViewById(R.id.swipe_view);
-            swipeView.setVoteViews(upVoteView, downVoteView);
-            swipeView.setVotable(mSubmission);
-            swipeView.setAccount(mCallback.getAccount());
-            swipeView.setSwipeListener(new SwipeView.SwipeListener() {
-                @Override
-                public void onRightToLeftSwipe() {
-                    if (mSubmission.getVoteStatus() == Votable.DOWNVOTED) {
-                        RedditApi.vote(swipeView.getContext(), mSubmission, mCallback.getAccount(), Votable.NEUTRAL);
-                    } else {
-                        RedditApi.vote(swipeView.getContext(), mSubmission, mCallback.getAccount(), Votable.DOWNVOTED);
-                    }
-                }
 
-                @Override
-                public void onLeftToRightSwipe() {
-                    if (mSubmission.getVoteStatus() == Votable.DOWNVOTED) {
-                        RedditApi.vote(swipeView.getContext(), mSubmission, mCallback.getAccount(), Votable.NEUTRAL);
-                    } else {
-                        RedditApi.vote(swipeView.getContext(), mSubmission, mCallback.getAccount(), Votable.UPVOTED);
-                    }
-                }
-            });
-            TextView title = (TextView) itemView.findViewById(R.id.title);
-            TextView domain = (TextView) itemView.findViewById(R.id.domain);
-            final TextView metaData = (TextView) itemView.findViewById(R.id.metadata);
-            TextView commentData = (TextView) itemView.findViewById(R.id.num_comments);
-            View nsfwWarning = itemView.findViewById(R.id.nsfw_warning);
-            View expandButton = itemView.findViewById(R.id.expand_self_text);
-            expandButton.setOnClickListener(mExpandListener);
-
-            if (mSubmission.isNsfw()) {
-                nsfwWarning.setVisibility(View.VISIBLE);
-            } else {
-                nsfwWarning.setVisibility(View.GONE);
-            }
-
-            switch (s.getVoteStatus()) {
-                case Votable.DOWNVOTED:
-                    downVoteView.setVisibility(View.VISIBLE);
-                    upVoteView.setVisibility(View.GONE);
-                    break;
-                case Votable.UPVOTED:
-                    upVoteView.setVisibility(View.VISIBLE);
-                    downVoteView.setVisibility(View.GONE);
-                    break;
-                default:
-                    upVoteView.setVisibility(View.GONE);
-                    downVoteView.setVisibility(View.GONE);
-                    break;
-            }
-
-            title.setText(StringEscapeUtils.unescapeHtml4(s.getTitle()));
-            domain.setText(s.getDomain());
-            metaData.setText(s.getScore() + " points by " + s.getAuthor());
-            commentData.setText(s.getNumberOfComments() + " comments");
+            mTitle = (TextView) itemView.findViewById(R.id.title);
+            mDomain = (TextView) itemView.findViewById(R.id.domain);
+            mMetadata = (TextView) itemView.findViewById(R.id.metadata);
+            mCommentData = (TextView) itemView.findViewById(R.id.num_comments);
+            mSubreddit = (TextView) itemView.findViewById(R.id.subreddit_title);
+            mNsfwWarning = itemView.findViewById(R.id.nsfw_warning);
+            mExpandButton = itemView.findViewById(R.id.expand_self_text);
+            mBackgroundVoteView = itemView.findViewById(R.id.vote_background);
+            mForegroundVoteView = itemView.findViewById(R.id.vote_foreground);
+            mSwipeView = (SwipeView) itemView.findViewById(R.id.swipe_view);
             View submissionData = itemView.findViewById(R.id.submission_data);
 
             submissionData.setOnClickListener(new View.OnClickListener() {
@@ -141,15 +105,52 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
                 }
             });
 
-            TextView subreddit = (TextView) itemView.findViewById(R.id.subreddit_title);
-            subreddit.setText("/r/" + s.getSubredditName());
+            mSwipeView.setUp(mBackgroundVoteView, mForegroundVoteView, mVoteListener, mCallback.getAccount());
+            mExpandButton.setOnClickListener(mExpandListener);
+        }
+        
+        private void setContent(Submission s) {
+            mSubmission = s;
+            mSwipeView.recycle(mSubmission);
+
+            mTitle.setText(StringEscapeUtils.unescapeHtml4(s.getTitle()));
+            mDomain.setText(s.getDomain());
+            mMetadata.setText(s.getScore() + " points by " + s.getAuthor());
+            mCommentData.setText(s.getNumberOfComments() + " comments");
+            mSubreddit.setText("/r/" + s.getSubredditName());
+
+            if (mSubmission.isNsfw()) {
+                mNsfwWarning.setVisibility(View.VISIBLE);
+            } else {
+                mNsfwWarning.setVisibility(View.GONE);
+            }
+
+            switch (s.getVoteStatus()) {
+                case Votable.DOWNVOTED:
+                    mForegroundVoteView.setScaleY(0f);
+                    mBackgroundVoteView.setVisibility(View.VISIBLE);
+                    mBackgroundVoteView.setBackgroundColor(
+                            mContext.getResources().getColor(R.color.periwinkle));
+                    break;
+                case Votable.UPVOTED:
+                    mForegroundVoteView.setScaleY(0f);
+                    mBackgroundVoteView.setVisibility(View.VISIBLE);
+                    mBackgroundVoteView.setBackgroundColor(
+                            mContext.getResources().getColor(R.color.orangered));
+                    break;
+                default:
+                    mBackgroundVoteView.setVisibility(View.GONE);
+                    mForegroundVoteView.setScaleY(0f);
+                    break;
+            }
 
             View container = itemView.findViewById(R.id.content_preview);
             ImageView imageView = (ImageView) itemView.findViewById(R.id.image);
             final ImageButton button = (ImageButton) itemView.findViewById(R.id.preview_button);
+            setUpNsfw(button);
 
             if (mSubmission.isSelf()) {
-                showSelfText(expandButton, container, imageView, button);
+                showSelfText(mExpandButton, container, imageView, button);
             } else {
                 itemView.findViewById(R.id.show_self_text).setVisibility(View.GONE);
                 itemView.findViewById(R.id.self_text).setVisibility(View.GONE);
@@ -158,68 +159,28 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
                     container.setVisibility(View.VISIBLE);
                     String id = linkDetails.getLinkId();
                     if (linkDetails.getType() == UrlParser.IMGUR_IMAGE) {
-                        if (s.isNsfw()) {
-                            button.setVisibility(View.VISIBLE);
-                            button.setBackgroundColor(button.getContext().getResources()
-                                    .getColor(android.R.color.black));
-                            button.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    button.setVisibility(View.GONE);
-                                }
-                            });
-                        } else {
-                            button.setVisibility(View.GONE);
-                        }
-                        if (!setImagePreview()) {
+                        if (!didSetImagePreview()) {
                             imageView.setImageDrawable(null);
-                            ImgurApi.getImageDetails(id, imageView.getContext(), new ImgurImageFuture());
+                            ImgurApi.getImageDetails(id, mContext, new ImgurImageFuture());
                         }
                     } else if (linkDetails.getType() == UrlParser.IMGUR_ALBUM) {
-                        if (s.isNsfw()) {
-                            button.setVisibility(View.VISIBLE);
-                            button.setBackgroundColor(button.getContext().getResources()
-                                    .getColor(android.R.color.black));
-                            button.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    button.setVisibility(View.GONE);
-                                }
-                            });
-                        } else {
-                            button.setVisibility(View.GONE);
-                        }
-                        if (!setImagePreview()) {
+                        if (!didSetImagePreview()) {
                             imageView.setImageDrawable(null);
-                            ImgurApi.getAlbumDetails(id, imageView.getContext(), new ImgurAlbumFuture());
+                            ImgurApi.getAlbumDetails(id, mContext, new ImgurAlbumFuture());
                         }
                     } else if (linkDetails.getType() == UrlParser.YOUTUBE) {
                         ImgurApi.loadImage(linkDetails.getUrl(), imageView, null);
                         button.setImageResource(android.R.drawable.ic_media_play);
                         button.setVisibility(View.VISIBLE);
-                        imageView.setAlpha(0.8f);
                         button.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
-                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(s.getUrl()));
-                                view.getContext().startActivity(browserIntent);
+                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(mSubmission.getUrl()));
+                                mContext.startActivity(browserIntent);
                             }
                         });
                     } else if (linkDetails.getType() == UrlParser.NORMAL_IMAGE) {
                         ImgurApi.loadImage(linkDetails.getUrl(), imageView, null);
-                        if (s.isNsfw()) {
-                            button.setVisibility(View.VISIBLE);
-                            button.setBackgroundColor(button.getContext().getResources()
-                                    .getColor(android.R.color.black));
-                            button.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    button.setVisibility(View.GONE);
-                                }
-                            });
-                        } else {
-                            button.setVisibility(View.GONE);
-                        }
                         imageView.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
@@ -232,6 +193,36 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
                 }
             }
             itemView.invalidate();
+        }
+
+        private SwipeView.SwipeListener mVoteListener = new SwipeView.SwipeListener() {
+            @Override
+            public void onRightToLeftSwipe() {
+                mSubmission.setVoteStatus(mSubmission.getVoteStatus() == Votable.DOWNVOTED ? Votable.NEUTRAL : Votable.DOWNVOTED);
+                RedditApi.vote(mContext, mSubmission, mCallback.getAccount());
+            }
+
+            @Override
+            public void onLeftToRightSwipe() {
+                mSubmission.setVoteStatus(mSubmission.getVoteStatus() == Votable.UPVOTED ? Votable.NEUTRAL : Votable.UPVOTED);
+                RedditApi.vote(mContext, mSubmission, mCallback.getAccount());
+            }
+        };
+
+        private void setUpNsfw(final ImageButton button) {
+            if (mSubmission.isNsfw()) {
+                button.setVisibility(View.VISIBLE);
+                button.setBackgroundColor(button.getContext().getResources()
+                        .getColor(android.R.color.black));
+                button.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        button.setVisibility(View.GONE);
+                    }
+                });
+            } else {
+                button.setVisibility(View.GONE);
+            }
         }
 
         private void showSelfText(View expandButton, View container, ImageView imageView, ImageButton button) {
@@ -260,7 +251,7 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
             public void onCompleted(Exception e, final ResponseImgurWrapper<ImgurAlbum> result) {
                 if (result != null && result.isSuccess()) {
                     mSubmission.setImgurData(result.getData());
-                    setImagePreview();
+                    didSetImagePreview();
                 } else if (result != null) {
                     Log.e("SubmissionsRecyclerAdapter", "failed, status = " + result.getStatus());
                 } else {
@@ -274,7 +265,7 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
             public void onCompleted(Exception e, final ResponseImgurWrapper<ImgurImage> result) {
                 if (result != null && result.isSuccess()) {
                     mSubmission.setImgurData(result.getData());
-                    setImagePreview();
+                    didSetImagePreview();
                 } else if (result != null) {
                     Log.e("SubmissionsRecyclerAdapter", "failed, status = " + result.getStatus());
                 } else {
@@ -316,7 +307,7 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
          *
          * @return returns whether or not the data has been set.
          */
-        private boolean setImagePreview() {
+        private boolean didSetImagePreview() {
             if (mSubmission.getImgurData() == null) {
                 return false;
             }

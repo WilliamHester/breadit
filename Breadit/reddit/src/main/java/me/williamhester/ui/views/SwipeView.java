@@ -1,12 +1,16 @@
 package me.williamhester.ui.views;
 
 import android.content.Context;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.ScaleAnimation;
 import android.widget.LinearLayout;
 
 import me.williamhester.models.Account;
@@ -18,12 +22,16 @@ import me.williamhester.reddit.R;
  */
 public class SwipeView extends LinearLayout {
 
+    private final long ANIMATION_LENGTH = 300;
+
     private int mTouchSlop;
-    private int mMinFlingVelocity;
-    private long mAnimTime;
+    private int mFlingVelocity;
+    private int mBackgroundColor;
     private float mDownRawX;
     private float mDownRawY;
     private float mDownX;
+    private float mSwipeDistance;
+    private float mMinFlingDistance;
     private boolean mSwiping;
     private boolean mEnabled;
 
@@ -33,7 +41,7 @@ public class SwipeView extends LinearLayout {
     private View mBackgroundView;
     private View mForegroundView;
     private Votable mVotable;
-
+    private final Handler mHandler = new Handler();
 
     public SwipeView(Context context) {
         this(context, null, 0, 0);
@@ -49,30 +57,26 @@ public class SwipeView extends LinearLayout {
 
     public SwipeView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        mSwipeDistance = 100 * context.getResources().getDisplayMetrics().density;
+        mMinFlingDistance = mSwipeDistance / 2;
         init();
     }
 
     private void init() {
         ViewConfiguration vc = ViewConfiguration.get(getContext());
         mTouchSlop = vc.getScaledTouchSlop();
-        mMinFlingVelocity = vc.getScaledMinimumFlingVelocity();
-        mAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+        mFlingVelocity = (vc.getScaledMaximumFlingVelocity() + vc.getScaledMinimumFlingVelocity()) / 2;
     }
 
-    public void setSwipeListener(SwipeListener listener) {
-        mSwipeListener = listener;
-    }
-
-    public void setVoteViews(View backgroundView, View foregroundView) {
-        mBackgroundView = backgroundView;
-        mForegroundView = foregroundView;
-    }
-
-    public void setVotable(Votable votable) {
+    public void recycle(Votable votable) {
         mVotable = votable;
     }
 
-    public void setAccount(Account account) {
+    public void setUp(View backgroundView, View foregroundView,
+                      SwipeListener listener, Account account) {
+        mBackgroundView = backgroundView;
+        mForegroundView = foregroundView;
+        mSwipeListener = listener;
         mAccount = account;
     }
 
@@ -169,28 +173,37 @@ public class SwipeView extends LinearLayout {
             mVelocityTracker.addMovement(ev);
 
             float swipeDistance = ev.getX() - mDownX;
-            float percent = Math.abs(swipeDistance / (getWidth() / 3f));
-            if (mVotable.getVoteStatus() == Votable.NEUTRAL) {
-                mForegroundView.setVisibility(GONE);
-                mBackgroundView.setVisibility(VISIBLE);
-                mBackgroundView.setScaleY(percent);
-                if (swipeDistance > 0) {
-                    mBackgroundView.setBackgroundColor(getResources().getColor(R.color.orangered));
-                } else {
-                    mBackgroundView.setBackgroundColor(getResources().getColor(R.color.periwinkle));
-                }
-            } else {
-                if (swipeDistance > 0) {
-                    mForegroundView.setVisibility(GONE);
+            float percent = Math.abs(swipeDistance / mSwipeDistance);
+            mForegroundView.setVisibility(VISIBLE);
+            if (swipeDistance > 0) {
+                if (mVotable.getVoteStatus() == Votable.UPVOTED) {
+                    if (mForegroundView.getVisibility() == VISIBLE) {
+                        mForegroundView.setVisibility(GONE);
+                        mForegroundView.invalidate();
+                    }
                     mBackgroundView.setAlpha(1f - percent);
                 } else {
-                    mForegroundView.setVisibility(VISIBLE);
+                    if (mForegroundView.getVisibility() == GONE) {
+                        mForegroundView.setVisibility(VISIBLE);
+                        mForegroundView.invalidate();
+                    }
+                    mForegroundView.setBackgroundColor(getResources().getColor(R.color.orangered));
                     mForegroundView.setScaleY(percent);
                 }
+            } else {
                 if (mVotable.getVoteStatus() == Votable.DOWNVOTED) {
-                    mForegroundView.setBackgroundColor(getResources().getColor(R.color.orangered));
+                    if (mForegroundView.getVisibility() == VISIBLE) {
+                        mForegroundView.setVisibility(GONE);
+                        mForegroundView.invalidate();
+                    }
+                    mBackgroundView.setAlpha(1f - percent);
                 } else {
+                    if (mForegroundView.getVisibility() == GONE) {
+                        mForegroundView.setVisibility(VISIBLE);
+                        mForegroundView.invalidate();
+                    }
                     mForegroundView.setBackgroundColor(getResources().getColor(R.color.periwinkle));
+                    mForegroundView.setScaleY(percent);
                 }
             }
 
@@ -202,11 +215,26 @@ public class SwipeView extends LinearLayout {
             mVelocityTracker.addMovement(ev);
             mVelocityTracker.computeCurrentVelocity(1000);
             float swipeDistance = ev.getX() - mDownX;
-            if (swipeDistance > getWidth() / 2.0f
-                    || mVelocityTracker.getXVelocity() > mMinFlingVelocity) {
+            float flingVelocity = mVelocityTracker.getXVelocity();
+//            if (swipeDistance > mSwipeDistance
+//                    || mVelocityTracker.getXVelocity() > mFlingVelocity) {
+//                onLeftToRightSwipe();
+//            } else if (swipeDistance < -mSwipeDistance
+//                    || mVelocityTracker.getXVelocity() < -mFlingVelocity) {
+//                onRightToLeftSwipe();
+//            } else {
+//                onCancelSwipe();
+//            }
+            if (swipeDistance > mSwipeDistance) {
                 onLeftToRightSwipe();
-            } else {
+            } else if (flingVelocity > mFlingVelocity && swipeDistance > mMinFlingDistance) {
+                onLeftToRightSwipe();
+            } else if (swipeDistance < -mSwipeDistance) {
                 onRightToLeftSwipe();
+            } else if (flingVelocity < -mFlingVelocity && swipeDistance < -mMinFlingDistance) {
+                onRightToLeftSwipe();
+            } else {
+                onCancelSwipe();
             }
         }
         stopMotionTracking();
@@ -223,25 +251,97 @@ public class SwipeView extends LinearLayout {
     }
 
     private void onRightToLeftSwipe() {
+        int oldVoteStatus = mVotable.getVoteStatus();
         if (mSwipeListener != null) {
             mSwipeListener.onRightToLeftSwipe();
         }
-        if (mVotable.getVoteStatus() == Votable.UPVOTED) {
-            mBackgroundView.setBackgroundColor(getResources().getColor(R.color.periwinkle));
-        } else {
-            mBackgroundView.setVisibility(GONE);
+        mBackgroundColor = getResources().getColor(R.color.periwinkle);
+        if (oldVoteStatus == Votable.UPVOTED || oldVoteStatus == Votable.NEUTRAL) {
+            mHandler.postDelayed(mFinishVoteRunnable, ANIMATION_LENGTH);
         }
     }
 
     private void onLeftToRightSwipe() {
+        int oldVoteStatus = mVotable.getVoteStatus();
         if (mSwipeListener != null) {
             mSwipeListener.onLeftToRightSwipe();
         }
-        if (mVotable.getVoteStatus() == Votable.DOWNVOTED) {
-            mBackgroundView.setBackgroundColor(getResources().getColor(R.color.orangered));
-        } else {
-            mBackgroundView.setVisibility(GONE);
+        mBackgroundColor = getResources().getColor(R.color.orangered);
+        if (oldVoteStatus == Votable.DOWNVOTED || oldVoteStatus == Votable.NEUTRAL) {
+            mHandler.postDelayed(mFinishVoteRunnable, ANIMATION_LENGTH);
         }
+    }
+
+    private void onCancelSwipe() {
+        mHandler.postDelayed(mCancelSwipeRunnable, ANIMATION_LENGTH);
+    }
+
+    private Runnable mFinishVoteRunnable = new Runnable() {
+        @Override
+        public void run() {
+            float scaleY = mForegroundView.getScaleY();
+            float centerHeight = mForegroundView.getHeight() / 2f;
+            float centerWidth = mForegroundView.getWidth() / 2f;
+            ScaleAnimation scaleAnimation = new ScaleAnimation(1, 1, scaleY, 1, centerWidth, centerHeight);
+            scaleAnimation.setFillAfter(true);
+            scaleAnimation.setDuration(Math.abs(Math.round((ANIMATION_LENGTH * (1f - scaleY)))));
+            scaleAnimation.setAnimationListener(new AnimationFinishedListener() {
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    mBackgroundView.setBackgroundColor(mBackgroundColor);
+                    mBackgroundView.setVisibility(VISIBLE);
+                    mBackgroundView.setAlpha(1f);
+                    mBackgroundView.setScaleY(1f);
+                    mForegroundView.setScaleY(0f);
+                    mForegroundView.clearAnimation();
+                }
+            });
+            mForegroundView.startAnimation(scaleAnimation);
+        }
+    };
+
+    private Runnable mCancelSwipeRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (mForegroundView.getVisibility() == VISIBLE) {
+                float scaleY = mForegroundView.getScaleY();
+                float centerHeight = mForegroundView.getHeight() / 2f;
+                float centerWidth = mForegroundView.getWidth() / 2f;
+                ScaleAnimation scaleAnimation = new ScaleAnimation(1, 1, scaleY, 0, centerWidth, centerHeight);
+                scaleAnimation.setDuration(Math.abs(Math.round((ANIMATION_LENGTH * (scaleY)))));
+                scaleAnimation.setAnimationListener(new AnimationFinishedListener() {
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        mForegroundView.setScaleY(0f);
+                    }
+                });
+                mForegroundView.startAnimation(scaleAnimation);
+            } else {
+                float alpha = mBackgroundView.getAlpha();
+                AlphaAnimation alphaAnimation = new AlphaAnimation(alpha, 1.0f);
+                alphaAnimation.setDuration(Math.abs(Math.round((ANIMATION_LENGTH * (1f - alpha)))));
+                alphaAnimation.setAnimationListener(new AnimationFinishedListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+                        mBackgroundView.setAlpha(1f);
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        mBackgroundView.setAlpha(1f);
+                    }
+                });
+                mBackgroundView.startAnimation(alphaAnimation);
+            }
+        }
+    };
+
+    private abstract class AnimationFinishedListener implements Animation.AnimationListener {
+        @Override
+        public void onAnimationStart(Animation animation) { }
+
+        @Override
+        public void onAnimationRepeat(Animation animation) { }
     }
 
     public interface SwipeListener {

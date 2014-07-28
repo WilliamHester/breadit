@@ -80,7 +80,7 @@ public class SubredditFragment extends Fragment implements SubmissionsRecyclerAd
             mNames = new HashSet<>();
             mSubmissionList = new ArrayList<>();
         }
-        mSubmissionsAdapter = new SubmissionsRecyclerAdapter(mSubmissionList, this);
+        mSubmissionsAdapter = new SubmissionsRecyclerAdapter(mSubmissionList, this, getActivity());
         loadPrefs();
     }
 

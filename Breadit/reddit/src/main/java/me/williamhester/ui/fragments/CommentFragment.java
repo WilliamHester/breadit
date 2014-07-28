@@ -263,7 +263,7 @@ public class CommentFragment extends Fragment {
         public boolean onUpVote(CommentView commentView) {
             if (mAccount != null) {
                 Votable v = commentView.getComment();
-                RedditApi.vote(getActivity(), v, mAccount, Votable.UPVOTED);
+                RedditApi.vote(getActivity(), v, mAccount);
                 return true;
             }
             return false;
@@ -273,7 +273,7 @@ public class CommentFragment extends Fragment {
         public boolean onDownVote(CommentView commentView) {
             if (mAccount != null) {
                 Votable v = commentView.getComment();
-                RedditApi.vote(getActivity(), v, mAccount, Votable.DOWNVOTED);
+                RedditApi.vote(getActivity(), v, mAccount);
                 return true;
             }
             return false;
@@ -283,7 +283,7 @@ public class CommentFragment extends Fragment {
         public boolean onNeutralVote(CommentView commentView) {
             if (mAccount != null) {
                 Votable v = commentView.getComment();
-                RedditApi.vote(getActivity(), v, mAccount, Votable.NEUTRAL);
+                RedditApi.vote(getActivity(), v, mAccount);
                 return true;
             }
             return false;
@@ -667,13 +667,8 @@ public class CommentFragment extends Fragment {
                         v = mSubmission;
                     } else if (position > 0) {
                         v = mCommentAdapter.getItem(position - HEADER_VIEW_COUNT);
-                        if (v.getVoteStatus() == Comment.DOWNVOTED) {
-                            RedditApi.vote(getActivity(), v, mAccount, Votable.NEUTRAL);
-                            v.setVoteStatus(Votable.NEUTRAL);
-                        } else {
-                            RedditApi.vote(getActivity(), v, mAccount, Votable.DOWNVOTED);
-                            v.setVoteStatus(Votable.DOWNVOTED);
-                        }
+                        v.setVoteStatus(v.getVoteStatus() == Votable.DOWNVOTED ? Votable.NEUTRAL : Votable.DOWNVOTED);
+                        RedditApi.vote(getActivity(), v, mAccount);
                     }
                     setVoteStatus(v, position);
                     return true;
@@ -683,13 +678,8 @@ public class CommentFragment extends Fragment {
                         v = mSubmission;
                     } else if (position > 0) {
                         v = mCommentAdapter.getItem(position - HEADER_VIEW_COUNT);
-                        if (v.getVoteStatus() == Comment.UPVOTED) {
-                            RedditApi.vote(getActivity(), v, mAccount, Votable.NEUTRAL);
-                            v.setVoteStatus(Votable.NEUTRAL);
-                        } else {
-                            RedditApi.vote(getActivity(), v, mAccount, Votable.UPVOTED);
-                            v.setVoteStatus(Votable.UPVOTED);
-                        }
+                        v.setVoteStatus(v.getVoteStatus() == Votable.UPVOTED ? Votable.NEUTRAL : Votable.UPVOTED);
+                        RedditApi.vote(getActivity(), v, mAccount);
                     }
                     setVoteStatus(v, position);
                     return true;
