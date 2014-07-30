@@ -28,6 +28,7 @@ import me.williamhester.models.ImgurImage;
 import me.williamhester.models.ResponseImgurWrapper;
 import me.williamhester.models.Submission;
 import me.williamhester.models.Votable;
+import me.williamhester.models.utils.Utilities;
 import me.williamhester.network.ImgurApi;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
@@ -73,6 +74,7 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
         private TextView mTitle;
         private TextView mDomain;
         private TextView mMetadata;
+        private TextView mTime;
         private TextView mCommentData;
         private TextView mSubreddit;
         private View mNsfwWarning;
@@ -89,6 +91,7 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
             mTitle = (TextView) itemView.findViewById(R.id.title);
             mDomain = (TextView) itemView.findViewById(R.id.domain);
             mMetadata = (TextView) itemView.findViewById(R.id.metadata);
+            mTime = (TextView) itemView.findViewById(R.id.time);
             mCommentData = (TextView) itemView.findViewById(R.id.num_comments);
             mSubreddit = (TextView) itemView.findViewById(R.id.subreddit_title);
             mNsfwWarning = itemView.findViewById(R.id.nsfw_warning);
@@ -116,6 +119,7 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
             mTitle.setText(StringEscapeUtils.unescapeHtml4(s.getTitle()));
             mDomain.setText(s.getDomain());
             mMetadata.setText(s.getScore() + " points by " + s.getAuthor());
+            mTime.setText(Utilities.calculateTimeShort(s.getCreatedUtc()));
             mCommentData.setText(s.getNumberOfComments() + " comments");
             mSubreddit.setText("/r/" + s.getSubredditName());
 

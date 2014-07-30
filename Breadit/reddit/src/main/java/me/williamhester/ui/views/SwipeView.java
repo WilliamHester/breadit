@@ -216,22 +216,11 @@ public class SwipeView extends LinearLayout {
             mVelocityTracker.computeCurrentVelocity(1000);
             float swipeDistance = ev.getX() - mDownX;
             float flingVelocity = mVelocityTracker.getXVelocity();
-//            if (swipeDistance > mSwipeDistance
-//                    || mVelocityTracker.getXVelocity() > mFlingVelocity) {
-//                onLeftToRightSwipe();
-//            } else if (swipeDistance < -mSwipeDistance
-//                    || mVelocityTracker.getXVelocity() < -mFlingVelocity) {
-//                onRightToLeftSwipe();
-//            } else {
-//                onCancelSwipe();
-//            }
-            if (swipeDistance > mSwipeDistance) {
+            if (swipeDistance > mSwipeDistance
+                    || flingVelocity > mFlingVelocity && swipeDistance > mMinFlingDistance) {
                 onLeftToRightSwipe();
-            } else if (flingVelocity > mFlingVelocity && swipeDistance > mMinFlingDistance) {
-                onLeftToRightSwipe();
-            } else if (swipeDistance < -mSwipeDistance) {
-                onRightToLeftSwipe();
-            } else if (flingVelocity < -mFlingVelocity && swipeDistance < -mMinFlingDistance) {
+            } else if (swipeDistance < -mSwipeDistance
+                    || flingVelocity < -mFlingVelocity && swipeDistance < -mMinFlingDistance) {
                 onRightToLeftSwipe();
             } else {
                 onCancelSwipe();

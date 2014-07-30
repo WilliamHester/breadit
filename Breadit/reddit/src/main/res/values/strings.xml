@@ -123,4 +123,7 @@
     <!-- ImgurImageFragment -->
     <string name="toggle_description">Toggle description</string>
 
+    <!-- RedditLiveFragment -->
+    <string name="say_something">Say something</string>
+
 </resources>
