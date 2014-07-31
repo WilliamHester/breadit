@@ -68,7 +68,7 @@ public class SubredditFragment extends Fragment implements SubmissionsRecyclerAd
         if (savedInstanceState != null) {
             mAccount = savedInstanceState.getParcelable("account");
             mSubredditName = savedInstanceState.getString("subreddit");
-            mSubmissionList = savedInstanceState.getParcelableArrayList("submissions");
+            mSubmissionList = (ArrayList<Submission>) savedInstanceState.getSerializable("submissions");
             String[] array = savedInstanceState.getStringArray("names");
             mNames = new HashSet<>();
             for (String name : array) {
@@ -126,7 +126,7 @@ public class SubredditFragment extends Fragment implements SubmissionsRecyclerAd
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putParcelableArrayList("submissions", mSubmissionList);
+        outState.putSerializable("submissions", mSubmissionList);
         outState.putParcelable("account", mAccount);
         outState.putString("subreddit", mSubredditName);
         String[] array = new String[mNames.size()];
@@ -260,7 +260,8 @@ public class SubredditFragment extends Fragment implements SubmissionsRecyclerAd
     public void onCardClicked(Submission submission) {
         Intent i = new Intent(getActivity(), SubmissionActivity.class);
         Bundle args = new Bundle();
-        args.putParcelable(SubmissionActivity.SUBMISSION, submission);
+        args.putSerializable(SubmissionActivity.SUBMISSION, submission);
+        args.putSerializable("media", submission.getMedia());
         args.putParcelable(SubmissionActivity.ACCOUNT, mAccount);
         args.putString(SubmissionActivity.TAB, SubmissionActivity.COMMENT_TAB);
         i.putExtras(args);
@@ -324,7 +325,7 @@ public class SubredditFragment extends Fragment implements SubmissionsRecyclerAd
                 JsonObject rootObject = new JsonParser().parse(data).getAsJsonObject();
                 JsonArray array = rootObject.get("data").getAsJsonObject().get("children").getAsJsonArray();
 
-                submissions = new ArrayList<Submission>();
+                submissions = new ArrayList<>();
                 for (int i = 0; i < array.size(); i++) {
                     array.get(i);
                     Gson gson = new Gson();

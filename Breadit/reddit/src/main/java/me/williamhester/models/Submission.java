@@ -8,6 +8,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.annotations.SerializedName;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -19,7 +20,7 @@ import java.util.List;
 
 import me.williamhester.models.utils.Utilities;
 
-public class Submission extends Thing implements Parcelable, Votable, Serializable {
+public class Submission extends Thing implements Votable, Serializable {
 
     public static final int HOT = 0;
     public static final int NEW = 1;
@@ -33,6 +34,8 @@ public class Submission extends Thing implements Parcelable, Votable, Serializab
     public static final int MONTH = 3;
     public static final int YEAR = 4;
     public static final int ALL = 5;
+
+    public static final String LIVE_UPDATE = "liveupdate";
 
     private static final long serialVersionUID = -112181006397201414L;
 
@@ -65,6 +68,7 @@ public class Submission extends Thing implements Parcelable, Votable, Serializab
     private long ups;
     private long downs;
     private Boolean likes;
+    private Media media;
     private int mVoteStatus;
     private boolean mIsBeingEdited = false;
     private Object mImgurData;
@@ -295,6 +299,10 @@ public class Submission extends Thing implements Parcelable, Votable, Serializab
         mImgurData = data;
     }
 
+    public Media getMedia() {
+        return media;
+    }
+
     public Object getImgurData() {
         return mImgurData;
     }
@@ -393,12 +401,12 @@ public class Submission extends Thing implements Parcelable, Votable, Serializab
         return submissions;
     }
 
-    @Override
+//    @Override
     public int describeContents() {
         return 0;
     }
 
-    @Override
+//    @Override
     public void writeToParcel(Parcel parcel, int i) {
         Bundle b = new Bundle();
         b.putString("name", name);
@@ -444,5 +452,22 @@ public class Submission extends Thing implements Parcelable, Votable, Serializab
             return new Submission[size];
         }
     };
+
+    public static class Media implements Serializable {
+        private static final long serialVersionUID = -3883427725988406001L;
+
+        @SerializedName("type")
+        private String mType;
+        @SerializedName("event_id")
+        private String mEventId;
+
+        public String getType() {
+            return mType;
+        }
+
+        public String getEventId() {
+            return mEventId;
+        }
+    }
 
 }

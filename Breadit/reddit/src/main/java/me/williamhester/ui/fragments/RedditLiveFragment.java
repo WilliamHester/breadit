@@ -9,8 +9,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.async.http.AsyncHttpClient;
 import com.koushikdutta.async.http.WebSocket;
 import com.koushikdutta.async.http.socketio.Acknowledge;
@@ -19,7 +21,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import me.williamhester.models.LiveResponse;
+import me.williamhester.models.RedditLive;
+import me.williamhester.models.ResponseRedditWrapper;
 import me.williamhester.models.Submission;
+import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 
 /**
@@ -56,20 +61,20 @@ public class RedditLiveFragment extends Fragment {
 
         ListView liveComments = (ListView) v.findViewById(R.id.live_comments);
         liveComments.setAdapter(mAdapter);
+
+        RedditApi.getRedditLiveData(getActivity(), mSubmission, mLiveCallback);
         return v;
     }
 
-    private void setUpLiveListener() {
-        AsyncHttpClient.getDefaultInstance().websocket(
-                "wss://wss.redditmedia.com/live/tayzhy1oj2g5?h=902e90a7fcb1d6b4be0a1b161cce607886ce12d3&amp;e=1406784103",
-                "my-protocol", new AsyncHttpClient.WebSocketConnectCallback() {
+    private void setUpLiveListener(String url) {
+        Log.d("RedditLiveFragment", url);
+        AsyncHttpClient.getDefaultInstance().websocket(url, "wss", new AsyncHttpClient.WebSocketConnectCallback() {
             @Override
             public void onCompleted(Exception ex, WebSocket webSocket) {
                 if (ex != null) {
-                    Log.e("RedditLiveFragment", ex.toString());
+                    ex.printStackTrace();
                     return;
                 }
-                webSocket.send(new byte[10]);
                 webSocket.setStringCallback(new WebSocket.StringCallback() {
                     @Override
                     public void onStringAvailable(String s) {
@@ -85,10 +90,31 @@ public class RedditLiveFragment extends Fragment {
         });
     }
 
+    private FutureCallback<ResponseRedditWrapper<RedditLive>> mLiveCallback =
+            new FutureCallback<ResponseRedditWrapper<RedditLive>>() {
+        @Override
+        public void onCompleted(Exception e, ResponseRedditWrapper<RedditLive> result) {
+            if (e != null) {
+                e.printStackTrace();
+                return;
+            }
+            setUpLiveListener(result.getData().getWebsocketUrl());
+        }
+    };
+
     private class LiveAdapter extends ArrayAdapter<LiveResponse> {
 
         public LiveAdapter(Context context) {
             super(context, R.layout.list_item_live, mLiveResponses);
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                convertView = View.inflate(getActivity(), R.layout.list_item_live, null);
+            }
+
+            return convertView;
         }
 
     }

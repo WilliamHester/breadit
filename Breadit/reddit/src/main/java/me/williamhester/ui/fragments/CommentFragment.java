@@ -77,12 +77,12 @@ public class CommentFragment extends Fragment {
         if (savedInstanceState != null) {
             mCommentsList = savedInstanceState.getParcelableArrayList("comments");
             mAccount = savedInstanceState.getParcelable("account");
-            mSubmission = savedInstanceState.getParcelable("submission");
+            mSubmission = (Submission) savedInstanceState.getSerializable("submission");
             mPermalink = savedInstanceState.getString("permalink");
             mSortType = savedInstanceState.getInt("sortType");
         } else if (args != null) {
             mAccount = args.getParcelable("account");
-            mSubmission = args.getParcelable("submission");
+            mSubmission = (Submission) args.getSerializable("submission");
             if (mSubmission != null) {
                 mPermalink = "http://www.reddit.com" + mSubmission.getPermalink();
             } else {
@@ -123,7 +123,7 @@ public class CommentFragment extends Fragment {
         super.onSaveInstanceState(outState);
         outState.putParcelableArrayList("comments", mCommentsList);
         outState.putParcelable("account", mAccount);
-        outState.putParcelable("submission", mSubmission);
+        outState.putSerializable("submission", mSubmission);
         outState.putString("permalink", mPermalink);
         outState.putInt("sortType", mSortType);
     }

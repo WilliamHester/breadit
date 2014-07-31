@@ -31,9 +31,9 @@ public class WebViewFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (savedInstanceState != null) {
             mUri = savedInstanceState.getString(URI);
-            mSubmission = savedInstanceState.getParcelable(SUBMISSION);
+            mSubmission = (Submission) savedInstanceState.getSerializable(SUBMISSION);
         } else if (getArguments() != null) {
-            mSubmission = getArguments().getParcelable("submission");
+            mSubmission = (Submission) getArguments().getParcelable(SUBMISSION);
             mUri = mSubmission.getUrl();
         }
     }
@@ -80,7 +80,7 @@ public class WebViewFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelable(SUBMISSION, mSubmission);
+        outState.putSerializable(SUBMISSION, mSubmission);
         outState.putString(URI, mUri);
         if (mWebView != null)
             mWebView.saveState(outState);
