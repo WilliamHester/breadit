@@ -18,7 +18,7 @@
         android:layout_height="wrap_content"
         android:hint="@string/subreddit_name"/>
 
-    <EditText android:id="@+id/title"
+    <EditText android:id="@+id/body"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/post_title"/>

@@ -59,6 +59,7 @@ public class RedditLiveFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_reddit_live, root, false);
 
+        mAdapter = new LiveAdapter();
         ListView liveComments = (ListView) v.findViewById(R.id.live_comments);
         liveComments.setAdapter(mAdapter);
 
@@ -67,7 +68,6 @@ public class RedditLiveFragment extends Fragment {
     }
 
     private void setUpLiveListener(String url) {
-        Log.d("RedditLiveFragment", url);
         AsyncHttpClient.getDefaultInstance().websocket(url, "wss", new AsyncHttpClient.WebSocketConnectCallback() {
             @Override
             public void onCompleted(Exception ex, WebSocket webSocket) {
@@ -104,8 +104,8 @@ public class RedditLiveFragment extends Fragment {
 
     private class LiveAdapter extends ArrayAdapter<LiveResponse> {
 
-        public LiveAdapter(Context context) {
-            super(context, R.layout.list_item_live, mLiveResponses);
+        public LiveAdapter() {
+            super(getActivity(), R.layout.list_item_live, mLiveResponses);
         }
 
         @Override

@@ -212,7 +212,7 @@ public class UserFragment extends Fragment {
 //                        = (TextView) convertView.findViewById(R.id.subreddit_name_and_time);
 //                TextView author = (TextView) convertView.findViewById(R.id.author);
 //                ImageView thumbnail = (ImageView) convertView.findViewById(R.id.thumbnail);
-                TextView title = (TextView) convertView.findViewById(R.id.title);
+                TextView title = (TextView) convertView.findViewById(R.id.body);
                 TextView domain = (TextView) convertView.findViewById(R.id.domain);
                 final TextView points = (TextView) convertView.findViewById(R.id.metadata);
 

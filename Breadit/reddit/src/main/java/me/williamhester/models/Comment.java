@@ -46,8 +46,7 @@ public class Comment extends Thing implements Parcelable, Votable {
     private int mVoteStatus;
     private long mCreated;
     private long mCreatedUtc;
-    private long mUps;
-    private long mDowns;
+    private int mUps;
     private long mEdited;
 
     private int mLevel = 0;
@@ -60,7 +59,6 @@ public class Comment extends Thing implements Parcelable, Votable {
         mAuthor = account.getUsername();
         mVoteStatus = 0;
         mUps = 0;
-        mDowns = 0;
         mCreatedUtc = System.currentTimeMillis() / 1000;
         mBodyHtml = "";
         mBody = "";
@@ -108,8 +106,7 @@ public class Comment extends Thing implements Parcelable, Votable {
             comment.mSaved = data.get("data").getAsJsonObject().get("saved").getAsBoolean();
             comment.mCreated = data.get("data").getAsJsonObject().get("created").getAsLong();
             comment.mCreatedUtc = data.get("data").getAsJsonObject().get("created_utc").getAsLong();
-            comment.mUps = data.get("data").getAsJsonObject().get("ups").getAsLong();
-            comment.mDowns = data.get("data").getAsJsonObject().get("downs").getAsLong();
+            comment.mUps = data.get("data").getAsJsonObject().get("ups").getAsInt();
             JsonElement je = data.get("data").getAsJsonObject().get("likes");
             if (je.isJsonNull()) {
                 comment.mVoteStatus = NEUTRAL;
@@ -169,8 +166,7 @@ public class Comment extends Thing implements Parcelable, Votable {
         comment.mSaved = data.get("data").getAsJsonObject().get("saved").getAsBoolean();
         comment.mCreated = data.get("data").getAsJsonObject().get("created").getAsLong();
         comment.mCreatedUtc = data.get("data").getAsJsonObject().get("created_utc").getAsLong();
-        comment.mUps = data.get("data").getAsJsonObject().get("ups").getAsLong();
-        comment.mDowns = data.get("data").getAsJsonObject().get("downs").getAsLong();
+        comment.mUps = data.get("data").getAsJsonObject().get("ups").getAsInt();
         JsonElement je = data.get("data").getAsJsonObject().get("likes");
         if (je.isJsonNull()) {
             comment.mVoteStatus = NEUTRAL;
@@ -241,16 +237,8 @@ public class Comment extends Thing implements Parcelable, Votable {
         return mLinkUrl;
     }
 
-    public long getUpVotes() { 
+    public int getScore() {
         return mUps;
-    }
-
-    public long getDownVotes() { 
-        return mDowns;
-    }
-
-    public long getScore() {
-        return mUps - mDowns;
     }
 
     public String getAuthor() { 
@@ -460,7 +448,6 @@ public class Comment extends Thing implements Parcelable, Votable {
         dest.writeLong(this.mCreated);
         dest.writeLong(this.mCreatedUtc);
         dest.writeLong(this.mUps);
-        dest.writeLong(this.mDowns);
         dest.writeLong(this.mEdited);
         dest.writeInt(this.mLevel);
         dest.writeByte(mIsHidden ? (byte) 1 : (byte) 0);
@@ -473,8 +460,6 @@ public class Comment extends Thing implements Parcelable, Votable {
 
     private Comment(Parcel in) {
         in.readTypedList(mReplies, Comment.CREATOR);
-//        this.mMore = new ArrayList<List<String>>();
-//        in.readList(this.mMore, List<String>.class.getClassLoader());
         this.mApprovedBy = in.readString();
         this.mAuthor = in.readString();
         this.mAuthorFlairCss = in.readString();
@@ -493,8 +478,7 @@ public class Comment extends Thing implements Parcelable, Votable {
         this.mVoteStatus = in.readInt();
         this.mCreated = in.readLong();
         this.mCreatedUtc = in.readLong();
-        this.mUps = in.readLong();
-        this.mDowns = in.readLong();
+        this.mUps = in.readInt();
         this.mEdited = in.readLong();
         this.mLevel = in.readInt();
         this.mIsHidden = in.readByte() != 0;

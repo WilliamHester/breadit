@@ -28,13 +28,11 @@ import me.williamhester.models.ImgurImage;
 import me.williamhester.models.ResponseImgurWrapper;
 import me.williamhester.models.Submission;
 import me.williamhester.models.Votable;
-import me.williamhester.models.utils.Utilities;
 import me.williamhester.network.ImgurApi;
-import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 import me.williamhester.tools.HtmlParser;
 import me.williamhester.tools.UrlParser;
-import me.williamhester.ui.views.SwipeView;
+import me.williamhester.ui.views.VotableViewHolder;
 
 /**
  * Created by william on 6/27/14.
@@ -69,36 +67,24 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
         return mSubmissions.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends VotableViewHolder {
 
-        private TextView mTitle;
         private TextView mDomain;
-        private TextView mMetadata;
-        private TextView mTime;
         private TextView mCommentData;
         private TextView mSubreddit;
         private View mNsfwWarning;
         private View mExpandButton;
-        private View mBackgroundVoteView;
-        private View mForegroundVoteView;
-        private SwipeView mSwipeView;
 
         private Submission mSubmission;
 
         public ViewHolder(View itemView) {
             super(itemView);
 
-            mTitle = (TextView) itemView.findViewById(R.id.title);
             mDomain = (TextView) itemView.findViewById(R.id.domain);
-            mMetadata = (TextView) itemView.findViewById(R.id.metadata);
-            mTime = (TextView) itemView.findViewById(R.id.time);
             mCommentData = (TextView) itemView.findViewById(R.id.num_comments);
             mSubreddit = (TextView) itemView.findViewById(R.id.subreddit_title);
             mNsfwWarning = itemView.findViewById(R.id.nsfw_warning);
             mExpandButton = itemView.findViewById(R.id.expand_self_text);
-            mBackgroundVoteView = itemView.findViewById(R.id.vote_background);
-            mForegroundVoteView = itemView.findViewById(R.id.vote_foreground);
-            mSwipeView = (SwipeView) itemView.findViewById(R.id.swipe_view);
             View submissionData = itemView.findViewById(R.id.submission_data);
 
             submissionData.setOnClickListener(new View.OnClickListener() {
@@ -108,44 +94,22 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
                 }
             });
 
-            mSwipeView.setUp(mBackgroundVoteView, mForegroundVoteView, mVoteListener, mCallback.getAccount());
             mExpandButton.setOnClickListener(mExpandListener);
         }
-        
-        private void setContent(Submission s) {
-            mSubmission = s;
-            mSwipeView.recycle(mSubmission);
+        @Override
+        public void setContent(Votable votable) {
+            super.setContent(votable);
+            mSubmission = (Submission) votable;
 
-            mTitle.setText(StringEscapeUtils.unescapeHtml4(s.getTitle()));
-            mDomain.setText(s.getDomain());
-            mMetadata.setText(s.getScore() + " points by " + s.getAuthor());
-            mTime.setText(Utilities.calculateTimeShort(s.getCreatedUtc()));
-            mCommentData.setText(s.getNumberOfComments() + " comments");
-            mSubreddit.setText("/r/" + s.getSubredditName());
+            mBody.setText(StringEscapeUtils.unescapeHtml4(mSubmission.getTitle()));
+            mDomain.setText(mSubmission.getDomain());
+            mCommentData.setText(mSubmission.getNumberOfComments() + " comments");
+            mSubreddit.setText("/r/" + mSubmission.getSubredditName());
 
             if (mSubmission.isNsfw()) {
                 mNsfwWarning.setVisibility(View.VISIBLE);
             } else {
                 mNsfwWarning.setVisibility(View.GONE);
-            }
-
-            switch (s.getVoteStatus()) {
-                case Votable.DOWNVOTED:
-                    mForegroundVoteView.setScaleY(0f);
-                    mBackgroundVoteView.setVisibility(View.VISIBLE);
-                    mBackgroundVoteView.setBackgroundColor(
-                            mContext.getResources().getColor(R.color.periwinkle));
-                    break;
-                case Votable.UPVOTED:
-                    mForegroundVoteView.setScaleY(0f);
-                    mBackgroundVoteView.setVisibility(View.VISIBLE);
-                    mBackgroundVoteView.setBackgroundColor(
-                            mContext.getResources().getColor(R.color.orangered));
-                    break;
-                default:
-                    mBackgroundVoteView.setVisibility(View.GONE);
-                    mForegroundVoteView.setScaleY(0f);
-                    break;
             }
 
             View container = itemView.findViewById(R.id.content_preview);
@@ -158,7 +122,7 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
             } else {
                 itemView.findViewById(R.id.show_self_text).setVisibility(View.GONE);
                 itemView.findViewById(R.id.self_text).setVisibility(View.GONE);
-                final UrlParser linkDetails = new UrlParser(s.getUrl());
+                final UrlParser linkDetails = new UrlParser(mSubmission.getUrl());
                 if (linkDetails.getType() != UrlParser.NOT_SPECIAL) {
                     container.setVisibility(View.VISIBLE);
                     String id = linkDetails.getLinkId();
@@ -199,19 +163,10 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
             itemView.invalidate();
         }
 
-        private SwipeView.SwipeListener mVoteListener = new SwipeView.SwipeListener() {
-            @Override
-            public void onRightToLeftSwipe() {
-                mSubmission.setVoteStatus(mSubmission.getVoteStatus() == Votable.DOWNVOTED ? Votable.NEUTRAL : Votable.DOWNVOTED);
-                RedditApi.vote(mContext, mSubmission, mCallback.getAccount());
-            }
-
-            @Override
-            public void onLeftToRightSwipe() {
-                mSubmission.setVoteStatus(mSubmission.getVoteStatus() == Votable.UPVOTED ? Votable.NEUTRAL : Votable.UPVOTED);
-                RedditApi.vote(mContext, mSubmission, mCallback.getAccount());
-            }
-        };
+        @Override
+        protected Account getAccount() {
+            return mCallback.getAccount();
+        }
 
         private void setUpNsfw(final ImageButton button) {
             if (mSubmission.isNsfw()) {

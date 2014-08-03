@@ -26,14 +26,7 @@ public class RedditApi {
                 .addHeader("Cookie", "reddit_session=" + account.getCookie())
                 .addHeader("X-Modhash", account.getModhash().replace("\"", ""))
                 .setBodyParameter("dir", String.valueOf(v.getVoteStatus()))
-                .setBodyParameter("id", v.getName())
-                .asString()
-                .setCallback(new FutureCallback<String>() {
-                    @Override
-                    public void onCompleted(Exception e, String result) {
-                        Log.d("RedditApi", result);
-                    }
-                });
+                .setBodyParameter("id", v.getName());
     }
 
     public static void getRedditLiveData(Context context, Submission submission,

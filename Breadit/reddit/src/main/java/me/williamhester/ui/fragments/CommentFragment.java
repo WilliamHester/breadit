@@ -114,7 +114,6 @@ public class CommentFragment extends Fragment {
         }
         mCommentAdapter = new CommentArrayAdapter(mContext);
         mCommentsListView.setAdapter(mCommentAdapter);
-//        mCommentsListView.setOnTouchListener(mGestureListener);
         return v;
     }
 
@@ -149,7 +148,7 @@ public class CommentFragment extends Fragment {
 //                = (TextView) subView.findViewById(R.id.subreddit_name_and_time);
         TextView author = (TextView) subView.findViewById(R.id.author);
 //        ImageView thumbnail = (ImageView) subView.findViewById(R.id.thumbnail);
-        TextView title = (TextView) subView.findViewById(R.id.title);
+        TextView title = (TextView) subView.findViewById(R.id.body);
         TextView domain = (TextView) subView.findViewById(R.id.domain);
         final TextView points = (TextView) subView.findViewById(R.id.metadata);
         mNumComments = (TextView) v.findViewById(R.id.num_comments);
