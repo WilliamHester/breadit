@@ -170,7 +170,7 @@ public class Message implements Votable, Parcelable {
     }
 
     @Override
-    public long getScore() {
+    public int getScore() {
         return -1;
     }
 

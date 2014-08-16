@@ -33,9 +33,7 @@ public class SwipeView extends LinearLayout {
     private float mSwipeDistance;
     private float mMinFlingDistance;
     private boolean mSwiping;
-    private boolean mEnabled;
 
-    private Account mAccount;
     private SwipeListener mSwipeListener;
     private VelocityTracker mVelocityTracker;
     private View mBackgroundView;
@@ -73,16 +71,15 @@ public class SwipeView extends LinearLayout {
     }
 
     public void setUp(View backgroundView, View foregroundView,
-                      SwipeListener listener, Account account) {
+                      SwipeListener listener) {
         mBackgroundView = backgroundView;
         mForegroundView = foregroundView;
         mSwipeListener = listener;
-        mAccount = account;
     }
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        if (mAccount == null) {
+        if (!isEnabled()) {
             return super.onTouchEvent(ev);
         }
         switch (ev.getAction()) {
@@ -94,6 +91,7 @@ public class SwipeView extends LinearLayout {
                 break;
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
+                super.onInterceptTouchEvent(ev);
                 stopMotionTracking();
                 break;
         }
@@ -102,7 +100,7 @@ public class SwipeView extends LinearLayout {
 
     @Override
     public boolean onTouchEvent(@NonNull MotionEvent ev) {
-        if (mAccount == null) {
+        if (!isEnabled()) {
             return super.onTouchEvent(ev);
         }
         switch (ev.getAction()) {
@@ -225,6 +223,8 @@ public class SwipeView extends LinearLayout {
             } else {
                 onCancelSwipe();
             }
+        } else {
+            super.onTouchEvent(ev);
         }
         stopMotionTracking();
     }

@@ -153,7 +153,7 @@ public class UserFragment extends Fragment {
             if (convertView != null)
                 tag = convertView.getTag() == null ? null : (String) convertView.getTag();
 
-            if (t instanceof Comment) {
+//            if (t instanceof Comment) {
                 if (tag == null || !tag.equals("t1")) {
                     LayoutInflater inflater = (LayoutInflater) mContext
                             .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -170,33 +170,33 @@ public class UserFragment extends Fragment {
                 replyLayout.setVisibility(View.GONE);
                 body.setVisibility(View.VISIBLE);
 
-                author.setText(Utilities.removeEndQuotes(((Comment) getItem(position))
-                        .getAuthor()));
-                score.setText(((Comment)getItem(position)).getScore() + " points by ");
-                time.setText(" " + Utilities.calculateTimeShort(((Comment)getItem(position))
-                        .getCreatedUtc()));
-                body.setText(Html.fromHtml(StringEscapeUtils
-                        .unescapeHtml4(((Comment)getItem(position)).getBodyHtml())));
-
-                switch (((Comment)getItem(position)).getVoteStatus()) {
-                    case Votable.DOWNVOTED:
-                        voteStatus.setVisibility(View.VISIBLE);
-                        voteStatus.setBackgroundColor(getResources().getColor(R.color.periwinkle));
-                        break;
-                    case Votable.UPVOTED:
-                        voteStatus.setVisibility(View.VISIBLE);
-                        voteStatus.setBackgroundColor(getResources().getColor(R.color.orangered));
-                        break;
-                    default:
-                        voteStatus.setVisibility(View.GONE);
-                        break;
-                }
-                if (((Comment)getItem(position)).isHidden())
+//                author.setText(Utilities.removeEndQuotes(((Comment) getItem(position))
+//                        .getAuthor()));
+//                score.setText(((Comment)getItem(position)).getScore() + " points by ");
+//                time.setText(" " + Utilities.calculateTimeShort(((Comment)getItem(position))
+//                        .getCreatedUtc()));
+//                body.setText(Html.fromHtml(StringEscapeUtils
+//                        .unescapeHtml4(((Comment)getItem(position)).getBodyHtml())));
+//
+//                switch (((Comment)getItem(position)).getVoteStatus()) {
+//                    case Votable.DOWNVOTED:
+//                        voteStatus.setVisibility(View.VISIBLE);
+//                        voteStatus.setBackgroundColor(getResources().getColor(R.color.periwinkle));
+//                        break;
+//                    case Votable.UPVOTED:
+//                        voteStatus.setVisibility(View.VISIBLE);
+//                        voteStatus.setBackgroundColor(getResources().getColor(R.color.orangered));
+//                        break;
+//                    default:
+//                        voteStatus.setVisibility(View.GONE);
+//                        break;
+//                }
+//                if (((Comment)getItem(position)).isHidden())
                     body.setVisibility(View.GONE);
-                else
-                    body.setVisibility(View.VISIBLE);
-
-            } else if (t instanceof Submission) {
+//                else
+//                    body.setVisibility(View.VISIBLE);
+//
+//            } else if (t instanceof Submission) {
                 if (tag == null || !tag.equals("t3")) {
                     LayoutInflater inflater = (LayoutInflater) mContext
                             .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -207,7 +207,7 @@ public class UserFragment extends Fragment {
 
                 convertView.invalidate();
 
-                final View voteStatus = convertView.findViewById(R.id.vote_status);
+//                final View voteStatus = convertView.findViewById(R.id.vote_status);
 //                TextView nameAndTime
 //                        = (TextView) convertView.findViewById(R.id.subreddit_name_and_time);
 //                TextView author = (TextView) convertView.findViewById(R.id.author);
@@ -242,10 +242,10 @@ public class UserFragment extends Fragment {
                 } else {
                     title.setTypeface(Typeface.create("sans-serif-light", Typeface.NORMAL));
                 }
-            } else {
-                Log.i("UserFragment", "Something bad happened");
-            }
-            return convertView;
+//            } else {
+//                Log.i("UserFragment", "Something bad happened");
+//            }
+            return null;
         }
     }
 
@@ -292,9 +292,9 @@ public class UserFragment extends Fragment {
                     for (JsonElement e : children) {
                         JsonObject data = e.getAsJsonObject();
                         if (data.get("kind").getAsString().contains("t1")) {
-                            things.add(Comment.fromJsonString(data));
-                        } else if (data.get("kind").getAsString().contains("t3")) {
-                            things.add(Submission.fromJsonString(data));
+//                            things.add(Comment.fromJsonString(data));
+//                        } else if (data.get("kind").getAsString().contains("t3")) {
+//                            things.add(Submission.fromJsonString(data));
                         }
                     }
                 } else {

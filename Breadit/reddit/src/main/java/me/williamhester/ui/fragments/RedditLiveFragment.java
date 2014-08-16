@@ -90,15 +90,17 @@ public class RedditLiveFragment extends Fragment {
         });
     }
 
-    private FutureCallback<ResponseRedditWrapper<RedditLive>> mLiveCallback =
-            new FutureCallback<ResponseRedditWrapper<RedditLive>>() {
+    private FutureCallback<ResponseRedditWrapper> mLiveCallback =
+            new FutureCallback<ResponseRedditWrapper>() {
         @Override
-        public void onCompleted(Exception e, ResponseRedditWrapper<RedditLive> result) {
+        public void onCompleted(Exception e, ResponseRedditWrapper result) {
             if (e != null) {
                 e.printStackTrace();
                 return;
             }
-            setUpLiveListener(result.getData().getWebsocketUrl());
+            if (result.getData() instanceof RedditLive) {
+                setUpLiveListener(((RedditLive) result.getData()).getWebsocketUrl());
+            }
         }
     };
 

@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import java.text.DecimalFormat;
 
 import me.williamhester.models.Comment;
+import me.williamhester.models.MoreComments;
 import me.williamhester.models.Votable;
 import me.williamhester.models.utils.Utilities;
 import me.williamhester.reddit.R;
@@ -46,17 +47,19 @@ public class CommentView extends RelativeLayout {
     private LinkMovementMethod mLinkMovementMethod;
     private SpannableStringBuilder mSpannable;
     private SwipeDetector mSwipeDetector;
-
-    private CommentView mThis = this;
-
     public CommentView(Context context, Comment comment) {
         super(context);
-        mComment = comment;
 
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.list_item_comment, this);
-        setupViews();
-        loadData();
+        mVoteIndicator = findViewById(R.id.vote_status);
+        mCommentMetadata = (TextView) findViewById(R.id.metadata);
+        mBody = (TextView) findViewById(R.id.body);
+        mEditedText = (LinearLayout) findViewById(R.id.edited_text);
+        mReplyBody = (EditText) findViewById(R.id.reply_body);
+        mCancel = (Button) findViewById(R.id.cancel_reply);
+        mConfirm = (Button) findViewById(R.id.confirm_reply);
+        setComment(comment);
 
         mSwipeDetector = new SwipeDetector();
         mGestureDetector = new GestureDetector(context, mSwipeDetector);
@@ -65,19 +68,17 @@ public class CommentView extends RelativeLayout {
         mLinkMovementMethod = new CommentLinkMovementMethod();
     }
 
-    public void setComment(Comment comment) {
-        mComment = comment;
-        loadData();
+    public void setComment(Object object) {
+        if (object instanceof MoreComments) {
+            loadMoreCommentData();
+        } else if (object instanceof Comment) {
+            mComment = (Comment) object;
+            loadData();
+        }
     }
 
-    private void setupViews() {
-        mVoteIndicator = findViewById(R.id.vote_status);
-        mCommentMetadata = (TextView) findViewById(R.id.comment_metadata);
-        mBody = (TextView) findViewById(R.id.body);
-        mEditedText = (LinearLayout) findViewById(R.id.edited_text);
-        mReplyBody = (EditText) findViewById(R.id.reply_body);
-        mCancel = (Button) findViewById(R.id.cancel_reply);
-        mConfirm = (Button) findViewById(R.id.confirm_reply);
+    private void loadMoreCommentData() {
+
     }
 
     private void loadData() {
@@ -91,27 +92,6 @@ public class CommentView extends RelativeLayout {
             mReplyBody.setEnabled(true);
             mBody.setVisibility(View.GONE);
             mEditedText.setVisibility(View.VISIBLE);
-//            mConfirm.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View view) {
-//                    if (position == 1)
-//                        new ReplyAsyncTask(replyBody.getText().toString(),
-//                                mSubmission.getName()).execute();
-//                    else if (position > 1)
-//                        new ReplyAsyncTask(replyBody.getText().toString(),
-//                                getItem(position - 1).getName()).execute();
-//                    confirm.setEnabled(false);
-//                    cancel.setEnabled(false);
-//                    replyBody.setEnabled(false);
-//                }
-//            });
-//            mCancel.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View view) {
-//                    mCommentsList.remove(position);
-//                    mCommentAdapter.notifyDataSetChanged();
-//                }
-//            });
         } else {
             mEditedText.setVisibility(View.GONE);
             mBody.setVisibility(View.VISIBLE);
@@ -140,7 +120,8 @@ public class CommentView extends RelativeLayout {
         }
 
         String bodyText = formatHtmlForMeta(mComment.getBodyHtml());
-        mSpannable = HtmlParser.parseHtml(StringEscapeUtils.unescapeHtml4(bodyText));
+        HtmlParser parser = new HtmlParser(StringEscapeUtils.unescapeHtml4(bodyText));
+        mSpannable = parser.getSpannableString();
         mBody.setText(mSpannable);
         mBody.setMovementMethod(mLinkMovementMethod);
         mBody.setOnTouchListener(new OnTouchListener() {
@@ -279,7 +260,7 @@ public class CommentView extends RelativeLayout {
         @Override
         public boolean onSingleTapConfirmed(MotionEvent ev) {
             if (!mIgnoreNext && mEventListener != null) {
-                mEventListener.onSingleTap(mThis);
+                mEventListener.onSingleTap(CommentView.this);
                 return true;
             }
             mIgnoreNext = false;
@@ -289,14 +270,14 @@ public class CommentView extends RelativeLayout {
         @Override
         public void onLongPress(MotionEvent ev) {
             if (mEventListener != null) {
-                mEventListener.onLongPress(mThis);
+                mEventListener.onLongPress(CommentView.this);
             }
         }
 
         @Override
         public boolean onDoubleTap(MotionEvent ev) {
             if (mEventListener != null) {
-                mEventListener.onDoubleTap(mThis);
+                mEventListener.onDoubleTap(CommentView.this);
                 return true;
             }
             return false;
@@ -310,21 +291,21 @@ public class CommentView extends RelativeLayout {
                     && Math.abs(velocityX) > Math.abs(velocityY)) {
                 if (ev1.getX() < ev2.getX()) {
                     if (mComment.getVoteStatus() == Votable.UPVOTED) {
-                        if (mEventListener.onNeutralVote(mThis)) {
+                        if (mEventListener.onNeutralVote(CommentView.this)) {
                             setVoteStatus(Votable.NEUTRAL);
                         }
                     } else {
-                        if (mEventListener.onUpVote(mThis)) {
+                        if (mEventListener.onUpVote(CommentView.this)) {
                             setVoteStatus(Votable.UPVOTED);
                         }
                     }
                 } else {
                     if (mComment.getVoteStatus() == Votable.DOWNVOTED) {
-                        if (mEventListener.onNeutralVote(mThis)) {
+                        if (mEventListener.onNeutralVote(CommentView.this)) {
                             setVoteStatus(Votable.NEUTRAL);
                         }
                     } else {
-                        if (mEventListener.onDownVote(mThis)) {
+                        if (mEventListener.onDownVote(CommentView.this)) {
                             setVoteStatus(Votable.DOWNVOTED);
                         }
                     }

@@ -2,6 +2,7 @@ package me.williamhester.tools;
 
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.support.annotation.NonNull;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -22,6 +23,7 @@ import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
@@ -34,7 +36,22 @@ import me.williamhester.ui.text.SpoilerSpan;
  */
 public class HtmlParser {
 
-    public static SpannableStringBuilder parseHtml(String html) {
+    private List<String> mLinks = new ArrayList<>();
+    private SpannableStringBuilder mSpannableStringBuilder;
+
+    public HtmlParser(String html) {
+        mSpannableStringBuilder = parseHtml(html);
+    }
+
+    public @NonNull SpannableStringBuilder getSpannableString() {
+        return mSpannableStringBuilder;
+    }
+
+    public List<String> getLinks() {
+        return mLinks;
+    }
+
+    private SpannableStringBuilder parseHtml(String html) {
         if (html != null) {
             Document document = Jsoup.parse(html);
             SpannableStringBuilder sb = generateString(document);
@@ -46,11 +63,11 @@ public class HtmlParser {
         return new SpannableStringBuilder().append("");
     }
 
-    public static SpannableStringBuilder generateString(Node node) {
+    private SpannableStringBuilder generateString(Node node) {
         return generateString(node, new SpannableStringBuilder());
     }
 
-    private static SpannableStringBuilder generateString(Node node, SpannableStringBuilder sb) {
+    private SpannableStringBuilder generateString(Node node, SpannableStringBuilder sb) {
         if (node instanceof TextNode) {
             return new SpannableStringBuilder(((TextNode) node).text());
         }
@@ -69,7 +86,7 @@ public class HtmlParser {
         return sb;
     }
 
-    private static Object getSpanFromTag(Node node) {
+    private Object getSpanFromTag(Node node) {
         if (node instanceof Element) {
             String tag = ((Element) node).tag().getName();
             if (tag.equalsIgnoreCase("code")) {
@@ -89,7 +106,9 @@ public class HtmlParser {
                 if (url.equals("/spoiler")) {
                     return new SpoilerSpan();
                 } else {
-                    return new LinkSpan(node.attr("href"));
+                    String s = node.attr("href");
+                    mLinks.add(s);
+                    return new LinkSpan(s);
                 }
             } else if (tag.equalsIgnoreCase("li")) {
                 return new BulletSpan(BulletSpan.STANDARD_GAP_WIDTH, Color.CYAN);

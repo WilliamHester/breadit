@@ -6,79 +6,89 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <me.williamhester.ui.views.SwipeView
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp"
-        android:paddingBottom="8dp"
-        android:paddingTop="8dp"
+    <me.williamhester.ui.views.SwipeView android:id="@+id/swipe_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="@color/darker_gray">
 
-        <TextView android:id="@+id/comment_metadata"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-bold"
-            android:textSize="12sp"
-            android:textColor="@color/auburn_orange"/>
-
-        <!--Todo: add an ImageView for if the account has a gilded comment-->
-
-        <TextView android:id="@+id/body"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="13sp"
-            android:paddingTop="1dp"
-            android:textColor="@color/ghostwhite" />
-
-        <LinearLayout android:id="@+id/edited_text"
+        <RelativeLayout android:id="@+id/comment_content"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:paddingBottom="8dp"
+            android:paddingTop="8dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingTop="8dp">
+            android:background="@drawable/breadit_list_selector_holo_light">
 
-            <EditText android:id="@+id/reply_body"
+            <TextView android:id="@+id/metadata"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-bold"
+                android:textSize="12sp"
+                android:textColor="@color/auburn_orange"/>
+
+            <!--Todo: add an ImageView for if the account has a gilded comment-->
+
+            <TextView android:id="@+id/body"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/mid_gray"
-                android:hint="@string/reply_hint"/>
+                android:textSize="13sp"
+                android:paddingTop="1dp"
+                android:textColor="@color/ghostwhite"
+                android:layout_below="@id/metadata"/>
 
-            <View android:layout_marginTop="8dp"
-                android:layout_height="1dp"
+            <LinearLayout android:id="@+id/edited_text"
                 android:layout_width="match_parent"
-                android:background="@color/dark_gray"/>
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingTop="8dp"
+                android:visibility="gone">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <Button android:id="@+id/cancel_reply"
-                    android:layout_width="0dp"
+                <EditText android:id="@+id/reply_body"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/cancel"
-                    style="?android:buttonBarButtonStyle"
-                    android:textColor="@color/mid_gray"/>
+                    android:textColor="@color/mid_gray"
+                    android:hint="@string/reply_hint"/>
 
-                <View
-                    android:layout_height="match_parent"
-                    android:layout_width="1dp"
-                    android:background="@color/dark_gray"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"/>
+                <View android:layout_marginTop="8dp"
+                    android:layout_height="1dp"
+                    android:layout_width="match_parent"
+                    android:background="@color/dark_gray"/>
 
-                <Button android:id="@+id/confirm_reply"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/reply"
-                    style="?android:buttonBarButtonStyle"
-                    android:textColor="@color/mid_gray"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <Button android:id="@+id/cancel_reply"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/cancel"
+                        style="?android:buttonBarButtonStyle"
+                        android:textColor="@color/mid_gray"/>
+
+                    <View
+                        android:layout_height="match_parent"
+                        android:layout_width="1dp"
+                        android:background="@color/dark_gray"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp"/>
+
+                    <Button android:id="@+id/confirm_reply"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/reply"
+                        style="?android:buttonBarButtonStyle"
+                        android:textColor="@color/mid_gray"/>
+
+                </LinearLayout>
 
             </LinearLayout>
 
-        </LinearLayout>
+        </RelativeLayout>
 
     </me.williamhester.ui.views.SwipeView>
 

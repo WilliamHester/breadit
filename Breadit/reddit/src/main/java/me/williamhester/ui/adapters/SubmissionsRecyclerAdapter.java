@@ -37,7 +37,7 @@ import me.williamhester.ui.views.VotableViewHolder;
 /**
  * Created by william on 6/27/14.
  */
-public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<SubmissionsRecyclerAdapter.ViewHolder> {
+public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<SubmissionsRecyclerAdapter.SubmissionViewHolder> {
 
     private List<Submission> mSubmissions;
     private final List<String> mExpandedSubmissions = new ArrayList<>();
@@ -52,14 +52,14 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
     }
 
     @Override
-    public SubmissionsRecyclerAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int position) {
+    public SubmissionViewHolder onCreateViewHolder(ViewGroup parent, int position) {
         final View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_post, parent, false);
-        return new ViewHolder(v);
+        return new SubmissionViewHolder(v);
     }
 
     @Override
-    public void onBindViewHolder(SubmissionsRecyclerAdapter.ViewHolder viewHolder, int position) {
-        viewHolder.setContent(mSubmissions.get(position));
+    public void onBindViewHolder(SubmissionViewHolder submissionViewHolder, int position) {
+        submissionViewHolder.setContent(mSubmissions.get(position));
     }
 
     @Override
@@ -67,7 +67,7 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
         return mSubmissions.size();
     }
 
-    public class ViewHolder extends VotableViewHolder {
+    public class SubmissionViewHolder extends VotableViewHolder {
 
         private TextView mDomain;
         private TextView mCommentData;
@@ -77,8 +77,8 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
 
         private Submission mSubmission;
 
-        public ViewHolder(View itemView) {
-            super(itemView);
+        public SubmissionViewHolder(View itemView) {
+            super(itemView, mCallback.getAccount());
 
             mDomain = (TextView) itemView.findViewById(R.id.domain);
             mCommentData = (TextView) itemView.findViewById(R.id.num_comments);
@@ -105,6 +105,9 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
             mDomain.setText(mSubmission.getDomain());
             mCommentData.setText(mSubmission.getNumberOfComments() + " comments");
             mSubreddit.setText("/r/" + mSubmission.getSubredditName());
+            mMetadata.setText(mSubmission.getAuthor() + " " + mSubmission.getScore()
+                    + itemView.getResources().getQuantityString(R.plurals.points,
+                    mSubmission.getScore()));
 
             if (mSubmission.isNsfw()) {
                 mNsfwWarning.setVisibility(View.VISIBLE);
@@ -163,11 +166,6 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
             itemView.invalidate();
         }
 
-        @Override
-        protected Account getAccount() {
-            return mCallback.getAccount();
-        }
-
         private void setUpNsfw(final ImageButton button) {
             if (mSubmission.isNsfw()) {
                 button.setVisibility(View.VISIBLE);
@@ -198,7 +196,8 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
                 }
                 imageView.setVisibility(View.GONE);
                 button.setVisibility(View.GONE);
-                content.setText(HtmlParser.parseHtml(StringEscapeUtils.unescapeHtml4(mSubmission.getBodyHtml())));
+                HtmlParser parser = new HtmlParser(StringEscapeUtils.unescapeHtml4(mSubmission.getBodyHtml()));
+                content.setText(parser.getSpannableString());
             } else {
                 itemView.findViewById(R.id.show_self_text).setVisibility(View.GONE);
                 container.setVisibility(View.GONE);

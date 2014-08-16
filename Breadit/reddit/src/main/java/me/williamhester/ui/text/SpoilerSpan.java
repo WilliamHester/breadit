@@ -15,6 +15,7 @@ public class SpoilerSpan extends ClickableSpan {
         TextPaint unpaint = new TextPaint();
         unpaint.bgColor = view.getContext().getResources().getColor(android.R.color.transparent);
         updateDrawState(new TextPaint());
+        view.invalidate(); // TODO: check to see if this actually works
     }
 
     @Override
