@@ -7,6 +7,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
 
+@SuppressWarnings("unused")
 public class Submission extends Thing implements Votable, Serializable {
 
     public static final int HOT = 0;

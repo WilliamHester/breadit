@@ -48,8 +48,6 @@ public class CommentViewHolder extends VotableViewHolder {
             if (mComment.getSpannableBody() == null && mComment.getBodyHtml() != null) {
                 HtmlParser parser = new HtmlParser(StringEscapeUtils.unescapeHtml4(mComment.getBodyHtml()));
                 mComment.setSpannableBody(parser.getSpannableString());
-                mComment.setBodyHtml(null); // Get rid of the old html, as it's useless now.
-                mComment.setBody(null);
             }
             mBody.setText(mComment.getSpannableBody());
             if (isHidden()) {

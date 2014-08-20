@@ -59,7 +59,7 @@ public class RedditApi {
                                          final FutureCallback<Submission> submissionCallback,
                                          final FutureCallback<List<Comment>> commentCallback) {
         Ion.with(context)
-                .load(permalink + ".json")
+                .load(REDDIT_URL + permalink + ".json")
                 .addHeader("User-Agent", USER_AGENT)
                 .addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
                 .asString()
@@ -106,7 +106,7 @@ public class RedditApi {
                 .addHeader("Cookie", "reddit_session=" + account.getCookie())
                 .addHeader("X-Modhash", account.getModhash().replace("\"", ""))
                 .addHeader("api_type", "json")
-                .setBodyParameter("text", thing.getBody())
+//                .setBodyParameter("text", thing.getRawMarkdown())
                 .setBodyParameter("thing_id", thing.getName())
                 .asString()
                 .setCallback(new FutureCallback<String>() {

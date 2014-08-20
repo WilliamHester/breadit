@@ -16,9 +16,7 @@ public interface Votable {
     public void setVoteStatus(int status);
     public int getScore();
     public String getAuthor();
-    public String getBody();
     public void setSpannableBody(Spannable body);
-    public void setBody(String body);
     public void setBeingEdited(boolean b);
     public boolean isBeingEdited();
     public void setBodyHtml(String body);

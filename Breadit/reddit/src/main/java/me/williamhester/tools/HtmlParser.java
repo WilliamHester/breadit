@@ -55,7 +55,7 @@ public class HtmlParser {
         if (html != null) {
             Document document = Jsoup.parse(html);
             SpannableStringBuilder sb = generateString(document);
-            while (sb.charAt(0) == '\n' || sb.charAt(0) == ' ') {
+            while (sb.length() > 0 && (sb.charAt(0) == '\n' || sb.charAt(0) == ' ')) {
                 sb.delete(0, 1);
             }
             return sb;

@@ -1,17 +1,17 @@
 package me.williamhester.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.Spannable;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Stack;
 
-public class Comment implements Serializable, Votable {
+public class Comment implements Serializable, Votable, Parcelable {
     private static final long serialVersionUID = -8883017260375266824L;
 
     public static final int BEST = 0;
@@ -27,7 +27,6 @@ public class Comment implements Serializable, Votable {
     private String mAuthorFlairCss;
     private String mAuthorFlairText;
     private String mBannedBy;
-    private String mBody;
     private String mBodyHtml;
     private String mSubreddit;
     private String mSubredditId;
@@ -75,9 +74,6 @@ public class Comment implements Serializable, Votable {
         if (!object.get("banned_by").isJsonNull()) {
             mBannedBy = object.get("banned_by").getAsString();
         }
-        if (!object.get("body").isJsonNull()) {
-            mBody = object.get("body").getAsString();
-        }
         if (!object.get("body_html").isJsonNull()) {
             mBodyHtml = object.get("body_html").getAsString();
         }
@@ -118,7 +114,6 @@ public class Comment implements Serializable, Votable {
         mUps = "";
         mCreatedUtc = System.currentTimeMillis() / 1000;
         mBodyHtml = "";
-        mBody = "";
         mLevel = level;
         mIsBeingEdited = true;
     }
@@ -152,15 +147,6 @@ public class Comment implements Serializable, Votable {
 
     public String getBodyHtml() {
         return mBodyHtml;
-    }
-
-    public String getBody() { 
-        return mBody;
-    }
-
-    @Override
-    public void setBody(String body) {
-       mBody = body;
     }
 
     public String getSubreddit() {
@@ -295,4 +281,74 @@ public class Comment implements Serializable, Votable {
             throw new UnsupportedOperationException();
         }
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeSerializable(this.mReplies);
+        dest.writeString(this.mApprovedBy);
+        dest.writeString(this.mAuthor);
+        dest.writeString(this.mAuthorFlairCss);
+        dest.writeString(this.mAuthorFlairText);
+        dest.writeString(this.mBannedBy);
+        dest.writeString(this.mBodyHtml);
+        dest.writeString(this.mSubreddit);
+        dest.writeString(this.mSubredditId);
+        dest.writeString(this.mLinkAuthor);
+        dest.writeString(this.mLinkId);
+        dest.writeString(this.mLinkTitle);
+        dest.writeString(this.mLinkUrl);
+        dest.writeString(this.mDistinguished);
+        dest.writeByte(mSaved ? (byte) 1 : (byte) 0);
+        dest.writeValue(this.mVoteStatus);
+        dest.writeLong(this.mCreated);
+        dest.writeLong(this.mCreatedUtc);
+        dest.writeString(this.mUps);
+        dest.writeInt(this.mScore);
+        dest.writeInt(this.mLevel);
+        dest.writeByte(mIsHidden ? (byte) 1 : (byte) 0);
+        dest.writeByte(mIsBeingEdited ? (byte) 1 : (byte) 0);
+        dest.writeString(this.mReplyText);
+    }
+
+    private Comment(Parcel in) {
+        this.mReplies = (ResponseRedditWrapper) in.readSerializable();
+        this.mApprovedBy = in.readString();
+        this.mAuthor = in.readString();
+        this.mAuthorFlairCss = in.readString();
+        this.mAuthorFlairText = in.readString();
+        this.mBannedBy = in.readString();
+        this.mBodyHtml = in.readString();
+        this.mSubreddit = in.readString();
+        this.mSubredditId = in.readString();
+        this.mLinkAuthor = in.readString();
+        this.mLinkId = in.readString();
+        this.mLinkTitle = in.readString();
+        this.mLinkUrl = in.readString();
+        this.mDistinguished = in.readString();
+        this.mSaved = in.readByte() != 0;
+        this.mVoteStatus = (Boolean) in.readValue(Boolean.class.getClassLoader());
+        this.mCreated = in.readLong();
+        this.mCreatedUtc = in.readLong();
+        this.mUps = in.readString();
+        this.mScore = in.readInt();
+        this.mLevel = in.readInt();
+        this.mIsHidden = in.readByte() != 0;
+        this.mIsBeingEdited = in.readByte() != 0;
+        this.mReplyText = in.readString();
+    }
+
+    public static final Creator<Comment> CREATOR = new Creator<Comment>() {
+        public Comment createFromParcel(Parcel source) {
+            return new Comment(source);
+        }
+
+        public Comment[] newArray(int size) {
+            return new Comment[size];
+        }
+    };
 }

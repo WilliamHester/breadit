@@ -6,7 +6,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,7 +25,6 @@ import org.apache.http.message.BasicNameValuePair;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.Future;
 
 import me.williamhester.models.Account;
 import me.williamhester.models.Comment;
@@ -35,14 +33,11 @@ import me.williamhester.models.Votable;
 import me.williamhester.models.utils.Utilities;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
-import me.williamhester.tools.HtmlParser;
 import me.williamhester.ui.views.CommentViewHolder;
 
 public class CommentFragment extends Fragment {
 
-    private final int HEADER_VIEW_COUNT = 1;
-
-    private List<Comment> mCommentsList;
+    private ArrayList<Comment> mCommentsList;
     private CommentArrayAdapter mCommentAdapter;
     private Context mContext;
     private ListView mCommentsListView;
@@ -63,7 +58,7 @@ public class CommentFragment extends Fragment {
         Bundle args = getArguments();
         mContext = getActivity();
         if (savedInstanceState != null) {
-//            mCommentsList = savedInstanceState.getParcelableArrayList("comments");
+            mCommentsList = savedInstanceState.getParcelableArrayList("comments");
             mAccount = savedInstanceState.getParcelable("account");
             mSubmission = (Submission) savedInstanceState.getSerializable("submission");
             mPermalink = savedInstanceState.getString("permalink");
@@ -72,9 +67,10 @@ public class CommentFragment extends Fragment {
             mAccount = args.getParcelable("account");
             mSubmission = (Submission) args.getSerializable("submission");
             if (mSubmission != null) {
-                mPermalink = "http://www.reddit.com" + mSubmission.getPermalink();
+                mPermalink = mSubmission.getPermalink();
             } else {
                 mPermalink = args.getString("permalink");
+                mPermalink = mPermalink.substring(mPermalink.indexOf("reddit.com") + 10);
                 RedditApi.getSubmissionData(mContext, mPermalink, mSubmissionCallback, mCommentCallback);
             }
             mCommentsList = new ArrayList<>();
@@ -100,7 +96,7 @@ public class CommentFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-//        outState.putSerializable("comments", mCommentsList);
+        outState.putParcelableArrayList("comments", mCommentsList);
         outState.putParcelable("account", mAccount);
         outState.putSerializable("submission", mSubmission);
         outState.putString("permalink", mPermalink);
@@ -338,7 +334,7 @@ public class CommentFragment extends Fragment {
         @Override
         protected void onPostExecute(Void result) {
             if (mPosition > 0) {
-                mCommentAdapter.remove(mCommentAdapter.getItem(mPosition - HEADER_VIEW_COUNT));
+                mCommentAdapter.remove(mCommentAdapter.getItem(mPosition));
                 mCommentAdapter.notifyDataSetChanged();
             } else {
                 if (getActivity() != null)

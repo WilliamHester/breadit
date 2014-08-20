@@ -6,7 +6,7 @@ buildscript {
         classpath 'com.android.tools.build:gradle:0.12.+'
     }
 }
-apply plugin: 'android'
+apply plugin: 'com.android.application'
 
 repositories {
     mavenCentral()
@@ -39,6 +39,8 @@ android {
 dependencies {
     compile 'com.github.chrisbanes.photoview:library:1.+'
     compile 'com.koushikdutta.async:androidasync:1.+'
+//    compile 'commons-codec:commons-codec:1.5'
+    compile 'com.github.chrisbanes.photoview:library:1.2.2'
     compile 'com.koushikdutta.ion:ion:1.+'
     compile 'org.jsoup:jsoup:1.7.3'
     compile 'org.apache.commons:commons-lang3:3.3.1'
