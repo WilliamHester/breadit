@@ -29,7 +29,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/skip_setup"
-            android:textColor="@color/auburn"
+            android:textColor="@color/auburn_orange"
             android:fontFamily="sans-serif-condensed"/>
 
         <View
@@ -45,7 +45,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/next"
-            android:textColor="@color/auburn"
+            android:textColor="@color/auburn_orange"
             android:fontFamily="sans-serif-condensed"/>
 
     </LinearLayout>

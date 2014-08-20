@@ -12,7 +12,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
@@ -22,7 +21,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.koushikdutta.urlimageviewhelper.UrlImageViewHelper;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 
@@ -155,7 +153,7 @@ public class UserFragment extends Fragment {
             if (convertView != null)
                 tag = convertView.getTag() == null ? null : (String) convertView.getTag();
 
-            if (t instanceof Comment) {
+//            if (t instanceof Comment) {
                 if (tag == null || !tag.equals("t1")) {
                     LayoutInflater inflater = (LayoutInflater) mContext
                             .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -164,7 +162,7 @@ public class UserFragment extends Fragment {
                 }
                 LinearLayout root = (LinearLayout) convertView.findViewById(R.id.root);
                 TextView author = (TextView) convertView.findViewById(R.id.author);
-                TextView score = (TextView) convertView.findViewById(R.id.points);
+                TextView score = (TextView) convertView.findViewById(R.id.metadata);
                 TextView time = (TextView) convertView.findViewById(R.id.time);
                 TextView body = (TextView) convertView.findViewById(R.id.body);
                 View voteStatus = convertView.findViewById(R.id.vote_status);
@@ -172,33 +170,33 @@ public class UserFragment extends Fragment {
                 replyLayout.setVisibility(View.GONE);
                 body.setVisibility(View.VISIBLE);
 
-                author.setText(Utilities.removeEndQuotes(((Comment) getItem(position))
-                        .getAuthor()));
-                score.setText(((Comment)getItem(position)).getScore() + " points by ");
-                time.setText(" " + Utilities.calculateTimeShort(((Comment)getItem(position))
-                        .getCreatedUtc()));
-                body.setText(Html.fromHtml(StringEscapeUtils
-                        .unescapeHtml4(((Comment)getItem(position)).getBodyHtml())));
-
-                switch (((Comment)getItem(position)).getVoteStatus()) {
-                    case Votable.DOWNVOTED:
-                        voteStatus.setVisibility(View.VISIBLE);
-                        voteStatus.setBackgroundColor(getResources().getColor(R.color.periwinkle));
-                        break;
-                    case Votable.UPVOTED:
-                        voteStatus.setVisibility(View.VISIBLE);
-                        voteStatus.setBackgroundColor(getResources().getColor(R.color.orangered));
-                        break;
-                    default:
-                        voteStatus.setVisibility(View.GONE);
-                        break;
-                }
-                if (((Comment)getItem(position)).isHidden())
+//                author.setText(Utilities.removeEndQuotes(((Comment) getItem(position))
+//                        .getAuthor()));
+//                score.setText(((Comment)getItem(position)).getScore() + " points by ");
+//                time.setText(" " + Utilities.calculateTimeShort(((Comment)getItem(position))
+//                        .getCreatedUtc()));
+//                body.setText(Html.fromHtml(StringEscapeUtils
+//                        .unescapeHtml4(((Comment)getItem(position)).getBodyHtml())));
+//
+//                switch (((Comment)getItem(position)).getVoteStatus()) {
+//                    case Votable.DOWNVOTED:
+//                        voteStatus.setVisibility(View.VISIBLE);
+//                        voteStatus.setBackgroundColor(getResources().getColor(R.color.periwinkle));
+//                        break;
+//                    case Votable.UPVOTED:
+//                        voteStatus.setVisibility(View.VISIBLE);
+//                        voteStatus.setBackgroundColor(getResources().getColor(R.color.orangered));
+//                        break;
+//                    default:
+//                        voteStatus.setVisibility(View.GONE);
+//                        break;
+//                }
+//                if (((Comment)getItem(position)).isHidden())
                     body.setVisibility(View.GONE);
-                else
-                    body.setVisibility(View.VISIBLE);
-
-            } else if (t instanceof Submission) {
+//                else
+//                    body.setVisibility(View.VISIBLE);
+//
+//            } else if (t instanceof Submission) {
                 if (tag == null || !tag.equals("t3")) {
                     LayoutInflater inflater = (LayoutInflater) mContext
                             .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -209,28 +207,17 @@ public class UserFragment extends Fragment {
 
                 convertView.invalidate();
 
-                final View voteStatus = convertView.findViewById(R.id.vote_status);
-                TextView nameAndTime
-                        = (TextView) convertView.findViewById(R.id.subreddit_name_and_time);
-                TextView author = (TextView) convertView.findViewById(R.id.author);
-                ImageView thumbnail = (ImageView) convertView.findViewById(R.id.thumbnail);
-                TextView title = (TextView) convertView.findViewById(R.id.title);
+//                final View voteStatus = convertView.findViewById(R.id.vote_status);
+//                TextView nameAndTime
+//                        = (TextView) convertView.findViewById(R.id.subreddit_name_and_time);
+//                TextView author = (TextView) convertView.findViewById(R.id.author);
+//                ImageView thumbnail = (ImageView) convertView.findViewById(R.id.thumbnail);
+                TextView title = (TextView) convertView.findViewById(R.id.body);
                 TextView domain = (TextView) convertView.findViewById(R.id.domain);
-                final TextView points = (TextView) convertView.findViewById(R.id.points);
-                View spacer = convertView.findViewById(R.id.spacer);
+                final TextView points = (TextView) convertView.findViewById(R.id.metadata);
 
-                // if the submission is a self post, we need to hide the thumbnail
-                if (s.isSelf()) {
-                    thumbnail.setVisibility(View.GONE);
-                    spacer.setVisibility(View.GONE);
-                } else {
-                    thumbnail.setVisibility(View.VISIBLE);
-                    spacer.setVisibility(View.VISIBLE);
-                    UrlImageViewHelper.setUrlDrawable(thumbnail, s.getThumbnailUrl());
-                }
-
-                nameAndTime.setText(" in " + s.getSubredditName() + " "
-                        + Utilities.calculateTimeShort(s.getCreatedUtc()));
+//                nameAndTime.setText(" in " + s.getSubredditName() + " "
+//                        + Utilities.calculateTimeShort(s.getCreatedUtc()));
                 switch (s.getVoteStatus()) {
                     case Votable.DOWNVOTED:
                         voteStatus.setVisibility(View.VISIBLE);
@@ -246,7 +233,7 @@ public class UserFragment extends Fragment {
                 }
 
                 title.setText(StringEscapeUtils.unescapeHtml4(s.getTitle()));
-                author.setText(s.getAuthor());
+//                author.setText(s.getAuthor());
                 domain.setText("(" + s.getDomain() + ")");
                 points.setText(s.getScore() + " points by ");
 
@@ -255,10 +242,10 @@ public class UserFragment extends Fragment {
                 } else {
                     title.setTypeface(Typeface.create("sans-serif-light", Typeface.NORMAL));
                 }
-            } else {
-                Log.i("UserFragment", "Something bad happened");
-            }
-            return convertView;
+//            } else {
+//                Log.i("UserFragment", "Something bad happened");
+//            }
+            return null;
         }
     }
 
@@ -305,9 +292,9 @@ public class UserFragment extends Fragment {
                     for (JsonElement e : children) {
                         JsonObject data = e.getAsJsonObject();
                         if (data.get("kind").getAsString().contains("t1")) {
-                            things.add(Comment.fromJsonString(data));
-                        } else if (data.get("kind").getAsString().contains("t3")) {
-                            things.add(Submission.fromJsonString(data));
+//                            things.add(Comment.fromJsonString(data));
+//                        } else if (data.get("kind").getAsString().contains("t3")) {
+//                            things.add(Submission.fromJsonString(data));
                         }
                     }
                 } else {

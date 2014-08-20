@@ -1,11 +1,14 @@
 package me.williamhester.models;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * Created by william on 6/22/14.
  */
-public class ImgurAlbum {
+public class ImgurAlbum implements Serializable {
+
+    private static final long serialVersionUID = 2086261516664607998L;
 
     private String id;
     private String title;
@@ -22,6 +25,10 @@ public class ImgurAlbum {
     private int ivews;
     private int images_count;
     private List<ImgurImage> images;
+
+    public String getTitle() {
+        return title;
+    }
 
     public List<ImgurImage> getImages() {
         return images;

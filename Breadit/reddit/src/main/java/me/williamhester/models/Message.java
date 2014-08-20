@@ -2,6 +2,7 @@ package me.williamhester.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.Spannable;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -91,11 +92,6 @@ public class Message implements Votable, Parcelable {
     }
 
     @Override
-    public void setBody(String body) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public void setBeingEdited(boolean b) {
         throw new UnsupportedOperationException();
     }
@@ -170,13 +166,18 @@ public class Message implements Votable, Parcelable {
     }
 
     @Override
-    public long getScore() {
+    public int getScore() {
         return -1;
     }
 
     @Override
     public String getAuthor() {
         return mAuthor;
+    }
+
+    @Override
+    public void setSpannableBody(Spannable body) {
+
     }
 
     /**

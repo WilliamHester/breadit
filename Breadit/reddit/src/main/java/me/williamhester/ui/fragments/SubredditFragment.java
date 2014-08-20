@@ -4,22 +4,16 @@ import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.GestureDetector;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -27,42 +21,38 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
-import com.koushikdutta.urlimageviewhelper.UrlImageViewHelper;
-
-import org.apache.commons.lang3.StringEscapeUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import me.williamhester.models.ImgurAlbum;
+import me.williamhester.models.ImgurImage;
 import me.williamhester.models.Submission;
 import me.williamhester.models.SubmissionsListViewHelper;
 import me.williamhester.models.Account;
-import me.williamhester.models.Votable;
 import me.williamhester.models.utils.Utilities;
 import me.williamhester.databases.AccountDataSource;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.activities.SubmissionActivity;
-import me.williamhester.databases.VoteAsyncTask;
+import me.williamhester.ui.adapters.SubmissionsRecyclerAdapter;
 
-public class SubredditFragment extends Fragment {
+public class SubredditFragment extends Fragment implements SubmissionsRecyclerAdapter.AdapterCallbacks {
 
     public static final int HISTORY = 0;
     public static final int SAVED = 1;
 
     private Context mContext;
-    private ListView mSubmissions;
     private String mSubredditName;
-    private SubmissionArrayAdapter mSubmissionsAdapter;
+    private SubmissionsRecyclerAdapter mSubmissionsAdapter;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private ArrayList<Submission> mSubmissionList;
     private HashSet<String> mNames;
     private Account mAccount;
-    private View mFooterView;
 
-    private GestureDetector mGestureDetector;
-    private View.OnTouchListener mGestureListener;
+    private RecyclerView mSubmissionsView;
+    private LinearLayoutManager mLayoutManager;
 
     private boolean mFailedToLoad = false;
     private boolean mHideNsfw = true;
@@ -78,46 +68,47 @@ public class SubredditFragment extends Fragment {
         if (savedInstanceState != null) {
             mAccount = savedInstanceState.getParcelable("account");
             mSubredditName = savedInstanceState.getString("subreddit");
-            mSubmissionList = savedInstanceState.getParcelableArrayList("submissions");
+            mSubmissionList = (ArrayList<Submission>) savedInstanceState.getSerializable("submissions");
             String[] array = savedInstanceState.getStringArray("names");
-            mNames = new HashSet<String>();
+            mNames = new HashSet<>();
             for (String name : array) {
                 mNames.add(name);
             }
         } else if (getArguments() != null) {
             mAccount = getArguments().getParcelable("account");
             mSubredditName = getArguments().getString("subreddit");
-            mNames = new HashSet<String>();
-            mSubmissionList = new ArrayList<Submission>();
+            mNames = new HashSet<>();
+            mSubmissionList = new ArrayList<>();
         }
+        mSubmissionsAdapter = new SubmissionsRecyclerAdapter(mSubmissionList, this, getActivity());
         loadPrefs();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle bundle) {
         View v = inflater.inflate(R.layout.fragment_subreddit, null);
-        mGestureDetector = new GestureDetector(mContext, new SwipeDetector2());
-        mGestureListener = new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                return mGestureDetector.onTouchEvent(motionEvent);
-            }
-        };
 
-        mSubmissions = (ListView) v.findViewById(R.id.submissions);
-        mFooterView = createFooterView(inflater);
-        mSubmissions.addFooterView(mFooterView);
+        mSubmissionsView = (RecyclerView) v.findViewById(R.id.Submissions_recycler);
+        mSubmissionsView.setHasFixedSize(false);
+        mLayoutManager = new LinearLayoutManager(getActivity());
+        mSubmissionsView.setLayoutManager(mLayoutManager);
+        mSubmissionsView.setAdapter(mSubmissionsAdapter);
+        mSubmissionsView.setOnScrollListener(new InfiniteLoadingScrollListener());
+        mSubmissionsView.setItemAnimator(new DefaultItemAnimator());
+
         mSwipeRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.swipe_refresh);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                Log.d("SubredditFragment", "onRefresh");
                 new RefreshUserClass(true).execute();
             }
         });
-        mSwipeRefreshLayout.setColorScheme(R.color.orangered, R.color.periwinkle,
-                R.color.orangered,R.color.periwinkle);
-        populateSubmissions();
+
+        mSwipeRefreshLayout.setColorSchemeResources(R.color.orangered, R.color.periwinkle,
+                R.color.orangered, R.color.periwinkle);
+        if (mSubmissionList.size() == 0) {
+            populateSubmissions();
+        }
         return v;
     }
 
@@ -135,7 +126,7 @@ public class SubredditFragment extends Fragment {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putParcelableArrayList("submissions", mSubmissionList);
+        outState.putSerializable("submissions", mSubmissionList);
         outState.putParcelable("account", mAccount);
         outState.putString("subreddit", mSubredditName);
         String[] array = new String[mNames.size()];
@@ -208,6 +199,7 @@ public class SubredditFragment extends Fragment {
         } else {
             mHideViewed = prefs.getBoolean("pref_remove_viewed_front", false);
         }
+        mHideNsfw = prefs.getBoolean("pref_hide_nsfw", true);
         if (id != -1) {
             try {
                 AccountDataSource dataSource = new AccountDataSource(mContext);
@@ -222,9 +214,8 @@ public class SubredditFragment extends Fragment {
         }
         if (getActivity() != null)
             getActivity().invalidateOptionsMenu();
-        if (mSubmissions != null && oldId != id || oldHideViewed != mHideViewed) {
+        if (mSubmissionsView != null && oldId != id || oldHideViewed != mHideViewed) {
             new RefreshUserClass(true).execute();
-            mSubmissions.invalidateViews();
         }
     }
 
@@ -233,11 +224,6 @@ public class SubredditFragment extends Fragment {
      *     when the SwipeRefreshLayout's onRefresh method is called.
      */
     private void populateSubmissions() {
-        mSubmissionsAdapter = new SubmissionArrayAdapter(mContext);
-        mSubmissions.setAdapter(mSubmissionsAdapter);
-        mSubmissions.setOnTouchListener(mGestureListener);
-        mSubmissions.setOnScrollListener(new InfiniteLoadingScrollListener());
-        Log.d("SubredditFragment", "populateSubmissions");
         new RefreshUserClass().execute();
     }
 
@@ -246,77 +232,45 @@ public class SubredditFragment extends Fragment {
         return v;
     }
 
-    private class SubmissionArrayAdapter extends ArrayAdapter<Submission> {
-        Context mContext;
+    @Override
+    public void onImageViewClicked(ImgurImage image) {
+        getFragmentManager().beginTransaction()
+                .add(R.id.container, ImagePagerFragment.newInstance(image), "ImagePagerFragment")
+                .addToBackStack("ImagePagerFragment")
+                .commit();
+    }
 
-        public SubmissionArrayAdapter(Context context) {
-            super(context, R.layout.list_item_post, mSubmissionList);
-            mContext = context;
-        }
+    @Override
+    public void onImageViewClicked(ImgurAlbum album) {
+        getFragmentManager().beginTransaction()
+                .add(R.id.container, ImagePagerFragment.newInstance(album), "ImagePagerFragment")
+                .addToBackStack("ImagePagerFragment")
+                .commit();
+    }
 
-        public View getView(final int position, View convertView, ViewGroup parent) {
-            LayoutInflater inflater = (LayoutInflater)
-                    mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            Submission s = (Submission) mSubmissions.getItemAtPosition(position);
+    @Override
+    public void onImageViewClicked(String imageUrl) {
+        getFragmentManager().beginTransaction()
+                .add(R.id.container, ImagePagerFragment.newInstance(imageUrl), "ImagePagerFragment")
+                .addToBackStack("ImagePagerFragment")
+                .commit();
+    }
 
-            if (convertView == null)
-                convertView = inflater.inflate(R.layout.list_item_post, parent, false);
-            else
-                convertView.invalidate();
+    @Override
+    public void onCardClicked(Submission submission) {
+        Intent i = new Intent(getActivity(), SubmissionActivity.class);
+        Bundle args = new Bundle();
+        args.putSerializable(SubmissionActivity.SUBMISSION, submission);
+        args.putSerializable("media", submission.getMedia());
+        args.putParcelable(SubmissionActivity.ACCOUNT, mAccount);
+        args.putString(SubmissionActivity.TAB, SubmissionActivity.COMMENT_TAB);
+        i.putExtras(args);
+        getActivity().startActivity(i);
+    }
 
-            final View voteStatus = convertView.findViewById(R.id.vote_status);
-            TextView nameAndTime
-                    = (TextView) convertView.findViewById(R.id.subreddit_name_and_time);
-            TextView author = (TextView) convertView.findViewById(R.id.author);
-            ImageView thumbnail = (ImageView) convertView.findViewById(R.id.thumbnail);
-            TextView title = (TextView) convertView.findViewById(R.id.title);
-            TextView domain = (TextView) convertView.findViewById(R.id.domain);
-            final TextView points = (TextView) convertView.findViewById(R.id.points);
-
-            // if the submission is a self post, we need to hide the thumbnail
-            if (s.isNsfw()) {
-                thumbnail.setScaleType(ImageView.ScaleType.CENTER);
-                thumbnail.setImageDrawable(getResources().getDrawable(R.drawable.ic_nsfw));
-            } else if (s.isSelf() || s.getThumbnailUrl().equals("")) {
-                thumbnail.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-                thumbnail.setImageDrawable(getResources()
-                        .getDrawable(R.drawable.ic_action_next_item));
-            } else {
-                thumbnail.setScaleType(ImageView.ScaleType.CENTER_CROP);
-                UrlImageViewHelper.setUrlDrawable(thumbnail, s.getThumbnailUrl());
-            }
-
-            if (mSubredditName == null || mSubredditName.equals("")) {
-                nameAndTime.setText(" in " + s.getSubredditName() + " "
-                        + Utilities.calculateTimeShort(s.getCreatedUtc()));
-            }
-            switch (s.getVoteStatus()) {
-                case Votable.DOWNVOTED:
-                    voteStatus.setVisibility(View.VISIBLE);
-                    voteStatus.setBackgroundColor(getResources().getColor(R.color.periwinkle));
-                    break;
-                case Votable.UPVOTED:
-                    voteStatus.setVisibility(View.VISIBLE);
-                    voteStatus.setBackgroundColor(getResources().getColor(R.color.orangered));
-                    break;
-                default:
-                    voteStatus.setVisibility(View.GONE);
-                    break;
-            }
-
-            title.setText(StringEscapeUtils.unescapeHtml4(s.getTitle()));
-            author.setText(s.getAuthor());
-            domain.setText("(" + s.getDomain() + ")");
-            points.setText(s.getScore() + " points by ");
-
-            if (mAccount != null && mAccount.hasVisited(getItem(position).getName())) {
-                title.setTypeface(title.getTypeface(), Typeface.ITALIC);
-            } else {
-                title.setTypeface(Typeface.create("sans-serif-light", Typeface.NORMAL));
-            }
-            
-            return convertView;
-        }
+    @Override
+    public Account getAccount() {
+        return mAccount;
     }
 
     private class RefreshUserClass extends AsyncTask<Void, Void, Void> {
@@ -337,7 +291,7 @@ public class SubredditFragment extends Fragment {
                 mSwipeRefreshLayout.setRefreshing(true);
             }
             SubmissionsListViewHelper list = new SubmissionsListViewHelper(mSubredditName,
-                    mPrimarySortType, mSecondarySortType, null, null, mAccount, mSubmissions);
+                    mPrimarySortType, mSecondarySortType, null, null, mAccount);
             new RetrieveSubmissionsTask(mRefreshList).execute(list);
             return null;
         }
@@ -371,7 +325,7 @@ public class SubredditFragment extends Fragment {
                 JsonObject rootObject = new JsonParser().parse(data).getAsJsonObject();
                 JsonArray array = rootObject.get("data").getAsJsonObject().get("children").getAsJsonArray();
 
-                submissions = new ArrayList<Submission>();
+                submissions = new ArrayList<>();
                 for (int i = 0; i < array.size(); i++) {
                     array.get(i);
                     Gson gson = new Gson();
@@ -400,10 +354,9 @@ public class SubredditFragment extends Fragment {
                         mSubmissionList.clear();
                         mNames.clear();
                     }
-                    if (result.size() < 25) {
-                        mSubmissions.removeFooterView(mFooterView);
-                    }
+                    int i = 0;
                     for (Submission s : result) {
+                        Log.d("SubredditFragment", "" + i++);
                         if (!mNames.contains(s.getName()) && (!mHideNsfw || !s.isNsfw())
                                 && !(mHideViewed && mAccount != null
                                 && mAccount.hasVisited(s.getName()))) {
@@ -411,21 +364,11 @@ public class SubredditFragment extends Fragment {
                             mNames.add(s.getName());
                         }
                     }
+                    Log.d("SubredditFragment", "Went here " + mSubmissionList.size());
                     mSubmissionsAdapter.notifyDataSetChanged();
                 } else if (mNothingHere) {
-                    TextView loading = (TextView) mFooterView.findViewById(R.id.loading_text);
-                    if (loading != null)
-                        loading.setText(R.string.nothing_here);
-                    ProgressBar progressBar = (ProgressBar) mFooterView.findViewById(R.id.progress_bar);
-                    if (progressBar != null)
-                        progressBar.setVisibility(View.GONE);
+
                 } else if (mFailedToLoad) {
-                    TextView loading = (TextView) mFooterView.findViewById(R.id.loading_text);
-                    if (loading != null)
-                        loading.setText(R.string.failed_to_load);
-                    ProgressBar progressBar = (ProgressBar) mFooterView.findViewById(R.id.progress_bar);
-                    if (progressBar != null)
-                        progressBar.setVisibility(View.GONE);
                     mFailedToLoad = true;
                 }
                 mSwipeRefreshLayout.setRefreshing(false);
@@ -435,157 +378,34 @@ public class SubredditFragment extends Fragment {
         }
     }
 
-    public class InfiniteLoadingScrollListener implements AbsListView.OnScrollListener {
+    public class InfiniteLoadingScrollListener implements RecyclerView.OnScrollListener {
 
         private final int VISIBLE_THRESHOLD = 5;
         private int previousTotal = 0;
         private boolean loading = true;
 
         @Override
-        public void onScroll(AbsListView view, int firstVisibleItem,
-                             int visibleItemCount, int totalItemCount) {
+        public void onScrollStateChanged(int i) {
+            // Don't care
+        }
+
+        @Override
+        public void onScrolled(int i, int i2) {
             if (loading) {
-                if (totalItemCount > previousTotal) {
-                    previousTotal = totalItemCount;
+                if (mSubmissionsAdapter.getItemCount() > previousTotal) {
+                    previousTotal = mSubmissionsAdapter.getItemCount();
                     loading = false;
                 }
             } else if (mSubmissionList.size() > 0
-                    && (totalItemCount - visibleItemCount) <= (firstVisibleItem + VISIBLE_THRESHOLD)) {
+                    && (mSubmissionsAdapter.getItemCount() - mLayoutManager.getChildCount()) // 25 - 4 = 21
+                    <= (mLayoutManager.findFirstVisibleItemPosition() + VISIBLE_THRESHOLD)) { // 20 + 5 = 25
                 SubmissionsListViewHelper list = new SubmissionsListViewHelper(mSubredditName,
                         mPrimarySortType, mSecondarySortType, null,
                         mSubmissionList.get(mSubmissionList.size() - 1).getName(),
-                        mAccount, mSubmissions);
+                        mAccount);
                 new RetrieveSubmissionsTask().execute(list);
                 loading = true;
             }
-        }
-
-        @Override
-        public void onScrollStateChanged(AbsListView view, int scrollState) { }
-    }
-
-    public class SwipeDetector2 extends GestureDetector.SimpleOnGestureListener {
-
-        private static final int SWIPE_MIN_DISTANCE = 120;
-        private static final int SWIPE_MAX_OFF_PATH = 250;
-        private static final int SWIPE_THRESHOLD_VELOCITY = 200;
-
-        @Override
-        public boolean onSingleTapUp(MotionEvent ev) {
-            int x = (int) ev.getX();
-            int y = (int) ev.getY();
-            int position = mSubmissions.pointToPosition(x, y);
-            if (position == mSubmissionList.size()) {
-                if (mFailedToLoad) {
-                    mFailedToLoad = false;
-                    Log.d("SubredditFragment", "onSingleTapUp");
-                    new RefreshUserClass().execute();
-                    TextView loading = (TextView) mFooterView.findViewById(R.id.loading_text);
-                    loading.setText(R.string.loading_submissions);
-                    ProgressBar progressBar = (ProgressBar) mFooterView.findViewById(R.id.progress_bar);
-                    progressBar.setVisibility(View.VISIBLE);
-                }
-            } else if (position >= 0) {
-                ImageView iv = null;
-                Submission s;
-                if (mHideViewed) {
-                    s = mSubmissionList.remove(position);
-                } else {
-                    s = mSubmissionList.get(position);
-                }
-                if (mSubmissions.getChildAt(position
-                        - mSubmissions.getFirstVisiblePosition()) != null)
-                    iv = (ImageView) mSubmissions.getChildAt(position
-                            - mSubmissions.getFirstVisiblePosition()).findViewById(R.id.thumbnail);
-                if (mAccount == null) {
-                    Log.i("SubredditFragment", "mAccount is null");
-                } else if (!mAccount.hasVisited(mSubmissionList.get(position).getName())) {
-                    mAccount.visit(s.getName());
-                    AccountDataSource dataSource = new AccountDataSource(mContext);
-                    dataSource.open();
-                    dataSource.setHistory(mAccount);
-                    dataSource.close();
-                }
-                Intent i = new Intent(getActivity(), SubmissionActivity.class);
-                Bundle b = new Bundle();
-                b.putParcelable("submission", s);
-                b.putParcelable("account", mAccount);
-                // Clicked on the image side
-                if (iv != null && x >= iv.getLeft() + mSubmissions.getLeft()) {
-                    b.putString("tab", SubmissionActivity.CONTENT_TAB);
-                } else { // Clicked on the text side
-                    b.putString("tab", SubmissionActivity.COMMENT_TAB);
-                }
-                i.putExtras(b);
-                mContext.startActivity(i);
-                mSubmissionsAdapter.notifyDataSetChanged();
-            }
-            return false;
-        }
-
-
-        @Override
-        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            if (mAccount != null) {
-                try {
-                    if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH)
-                        return false;
-                } catch (NullPointerException e) {
-                    return false;
-                }
-                // right to left swipe
-                int position = mSubmissions.pointToPosition((int) e1.getX(), (int) e1.getY());
-                if (position > -1 && e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE
-                        && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
-                            Submission s = mSubmissionsAdapter.getItem(position);
-                            if (s.getVoteStatus() == Submission.DOWNVOTED) {
-                                new VoteAsyncTask(s.getName(), mAccount, VoteAsyncTask.NEUTRAL).execute();
-                                s.setVoteStatus(Submission.NEUTRAL);
-                            } else {
-                                new VoteAsyncTask(s.getName(), mAccount, VoteAsyncTask.DOWNVOTE).execute();
-                                s.setVoteStatus(Submission.DOWNVOTED);
-                            }
-                            View v = mSubmissions.getChildAt(position - mSubmissions.getFirstVisiblePosition());
-                            View voteStatus = v.findViewById(R.id.vote_status);
-                            TextView points = (TextView) v.findViewById(R.id.points);
-                            switch (s.getVoteStatus()) {
-                                case Submission.DOWNVOTED:
-                                    voteStatus.setVisibility(View.VISIBLE);
-                                    voteStatus.setBackgroundColor(getResources().getColor(R.color.periwinkle));
-                                    points.setText(s.getScore() + " points by ");
-                            break;
-                        default:
-                            voteStatus.setVisibility(View.GONE);
-                            points.setText(s.getScore() + " points by ");
-                            break;
-                    }
-                } else if (position > -1 && e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE
-                        && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
-                    Submission s = mSubmissionsAdapter.getItem(position);
-                    if (s.getVoteStatus() == Submission.UPVOTED) {
-                        new VoteAsyncTask(s.getName(), mAccount, VoteAsyncTask.NEUTRAL).execute();
-                        s.setVoteStatus(Submission.NEUTRAL);
-                    } else {
-                        new VoteAsyncTask(s.getName(), mAccount, VoteAsyncTask.UPVOTE).execute();
-                        s.setVoteStatus(Submission.UPVOTED);
-                    }
-                    View v = mSubmissions.getChildAt(position - mSubmissions.getFirstVisiblePosition());
-                    View voteStatus = v.findViewById(R.id.vote_status);
-                    TextView points = (TextView) v.findViewById(R.id.points);
-                    switch (s.getVoteStatus()) {
-                        case Submission.UPVOTED:
-                            voteStatus.setVisibility(View.VISIBLE);
-                            voteStatus.setBackgroundColor(getResources().getColor(R.color.orangered));
-                            points.setText(s.getScore() + " points by ");
-                            break;
-                        default:
-                            voteStatus.setVisibility(View.GONE);
-                            points.setText(s.getScore() + " points by ");
-                            break;
-                    }
-                }
-            }
-            return false;
         }
     }
 }

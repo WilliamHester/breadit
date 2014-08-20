@@ -13,7 +13,7 @@
         android:textSize="32sp"
         android:text="@string/welcome"
         android:fontFamily="sans-serif-condensed"
-        android:textColor="@color/auburn"/>
+        android:textColor="@color/auburn_orange"/>
 
     <TextView
         android:gravity="center"
@@ -24,6 +24,6 @@
         android:textSize="20sp"
         android:text="@string/options"
         android:fontFamily="sans-serif-condensed"
-        android:textColor="@color/auburn"/>
+        android:textColor="@color/auburn_orange"/>
 
 </RelativeLayout>

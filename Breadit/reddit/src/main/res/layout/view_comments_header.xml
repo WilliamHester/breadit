@@ -23,7 +23,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-condensed"
-            android:textColor="@color/auburn"
+            android:textColor="@color/auburn_orange"
             android:padding="8dp"/>
 
         <Spinner android:id="@+id/sort_by"

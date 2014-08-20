@@ -155,7 +155,7 @@ public class TabView extends FrameLayout {
                 (int) (4 * scale), (int) (4 * scale), (int) (4 * scale));
         View selector = new View(mContext);
         selector.setId(R.id.selector);
-        selector.setBackgroundColor(getResources().getColor(R.color.auburn));
+        selector.setBackgroundColor(getResources().getColor(R.color.auburn_orange));
         selector.setVisibility(View.GONE);
         tabFrame.addView(selector, selectorParams);
         tabFrame.setOnClickListener(new OnClickListener() {

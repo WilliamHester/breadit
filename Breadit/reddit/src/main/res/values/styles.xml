@@ -10,7 +10,7 @@
     <!--Below this is stuff that was auto-generated-->
     <style name="AppTheme" parent="@style/_Breadit"/>
 
-    <style name="_Breadit" parent="android:Theme.Holo.Light.DarkActionBar">
+    <style name="_Breadit" parent="android:Theme.Holo">
 
         <item name="android:editTextBackground">@drawable/breadit_edit_text_holo_light</item>
 
@@ -61,8 +61,10 @@
         <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_breadit</item>
         <item name="android:actionModeCloseButtonStyle">@style/ActionButton.CloseMode.Breadit</item>
 
-        <!-- Light.DarkActionBar specific -->
+         <!--Light.DarkActionBar specific -->
         <item name="android:actionBarWidgetTheme">@style/Theme.Breadit.Widget</item>
+
+        <item name="android:windowBackground">@color/darker_gray</item>
     </style>
 
     <style name="AutoCompleteTextViewBreadit" parent="android:Widget.Holo.Light.AutoCompleteTextView">

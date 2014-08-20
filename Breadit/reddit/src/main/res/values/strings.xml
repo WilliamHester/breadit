@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Basic stuff and MainActivity -->
+    <!-- Basic and MainActivity -->
     <string name="app_name">Breadit</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -10,7 +10,7 @@
     <string name="submit">Submit</string>
     <string name="must_be_logged_in">You must be logged in to do that.</string>
 
-    <!-- Welcome stuff -->
+    <!-- Welcome -->
     <string name="welcome">Welcome to Breadit! Let\'s get started.</string>
     <string name="options">Continue the setup to sign in with an existing account, or skip the setup and do it later.</string>
     <string name="get_started">Get started!</string>
@@ -25,34 +25,38 @@
     <string name="username">Username</string>
     <string name="password">Password</string>
 
-    <!-- SubredditFragment stuff -->
+    <!-- SubredditFragment -->
     <string name="thumbnail_description">Thumbnail image for a post</string>
     <string name="failed_to_refresh">Could not refresh list.</string>
     <string name="loading_submissions">Hang on a second. Loading data from Reddit.</string>
     <string name="failed_to_load">Failed to load more submissions. Click to try again.</string>
     <string name="nothing_here">There\'s nothing here!</string>
 
-    <!-- SubmissionFragment stuff -->
+    <!-- SubmissionFragment -->
     <string name="share">Share</string>
     <string name="open_link_browser">Open in browser</string>
     <string name="reply_hint">Enter reply</string>
     <string name="cancel">Cancel</string>
     <string name="reply">Reply</string>
 
-    <!-- Comments stuff -->
+    <!-- Comments -->
     <string name="edit">Edit</string>
     <string name="save">Save</string>
     <string name="delete">Delete</string>
     <string name="view_profile">View profile</string>
     <string name="message_user">Message user</string>
     <string name="expand_links">Expand links</string>
+    <plurals name="points">
+        <item quantity="one">point</item>
+        <item quantity="other">points</item>
+    </plurals>
 
-    <!-- Sharing stuff -->
+    <!-- Sharing -->
     <string name="share_with">Share link with…</string>
     <string name="comments">Comments</string>
     <string name="content">Content</string>
 
-    <!-- Account stuff -->
+    <!-- Account -->
     <string name="action_compose_message">Compose message</string>
     <string name="to">To</string>
     <string name="from">From</string>
@@ -99,8 +103,7 @@
     <string name="select_an_account">Select an account</string>
     <string name="select_to_remove">Select an account to remove</string>
 
-
-    <!-- Drawer Stuff -->
+    <!-- Drawer -->
     <string name="search_sub_hint">Go to a Subreddit</string>
     <string name="currently_viewing">Currently Viewing</string>
     <string name="subscribe">Subscribed</string>
@@ -119,5 +122,11 @@
 
     <!-- NavigationDrawerFragment -->
     <string name="go">Go</string>
+
+    <!-- ImgurImageFragment -->
+    <string name="toggle_description">Toggle description</string>
+
+    <!-- RedditLiveFragment -->
+    <string name="say_something">Say something</string>
 
 </resources>

@@ -63,7 +63,7 @@ public class SubmitDialogFragment extends DialogFragment {
         mCaptchaResponse = (EditText) v.findViewById(R.id.captcha_response);
         mSubredditName = (EditText) v.findViewById(R.id.subreddit_name);
         mSubmitText = (EditText) v.findViewById(R.id.submit_body);
-        mTitle = (EditText) v.findViewById(R.id.title);
+        mTitle = (EditText) v.findViewById(R.id.body);
         mConfirm = (Button) v.findViewById(R.id.confirm_reply);
         mCancel = (Button) v.findViewById(R.id.cancel_reply);
         mCancel.setOnClickListener(new View.OnClickListener() {

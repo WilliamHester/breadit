@@ -37,6 +37,7 @@ public class Utilities {
         HttpGet httpGet;
         httpGet = new HttpGet(url);
         httpGet.addHeader("User-Agent", USER_AGENT);
+        Log.d("Utilities", cookie);
         if (cookie != null)
             httpGet.setHeader("Cookie", "reddit_session=" + cookie);
         if (modhash != null)

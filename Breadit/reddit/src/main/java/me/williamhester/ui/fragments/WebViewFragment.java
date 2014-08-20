@@ -1,5 +1,6 @@
 package me.williamhester.ui.fragments;
 
+import android.annotation.SuppressLint;
 import android.app.Fragment;
 import android.content.Intent;
 import android.net.Uri;
@@ -7,8 +8,10 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ProgressBar;
 
 import me.williamhester.models.Submission;
 import me.williamhester.reddit.R;
@@ -28,13 +31,14 @@ public class WebViewFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (savedInstanceState != null) {
             mUri = savedInstanceState.getString(URI);
-            mSubmission = savedInstanceState.getParcelable(SUBMISSION);
+            mSubmission = (Submission) savedInstanceState.getSerializable(SUBMISSION);
         } else if (getArguments() != null) {
-            mSubmission = getArguments().getParcelable("submission");
+            mSubmission = (Submission) getArguments().getParcelable(SUBMISSION);
             mUri = mSubmission.getUrl();
         }
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_webview, null);
@@ -46,7 +50,8 @@ public class WebViewFragment extends Fragment {
         mWebView.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
         mWebView.getSettings().setUseWideViewPort(true);
         mWebView.getSettings().setLoadWithOverviewMode(true);
-        mWebView.setBackgroundColor(0x00000000);
+
+        final ProgressBar progressBar = (ProgressBar) v.findViewById(R.id.progress_bar);
 
         if (savedInstanceState != null) {
             mWebView.restoreState(savedInstanceState);
@@ -56,6 +61,18 @@ public class WebViewFragment extends Fragment {
                 startActivity(browserIntent);
             } else {
                 mWebView.loadUrl(imgurOptimize(mSubmission.getUrl()));
+                mWebView.setWebChromeClient(new WebChromeClient() {
+                    @Override
+                    public void onProgressChanged(WebView view, int progress) {
+                        if (progress < 100 && progressBar.getVisibility() == View.GONE){
+                            progressBar.setVisibility(View.VISIBLE);
+                        }
+                        progressBar.setProgress(progress);
+                        if (progress == 100) {
+                            progressBar.setVisibility(ProgressBar.GONE);
+                        }
+                    }
+                });
             }
         }
         return v;
@@ -63,7 +80,7 @@ public class WebViewFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelable(SUBMISSION, mSubmission);
+        outState.putSerializable(SUBMISSION, mSubmission);
         outState.putString(URI, mUri);
         if (mWebView != null)
             mWebView.saveState(outState);

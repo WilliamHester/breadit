@@ -8,7 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:choiceMode="singleChoice"
-        android:divider="@color/darker_gray"
+        android:divider="@color/dark_gray"
         android:dividerHeight="1dp"
-        android:background="@color/blackish"/>
+        android:background="@color/darker_gray"/>
 </LinearLayout>

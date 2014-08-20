@@ -20,6 +20,7 @@ import android.widget.TextView;
 
 import me.williamhester.models.Account;
 import me.williamhester.models.Submission;
+import me.williamhester.ui.fragments.RedditLiveFragment;
 import me.williamhester.ui.fragments.WebViewFragment;
 import me.williamhester.ui.fragments.CommentFragment;
 import me.williamhester.databases.AccountDataSource;
@@ -28,11 +29,15 @@ import me.williamhester.ui.views.TabView;
 
 public class SubmissionActivity extends Activity implements TabView.TabSwitcher {
 
+    public static final String ACCOUNT = "account";
     public static final String COMMENT_TAB = "comments";
     public static final String CONTENT_TAB = "content";
+    public static final String SUBMISSION = "submission";
+    public static final String TAB = "tab";
 
     private Context mContext = this;
     private Submission mSubmission;
+    private Submission.Media mMedia;
     private TabView mTabView;
     private String mPermalink;
     private Account mAccount;
@@ -65,10 +70,11 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
             }
             mCurrentTag = COMMENT_TAB;
         } else if (getIntent().getExtras() != null) {
-            mSubmission = getIntent().getExtras().getParcelable("submission");
-            mAccount = getIntent().getExtras().getParcelable("account");
+            mSubmission = (Submission) getIntent().getExtras().getSerializable(SUBMISSION);
+            mMedia = (Submission.Media) getIntent().getExtras().getSerializable("media");
+            mAccount = getIntent().getExtras().getParcelable(ACCOUNT);
             if (mCurrentTag == null) {
-                mCurrentTag = getIntent().getExtras().getString("tab");
+                mCurrentTag = getIntent().getExtras().getString(TAB);
             }
         }
 
@@ -77,6 +83,7 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
         ActionBar actionBar = getActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setDisplayShowTitleEnabled(false);
         }
     }
 
@@ -123,18 +130,18 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
 
         TextView commentTab = new TextView(this);
         commentTab.setText(R.string.comments);
-        commentTab.setTextColor(getResources().getColor(R.color.mid_gray));
+        commentTab.setTextColor(getResources().getColor(R.color.ghostwhite));
         commentTab.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
         commentTab.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
         TextView contentTab = new TextView(this);
         contentTab.setText(R.string.content);
-        contentTab.setTextColor(getResources().getColor(R.color.mid_gray));
+        contentTab.setTextColor(getResources().getColor(R.color.ghostwhite));
         contentTab.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
         contentTab.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
 
         Bundle args = new Bundle();
         args.putString("permalink", mPermalink);
-        args.putParcelable("submission", mSubmission);
+        args.putSerializable("submission", mSubmission);
         args.putParcelable("account", mAccount);
 
         CommentFragment comments;
@@ -153,13 +160,17 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
 
                     TextView contentTab = new TextView(mContext);
                     contentTab.setText(R.string.content);
-                    contentTab.setTextColor(getResources().getColor(R.color.mid_gray));
+                    contentTab.setTextColor(getResources().getColor(R.color.ghostwhite));
                     contentTab.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
                     contentTab.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
 
-                    if (!mSubmission.isMeta() && !mSubmission.isSelf()) {
+                    if (mSubmission.getMedia() != null
+                            && mSubmission.getMedia().getType().equals(Submission.LIVE_UPDATE)) {
+                        RedditLiveFragment fragment = RedditLiveFragment.newInstance(mSubmission);
+                        mTabView.addTab(fragment, TabView.TAB_TYPE_MAIN, contentTab, CONTENT_TAB);
+                    } else if (!mSubmission.isMeta() && !mSubmission.isSelf()) {
                         Bundle args = new Bundle();
-                        args.putParcelable("submission", mSubmission);
+                        args.putSerializable("submission", mSubmission);
                         Fragment content = new WebViewFragment();
                         content.setArguments(args);
                         mTabView.addTab(content, TabView.TAB_TYPE_MAIN, contentTab, CONTENT_TAB);
@@ -173,6 +184,9 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
                     }
                 }
             });
+        } else if (mMedia != null && mMedia.getType().equals(Submission.LIVE_UPDATE)) {
+            RedditLiveFragment fragment = RedditLiveFragment.newInstance(mSubmission);
+            mTabView.addTab(fragment, TabView.TAB_TYPE_MAIN, contentTab, CONTENT_TAB);
         } else if (!mSubmission.isMeta() && !mSubmission.isSelf()) {
             content = new WebViewFragment();
             content.setArguments(args);
