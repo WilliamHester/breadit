@@ -105,11 +105,13 @@ public class HtmlParser {
                 String url = node.attr("href");
                 if (url.equals("/spoiler")) {
                     return new SpoilerSpan();
-                } else {
-                    String s = node.attr("href");
-                    mLinks.add(s);
-                    return new LinkSpan(s);
                 }
+                String beg = url.substring(0, 3);
+                if (beg.equals("/s") || beg.equals("#s")) {
+                    return new SpoilerSpan();
+                }
+                mLinks.add(url);
+                return new LinkSpan(url);
             } else if (tag.equalsIgnoreCase("li")) {
                 return new BulletSpan(BulletSpan.STANDARD_GAP_WIDTH, Color.CYAN);
             }

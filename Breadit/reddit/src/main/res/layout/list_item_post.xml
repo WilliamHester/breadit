@@ -8,8 +8,7 @@
     android:layout_marginTop="8dp"
     android:layout_marginLeft="8dp"
     android:layout_marginRight="8dp"
-    card_view:cardCornerRadius="2dp"
-    card_view:cardBackgroundColor="@color/darker_gray">
+    card_view:cardCornerRadius="2dp">
 
     <me.williamhester.ui.views.SwipeView
         android:id="@+id/swipe_view"

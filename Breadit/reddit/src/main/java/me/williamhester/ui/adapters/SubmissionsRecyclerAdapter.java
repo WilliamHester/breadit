@@ -59,6 +59,7 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
 
     @Override
     public void onBindViewHolder(SubmissionViewHolder submissionViewHolder, int position) {
+
         submissionViewHolder.setContent(mSubmissions.get(position));
     }
 
@@ -76,6 +77,8 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
         private View mExpandButton;
 
         private Submission mSubmission;
+
+        private final ArrayList<FutureCallback> mFutures = new ArrayList<>();
 
         public SubmissionViewHolder(View itemView) {
             super(itemView, mCallback.getAccount());
@@ -96,6 +99,7 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
 
             mExpandButton.setOnClickListener(mExpandListener);
         }
+
         @Override
         public void setContent(Votable votable) {
             super.setContent(votable);
@@ -130,16 +134,17 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
                     container.setVisibility(View.VISIBLE);
                     String id = linkDetails.getLinkId();
                     if (linkDetails.getType() == UrlParser.IMGUR_IMAGE) {
-                        if (!didSetImagePreview()) {
+                        if (!setImagePreview()) {
                             imageView.setImageDrawable(null);
-                            ImgurApi.getImageDetails(id, mContext, new ImgurImageFuture());
+                            ImgurApi.getImageDetails(id, mContext, mSubmission, mImgurCallback);
                         }
                     } else if (linkDetails.getType() == UrlParser.IMGUR_ALBUM) {
-                        if (!didSetImagePreview()) {
+                        if (!setImagePreview()) {
                             imageView.setImageDrawable(null);
-                            ImgurApi.getAlbumDetails(id, mContext, new ImgurAlbumFuture());
+                            ImgurApi.getAlbumDetails(id, mContext, mSubmission, mImgurCallback);
                         }
                     } else if (linkDetails.getType() == UrlParser.YOUTUBE) {
+                        imageView.setVisibility(View.VISIBLE);
                         ImgurApi.loadImage(linkDetails.getUrl(), imageView, null);
                         button.setImageResource(android.R.drawable.ic_media_play);
                         button.setVisibility(View.VISIBLE);
@@ -151,6 +156,7 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
                             }
                         });
                     } else if (linkDetails.getType() == UrlParser.NORMAL_IMAGE) {
+                        imageView.setVisibility(View.VISIBLE);
                         ImgurApi.loadImage(linkDetails.getUrl(), imageView, null);
                         imageView.setOnClickListener(new View.OnClickListener() {
                             @Override
@@ -204,33 +210,16 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
             }
         }
 
-        private class ImgurAlbumFuture implements FutureCallback<ResponseImgurWrapper<ImgurAlbum>> {
+        private FutureCallback<Submission> mImgurCallback = new FutureCallback<Submission>() {
             @Override
-            public void onCompleted(Exception e, final ResponseImgurWrapper<ImgurAlbum> result) {
-                if (result != null && result.isSuccess()) {
-                    mSubmission.setImgurData(result.getData());
-                    didSetImagePreview();
-                } else if (result != null) {
-                    Log.e("SubmissionsRecyclerAdapter", "failed, status = " + result.getStatus());
-                } else {
+            public void onCompleted(Exception e, Submission result) {
+                if (e != null) {
                     e.printStackTrace();
+                } else if (mSubmission == result) {
+                    setImagePreview();
                 }
             }
-        }
-
-        private class ImgurImageFuture implements FutureCallback<ResponseImgurWrapper<ImgurImage>> {
-            @Override
-            public void onCompleted(Exception e, final ResponseImgurWrapper<ImgurImage> result) {
-                if (result != null && result.isSuccess()) {
-                    mSubmission.setImgurData(result.getData());
-                    didSetImagePreview();
-                } else if (result != null) {
-                    Log.e("SubmissionsRecyclerAdapter", "failed, status = " + result.getStatus());
-                } else {
-                    e.printStackTrace();
-                }
-            }
-        }
+        };
 
         private View.OnClickListener mExpandListener = new View.OnClickListener() {
 
@@ -265,18 +254,21 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
          *
          * @return returns whether or not the data has been set.
          */
-        private boolean didSetImagePreview() {
+        private boolean setImagePreview() {
             if (mSubmission.getImgurData() == null) {
                 return false;
             }
-            ImgurImage image = null;
+            final ImgurImage image;
             if (mSubmission.getImgurData() instanceof ImgurAlbum) {
                 image = ((ImgurAlbum) mSubmission.getImgurData()).getImages().get(0);
             } else if (mSubmission.getImgurData() instanceof ImgurImage) {
                 image = (ImgurImage) mSubmission.getImgurData();
+            } else {
+                image = null;
             }
             ImageView imageView = (ImageView) itemView.findViewById(R.id.image);
             if (image != null && !image.isAnimated()) {
+                imageView.setVisibility(View.VISIBLE);
                 ImgurApi.loadImage(image.getUrl(), imageView, null);
                 ImageButton button = (ImageButton) itemView.findViewById(R.id.preview_button);
                 button.setVisibility(View.INVISIBLE);

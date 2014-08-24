@@ -64,7 +64,7 @@
          <!--Light.DarkActionBar specific -->
         <item name="android:actionBarWidgetTheme">@style/Theme.Breadit.Widget</item>
 
-        <item name="android:windowBackground">@color/darker_gray</item>
+        <item name="android:windowBackground">@color/blackish</item>
     </style>
 
     <style name="AutoCompleteTextViewBreadit" parent="android:Widget.Holo.Light.AutoCompleteTextView">

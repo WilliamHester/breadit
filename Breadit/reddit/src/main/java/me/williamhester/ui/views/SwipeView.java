@@ -54,7 +54,7 @@ public class SwipeView extends LinearLayout {
     }
 
     public SwipeView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
+        super(context, attrs, defStyleAttr);
         mSwipeDistance = 100 * context.getResources().getDisplayMetrics().density;
         mMinFlingDistance = mSwipeDistance / 2;
         init();

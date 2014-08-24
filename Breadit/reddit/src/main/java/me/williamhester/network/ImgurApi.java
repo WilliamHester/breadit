@@ -16,6 +16,7 @@ import javax.net.ssl.TrustManager;
 import me.williamhester.models.ImgurAlbum;
 import me.williamhester.models.ImgurImage;
 import me.williamhester.models.ResponseImgurWrapper;
+import me.williamhester.models.Submission;
 
 /**
  * Created by William on 6/14/14.
@@ -29,22 +30,42 @@ public class ImgurApi {
 
     private ImgurApi() {}
 
-    public static void getImageDetails(String id, Context context,
-                                       FutureCallback<ResponseImgurWrapper<ImgurImage>> callback) {
+    public static void getImageDetails(String id, Context context, final Submission submission,
+                                       final FutureCallback<Submission> callback) {
         Ion.with(context)
                 .load("https://api.imgur.com/3/image/" + id)
                 .addHeader(AUTHORIZATION, CLIENT_ID)
                 .as(new TypeToken<ResponseImgurWrapper<ImgurImage>>(){})
-                .setCallback(callback);
+                .setCallback(new FutureCallback<ResponseImgurWrapper<ImgurImage>>() {
+                    @Override
+                    public void onCompleted(Exception e, ResponseImgurWrapper<ImgurImage> result) {
+                        if (e == null) {
+                            submission.setImgurData(result.getData());
+                            callback.onCompleted(null, submission);
+                        } else {
+                            callback.onCompleted(e, null);
+                        }
+                    }
+                });
     }
 
-    public static void getAlbumDetails(String id, Context context,
-                                       FutureCallback<ResponseImgurWrapper<ImgurAlbum>> callback) {
+    public static void getAlbumDetails(String id, Context context, final Submission submission,
+                                       final FutureCallback<Submission> callback) {
         Ion.with(context)
                 .load("https://api.imgur.com/3/album/" + id)
                 .addHeader(AUTHORIZATION, CLIENT_ID)
                 .as(new TypeToken<ResponseImgurWrapper<ImgurAlbum>>(){})
-                .setCallback(callback);
+                .setCallback(new FutureCallback<ResponseImgurWrapper<ImgurAlbum>>() {
+                    @Override
+                    public void onCompleted(Exception e, ResponseImgurWrapper<ImgurAlbum> result) {
+                        if (e == null) {
+                            submission.setImgurData(result.getData());
+                            callback.onCompleted(null, submission);
+                        } else {
+                            callback.onCompleted(e, null);
+                        }
+                    }
+                });
     }
 
     public static void loadImage(String url, ImageView imageView, FutureCallback<ImageView> callback) {
