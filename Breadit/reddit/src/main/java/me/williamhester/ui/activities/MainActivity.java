@@ -53,22 +53,6 @@ public class MainActivity extends Activity
                 dataSource.close();
             }
             mNavigationDrawerFragment = NavigationDrawerFragment.newInstance(mAccount, mSubreddit);
-        } else if (getIntent() != null && getIntent().getExtras() != null) { // If the user just completed the setup
-            boolean b = getIntent().getExtras().getBoolean("finishedSetup");
-            mAccount = getIntent().getExtras().getParcelable("account");
-            SharedPreferences.Editor edit = prefs.edit();
-            edit.putBoolean("finishedSetup", b);
-            if (mAccount != null) {
-                AccountDataSource dataSource = new AccountDataSource(this);
-                dataSource.open();
-                dataSource.addAccount(mAccount);
-                dataSource.close();
-                edit.putLong("accountId", mAccount.getId());
-            }
-            edit.commit();
-        } else if (!prefs.getBoolean("finishedSetup", false)) { // If the user has not completed the setup
-            Intent i = new Intent(this, SetupActivity.class);
-            startActivity(i);
         } else { // If the user has completed the setup
             long id = prefs.getLong("accountId", -1);
             if (id != -1) {
@@ -111,19 +95,20 @@ public class MainActivity extends Activity
                 mSubredditFragment = getFragmentManager().findFragmentByTag("SubredditFragment");
                 mSubreddit = ((SubredditFragment) mSubredditFragment).getSubreddit();
                 mNavigationDrawerFragment.setSubreddit(mSubreddit,
-                        ((SubredditFragment) mSubredditFragment).getPrimarySortType(),
-                        ((SubredditFragment) mSubredditFragment).getSecondarySortType());
+                        0,  // TODO: Fix this
+                        0); // TODO: Fix this
             }
         });
     }
+
     @Override
     public void onResume() {
         super.onResume();
         mSubredditFragment = getFragmentManager().findFragmentByTag("SubredditFragment");
         mSubreddit = ((SubredditFragment) mSubredditFragment).getSubreddit();
         mNavigationDrawerFragment.setSubreddit(mSubreddit,
-                ((SubredditFragment) mSubredditFragment).getPrimarySortType(),
-                ((SubredditFragment) mSubredditFragment).getSecondarySortType());
+                0,  // TODO: Fix this
+                0); // TODO: Fix this
         SharedPreferences prefs = getSharedPreferences("preferences", Context.MODE_PRIVATE);
         long id = prefs.getLong("accountId", -1);
         if (id != -1) {
@@ -141,10 +126,8 @@ public class MainActivity extends Activity
         invalidateOptionsMenu();
     }
 
-
     @Override
     public void onNavigationDrawerItemSelected(String subreddit) {
-        Log.i("Main", subreddit + " selected");
         if ((mSubreddit == null && subreddit == null)
                 || (mSubreddit != null && mSubreddit.equals(subreddit))) {
             ((SubredditFragment) mSubredditFragment).refreshData();

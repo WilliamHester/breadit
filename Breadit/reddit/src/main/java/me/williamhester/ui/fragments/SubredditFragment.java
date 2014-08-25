@@ -21,6 +21,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
+import com.koushikdutta.async.future.FutureCallback;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,11 +30,15 @@ import java.util.List;
 
 import me.williamhester.models.ImgurAlbum;
 import me.williamhester.models.ImgurImage;
+import me.williamhester.models.Listing;
+import me.williamhester.models.ResponseImgurWrapper;
+import me.williamhester.models.ResponseRedditWrapper;
 import me.williamhester.models.Submission;
 import me.williamhester.models.SubmissionsListViewHelper;
 import me.williamhester.models.Account;
 import me.williamhester.models.utils.Utilities;
 import me.williamhester.databases.AccountDataSource;
+import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.activities.SubmissionActivity;
 import me.williamhester.ui.adapters.SubmissionsRecyclerAdapter;
@@ -57,8 +62,8 @@ public class SubredditFragment extends Fragment implements SubmissionsRecyclerAd
     private boolean mFailedToLoad = false;
     private boolean mHideNsfw = true;
     private boolean mHideViewed = false;
-    private int mPrimarySortType = Submission.HOT;
-    private int mSecondarySortType = Submission.ALL;
+    private String mPrimarySortType = RedditApi.SORT_TYPE_HOT;
+    private String mSecondarySortType = RedditApi.SECONDARY_SORT_ALL;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -80,6 +85,9 @@ public class SubredditFragment extends Fragment implements SubmissionsRecyclerAd
             mNames = new HashSet<>();
             mSubmissionList = new ArrayList<>();
         }
+        if (mSubredditName == null) {
+            mSubredditName = "";
+        }
         mSubmissionsAdapter = new SubmissionsRecyclerAdapter(mSubmissionList, this, getActivity());
         loadPrefs();
     }
@@ -100,7 +108,7 @@ public class SubredditFragment extends Fragment implements SubmissionsRecyclerAd
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                new RefreshUserClass(true).execute();
+                refreshData();
             }
         });
 
@@ -136,24 +144,67 @@ public class SubredditFragment extends Fragment implements SubmissionsRecyclerAd
     }
 
     public void setPrimarySort(int sortType) {
-        if (mPrimarySortType != sortType) {
-            mPrimarySortType = sortType;
+        String tempSortType;
+        switch (sortType) {
+            case 0:
+                tempSortType = RedditApi.SORT_TYPE_HOT;
+                break;
+            case 1:
+                tempSortType = RedditApi.SORT_TYPE_NEW;
+                break;
+            case 2:
+                tempSortType = RedditApi.SORT_TYPE_RISING;
+                break;
+            case 3:
+                tempSortType = RedditApi.SORT_TYPE_CONTROVERSIAL;
+                break;
+            case 4:
+                tempSortType = RedditApi.SORT_TYPE_TOP;
+                break;
+            default:
+                tempSortType = RedditApi.SORT_TYPE_HOT;
+        }
+        if (!mPrimarySortType.equals(tempSortType)) {
+            mPrimarySortType = tempSortType;
             refreshData();
         }
     }
 
     public void setSecondarySort(int sortType) {
-        if (mSecondarySortType != sortType) {
-            mSecondarySortType = sortType;
+        String tempSortType;
+        switch (sortType) {
+            case 0:
+                tempSortType = RedditApi.SECONDARY_SORT_HOUR;
+                break;
+            case 1:
+                tempSortType = RedditApi.SECONDARY_SORT_DAY;
+                break;
+            case 2:
+                tempSortType = RedditApi.SECONDARY_SORT_WEEK;
+                break;
+            case 3:
+                tempSortType = RedditApi.SECONDARY_SORT_MONTH;
+                break;
+            case 4:
+                tempSortType = RedditApi.SECONDARY_SORT_YEAR;
+                break;
+            case 5:
+                tempSortType = RedditApi.SECONDARY_SORT_ALL;
+                break;
+            default:
+                tempSortType = RedditApi.SECONDARY_SORT_ALL;
+        }
+        if (!mSecondarySortType.equals(tempSortType)) {
+            mSecondarySortType = tempSortType;
             refreshData();
         }
     }
 
-    public int getPrimarySortType() {
+    public String getPrimarySortType() {
         return mPrimarySortType;
     }
 
-    public int getSecondarySortType() {
+    public String getSecondarySortType() {
         return mSecondarySortType;
     }
 
@@ -162,8 +213,36 @@ public class SubredditFragment extends Fragment implements SubmissionsRecyclerAd
     }
 
     public void refreshData() {
-        Log.d("SubredditFragment", "refreshData");
-        new RefreshUserClass(true).execute();
+        if (mSwipeRefreshLayout != null) {
+            mSwipeRefreshLayout.setRefreshing(true);
+            RedditApi.getSubmissions(getActivity(), mSubredditName, mPrimarySortType, mSecondarySortType,
+                    null, null, mAccount, new FutureCallback<JsonObject>() {
+                        @Override
+                        public void onCompleted(Exception e, JsonObject result) {
+                            if (e == null) {
+                                ResponseRedditWrapper wrapper = new ResponseRedditWrapper(result, new Gson());
+                                if (wrapper.getData() instanceof Listing) {
+                                    ArrayList<Submission> submissions = new ArrayList<>();
+                                    List<ResponseRedditWrapper> children = ((Listing) wrapper.getData()).getChildren();
+                                    for (ResponseRedditWrapper innerWrapper : children) {
+                                        if (innerWrapper.getData() instanceof Submission) {
+                                            submissions.add((Submission) innerWrapper.getData());
+                                        }
+                                    }
+                                    if (submissions.size() > 0) {
+                                        mSubmissionList.clear();
+                                        mSubmissionList.addAll(submissions);
+                                        mSubmissionsAdapter.notifyDataSetChanged();
+                                        mSwipeRefreshLayout.setRefreshing(false);
+                                    }
+                                }
+                            } else {
+                                e.printStackTrace();
+                                mSwipeRefreshLayout.setRefreshing(false);
+                            }
+                        }
+                    });
+        }
     }
 
     public static SubredditFragment newInstance(Account account, String subredditName) {
@@ -215,7 +294,7 @@ public class SubredditFragment extends Fragment implements SubmissionsRecyclerAd
         if (getActivity() != null)
             getActivity().invalidateOptionsMenu();
         if (mSubmissionsView != null && oldId != id || oldHideViewed != mHideViewed) {
-            new RefreshUserClass(true).execute();
+            refreshData();
         }
     }
 
@@ -224,7 +303,7 @@ public class SubredditFragment extends Fragment implements SubmissionsRecyclerAd
      *     when the SwipeRefreshLayout's onRefresh method is called.
      */
     private void populateSubmissions() {
-        new RefreshUserClass().execute();
+        refreshData();
     }
 
     private View createFooterView(LayoutInflater inflater) {
@@ -290,9 +369,9 @@ public class SubredditFragment extends Fragment implements SubmissionsRecyclerAd
                 mAccount.refreshUserData();
                 mSwipeRefreshLayout.setRefreshing(true);
             }
-            SubmissionsListViewHelper list = new SubmissionsListViewHelper(mSubredditName,
-                    mPrimarySortType, mSecondarySortType, null, null, mAccount);
-            new RetrieveSubmissionsTask(mRefreshList).execute(list);
+//            SubmissionsListViewHelper list = new SubmissionsListViewHelper(mSubredditName,
+//                    mPrimarySortType, mSecondarySortType, null, null, mAccount);
+//            new RetrieveSubmissionsTask(mRefreshList).execute(list);
             return null;
         }
     }
@@ -356,7 +435,6 @@ public class SubredditFragment extends Fragment implements SubmissionsRecyclerAd
                     }
                     int i = 0;
                     for (Submission s : result) {
-                        Log.d("SubredditFragment", "" + i++);
                         if (!mNames.contains(s.getName()) && (!mHideNsfw || !s.isNsfw())
                                 && !(mHideViewed && mAccount != null
                                 && mAccount.hasVisited(s.getName()))) {
@@ -364,7 +442,6 @@ public class SubredditFragment extends Fragment implements SubmissionsRecyclerAd
                             mNames.add(s.getName());
                         }
                     }
-                    Log.d("SubredditFragment", "Went here " + mSubmissionList.size());
                     mSubmissionsAdapter.notifyDataSetChanged();
                 } else if (mNothingHere) {
 
@@ -399,11 +476,11 @@ public class SubredditFragment extends Fragment implements SubmissionsRecyclerAd
             } else if (mSubmissionList.size() > 0
                     && (mSubmissionsAdapter.getItemCount() - mLayoutManager.getChildCount()) // 25 - 4 = 21
                     <= (mLayoutManager.findFirstVisibleItemPosition() + VISIBLE_THRESHOLD)) { // 20 + 5 = 25
-                SubmissionsListViewHelper list = new SubmissionsListViewHelper(mSubredditName,
-                        mPrimarySortType, mSecondarySortType, null,
-                        mSubmissionList.get(mSubmissionList.size() - 1).getName(),
-                        mAccount);
-                new RetrieveSubmissionsTask().execute(list);
+//                SubmissionsListViewHelper list = new SubmissionsListViewHelper(mSubredditName,
+//                        mPrimarySortType, mSecondarySortType, null,
+//                        mSubmissionList.get(mSubmissionList.size() - 1).getName(),
+//                        mAccount);
+//                new RetrieveSubmissionsTask().execute(list);
                 loading = true;
             }
         }

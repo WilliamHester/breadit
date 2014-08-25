@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import com.koushikdutta.async.future.FutureCallback;
@@ -15,7 +16,9 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.http.message.BasicNameValuePair;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
 import me.williamhester.models.Account;
@@ -36,6 +39,19 @@ public class RedditApi {
 
     private static final String REDDIT_URL = "http://www.reddit.com";
 
+    public static String SORT_TYPE_HOT = "";
+    public static String SORT_TYPE_NEW = "new";
+    public static String SORT_TYPE_RISING = "rising";
+    public static String SORT_TYPE_CONTROVERSIAL = "controversial";
+    public static String SORT_TYPE_TOP = "top";
+
+    public static String SECONDARY_SORT_HOUR = "hour";
+    public static String SECONDARY_SORT_DAY = "day";
+    public static String SECONDARY_SORT_WEEK = "week";
+    public static String SECONDARY_SORT_MONTH = "month";
+    public static String SECONDARY_SORT_YEAR = "year";
+    public static String SECONDARY_SORT_ALL = "all";
+
     public static void vote(Context context, Votable v, Account account) {
         Ion.with(context)
                 .load(REDDIT_URL + "/api/vote")
@@ -53,6 +69,55 @@ public class RedditApi {
                 .addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
                 .as(new TypeToken<ResponseRedditWrapper>() {})
                 .setCallback(callback);
+    }
+
+    public static void getSubmissions(Context context, String subredditName, String sortType,
+                                      String secondarySort, String before, String after, Account account,
+                                      FutureCallback<JsonObject> callback) {
+        if (!subredditName.equals("")) {
+            subredditName = "/r/" + subredditName;
+        }
+        Ion.with(context)
+                .load(REDDIT_URL + subredditName + "/" + sortType + "/.json")
+                .addQueries(generateSubmissionQueries(secondarySort, before, after))
+                .addHeaders(generateUserHeaders(account))
+                .addHeader("User-Agent", USER_AGENT)
+                .asJsonObject()
+                .setCallback(callback);
+    }
+
+    private static Map<String, List<String>> generateSubmissionQueries(String secondarySort,
+                                                                         String before, String after) {
+        Map<String, List<String>> queries = new HashMap<>();
+//        if (secondarySort != null) {
+//            ArrayList<String> query = new ArrayList<>();
+//            query.add(secondarySort);
+//            queries.put("t", query);
+//        }
+        if (before != null) {
+            ArrayList<String> query = new ArrayList<>();
+            query.add(before);
+            queries.put("before", query);
+        }
+        if (after != null) {
+            ArrayList<String> query = new ArrayList<>();
+            query.add(after);
+            queries.put("after", query);
+        }
+        return queries;
+    }
+
+    private static Map<String, List<String>> generateUserHeaders(Account account) {
+        Map<String, List<String>> headers = new HashMap<>();
+        if (account != null) {
+            ArrayList<String> list1 = new ArrayList<>();
+            list1.add("reddit_session=" + account.getCookie());
+            headers.put("Cookie", list1);
+            ArrayList<String> list2 = new ArrayList<>();
+            list2.add(account.getModhash().replace("\"", ""));
+            headers.put("X-Modhash", list2);
+        }
+        return headers;
     }
 
     public static void getSubmissionData(Context context, String permalink,
@@ -123,6 +188,5 @@ public class RedditApi {
                     }
                 });
     }
-
 
 }
