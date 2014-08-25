@@ -1,5 +1,6 @@
 package me.williamhester.ui.fragments;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.os.Handler;
@@ -33,6 +34,8 @@ public class ImagePagerFragment extends Fragment {
     private String mTitle;
     private int mCurrentPosition;
 
+    private ImagePagerCallbacks mCallback;
+
     public static ImagePagerFragment newInstance(ImgurImage image) {
         Bundle args = new Bundle();
         args.putSerializable(IMAGE, image);
@@ -58,8 +61,21 @@ public class ImagePagerFragment extends Fragment {
     }
 
     @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        if (activity instanceof ImagePagerCallbacks) {
+            mCallback = (ImagePagerCallbacks) activity;
+        }
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (mCallback != null) {
+            mCallback.onImagePagerFragmentCreated();
+        }
 
         if (getArguments() != null) {
             if (getArguments().containsKey(IMAGE)) {
@@ -138,6 +154,20 @@ public class ImagePagerFragment extends Fragment {
 
         mAdapter = null;
         mAnimHandler.removeCallbacks(mAnimRunnable);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        if (mCallback != null) {
+            mCallback.onImagePagerFragmentDestroyed();
+        }
+    }
+
+    public interface ImagePagerCallbacks {
+        public void onImagePagerFragmentCreated();
+        public void onImagePagerFragmentDestroyed();
     }
 
 }

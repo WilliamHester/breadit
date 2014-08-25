@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -15,6 +16,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import me.williamhester.models.Account;
+import me.williamhester.ui.fragments.ImagePagerFragment;
 import me.williamhester.ui.fragments.NavigationDrawerFragment;
 import me.williamhester.ui.fragments.SubredditFragment;
 import me.williamhester.ui.fragments.SubmitDialogFragment;
@@ -22,7 +24,8 @@ import me.williamhester.databases.AccountDataSource;
 import me.williamhester.reddit.R;
 
 public class MainActivity extends Activity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks,
+        ImagePagerFragment.ImagePagerCallbacks {
 
     private NavigationDrawerFragment mNavigationDrawerFragment;
     private Fragment mSubredditFragment;
@@ -229,5 +232,17 @@ public class MainActivity extends Activity
             startActivity(i);
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onImagePagerFragmentCreated() {
+        DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawerLayout.setEnabled(false);
+    }
+
+    @Override
+    public void onImagePagerFragmentDestroyed() {
+        DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawerLayout.setEnabled(true);
     }
 }

@@ -67,21 +67,21 @@
         <item name="android:windowBackground">@color/blackish</item>
     </style>
 
-    <style name="AutoCompleteTextViewBreadit" parent="android:Widget.Holo.Light.AutoCompleteTextView">
+    <style name="AutoCompleteTextViewBreadit" parent="android:Widget.Holo.AutoCompleteTextView">
         <item name="android:dropDownSelector">@drawable/breadit_list_selector_holo_light</item>
         <item name="android:background">@drawable/breadit_edit_text_holo_light</item>
         <item name="android:textColor">@color/mid_gray</item>
     </style>
 
-    <style name="ButtonBreadit" parent="android:Widget.Holo.Light.Button">
+    <style name="ButtonBreadit" parent="android:Widget.Holo.Button">
         <item name="android:background">@drawable/breadit_btn_default_holo_light</item>
     </style>
 
-    <style name="ImageButtonBreadit" parent="android:Widget.Holo.Light.ImageButton">
+    <style name="ImageButtonBreadit" parent="android:Widget.Holo.ImageButton">
         <item name="android:background">@drawable/breadit_btn_default_holo_light</item>
     </style>
 
-    <style name="SpinnerBreadit" parent="android:Widget.Holo.Light.Spinner">
+    <style name="SpinnerBreadit" parent="android:Widget.Holo.Spinner">
         <item name="android:background">@drawable/breadit_spinner_background_holo_light</item>
         <item name="android:dropDownSelector">@drawable/breadit_list_selector_holo_light</item>
     </style>
@@ -106,38 +106,38 @@
         <item name="android:maxWidth">180dip</item>
     </style>
 
-    <style name="ProgressBarBreadit" parent="android:Widget.Holo.Light.ProgressBar.Horizontal">
+    <style name="ProgressBarBreadit" parent="android:Widget.Holo.ProgressBar.Horizontal">
         <item name="android:progressDrawable">@drawable/breadit_progress_horizontal_holo_light</item>
         <item name="android:indeterminateDrawable">@drawable/breadit_progress_indeterminate_horizontal_holo_light</item>
     </style>
 
-    <style name="SeekBarBreadit" parent="android:Widget.Holo.Light.SeekBar">
+    <style name="SeekBarBreadit" parent="android:Widget.Holo.SeekBar">
         <item name="android:progressDrawable">@drawable/breadit_scrubber_progress_horizontal_holo_light</item>
         <item name="android:indeterminateDrawable">@drawable/breadit_scrubber_progress_horizontal_holo_light</item>
         <item name="android:thumb">@drawable/breadit_scrubber_control_selector_holo_light</item>
     </style>
 
-    <style name="RatingBarBreadit" parent="android:Widget.Holo.Light.RatingBar">
+    <style name="RatingBarBreadit" parent="android:Widget.Holo.RatingBar">
         <item name="android:progressDrawable">@drawable/breadit_ratingbar_full_holo_light</item>
         <item name="android:indeterminateDrawable">@drawable/breadit_ratingbar_full_holo_light</item>
     </style>
 
-    <style name="RatingBarBigBreadit" parent="android:Widget.Holo.Light.RatingBar.Indicator">
+    <style name="RatingBarBigBreadit" parent="android:Widget.Holo.RatingBar.Indicator">
         <item name="android:progressDrawable">@drawable/breadit_ratingbar_holo_light</item>
         <item name="android:indeterminateDrawable">@drawable/breadit_ratingbar_holo_light</item>
     </style>
 
-    <style name="RatingBarSmallBreadit" parent="android:Widget.Holo.Light.RatingBar.Small">
+    <style name="RatingBarSmallBreadit" parent="android:Widget.Holo.RatingBar.Small">
         <item name="android:progressDrawable">@drawable/breadit_ratingbar_small_holo_light</item>
         <item name="android:indeterminateDrawable">@drawable/breadit_ratingbar_small_holo_light</item>
     </style>
 
-    <style name="ToggleBreadit" parent="android:Widget.Holo.Light.Button.Toggle">
+    <style name="ToggleBreadit" parent="android:Widget.Holo.Button.Toggle">
         <item name="android:background">@drawable/breadit_btn_toggle_holo_light</item>
     </style>
 
     <!--ActionBar styles-->
-    <style name="ActionBar.Solid.Breadit" parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
+    <style name="ActionBar.Solid.Breadit" parent="@android:style/Widget.Holo.ActionBar.Solid">
         <item name="android:background">@drawable/ab_solid_breadit</item>
         <item name="android:backgroundStacked">@drawable/ab_stacked_solid_breadit</item>
         <item name="android:backgroundSplit">@drawable/ab_bottom_solid_breadit</item>

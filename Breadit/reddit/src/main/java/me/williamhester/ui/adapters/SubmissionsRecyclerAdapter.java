@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,7 +24,6 @@ import java.util.List;
 import me.williamhester.models.Account;
 import me.williamhester.models.ImgurAlbum;
 import me.williamhester.models.ImgurImage;
-import me.williamhester.models.ResponseImgurWrapper;
 import me.williamhester.models.Submission;
 import me.williamhester.models.Votable;
 import me.williamhester.network.ImgurApi;
@@ -77,8 +75,6 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
         private View mExpandButton;
 
         private Submission mSubmission;
-
-        private final ArrayList<FutureCallback> mFutures = new ArrayList<>();
 
         public SubmissionViewHolder(View itemView) {
             super(itemView, mCallback.getAccount());
@@ -134,14 +130,18 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
                     container.setVisibility(View.VISIBLE);
                     String id = linkDetails.getLinkId();
                     if (linkDetails.getType() == UrlParser.IMGUR_IMAGE) {
-                        if (!setImagePreview()) {
+                        if (mSubmission.getImgurData() == null) {
                             imageView.setImageDrawable(null);
                             ImgurApi.getImageDetails(id, mContext, mSubmission, mImgurCallback);
+                        } else {
+                            setImagePreview();
                         }
                     } else if (linkDetails.getType() == UrlParser.IMGUR_ALBUM) {
-                        if (!setImagePreview()) {
+                        if (mSubmission.getImgurData() == null) {
                             imageView.setImageDrawable(null);
                             ImgurApi.getAlbumDetails(id, mContext, mSubmission, mImgurCallback);
+                        } else {
+                            setImagePreview();
                         }
                     } else if (linkDetails.getType() == UrlParser.YOUTUBE) {
                         imageView.setVisibility(View.VISIBLE);
@@ -254,10 +254,7 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
          *
          * @return returns whether or not the data has been set.
          */
-        private boolean setImagePreview() {
-            if (mSubmission.getImgurData() == null) {
-                return false;
-            }
+        private void setImagePreview() {
             final ImgurImage image;
             if (mSubmission.getImgurData() instanceof ImgurAlbum) {
                 image = ((ImgurAlbum) mSubmission.getImgurData()).getImages().get(0);
@@ -285,7 +282,6 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
             } else {
                 itemView.findViewById(R.id.content_preview).setVisibility(View.GONE);
             }
-            return true;
         }
     }
 
