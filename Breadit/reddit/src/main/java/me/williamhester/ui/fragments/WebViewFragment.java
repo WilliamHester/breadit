@@ -33,7 +33,7 @@ public class WebViewFragment extends Fragment {
             mUri = savedInstanceState.getString(URI);
             mSubmission = (Submission) savedInstanceState.getSerializable(SUBMISSION);
         } else if (getArguments() != null) {
-            mSubmission = (Submission) getArguments().getParcelable(SUBMISSION);
+            mSubmission = (Submission) getArguments().getSerializable(SUBMISSION);
             mUri = mSubmission.getUrl();
         }
     }

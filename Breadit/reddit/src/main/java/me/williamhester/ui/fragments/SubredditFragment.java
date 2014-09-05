@@ -10,6 +10,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,7 +32,6 @@ import java.util.List;
 import me.williamhester.models.ImgurAlbum;
 import me.williamhester.models.ImgurImage;
 import me.williamhester.models.Listing;
-import me.williamhester.models.ResponseImgurWrapper;
 import me.williamhester.models.ResponseRedditWrapper;
 import me.williamhester.models.Submission;
 import me.williamhester.models.SubmissionsListViewHelper;
@@ -44,9 +44,6 @@ import me.williamhester.ui.activities.SubmissionActivity;
 import me.williamhester.ui.adapters.SubmissionsRecyclerAdapter;
 
 public class SubredditFragment extends Fragment implements SubmissionsRecyclerAdapter.AdapterCallbacks {
-
-    public static final int HISTORY = 0;
-    public static final int SAVED = 1;
 
     private Context mContext;
     private String mSubredditName;
@@ -123,7 +120,7 @@ public class SubredditFragment extends Fragment implements SubmissionsRecyclerAd
     @Override
     public void onResume() {
         super.onResume();
-        if (mSubredditName != null && getActivity() != null
+        if (!TextUtils.isEmpty(mSubredditName) && getActivity() != null
                 && getActivity().getActionBar() != null) {
             getActivity().getActionBar().setTitle("/r/" + mSubredditName);
         } else if (getActivity() != null && getActivity().getActionBar() != null) {
@@ -476,11 +473,37 @@ public class SubredditFragment extends Fragment implements SubmissionsRecyclerAd
             } else if (mSubmissionList.size() > 0
                     && (mSubmissionsAdapter.getItemCount() - mLayoutManager.getChildCount()) // 25 - 4 = 21
                     <= (mLayoutManager.findFirstVisibleItemPosition() + VISIBLE_THRESHOLD)) { // 20 + 5 = 25
-//                SubmissionsListViewHelper list = new SubmissionsListViewHelper(mSubredditName,
-//                        mPrimarySortType, mSecondarySortType, null,
-//                        mSubmissionList.get(mSubmissionList.size() - 1).getName(),
-//                        mAccount);
-//                new RetrieveSubmissionsTask().execute(list);
+                String after;
+                if (mSubmissionList == null || mSubmissionList.size() == 0) {
+                    after = null;
+                } else {
+                    after = mSubmissionList.get(mSubmissionList.size() - 1).getName();
+                }
+                mSwipeRefreshLayout.setRefreshing(true);
+                RedditApi.getSubmissions(getActivity(), mSubredditName, mPrimarySortType,
+                        mSecondarySortType, null, after, mAccount, new FutureCallback<JsonObject>() {
+                            @Override
+                            public void onCompleted(Exception e, JsonObject result) {
+                                if (e == null) {
+                                    ResponseRedditWrapper wrapper = new ResponseRedditWrapper(result, new Gson());
+                                    if (wrapper.getData() instanceof Listing) {
+                                        ArrayList<Submission> submissions = new ArrayList<>();
+                                        List<ResponseRedditWrapper> children = ((Listing) wrapper.getData()).getChildren();
+                                        for (ResponseRedditWrapper innerWrapper : children) {
+                                            if (innerWrapper.getData() instanceof Submission) {
+                                                submissions.add((Submission) innerWrapper.getData());
+                                            }
+                                        }
+                                        mSubmissionList.addAll(submissions);
+                                        mSubmissionsAdapter.notifyDataSetChanged();
+                                        mSwipeRefreshLayout.setRefreshing(false);
+                                    }
+                                } else {
+                                    e.printStackTrace();
+                                    mSwipeRefreshLayout.setRefreshing(false);
+                                }
+                            }
+                        });
                 loading = true;
             }
         }

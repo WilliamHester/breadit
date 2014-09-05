@@ -2,6 +2,7 @@ package me.williamhester.ui.fragments;
 
 import android.app.Fragment;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -65,8 +66,8 @@ public class ImageFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_imgur_image, root, false);
-        ImageView imageView = (ImageView) v.findViewById(R.id.image);
+        final View v = inflater.inflate(R.layout.fragment_imgur_image, root, false);
+        final ImageView imageView = (ImageView) v.findViewById(R.id.image);
         TextView description = (TextView) v.findViewById(R.id.description);
         if (mImgurImage != null && mImgurImage.getDescription() != null) {
             description.setText(mImgurImage.getDescription());
@@ -76,10 +77,8 @@ public class ImageFragment extends Fragment {
             @Override
             public void onCompleted(Exception e, ImageView result) {
                 mAttacher = new PhotoViewAttacher(result);
-                if (getView() != null) {
-                    ProgressBar progressBar = (ProgressBar) getView().findViewById(R.id.progress_bar);
-                    progressBar.setVisibility(View.GONE);
-                }
+                ProgressBar progressBar = (ProgressBar) v.findViewById(R.id.progress_bar);
+                progressBar.setVisibility(View.GONE);
             }
         });
 

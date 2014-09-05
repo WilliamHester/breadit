@@ -37,6 +37,9 @@ public class ResponseRedditWrapper implements Serializable {
             // Award
         } else if (mKind.equals("t8")) {
             // Promo Campaign
+        } else if (mKind.equals("LiveUpdateEvent")) {
+            TypeToken<RedditLive> token = new TypeToken<RedditLive>() {};
+            mData = gson.fromJson(object.get("data"), token.getType());
         }
     }
 

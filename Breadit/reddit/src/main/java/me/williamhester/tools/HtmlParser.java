@@ -36,7 +36,7 @@ import me.williamhester.ui.text.SpoilerSpan;
  */
 public class HtmlParser {
 
-    private List<String> mLinks = new ArrayList<>();
+    private final List<String> mLinks = new ArrayList<>();
     private SpannableStringBuilder mSpannableStringBuilder;
 
     public HtmlParser(String html) {
@@ -47,7 +47,7 @@ public class HtmlParser {
         return mSpannableStringBuilder;
     }
 
-    public List<String> getLinks() {
+    public @NonNull List<String> getLinks() {
         return mLinks;
     }
 

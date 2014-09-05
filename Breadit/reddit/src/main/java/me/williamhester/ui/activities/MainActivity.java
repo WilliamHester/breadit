@@ -152,16 +152,12 @@ public class MainActivity extends Activity
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event)  {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (mNavigationDrawerFragment.isOpen()) {
-                mNavigationDrawerFragment.toggle();
-                return true;
-            } else {
-                return super.onKeyDown(keyCode, event);
-            }
+    public void onBackPressed()  {
+        if (mNavigationDrawerFragment.isOpen()) {
+            mNavigationDrawerFragment.toggle();
+        } else {
+            super.onBackPressed();
         }
-        return super.onKeyDown(keyCode, event);
     }
 
     @Override

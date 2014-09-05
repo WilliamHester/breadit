@@ -62,13 +62,25 @@ public class RedditApi {
     }
 
     public static void getRedditLiveData(Context context, Submission submission,
-                                         FutureCallback<ResponseRedditWrapper> callback) {
+                                         final FutureCallback<ResponseRedditWrapper> callback) {
         Ion.with(context)
                 .load(submission.getUrl() + "/about.json")
                 .addHeader("User-Agent", USER_AGENT)
                 .addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
-                .as(new TypeToken<ResponseRedditWrapper>() {})
-                .setCallback(callback);
+                .asJsonObject()
+                .setCallback(new FutureCallback<JsonObject>() {
+                    @Override
+                    public void onCompleted(Exception e, JsonObject result) {
+                        if (e != null) {
+                            e.printStackTrace();
+                            callback.onCompleted(e, null);
+                            return;
+                        }
+                        Gson gson = new Gson();
+                        ResponseRedditWrapper wrapper = new ResponseRedditWrapper(result, gson);
+                        callback.onCompleted(null, wrapper);
+                    }
+                });
     }
 
     public static void getSubmissions(Context context, String subredditName, String sortType,
