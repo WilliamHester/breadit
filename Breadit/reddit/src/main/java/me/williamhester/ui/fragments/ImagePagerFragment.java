@@ -28,6 +28,8 @@ public class ImagePagerFragment extends Fragment {
     private static final String ALBUM = "album";
     private static final String IMAGE_URL = "imageUrl";
 
+    private static final int PAGER_INDICATOR_MS = 1000;
+
     private FragmentPagerAdapter mAdapter;
     private Handler mAnimHandler;
     private Runnable mAnimRunnable;
@@ -103,6 +105,7 @@ public class ImagePagerFragment extends Fragment {
         if (mAdapter.getCount() < 2) {
             indicator.setVisibility(View.INVISIBLE);
         } else {
+            indicator.setText((mCurrentPosition + 1) + " of " + mAdapter.getCount());
             mAnimRunnable = new Runnable() {
                 @Override
                 public void run() {
@@ -126,23 +129,39 @@ public class ImagePagerFragment extends Fragment {
                     indicator.startAnimation(fadeOut);
                 }
             };
-            mAnimHandler.postDelayed(mAnimRunnable, 500);
+            mAnimHandler.postDelayed(mAnimRunnable, PAGER_INDICATOR_MS);
         }
         ViewPager pager = (ViewPager) v.findViewById(R.id.view_pager);
         pager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
-            public void onPageScrolled(int i, float v, int i2) { }
-
-            @Override
-            public void onPageSelected(int i) {
-                indicator.setVisibility(View.VISIBLE);
-                mAnimHandler.postDelayed(mAnimRunnable, 1000);
-                mCurrentPosition = i;
+            public void onPageScrolled(int position, float positionOffset, int pixels) {
+                if (positionOffset > 0.5f) {
+                    mCurrentPosition = position + 1;
+                } else if (positionOffset < -0.5f) {
+                    mCurrentPosition = position - 1;
+                } else {
+                    mCurrentPosition = position;
+                }
                 indicator.setText((mCurrentPosition + 1) + " of " + mAdapter.getCount());
             }
 
             @Override
-            public void onPageScrollStateChanged(int i) { }
+            public void onPageSelected(int i) {
+                mCurrentPosition = i;
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int i) {
+                switch (i) {
+                    case ViewPager.SCROLL_STATE_DRAGGING:
+                        indicator.setVisibility(View.VISIBLE);
+                        mAnimHandler.removeCallbacks(mAnimRunnable);
+                        break;
+                    case ViewPager.SCROLL_STATE_IDLE:
+                        mAnimHandler.postDelayed(mAnimRunnable, PAGER_INDICATOR_MS);
+                        break;
+                }
+            }
         });
         pager.setAdapter(mAdapter);
         return v;
