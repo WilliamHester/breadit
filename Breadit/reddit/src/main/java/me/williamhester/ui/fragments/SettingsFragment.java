@@ -149,6 +149,9 @@ public class SettingsFragment extends PreferenceFragment {
                                     .getListView().getCheckedItemPosition();
                             if (selection < accounts.size()) {
                                 id = accounts.get(selection).getId();
+                                ((BreaditApplication) getActivity().getApplicationContext()).setAccount(accounts.get(selection));
+                            } else {
+                                ((BreaditApplication) getActivity().getApplicationContext()).setAccount(null);
                             }
                             SharedPreferences.Editor editor = prefs.edit();
                             editor.putLong("accountId", id);
@@ -207,6 +210,9 @@ public class SettingsFragment extends PreferenceFragment {
                                     .getListView().getCheckedItemPosition();
                             if (selection < accounts.size()) {
                                 id = accounts.get(selection).getId();
+                                ((BreaditApplication) getActivity().getApplicationContext()).setAccount(accounts.get(selection));
+                            } else {
+                                ((BreaditApplication) getActivity().getApplicationContext()).setAccount(null);
                             }
                             if (id == -1) {
                                 mClearHistory.setEnabled(false);
