@@ -27,7 +27,6 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.williamhester.BreaditApplication;
 import me.williamhester.models.AccountManager;
 import me.williamhester.models.Submission;
 import me.williamhester.models.Thing;

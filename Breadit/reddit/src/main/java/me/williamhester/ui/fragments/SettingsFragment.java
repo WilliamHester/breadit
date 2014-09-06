@@ -16,9 +16,8 @@ import android.view.ViewGroup;
 
 import java.util.List;
 
-import me.williamhester.BreaditApplication;
-import me.williamhester.models.Account;
 import me.williamhester.databases.AccountDataSource;
+import me.williamhester.models.Account;
 import me.williamhester.models.AccountManager;
 import me.williamhester.reddit.R;
 

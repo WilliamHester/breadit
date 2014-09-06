@@ -3,7 +3,6 @@ package me.williamhester.ui.fragments;
 import android.app.Fragment;
 import android.os.Bundle;
 
-import me.williamhester.BreaditApplication;
 import me.williamhester.models.Account;
 import me.williamhester.models.AccountManager;
 

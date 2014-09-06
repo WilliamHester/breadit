@@ -13,7 +13,6 @@ import android.view.animation.Animation;
 import android.view.animation.ScaleAnimation;
 import android.widget.LinearLayout;
 
-import me.williamhester.BreaditApplication;
 import me.williamhester.models.AccountManager;
 import me.williamhester.models.Votable;
 import me.williamhester.reddit.R;
