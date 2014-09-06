@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button android:id="@+id/hot_sort"
+            android:textAllCaps="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/hot"
+            android:padding="8dp"
+            style="?android:attr/buttonBarButtonStyle"/>
+
+        <Button android:id="@+id/new_sort"
+            android:textAllCaps="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/new_string"
+            android:padding="8dp"
+            style="?android:attr/buttonBarButtonStyle"/>
+
+        <Button android:id="@+id/rising_sort"
+            android:textAllCaps="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/rising"
+            android:padding="8dp"
+            style="?android:attr/buttonBarButtonStyle"/>
+
+        <Button android:id="@+id/controversial_sort"
+            android:textAllCaps="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/controversial"
+            android:padding="8dp"
+            style="?android:attr/buttonBarButtonStyle"/>
+
+        <Button android:id="@+id/top_sort"
+            android:textAllCaps="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/top"
+            android:padding="8dp"
+            style="?android:attr/buttonBarButtonStyle"/>
+
+    </LinearLayout>
+
+    <LinearLayout android:id="@+id/secondary_sorts"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button android:id="@+id/hour_sort"
+            android:textAllCaps="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/hour"
+            android:padding="8dp"
+            style="?android:attr/buttonBarButtonStyle"/>
+
+        <Button android:id="@+id/day_sort"
+            android:textAllCaps="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/today"
+            android:padding="8dp"
+            style="?android:attr/buttonBarButtonStyle"/>
+
+        <Button android:id="@+id/week_sort"
+            android:textAllCaps="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/week"
+            android:padding="8dp"
+            style="?android:attr/buttonBarButtonStyle"/>
+
+        <Button android:id="@+id/month_sort"
+            android:textAllCaps="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/month"
+            android:padding="8dp"
+            style="?android:attr/buttonBarButtonStyle"/>
+
+        <Button android:id="@+id/year_sort"
+            android:textAllCaps="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/year"
+            android:padding="8dp"
+            style="?android:attr/buttonBarButtonStyle"/>
+
+        <Button android:id="@+id/all_sort"
+            android:textAllCaps="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/all"
+            android:padding="8dp"
+            style="?android:attr/buttonBarButtonStyle"/>
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -129,4 +129,19 @@
     <!-- RedditLiveFragment -->
     <string name="say_something">Say something</string>
 
+    <!-- SortFragment -->
+    <!-- Primary Sorts -->
+    <string name="hot">Hot</string>
+    <string name="top">Top</string>
+    <string name="new_string">New</string>
+    <string name="controversial">Controversial</string>
+    <string name="rising">Rising</string>
+    <!-- Secondary Sorts -->
+    <string name="hour">This hour</string>
+    <string name="today">Today</string>
+    <string name="week">This week</string>
+    <string name="month">This month</string>
+    <string name="year">This year</string>
+    <string name="all">All time</string>
+
 </resources>
