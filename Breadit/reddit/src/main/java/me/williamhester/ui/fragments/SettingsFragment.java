@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 
 import java.util.List;
 
+import me.williamhester.BreaditApplication;
 import me.williamhester.models.Account;
 import me.williamhester.databases.AccountDataSource;
 import me.williamhester.reddit.R;
@@ -29,10 +30,9 @@ public class SettingsFragment extends PreferenceFragment {
     private Account mAccount;
 
 
-    public static SettingsFragment newInstance(Account account) {
+    public static SettingsFragment newInstance() {
         SettingsFragment fragment = new SettingsFragment();
         Bundle args = new Bundle();
-        args.putParcelable("account", account);
         fragment.setArguments(args);
         return fragment;
     }
@@ -48,9 +48,7 @@ public class SettingsFragment extends PreferenceFragment {
         mLogIn = findPreference("pref_login");
         mLogOut = findPreference("pref_logout");
         mSwitchUsers = findPreference("pref_switch_users");
-        if(getArguments() != null) {
-            mAccount = getArguments().getParcelable("account");
-        }
+        mAccount = ((BreaditApplication) getActivity().getApplicationContext()).getAccount();
     }
 
     @Override

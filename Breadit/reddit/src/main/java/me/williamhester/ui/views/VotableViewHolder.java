@@ -4,7 +4,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
 
-import me.williamhester.models.Account;
 import me.williamhester.models.Votable;
 import me.williamhester.models.utils.Utilities;
 import me.williamhester.network.RedditApi;
@@ -17,7 +16,6 @@ public abstract class VotableViewHolder extends RecyclerView.ViewHolder {
 
     // The mBody TextView is protected so that it can be modified by its children.
     protected TextView mBody;
-    private Account mAccount;
 
     private TextView mTime;
     protected TextView mMetadata;
@@ -26,7 +24,7 @@ public abstract class VotableViewHolder extends RecyclerView.ViewHolder {
     protected SwipeView mSwipeView;
     private Votable mVotable;
 
-    public VotableViewHolder(View itemView, Account account) {
+    public VotableViewHolder(View itemView) {
         super(itemView);
 
         mBody = (TextView) itemView.findViewById(R.id.body);
@@ -35,9 +33,7 @@ public abstract class VotableViewHolder extends RecyclerView.ViewHolder {
         mForegroundVoteView = itemView.findViewById(R.id.vote_foreground);
         mMetadata = (TextView) itemView.findViewById(R.id.metadata);
         mSwipeView = (SwipeView) itemView.findViewById(R.id.swipe_view);
-        mAccount = account;
         mSwipeView.setUp(mBackgroundVoteView, mForegroundVoteView, mVoteListener);
-        mSwipeView.setEnabled(mAccount != null);
     }
 
     public void setContent(Votable votable) {
@@ -75,13 +71,13 @@ public abstract class VotableViewHolder extends RecyclerView.ViewHolder {
         @Override
         public void onRightToLeftSwipe() {
             mVotable.setVoteStatus(mVotable.getVoteStatus() == Votable.DOWNVOTED ? Votable.NEUTRAL : Votable.DOWNVOTED);
-            RedditApi.vote(itemView.getContext(), mVotable, mAccount);
+            RedditApi.vote(itemView.getContext(), mVotable);
         }
 
         @Override
         public void onLeftToRightSwipe() {
             mVotable.setVoteStatus(mVotable.getVoteStatus() == Votable.UPVOTED ? Votable.NEUTRAL : Votable.UPVOTED);
-            RedditApi.vote(itemView.getContext(), mVotable, mAccount);
+            RedditApi.vote(itemView.getContext(), mVotable);
         }
     };
 }

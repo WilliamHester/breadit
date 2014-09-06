@@ -32,7 +32,7 @@ public class UserActivity extends Activity {
             mUsername = getIntent().getExtras().getString("username");
         }
         getFragmentManager().beginTransaction()
-                .replace(R.id.container, UserFragment.newInstance(mUsername, mAccount))
+                .replace(R.id.container, UserFragment.newInstance(mUsername))
                 .commit();
 
         if (getActionBar() != null) {
@@ -55,7 +55,7 @@ public class UserActivity extends Activity {
                 return true;
             case R.id.action_compose_message:
                 MessageDialogFragment messageDialogFragment = MessageDialogFragment
-                        .newInstance(mAccount, mUsername);
+                        .newInstance(mUsername);
                 messageDialogFragment.show(getFragmentManager(), "message_dialog");
                 return true;
         }

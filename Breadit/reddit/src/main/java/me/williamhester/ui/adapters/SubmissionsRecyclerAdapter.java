@@ -21,7 +21,6 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.williamhester.models.Account;
 import me.williamhester.models.ImgurAlbum;
 import me.williamhester.models.ImgurImage;
 import me.williamhester.models.Submission;
@@ -77,7 +76,7 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
         private Submission mSubmission;
 
         public SubmissionViewHolder(View itemView) {
-            super(itemView, mCallback.getAccount());
+            super(itemView);
 
             mDomain = (TextView) itemView.findViewById(R.id.domain);
             mCommentData = (TextView) itemView.findViewById(R.id.num_comments);
@@ -290,6 +289,5 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
         public void onImageViewClicked(ImgurAlbum album);
         public void onImageViewClicked(String imageUrl);
         public void onCardClicked(Submission submission);
-        public Account getAccount();
     }
 }

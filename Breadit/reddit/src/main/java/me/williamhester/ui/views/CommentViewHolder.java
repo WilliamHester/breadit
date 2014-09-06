@@ -8,7 +8,6 @@ import android.view.View;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 
-import me.williamhester.models.Account;
 import me.williamhester.models.Comment;
 import me.williamhester.models.MoreComments;
 import me.williamhester.models.Votable;
@@ -22,8 +21,8 @@ public class CommentViewHolder extends VotableViewHolder {
     private Comment mComment;
     private CommentClickCallbacks mCallback;
 
-    public CommentViewHolder(View itemView, Account account, CommentClickCallbacks callbacks) {
-        super(itemView, account);
+    public CommentViewHolder(View itemView, CommentClickCallbacks callbacks) {
+        super(itemView);
         mCallback = callbacks;
         mBody.setMovementMethod(new LinkMovementMethod());
     }

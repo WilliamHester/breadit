@@ -2,13 +2,10 @@ package me.williamhester.ui.fragments;
 
 import android.app.ActionBar;
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
@@ -41,19 +38,20 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-;import me.williamhester.models.Account;
+import me.williamhester.databases.AccountDataSource;
 import me.williamhester.models.Submission;
 import me.williamhester.models.Subreddit;
 import me.williamhester.models.utils.Utilities;
-import me.williamhester.databases.AccountDataSource;
 import me.williamhester.reddit.R;
+
+;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
  * See the <a href="https://developer.android.com/design/patterns/navigation-drawer.html#Interaction">
  * design guidelines</a> for a complete explanation of the behaviors implemented here.
  */
-public class NavigationDrawerFragment extends Fragment {
+public class NavigationDrawerFragment extends AccountFragment {
 
     /**
      * Remember the position of the selected item.
@@ -82,11 +80,7 @@ public class NavigationDrawerFragment extends Fragment {
     private ArrayAdapter<String> mSubredditArrayAdapter;
 
     private int mCurrentSelectedPosition = 0;
-    private boolean mFromSavedInstanceState;
-    private boolean mUserLearnedDrawer;
-    private boolean mSubredditIsLoading = false;
     private boolean mIsOpen = false;
-    private Account mAccount;
     private Context mContext;
     private CheckBox mCheckbox;
     private Subreddit mSubreddit;
@@ -109,42 +103,20 @@ public class NavigationDrawerFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mAccount = getArguments().getParcelable("account");
             mSubName = getArguments().getString("subreddit");
             if (mSubName == null) {
                 mSubName = "FrontPage";
             }
         }
-        // Read in the flag indicating whether or not the user has demonstrated awareness of the
-        // drawer. See PREF_USER_LEARNED_DRAWER for details.
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mContext);
-        mUserLearnedDrawer = sp.getBoolean(PREF_USER_LEARNED_DRAWER, false);
 
         if (savedInstanceState != null) {
             mCurrentSelectedPosition = savedInstanceState.getInt(STATE_SELECTED_POSITION);
-            mFromSavedInstanceState = true;
         }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        Log.d("NDF", "onResume");
-        SharedPreferences prefs = mContext
-                .getSharedPreferences("preferences", Context.MODE_PRIVATE);
-        long id = prefs.getLong("accountId", -1);
-        if (id != -1) {
-            try {
-                AccountDataSource dataSource = new AccountDataSource(mContext);
-                dataSource.open();
-                mAccount = dataSource.getAccount(id);
-                dataSource.close();
-            } catch (NullPointerException e) {
-                Log.e("Breadit", "Error opening database");
-            }
-        } else {
-            mAccount = null;
-        }
         if (mAccount != null) {
             mSubredditList = mAccount.getSubreddits();
             Collections.sort(mSubredditList, mOrderList);
@@ -376,14 +348,13 @@ public class NavigationDrawerFragment extends Fragment {
         }
     }
 
-    public static NavigationDrawerFragment newInstance(Account account) {
-        return newInstance(account, null);
+    public static NavigationDrawerFragment newInstance() {
+        return newInstance(null);
     }
 
-    public static NavigationDrawerFragment newInstance(Account account, String subreddit) {
+    public static NavigationDrawerFragment newInstance(String subreddit) {
         Bundle args = new Bundle();
         args.putString("subreddit", subreddit);
-        args.putParcelable("account", account);
         NavigationDrawerFragment fragment = new NavigationDrawerFragment();
         fragment.setArguments(args);
         return fragment;
@@ -562,7 +533,6 @@ public class NavigationDrawerFragment extends Fragment {
                 return false;
             }
             try {
-                mSubredditIsLoading = true;
                 String s = Utilities.get("", "http://www.reddit.com/r/" + mSubName + "/about.json",
                         mAccount);
                 mSubreddit = Subreddit.fromString(s);
@@ -573,8 +543,6 @@ public class NavigationDrawerFragment extends Fragment {
                 e.printStackTrace();
                 mSubreddit = null;
                 return false;
-            } finally {
-                mSubredditIsLoading = false;
             }
             return true;
         }

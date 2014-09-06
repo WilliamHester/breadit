@@ -7,7 +7,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <application
+    <application android:name="me.williamhester.BreaditApplication"
         android:allowBackup="true"
         android:icon="@drawable/ic_breadit"
         android:label="@string/app_name"
@@ -42,9 +42,6 @@
                 <action android:name="android.intent.action.VIEW" />
                 <data android:scheme="me.williamhester.breadit" android:host="r" />
             </intent-filter>
-        </activity>
-        <activity android:name="me.williamhester.ui.activities.SetupActivity"
-            android:screenOrientation="portrait">
         </activity>
         <activity android:name="me.williamhester.ui.activities.AccountActivity" >
         </activity>

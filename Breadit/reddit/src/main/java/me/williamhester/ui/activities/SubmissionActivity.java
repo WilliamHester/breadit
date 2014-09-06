@@ -5,12 +5,10 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -18,13 +16,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import me.williamhester.models.Account;
 import me.williamhester.models.Submission;
+import me.williamhester.reddit.R;
+import me.williamhester.ui.fragments.CommentFragment;
 import me.williamhester.ui.fragments.RedditLiveFragment;
 import me.williamhester.ui.fragments.WebViewFragment;
-import me.williamhester.ui.fragments.CommentFragment;
-import me.williamhester.databases.AccountDataSource;
-import me.williamhester.reddit.R;
 import me.williamhester.ui.views.TabView;
 
 public class SubmissionActivity extends Activity implements TabView.TabSwitcher {
@@ -40,9 +36,7 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
     private Submission.Media mMedia;
     private TabView mTabView;
     private String mPermalink;
-    private Account mAccount;
     private String mCurrentTag;
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -55,24 +49,10 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
         if (getIntent().getAction() != null && getIntent().getAction().equals(Intent.ACTION_VIEW)) {
             mPermalink = getIntent().getDataString();
             mPermalink = "http://www.reddit.com" + mPermalink.substring(mPermalink.indexOf("/r/"));
-            Log.i("SubmissionActivity", "Viewing " + mPermalink);
-            SharedPreferences prefs = getSharedPreferences("preferences", MODE_PRIVATE);
-            long id = prefs.getLong("accountId", -1);
-            if (id != -1) {
-                try {
-                    AccountDataSource dataSource = new AccountDataSource(this);
-                    dataSource.open();
-                    mAccount = dataSource.getAccount(id);
-                    dataSource.close();
-                } catch (NullPointerException e) {
-                    Log.e("Breadit", "error accessing database");
-                }
-            }
             mCurrentTag = COMMENT_TAB;
         } else if (getIntent().getExtras() != null) {
             mSubmission = (Submission) getIntent().getExtras().getSerializable(SUBMISSION);
             mMedia = (Submission.Media) getIntent().getExtras().getSerializable("media");
-            mAccount = getIntent().getExtras().getParcelable(ACCOUNT);
             if (mCurrentTag == null) {
                 mCurrentTag = getIntent().getExtras().getString(TAB);
             }
@@ -142,7 +122,6 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
         Bundle args = new Bundle();
         args.putString("permalink", mPermalink);
         args.putSerializable("submission", mSubmission);
-        args.putParcelable("account", mAccount);
 
         CommentFragment comments;
         Fragment content;
@@ -176,7 +155,6 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
                         mTabView.addTab(content, TabView.TAB_TYPE_MAIN, contentTab, CONTENT_TAB);
                     } else if (!mSubmission.isSelf()) {
                         Bundle args = new Bundle();
-                        args.putParcelable("account", mAccount);
                         args.putString("permalink", mPermalink);
                         Fragment content = new CommentFragment();
                         content.setArguments(args);
