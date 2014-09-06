@@ -21,7 +21,6 @@ import android.widget.TextView;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.stream.MalformedJsonException;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.http.NameValuePair;
@@ -39,9 +38,8 @@ import me.williamhester.models.utils.Utilities;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.activities.UserActivity;
 
-public class MessagesFragment extends Fragment {
+public class MessagesFragment extends AccountFragment {
 
-    private Account mAccount;
     private Context mContext;
 
     private ListView mMessagesListView;
@@ -59,7 +57,6 @@ public class MessagesFragment extends Fragment {
         mMessageList = new ArrayList<Message>();
         mContext = getActivity();
         if (getArguments() != null) {
-            mAccount = getArguments().getParcelable("account");
             mFilterType = getArguments().getInt("filter_by", Message.ALL);
         }
     }
@@ -110,7 +107,7 @@ public class MessagesFragment extends Fragment {
                                     case 0:
                                         // Reply
                                         MessageDialogFragment mf = MessageDialogFragment
-                                                .newInstance(mAccount, m.getName());
+                                                .newInstance(m.getName());
                                         mf.show(getFragmentManager(), "reply_fragment");
                                         break;
                                     case 1:
@@ -120,7 +117,6 @@ public class MessagesFragment extends Fragment {
                                     case 2:
                                         // View user's profile
                                         Bundle b = new Bundle();
-                                        b.putParcelable("account", mAccount);
                                         b.putString("username", m.getAuthor());
                                         Intent i = new Intent(mContext, UserActivity.class);
                                         i.putExtras(b);

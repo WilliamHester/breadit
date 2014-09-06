@@ -1,6 +1,5 @@
 package me.williamhester.ui.fragments;
 
-import android.app.Fragment;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -26,7 +25,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import me.williamhester.models.Account;
 import me.williamhester.models.Comment;
 import me.williamhester.models.Submission;
 import me.williamhester.models.Votable;
@@ -35,7 +33,7 @@ import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.views.CommentViewHolder;
 
-public class CommentFragment extends Fragment {
+public class CommentFragment extends AccountFragment {
 
     private ArrayList<Comment> mCommentsList;
     private CommentArrayAdapter mCommentAdapter;
@@ -45,7 +43,6 @@ public class CommentFragment extends Fragment {
     private String mPermalink;
     private Submission mSubmission;
     private TextView mNumComments;
-    private Account mAccount;
     private View mHeaderView;
     private OnSubmissionLoaded mCallback;
 
@@ -59,12 +56,10 @@ public class CommentFragment extends Fragment {
         mContext = getActivity();
         if (savedInstanceState != null) {
             mCommentsList = savedInstanceState.getParcelableArrayList("comments");
-            mAccount = savedInstanceState.getParcelable("account");
             mSubmission = (Submission) savedInstanceState.getSerializable("submission");
             mPermalink = savedInstanceState.getString("permalink");
             mSortType = savedInstanceState.getInt("sortType");
         } else if (args != null) {
-            mAccount = args.getParcelable("account");
             mSubmission = (Submission) args.getSerializable("submission");
             if (mSubmission != null) {
                 mPermalink = mSubmission.getPermalink();
@@ -230,7 +225,7 @@ public class CommentFragment extends Fragment {
 
             if (convertView == null) {
                 convertView = View.inflate(mContext, R.layout.list_item_comment, null);
-                convertView.setTag(new CommentViewHolder(convertView, mAccount, mCommentCallbacks));
+                convertView.setTag(new CommentViewHolder(convertView, mCommentCallbacks));
             }
             ((CommentViewHolder) convertView.getTag()).setContent(getItem(position));
 

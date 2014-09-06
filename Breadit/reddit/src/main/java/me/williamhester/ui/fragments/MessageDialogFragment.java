@@ -17,6 +17,7 @@ import org.apache.http.message.BasicNameValuePair;
 import java.util.ArrayList;
 import java.util.List;
 
+import me.williamhester.BreaditApplication;
 import me.williamhester.models.Account;
 import me.williamhester.models.utils.Utilities;
 import me.williamhester.reddit.R;
@@ -39,10 +40,10 @@ public class MessageDialogFragment extends DialogFragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mName = getArguments().getString("name");
-            mAccount = getArguments().getParcelable("account");
             mReply = getArguments().getBoolean("reply");
         }
         setStyle(STYLE_NORMAL, android.R.style.Theme_Holo_Dialog);
+        mAccount = ((BreaditApplication) getActivity().getApplicationContext()).getAccount();
     }
 
     @Override
@@ -89,9 +90,8 @@ public class MessageDialogFragment extends DialogFragment {
         return v;
     }
 
-    public static MessageDialogFragment newInstance(Account account, String name, boolean reply) {
+    public static MessageDialogFragment newInstance(String name, boolean reply) {
         Bundle b = new Bundle();
-        b.putParcelable("account", account);
         b.putString("name", name);
         b.putBoolean("reply", reply);
         MessageDialogFragment m = new MessageDialogFragment();
@@ -99,8 +99,8 @@ public class MessageDialogFragment extends DialogFragment {
         return m;
     }
 
-    public static MessageDialogFragment newInstance(Account account, String name) {
-        return newInstance(account, name, false);
+    public static MessageDialogFragment newInstance(String name) {
+        return newInstance(name, false);
     }
 
     private class SendMessageAsyncTask extends AsyncTask<Void, Void, Void> {

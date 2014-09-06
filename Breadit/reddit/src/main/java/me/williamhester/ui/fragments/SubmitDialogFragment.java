@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import me.williamhester.BreaditApplication;
 import me.williamhester.models.Account;
 import me.williamhester.models.Captcha;
 import me.williamhester.models.utils.Utilities;
@@ -50,10 +51,10 @@ public class SubmitDialogFragment extends DialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mAccount = getArguments().getParcelable("account");
             mSubreddit = getArguments().getString("subreddit");
         }
         setStyle(STYLE_NORMAL, android.R.style.Theme_Holo_Dialog);
+        mAccount = ((BreaditApplication) getActivity().getApplicationContext()).getAccount();
     }
 
     @Override

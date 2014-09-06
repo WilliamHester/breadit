@@ -1,12 +1,9 @@
 package me.williamhester.ui.fragments;
 
-import android.app.Fragment;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.text.Html;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,8 +27,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.williamhester.models.Account;
-import me.williamhester.models.Comment;
+import me.williamhester.BreaditApplication;
 import me.williamhester.models.Submission;
 import me.williamhester.models.Thing;
 import me.williamhester.models.User;
@@ -39,9 +35,8 @@ import me.williamhester.models.Votable;
 import me.williamhester.models.utils.Utilities;
 import me.williamhester.reddit.R;
 
-public class UserFragment extends Fragment {
+public class UserFragment extends AccountFragment {
 
-    private Account mAccount;
     private String mUsername;
     private User mUser;
 
@@ -59,8 +54,8 @@ public class UserFragment extends Fragment {
         mContext = getActivity();
         if (getArguments() != null) {
             mUsername = getArguments().getString("username");
-            mAccount = getArguments().getParcelable("account");
         }
+        mAccount = ((BreaditApplication) getActivity().getApplicationContext()).getAccount();
         if (mUsername == null && mAccount != null) {
             mUsername = mAccount.getUsername();
         }
@@ -79,10 +74,9 @@ public class UserFragment extends Fragment {
         return v;
     }
 
-    public static UserFragment newInstance(String username, Account account) {
+    public static UserFragment newInstance(String username) {
         Bundle b = new Bundle();
         b.putString("username", username);
-        b.putParcelable("account", account);
         UserFragment fragment = new UserFragment();
         fragment.setArguments(b);
         return fragment;

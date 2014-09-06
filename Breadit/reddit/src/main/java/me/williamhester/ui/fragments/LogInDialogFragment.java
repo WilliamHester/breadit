@@ -18,6 +18,7 @@ import android.widget.Toast;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
+import me.williamhester.BreaditApplication;
 import me.williamhester.models.Account;
 import me.williamhester.databases.AccountDataSource;
 import me.williamhester.reddit.R;
@@ -104,6 +105,7 @@ public class LogInDialogFragment extends DialogFragment {
                 dataSource.open();
                 dataSource.addAccount(a);
                 dataSource.close();
+                ((BreaditApplication) getActivity().getApplicationContext()).setAccount(a);
                 if (getActivity() != null) {
                     SharedPreferences prefs = getActivity()
                             .getSharedPreferences("preferences", Context.MODE_PRIVATE);

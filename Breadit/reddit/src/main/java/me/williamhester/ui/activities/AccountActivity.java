@@ -9,7 +9,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import me.williamhester.models.Account;
 import me.williamhester.ui.fragments.MessageDialogFragment;
 import me.williamhester.ui.fragments.MessagesFragment;
 import me.williamhester.ui.fragments.UserFragment;
@@ -18,15 +17,10 @@ import me.williamhester.ui.views.TabView;
 
 public class AccountActivity extends Activity implements TabView.TabSwitcher {
 
-    private Account mAccount;
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_account);
-        if (getIntent().getExtras() != null) {
-            mAccount = getIntent().getExtras().getParcelable("account");
-        }
         setUpActionBarTabs();
     }
 
@@ -37,12 +31,9 @@ public class AccountActivity extends Activity implements TabView.TabSwitcher {
         View inboxView = inflater.inflate(R.layout.tab_inbox, null);
         View profileView = inflater.inflate(R.layout.tab_my_profile, null);
 
-        Bundle args = new Bundle();
-        args.putParcelable("account", mAccount);
-
         TabView tabView = (TabView) v.findViewById(R.id.tabs);
-        tabView.addTab(MessagesFragment.class, args, TabView.TAB_TYPE_MAIN, inboxView, "inbox");
-        tabView.addTab(UserFragment.class, args, TabView.TAB_TYPE_MAIN, profileView, "sent");
+        tabView.addTab(MessagesFragment.class, null, TabView.TAB_TYPE_MAIN, inboxView, "inbox");
+        tabView.addTab(UserFragment.class, null, TabView.TAB_TYPE_MAIN, profileView, "sent");
 
         ActionBar actionBar = getActionBar();
         if (actionBar != null) {
@@ -70,8 +61,7 @@ public class AccountActivity extends Activity implements TabView.TabSwitcher {
                 finish();
                 return true;
             case R.id.action_compose_message:
-                MessageDialogFragment messageDialogFragment = MessageDialogFragment
-                        .newInstance(mAccount, null);
+                MessageDialogFragment messageDialogFragment = MessageDialogFragment.newInstance(null);
                 messageDialogFragment.show(getFragmentManager(), "message_dialog");
                 return true;
         }

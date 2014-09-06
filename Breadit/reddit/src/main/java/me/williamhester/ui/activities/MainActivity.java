@@ -4,24 +4,17 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
-import android.util.Log;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
-import me.williamhester.models.Account;
+import me.williamhester.BreaditApplication;
+import me.williamhester.reddit.R;
 import me.williamhester.ui.fragments.ImagePagerFragment;
 import me.williamhester.ui.fragments.NavigationDrawerFragment;
 import me.williamhester.ui.fragments.SubredditFragment;
-import me.williamhester.ui.fragments.SubmitDialogFragment;
-import me.williamhester.databases.AccountDataSource;
-import me.williamhester.reddit.R;
 
 public class MainActivity extends Activity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks,
@@ -29,7 +22,6 @@ public class MainActivity extends Activity
 
     private NavigationDrawerFragment mNavigationDrawerFragment;
     private Fragment mSubredditFragment;
-    private Account mAccount;
     private String mSubreddit;
 
     @SuppressLint("CommitPrefEdits")
@@ -38,37 +30,22 @@ public class MainActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        SharedPreferences prefs = getSharedPreferences("preferences", MODE_PRIVATE);
 
         if (getIntent() != null && getIntent().getAction() != null
                 && getIntent().getAction().equals(Intent.ACTION_VIEW)) {
             mSubreddit = getIntent().getDataString();
             if (mSubreddit != null)
                 mSubreddit = mSubreddit.substring(mSubreddit.indexOf("/subreddit/") + 11);
-            long id = prefs.getLong("accountId", -1);
-            if (id != -1) {
-                AccountDataSource dataSource = new AccountDataSource(this);
-                dataSource.open();
-                mAccount = dataSource.getAccount(id);
-                dataSource.close();
-            }
-            mNavigationDrawerFragment = NavigationDrawerFragment.newInstance(mAccount, mSubreddit);
-        } else { // If the user has completed the setup
-            long id = prefs.getLong("accountId", -1);
-            if (id != -1) {
-                AccountDataSource dataSource = new AccountDataSource(this);
-                dataSource.open();
-                mAccount = dataSource.getAccount(id);
-                dataSource.close();
-            }
+            mNavigationDrawerFragment = NavigationDrawerFragment.newInstance(mSubreddit);
         }
+
         if (getActionBar() != null) {
             getActionBar().setDisplayHomeAsUpEnabled(true);
             getActionBar().setHomeButtonEnabled(true);
         }
 
         if (mNavigationDrawerFragment == null)
-            mNavigationDrawerFragment = NavigationDrawerFragment.newInstance(mAccount);
+            mNavigationDrawerFragment = NavigationDrawerFragment.newInstance();
 
         updateActionBar(null);
 
@@ -83,7 +60,7 @@ public class MainActivity extends Activity
                     .replace(R.id.container, mSubredditFragment, "SubredditFragment")
                     .commit();
         } else {
-            mSubredditFragment = SubredditFragment.newInstance(mAccount, mSubreddit);
+            mSubredditFragment = SubredditFragment.newInstance(mSubreddit);
             getFragmentManager().beginTransaction()
                     .add(R.id.container, mSubredditFragment, "SubredditFragment")
                     .commit();
@@ -109,20 +86,6 @@ public class MainActivity extends Activity
         mNavigationDrawerFragment.setSubreddit(mSubreddit,
                 0,  // TODO: Fix this
                 0); // TODO: Fix this
-        SharedPreferences prefs = getSharedPreferences("preferences", Context.MODE_PRIVATE);
-        long id = prefs.getLong("accountId", -1);
-        if (id != -1) {
-            try {
-                AccountDataSource dataSource = new AccountDataSource(this);
-                dataSource.open();
-                mAccount = dataSource.getAccount(id);
-                dataSource.close();
-            } catch (NullPointerException e) {
-                Log.e("Breadit", "Error opening database");
-            }
-        } else {
-            mAccount = null;
-        }
         invalidateOptionsMenu();
     }
 
@@ -141,7 +104,7 @@ public class MainActivity extends Activity
                         .replace(R.id.container, frag, "SubredditFragment")
                         .commit();
             } else {
-                mSubredditFragment = SubredditFragment.newInstance(mAccount, subreddit);
+                mSubredditFragment = SubredditFragment.newInstance(subreddit);
                 getFragmentManager().beginTransaction()
                         .addToBackStack(subreddit)
                         .replace(R.id.container, mSubredditFragment, "SubredditFragment")
@@ -180,7 +143,7 @@ public class MainActivity extends Activity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
-        if (mAccount == null) {
+        if (!((BreaditApplication) getApplicationContext()).isLoggedIn()) {
             menu.removeItem(R.id.action_my_account);
         }
         return super.onCreateOptionsMenu(menu);
@@ -192,20 +155,11 @@ public class MainActivity extends Activity
         if (id == R.id.action_settings) {
             Intent i = new Intent(this, SettingsActivity.class);
             Bundle b = new Bundle();
-            b.putParcelable("account", mAccount);
             i.putExtras(b);
             startActivity(i);
             return true;
-        } else if (id == R.id.action_submit) {
-            if (mAccount != null) {
-                SubmitDialogFragment sf = SubmitDialogFragment.newInstance(mAccount, mSubreddit);
-                sf.show(getFragmentManager(), "submit_fragment");
-            } else {
-                Toast.makeText(this, R.string.must_be_logged_in, Toast.LENGTH_SHORT).show();
-            }
         } else if (id == R.id.action_my_account) {
             Bundle b = new Bundle();
-            b.putParcelable("account", mAccount);
             Intent i = new Intent(this, AccountActivity.class);
             i.putExtras(b);
             startActivity(i);
