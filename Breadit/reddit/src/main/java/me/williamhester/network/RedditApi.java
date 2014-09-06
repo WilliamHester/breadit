@@ -23,6 +23,7 @@ import java.util.Stack;
 
 import me.williamhester.BreaditApplication;
 import me.williamhester.models.Account;
+import me.williamhester.models.AccountManager;
 import me.williamhester.models.Comment;
 import me.williamhester.models.Listing;
 import me.williamhester.models.RedditLive;
@@ -121,7 +122,7 @@ public class RedditApi {
     }
 
     private static Map<String, List<String>> generateUserHeaders(Context context) {
-        Account account = ((BreaditApplication) context.getApplicationContext()).getAccount();
+        Account account = AccountManager.getAccount();
         Map<String, List<String>> headers = new HashMap<>();
         if (account != null) {
             ArrayList<String> list1 = new ArrayList<>();

@@ -14,6 +14,7 @@ import android.view.animation.ScaleAnimation;
 import android.widget.LinearLayout;
 
 import me.williamhester.BreaditApplication;
+import me.williamhester.models.AccountManager;
 import me.williamhester.models.Votable;
 import me.williamhester.reddit.R;
 
@@ -64,7 +65,7 @@ public class SwipeView extends LinearLayout {
         ViewConfiguration vc = ViewConfiguration.get(getContext());
         mTouchSlop = vc.getScaledTouchSlop();
         mFlingVelocity = (vc.getScaledMaximumFlingVelocity() + vc.getScaledMinimumFlingVelocity()) / 2;
-        setEnabled(((BreaditApplication) getContext().getApplicationContext()).isLoggedIn());
+        setEnabled(AccountManager.isLoggedIn());
     }
 
     public void recycle(Votable votable) {

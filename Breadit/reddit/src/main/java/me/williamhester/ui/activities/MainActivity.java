@@ -10,7 +10,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import me.williamhester.BreaditApplication;
+import me.williamhester.models.AccountManager;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.fragments.ImagePagerFragment;
 import me.williamhester.ui.fragments.NavigationDrawerFragment;
@@ -143,7 +143,7 @@ public class MainActivity extends Activity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
-        if (!((BreaditApplication) getApplicationContext()).isLoggedIn()) {
+        if (!AccountManager.isLoggedIn()) {
             menu.removeItem(R.id.action_my_account);
         }
         return super.onCreateOptionsMenu(menu);
