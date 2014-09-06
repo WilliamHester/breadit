@@ -57,7 +57,7 @@ public class RedditApi {
     public static void vote(Context context, Votable v) {
         Ion.with(context)
                 .load(REDDIT_URL + "/api/vote")
-                .addHeaders(generateUserHeaders(context))
+                .addHeaders(generateUserHeaders())
                 .setBodyParameter("dir", String.valueOf(v.getVoteStatus()))
                 .setBodyParameter("id", v.getName())
                 .asString();
@@ -94,7 +94,7 @@ public class RedditApi {
         Ion.with(context)
                 .load(REDDIT_URL + subredditName + "/" + sortType + "/.json")
                 .addQueries(generateSubmissionQueries(secondarySort, before, after))
-                .addHeaders(generateUserHeaders(context))
+                .addHeaders(generateUserHeaders())
                 .addHeader("User-Agent", USER_AGENT)
                 .asJsonObject()
                 .setCallback(callback);
@@ -121,7 +121,7 @@ public class RedditApi {
         return queries;
     }
 
-    private static Map<String, List<String>> generateUserHeaders(Context context) {
+    private static Map<String, List<String>> generateUserHeaders() {
         Account account = AccountManager.getAccount();
         Map<String, List<String>> headers = new HashMap<>();
         if (account != null) {
@@ -183,7 +183,7 @@ public class RedditApi {
     public static void editThing(Context context, final Votable thing, final FutureCallback<Votable> callback) {
         Ion.with(context)
                 .load(REDDIT_URL + "/api/editusertext/")
-                .addHeaders(generateUserHeaders(context))
+                .addHeaders(generateUserHeaders())
                 .addHeader("api_type", "json")
 //                .setBodyParameter("text", thing.getRawMarkdown())
                 .setBodyParameter("thing_id", thing.getName())
