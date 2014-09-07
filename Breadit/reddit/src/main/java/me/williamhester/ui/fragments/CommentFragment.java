@@ -92,7 +92,6 @@ public class CommentFragment extends AccountFragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelableArrayList("comments", mCommentsList);
-        outState.putParcelable("account", mAccount);
         outState.putSerializable("submission", mSubmission);
         outState.putString("permalink", mPermalink);
         outState.putInt("sortType", mSortType);
