@@ -11,6 +11,9 @@ public class UrlParser {
     public static final int IMGUR_GALLERY = 3;
     public static final int YOUTUBE = 4;
     public static final int NORMAL_IMAGE = 6;
+    public static final int SUBMISSION = 7;
+    public static final int SUBREDDIT = 8;
+    public static final int USER = 9;
 
     private String mUrl;
     private String mId;
@@ -22,7 +25,18 @@ public class UrlParser {
         mUrl = url;
         mIsImgur = mUrl.toLowerCase().contains("imgur");
         mIsYoutube = mUrl.toLowerCase().contains("youtu.be") || mUrl.toLowerCase().contains("youtube.com");
-        if (mIsImgur) {
+        if (mUrl.substring(0, 3).equals("/u/") || mUrl.contains("reddit.com/u/")) { // go to a user
+            mType = USER;
+        } else if (mUrl.substring(0, 3).equals("/r/")) { // go to a subreddit
+            mType = SUBREDDIT;
+        } else if (mUrl.contains("reddit.com")) {
+            int i = mUrl.indexOf("/", 17);
+            if (i == -1 || i == mUrl.length()) { // definitely a subreddit or the frontpage
+                mType = SUBREDDIT;
+            } else { // found a link to another post
+                mType = SUBMISSION;
+            }
+        } else if (mIsImgur) {
             generateImgurDetails();
         } else if (mIsYoutube) {
             generateYoutubeDetails();
