@@ -1,6 +1,8 @@
 package me.williamhester.network;
 
 import android.content.Context;
+import android.os.AsyncTask;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -85,23 +87,14 @@ public class RedditApi {
         if (!subredditName.equals("")) {
             subredditName = "/r/" + subredditName;
         }
-        Ion.with(context)
-                .load(REDDIT_URL + subredditName + "/" + sortType + "/.json")
-                .addQueries(generateSubmissionQueries(secondarySort, before, after))
-                .addHeaders(generateUserHeaders())
-                .addHeader("User-Agent", USER_AGENT)
-                .asJsonObject()
-                .setCallback(callback);
-    }
-
-    private static Map<String, List<String>> generateSubmissionQueries(String secondarySort,
-                                                                         String before, String after) {
         Map<String, List<String>> queries = new HashMap<>();
-//        if (secondarySort != null) {
-//            ArrayList<String> query = new ArrayList<>();
-//            query.add(secondarySort);
-//            queries.put("t", query);
-//        }
+        if (secondarySort != null && (sortType.equals(SORT_TYPE_TOP)
+                || sortType.equals(SORT_TYPE_CONTROVERSIAL)
+                || sortType.equals(SORT_TYPE_RISING))) {
+            ArrayList<String> query = new ArrayList<>();
+            query.add(secondarySort);
+            queries.put("t", query);
+        }
         if (before != null) {
             ArrayList<String> query = new ArrayList<>();
             query.add(before);
@@ -112,21 +105,27 @@ public class RedditApi {
             query.add(after);
             queries.put("after", query);
         }
-        return queries;
+        Ion.with(context)
+                .load(REDDIT_URL + subredditName + "/" + sortType + "/.json")
+                .addQueries(queries)
+                .addHeaders(generateUserHeaders())
+                .addHeader("User-Agent", USER_AGENT)
+                .asJsonObject()
+                .setCallback(callback);
     }
 
-    private static Map<String, List<String>> generateUserHeaders() {
-        Account account = AccountManager.getAccount();
-        Map<String, List<String>> headers = new HashMap<>();
-        if (account != null) {
-            ArrayList<String> list1 = new ArrayList<>();
-            list1.add("reddit_session=" + account.getCookie());
-            headers.put("Cookie", list1);
-            ArrayList<String> list2 = new ArrayList<>();
-            list2.add(account.getModhash().replace("\"", ""));
-            headers.put("X-Modhash", list2);
-        }
-        return headers;
+    public static void logIn(Context context, String username, String password,
+                              FutureCallback<JsonObject> callback) {
+        Ion.with(context)
+                .load(REDDIT_URL + "/api/login/" + username)
+                .addQuery("api_type", "json")
+                .addQuery("user", username)
+                .addQuery("passwd", password)
+                .addQuery("rem", "True")
+                .addHeader("User-Agent", USER_AGENT)
+                .setBodyParameter("", "")
+                .asJsonObject()
+                .setCallback(callback);
     }
 
     public static void getSubmissionData(Context context, String permalink,
@@ -195,6 +194,27 @@ public class RedditApi {
                         callback.onCompleted(null, thing);
                     }
                 });
+    }
+
+    private static Map<String, List<String>> generateUserHeaders() {
+        Account account = AccountManager.getAccount();
+        Map<String, List<String>> headers = new HashMap<>();
+        if (account != null) {
+            ArrayList<String> list1 = new ArrayList<>();
+            list1.add("reddit_session=" + account.getCookie());
+            headers.put("Cookie", list1);
+            ArrayList<String> list2 = new ArrayList<>();
+            list2.add(account.getModhash().replace("\"", ""));
+            headers.put("X-Modhash", list2);
+        }
+        return headers;
+    }
+
+    private class GetSubscribedSubreddits extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... voids) {
+            return null;
+        }
     }
 
 }

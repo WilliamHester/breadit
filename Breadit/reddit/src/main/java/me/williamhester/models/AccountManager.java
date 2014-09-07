@@ -11,12 +11,13 @@ import me.williamhester.databases.AccountDataSource;
 public class AccountManager {
 
     private static Account mAccount;
+    private static SharedPreferences mPrefs;
 
     private AccountManager() { }
 
     public static void init(Context context) {
-        SharedPreferences prefs = context.getSharedPreferences("preferences", Context.MODE_PRIVATE);
-        long id = prefs.getLong("accountId", -1);
+        mPrefs = context.getSharedPreferences("preferences", Context.MODE_PRIVATE);
+        long id = mPrefs.getLong("accountId", -1);
         if (id != -1) {
             AccountDataSource dataSource = new AccountDataSource(context);
             dataSource.open();
@@ -35,5 +36,12 @@ public class AccountManager {
 
     public static void setAccount(Account account) {
         mAccount = account;
+        SharedPreferences.Editor editor = mPrefs.edit();
+        if (account == null) {
+            editor.putLong("accountId", -1);
+        } else {
+            editor.putLong("accountId", account.getId());
+        }
+        editor.apply();
     }
 }
