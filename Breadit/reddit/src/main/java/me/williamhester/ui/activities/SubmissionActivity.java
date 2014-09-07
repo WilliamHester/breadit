@@ -148,10 +148,7 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
                         RedditLiveFragment fragment = RedditLiveFragment.newInstance(mSubmission);
                         mTabView.addTab(fragment, TabView.TAB_TYPE_MAIN, contentTab, CONTENT_TAB);
                     } else if (!mSubmission.isMeta() && !mSubmission.isSelf()) {
-                        Bundle args = new Bundle();
-                        args.putSerializable("submission", mSubmission);
-                        Fragment content = new WebViewFragment();
-                        content.setArguments(args);
+                        Fragment content = WebViewFragment.newInstance(mSubmission);
                         mTabView.addTab(content, TabView.TAB_TYPE_MAIN, contentTab, CONTENT_TAB);
                     } else if (!mSubmission.isSelf()) {
                         Bundle args = new Bundle();
@@ -166,8 +163,7 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
             RedditLiveFragment fragment = RedditLiveFragment.newInstance(mSubmission);
             mTabView.addTab(fragment, TabView.TAB_TYPE_MAIN, contentTab, CONTENT_TAB);
         } else if (!mSubmission.isMeta() && !mSubmission.isSelf()) {
-            content = new WebViewFragment();
-            content.setArguments(args);
+            content = WebViewFragment.newInstance(mSubmission);
             mTabView.addTab(content, TabView.TAB_TYPE_MAIN, contentTab, CONTENT_TAB);
 
             mTabView.selectTab(mCurrentTag);

@@ -1,13 +1,17 @@
 package me.williamhester.ui.text;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.style.ClickableSpan;
+import android.util.Log;
 import android.view.View;
 
+import me.williamhester.reddit.R;
 import me.williamhester.ui.activities.MainActivity;
 import me.williamhester.ui.activities.SubmissionActivity;
 import me.williamhester.ui.activities.UserActivity;
+import me.williamhester.ui.fragments.WebViewFragment;
 
 /**
  * Created by William on 6/15/14.
@@ -29,27 +33,33 @@ public class LinkSpan extends ClickableSpan {
     public void onClick(View view) {
         Bundle args = new Bundle();
         args.putString("link", mLink);
+        Intent i = null;
         switch (getLinkType()) {
             case SUBMISSION:
-                Intent i = new Intent(view.getContext(), SubmissionActivity.class);
-                i.putExtras(args);
-                view.getContext().startActivity(i);
+                i = new Intent(view.getContext(), SubmissionActivity.class);
                 break;
             case SUBREDDIT:
-                Intent j = new Intent(view.getContext(), MainActivity.class);
-                j.putExtras(args);
-                view.getContext().startActivity(j);
+                i = new Intent(view.getContext(), MainActivity.class);
                 break;
             case USER:
-                Intent k = new Intent(view.getContext(), UserActivity.class);
-                k.putExtras(args);
-                view.getContext().startActivity(k);
+                i = new Intent(view.getContext(), UserActivity.class);
                 break;
             case EXTERNAL:
-                Intent l = new Intent(view.getContext(), MainActivity.class);
-                l.putExtras(args);
-                view.getContext().startActivity(l);
+                try {
+                    Activity activity = (Activity) view.getContext();
+                    activity.getFragmentManager().beginTransaction()
+                            .add(R.id.container, WebViewFragment.newInstance(mLink), "Link")
+                            .addToBackStack("WebView")
+                            .commit();
+                } catch (ClassCastException e) {
+                    Log.d("LinkSpan", "Can't do that");
+                    e.printStackTrace();
+                }
                 break;
+        }
+        if (i != null) {
+            i.putExtras(args);
+            view.getContext().startActivity(i);
         }
     }
 
