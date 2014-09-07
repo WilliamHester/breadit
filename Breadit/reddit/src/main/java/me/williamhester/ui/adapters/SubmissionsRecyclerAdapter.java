@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
+import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -203,6 +204,7 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
                 button.setVisibility(View.GONE);
                 HtmlParser parser = new HtmlParser(StringEscapeUtils.unescapeHtml4(mSubmission.getBodyHtml()));
                 content.setText(parser.getSpannableString());
+                content.setMovementMethod(new LinkMovementMethod());
             } else {
                 itemView.findViewById(R.id.show_self_text).setVisibility(View.GONE);
                 container.setVisibility(View.GONE);

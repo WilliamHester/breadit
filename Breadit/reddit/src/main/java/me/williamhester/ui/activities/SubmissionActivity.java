@@ -25,7 +25,6 @@ import me.williamhester.ui.views.TabView;
 
 public class SubmissionActivity extends Activity implements TabView.TabSwitcher {
 
-    public static final String ACCOUNT = "account";
     public static final String COMMENT_TAB = "comments";
     public static final String CONTENT_TAB = "content";
     public static final String SUBMISSION = "submission";

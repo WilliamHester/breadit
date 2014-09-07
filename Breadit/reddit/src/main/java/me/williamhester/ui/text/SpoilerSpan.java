@@ -3,6 +3,7 @@ package me.williamhester.ui.text;
 import android.support.annotation.NonNull;
 import android.text.TextPaint;
 import android.text.style.ClickableSpan;
+import android.util.Log;
 import android.view.View;
 
 /**
@@ -10,16 +11,23 @@ import android.view.View;
  */
 public class SpoilerSpan extends ClickableSpan {
 
+    private boolean mClicked = false;
+
     @Override
     public void onClick(View view) {
         TextPaint unpaint = new TextPaint();
-        unpaint.bgColor = view.getContext().getResources().getColor(android.R.color.transparent);
-        updateDrawState(new TextPaint());
-        view.invalidate(); // TODO: check to see if this actually works
+        mClicked = true;
+        updateDrawState(unpaint);
+        view.invalidate();
     }
 
     @Override
     public void updateDrawState(@NonNull TextPaint ds) {
-        ds.bgColor = ds.getColor();
+        ds.setUnderlineText(true);
+        if (!mClicked) {
+            ds.bgColor = ds.getColor();
+        } else {
+            ds.bgColor = 0;
+        }
     }
 }
