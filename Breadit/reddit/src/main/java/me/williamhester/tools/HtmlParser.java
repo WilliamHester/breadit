@@ -66,7 +66,7 @@ public class HtmlParser {
 
     private SpannableStringBuilder generateString(Node node, SpannableStringBuilder ssb) {
         if (node instanceof TextNode) {
-            return new SpannableStringBuilder(((TextNode) node).text());
+            return ssb.append(((TextNode) node).text());
         }
 
         insertNewLine(node, ssb);
@@ -106,11 +106,10 @@ public class HtmlParser {
                 if (url.equals("/s") || url.equals("#s")) {
                     String spoiler = node.attr("title");
                     ssb.append(' ');
-                    ssb.setSpan(new UnderlineSpan(), 0, ssb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                     ssb.append(spoiler);
                     ssb.setSpan(new SpoilerSpan(), ssb.length() - spoiler.length(), ssb.length(),
                             Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    return null;
+                    return new UnderlineSpan();
                 }
                 mLinks.add(new Link(ssb.toString(), url));
                 return new LinkSpan(url);
