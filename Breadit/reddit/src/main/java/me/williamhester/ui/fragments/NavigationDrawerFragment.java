@@ -105,34 +105,12 @@ public class NavigationDrawerFragment extends AccountFragment {
         if (getArguments() != null) {
             mSubName = getArguments().getString("subreddit");
             if (mSubName == null) {
-                mSubName = "FrontPage";
+                mSubName = "";
             }
         }
 
         if (savedInstanceState != null) {
             mCurrentSelectedPosition = savedInstanceState.getInt(STATE_SELECTED_POSITION);
-        }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (mAccount != null) {
-            mSubredditList = mAccount.getSubreddits();
-            Collections.sort(mSubredditList, mOrderList);
-            mSubredditList.add(0, "FrontPage");
-            mSubredditArrayAdapter = new SubredditAdapter(mSubredditList);
-            mDrawerListView.setAdapter(mSubredditArrayAdapter);
-            new GetUserSubreddits().execute();
-        } else {
-            mSubredditList = new ArrayList<String>();
-            String[] subs = getResources().getStringArray(R.array.default_subreddits);
-            for (String s : subs) {
-                mSubredditList.add(s);
-            }
-            mSubredditList.add(0, "FrontPage");
-            mSubredditArrayAdapter = new SubredditAdapter(mSubredditList);
-            mDrawerListView.setAdapter(mSubredditArrayAdapter);
         }
     }
 
@@ -156,7 +134,6 @@ public class NavigationDrawerFragment extends AccountFragment {
         if (mAccount != null) {
             mSubredditList = mAccount.getSubreddits();
             Collections.sort(mSubredditList, mOrderList);
-            mSubredditList.add(0, "FrontPage");
             mSubredditArrayAdapter = new SubredditAdapter(mSubredditList);
             mDrawerListView.setAdapter(mSubredditArrayAdapter);
         } else {
@@ -165,7 +142,6 @@ public class NavigationDrawerFragment extends AccountFragment {
             for (String s : subs) {
                 mSubredditList.add(s);
             }
-            mSubredditList.add(0, "FrontPage");
             mSubredditArrayAdapter = new SubredditAdapter(mSubredditList);
             mDrawerListView.setAdapter(mSubredditArrayAdapter);
         }
@@ -224,16 +200,32 @@ public class NavigationDrawerFragment extends AccountFragment {
         return v;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mAccount != null) {
+            mSubredditList = mAccount.getSubreddits();
+            Collections.sort(mSubredditList, mOrderList);
+            mSubredditArrayAdapter = new SubredditAdapter(mSubredditList);
+            mDrawerListView.setAdapter(mSubredditArrayAdapter);
+            new GetUserSubreddits().execute();
+        } else {
+            mSubredditList = new ArrayList<String>();
+            String[] subs = getResources().getStringArray(R.array.default_subreddits);
+            for (String s : subs) {
+                mSubredditList.add(s);
+            }
+            mSubredditArrayAdapter = new SubredditAdapter(mSubredditList);
+            mDrawerListView.setAdapter(mSubredditArrayAdapter);
+        }
+    }
+
     private void selectItem(String subreddit) {
         if (mDrawerLayout != null) {
             mDrawerLayout.closeDrawers();
         }
         if (mCallbacks != null) {
-            if (subreddit.equals("FrontPage") || subreddit.equals("")) {
-                mCallbacks.onNavigationDrawerItemSelected(null);
-            } else {
-                mCallbacks.onNavigationDrawerItemSelected(subreddit);
-            }
+            mCallbacks.onNavigationDrawerItemSelected(subreddit);
         }
     }
 
@@ -241,7 +233,7 @@ public class NavigationDrawerFragment extends AccountFragment {
         new SubredditDataAsyncTask(subreddit).execute();
         if (mAccount == null) {
             mCheckbox.setVisibility(View.GONE);
-        } else if (subreddit == null || subreddit.equals("FrontPage") || subreddit.equals("")) {
+        } else if (subreddit == null || subreddit.equals("")) {
             mCheckbox.setVisibility(View.GONE);
         } else {
             mCheckbox.setVisibility(View.VISIBLE);
@@ -252,8 +244,8 @@ public class NavigationDrawerFragment extends AccountFragment {
                 new SubscribeAsyncTask(b).execute();
             }
         });
-        mSubSpinner.setSelection(primarySort);
-        mFilterSpinner.setSelection(secondarySort);
+//        mSubSpinner.setSelection(primarySort);
+//        mFilterSpinner.setSelection(secondarySort);
     }
 
     @Override
@@ -342,7 +334,6 @@ public class NavigationDrawerFragment extends AccountFragment {
         protected void onPostExecute(Boolean isNew) {
             if (isNew) {
                 Collections.sort(mSubredditList, mOrderList);
-                mSubredditList.add(0, "FrontPage");
                 mSubredditArrayAdapter.notifyDataSetChanged();
             }
         }
@@ -448,7 +439,16 @@ public class NavigationDrawerFragment extends AccountFragment {
                 return;
             }
         });
-        selectItem(mSubName);
+
+        TextView frontpage = (TextView) v.findViewById(R.id.subreddit_list_item_title);
+        frontpage.setText("Front Page");
+        frontpage.setBackgroundResource(R.drawable.breadit_activated_background_holo_light);
+        frontpage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                selectItem("");
+            }
+        });
         return v;
     }
 
@@ -470,11 +470,7 @@ public class NavigationDrawerFragment extends AccountFragment {
                 v.setBackgroundColor(getResources().getColor(R.color.auburn_orange));
             String subreddit = mSubredditList.get(position);
             TextView subredditName = (TextView)v.findViewById(R.id.subreddit_list_item_title);
-            if (!subreddit.equals("FrontPage")) {
-                subredditName.setText("/r/" + subreddit);
-            } else {
-                subredditName.setText(subreddit);
-            }
+            subredditName.setText(subreddit);
             return v;
         }
     }
@@ -509,7 +505,6 @@ public class NavigationDrawerFragment extends AccountFragment {
                     mSubredditList.add(mSubreddit.getDisplayName());
                 mSubredditList.remove(0);
                 Collections.sort(mSubredditList, mOrderList);
-                mSubredditList.add(0, "FrontPage");
             } else {
                 if (mSubreddit != null)
                     mSubredditList.remove(mSubreddit.getDisplayName());

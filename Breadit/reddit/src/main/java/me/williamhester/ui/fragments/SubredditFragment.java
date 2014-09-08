@@ -104,11 +104,14 @@ public class SubredditFragment extends AccountFragment implements SubmissionsRec
     @Override
     public void onResume() {
         super.onResume();
-        if (!TextUtils.isEmpty(mSubredditName) && getActivity() != null
-                && getActivity().getActionBar() != null) {
-            getActivity().getActionBar().setTitle("/r/" + mSubredditName);
-        } else if (getActivity() != null && getActivity().getActionBar() != null) {
-            getActivity().getActionBar().setTitle("FrontPage");
+        String title = "";
+        if (getActivity() != null && getActivity().getActionBar() != null) {
+            if (!TextUtils.isEmpty(mSubredditName)) {
+                title = "/r/" + mSubredditName;
+            } else {
+                title = "Front Page";
+            }
+            getActivity().getActionBar().setTitle(title);
         }
         loadPrefs();
     }
@@ -200,33 +203,35 @@ public class SubredditFragment extends AccountFragment implements SubmissionsRec
     public void refreshData() {
         if (mSwipeRefreshLayout != null) {
             mSwipeRefreshLayout.setRefreshing(true);
-            RedditApi.getSubmissions(getActivity(), mSubredditName, mPrimarySortType, mSecondarySortType,
-                    null, null, new FutureCallback<JsonObject>() {
-                        @Override
-                        public void onCompleted(Exception e, JsonObject result) {
-                            if (e == null) {
-                                ResponseRedditWrapper wrapper = new ResponseRedditWrapper(result, new Gson());
-                                if (wrapper.getData() instanceof Listing) {
-                                    ArrayList<Submission> submissions = new ArrayList<>();
-                                    List<ResponseRedditWrapper> children = ((Listing) wrapper.getData()).getChildren();
-                                    for (ResponseRedditWrapper innerWrapper : children) {
-                                        if (innerWrapper.getData() instanceof Submission) {
-                                            submissions.add((Submission) innerWrapper.getData());
+            if (getActivity() != null) {
+                RedditApi.getSubmissions(getActivity(), mSubredditName, mPrimarySortType, mSecondarySortType,
+                        null, null, new FutureCallback<JsonObject>() {
+                            @Override
+                            public void onCompleted(Exception e, JsonObject result) {
+                                if (e == null) {
+                                    ResponseRedditWrapper wrapper = new ResponseRedditWrapper(result, new Gson());
+                                    if (wrapper.getData() instanceof Listing) {
+                                        ArrayList<Submission> submissions = new ArrayList<>();
+                                        List<ResponseRedditWrapper> children = ((Listing) wrapper.getData()).getChildren();
+                                        for (ResponseRedditWrapper innerWrapper : children) {
+                                            if (innerWrapper.getData() instanceof Submission) {
+                                                submissions.add((Submission) innerWrapper.getData());
+                                            }
+                                        }
+                                        if (submissions.size() > 0) {
+                                            mSubmissionList.clear();
+                                            mSubmissionList.addAll(submissions);
+                                            mSubmissionsAdapter.notifyDataSetChanged();
+                                            mSwipeRefreshLayout.setRefreshing(false);
                                         }
                                     }
-                                    if (submissions.size() > 0) {
-                                        mSubmissionList.clear();
-                                        mSubmissionList.addAll(submissions);
-                                        mSubmissionsAdapter.notifyDataSetChanged();
-                                        mSwipeRefreshLayout.setRefreshing(false);
-                                    }
+                                } else {
+                                    e.printStackTrace();
+                                    mSwipeRefreshLayout.setRefreshing(false);
                                 }
-                            } else {
-                                e.printStackTrace();
-                                mSwipeRefreshLayout.setRefreshing(false);
                             }
-                        }
-                    });
+                        });
+            }
         }
     }
 

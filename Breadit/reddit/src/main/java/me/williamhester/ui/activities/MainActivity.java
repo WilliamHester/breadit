@@ -1,12 +1,11 @@
 package me.williamhester.ui.activities;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Fragment;
-import android.app.FragmentManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -20,22 +19,25 @@ public class MainActivity extends Activity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks,
         ImagePagerFragment.ImagePagerCallbacks {
 
+    public static final String SUBREDDIT = "subreddit";
+
     private NavigationDrawerFragment mNavigationDrawerFragment;
     private Fragment mSubredditFragment;
     private String mSubreddit;
 
-    @SuppressLint("CommitPrefEdits")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-        if (getIntent() != null && getIntent().getAction() != null
-                && getIntent().getAction().equals(Intent.ACTION_VIEW)) {
-            mSubreddit = getIntent().getDataString();
-            if (mSubreddit != null)
-                mSubreddit = mSubreddit.substring(mSubreddit.indexOf("/subreddit/") + 11);
+        if (Intent.ACTION_VIEW.equals(getIntent().getAction())) {
+            if (getIntent().getExtras() != null) {
+                mSubreddit = getIntent().getExtras().getString(SUBREDDIT);
+            } else {
+                mSubreddit = getIntent().getDataString();
+                if (mSubreddit != null)
+                    mSubreddit = mSubreddit.substring(mSubreddit.indexOf("/subreddit/") + 11);
+            }
             mNavigationDrawerFragment = NavigationDrawerFragment.newInstance(mSubreddit);
         }
 
@@ -66,16 +68,16 @@ public class MainActivity extends Activity
                     .commit();
         }
 
-        getFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
-            @Override
-            public void onBackStackChanged() {
-                mSubredditFragment = getFragmentManager().findFragmentByTag("SubredditFragment");
-                mSubreddit = ((SubredditFragment) mSubredditFragment).getSubreddit();
-                mNavigationDrawerFragment.setSubreddit(mSubreddit,
-                        0,  // TODO: Fix this
-                        0); // TODO: Fix this
-            }
-        });
+//        getFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
+//            @Override
+//            public void onBackStackChanged() {
+//                mSubredditFragment = getFragmentManager().findFragmentByTag(mSubreddit);
+//                mSubreddit = ((SubredditFragment) mSubredditFragment).getSubreddit();
+//                mNavigationDrawerFragment.setSubreddit(mSubreddit,
+//                        0,  // TODO: Fix this
+//                        0); // TODO: Fix this
+//            }
+//        });
     }
 
     @Override
@@ -96,20 +98,11 @@ public class MainActivity extends Activity
             ((SubredditFragment) mSubredditFragment).refreshData();
         } else {
             mSubreddit = subreddit;
-            Fragment frag = getFragmentManager().findFragmentByTag(subreddit);
-            if (frag != null) {
-                mSubredditFragment = frag;
-                getFragmentManager().beginTransaction()
-                        .addToBackStack(subreddit)
-                        .replace(R.id.container, frag, "SubredditFragment")
-                        .commit();
-            } else {
-                mSubredditFragment = SubredditFragment.newInstance(subreddit);
-                getFragmentManager().beginTransaction()
-                        .addToBackStack(subreddit)
-                        .replace(R.id.container, mSubredditFragment, "SubredditFragment")
-                        .commit();
-            }
+            mSubredditFragment = SubredditFragment.newInstance(subreddit);
+            getFragmentManager().beginTransaction()
+                    .addToBackStack("SubredditFragment")
+                    .replace(R.id.container, mSubredditFragment, "SubredditFragment")
+                    .commit();
         }
         mSubreddit = subreddit;
     }
@@ -134,7 +127,7 @@ public class MainActivity extends Activity
     }
 
     private void updateActionBar(String sub) {
-        if (sub == null && getActionBar() != null)
+        if (TextUtils.isEmpty(sub) && getActionBar() != null)
             getActionBar().setTitle("FrontPage");
         else if (getActionBar() != null)
             getActionBar().setTitle("/r/" + sub);

@@ -41,6 +41,8 @@ public class LinkSpan extends ClickableSpan {
                 break;
             case UrlParser.SUBREDDIT:
                 i = new Intent(view.getContext(), MainActivity.class);
+                i.setAction(Intent.ACTION_VIEW);
+                args.putString(MainActivity.SUBREDDIT, parser.getLinkId());
                 break;
             case UrlParser.USER:
                 i = new Intent(view.getContext(), UserActivity.class);
