@@ -39,6 +39,8 @@ public class MainActivity extends Activity
                     mSubreddit = mSubreddit.substring(mSubreddit.indexOf("/subreddit/") + 11);
             }
             mNavigationDrawerFragment = NavigationDrawerFragment.newInstance(mSubreddit);
+        } else {
+            mSubreddit = "";
         }
 
         if (getActionBar() != null) {
@@ -56,15 +58,15 @@ public class MainActivity extends Activity
                         "NavigationDrawer")
                 .commit();
 
-        if (getFragmentManager().findFragmentByTag("SubredditFragment") != null) {
-            mSubredditFragment = getFragmentManager().findFragmentByTag("SubredditFragment");
+        if (getFragmentManager().findFragmentByTag(mSubreddit) != null) {
+            mSubredditFragment = getFragmentManager().findFragmentByTag(mSubreddit);
             getFragmentManager().beginTransaction()
-                    .replace(R.id.container, mSubredditFragment, "SubredditFragment")
+                    .replace(R.id.container, mSubredditFragment, mSubreddit)
                     .commit();
         } else {
             mSubredditFragment = SubredditFragment.newInstance(mSubreddit);
             getFragmentManager().beginTransaction()
-                    .add(R.id.container, mSubredditFragment, "SubredditFragment")
+                    .add(R.id.container, mSubredditFragment, mSubreddit)
                     .commit();
         }
 
@@ -83,7 +85,7 @@ public class MainActivity extends Activity
     @Override
     public void onResume() {
         super.onResume();
-        mSubredditFragment = getFragmentManager().findFragmentByTag("SubredditFragment");
+        mSubredditFragment = getFragmentManager().findFragmentByTag(mSubreddit);
         mSubreddit = ((SubredditFragment) mSubredditFragment).getSubreddit();
         mNavigationDrawerFragment.setSubreddit(mSubreddit,
                 0,  // TODO: Fix this
@@ -98,10 +100,14 @@ public class MainActivity extends Activity
             ((SubredditFragment) mSubredditFragment).refreshData();
         } else {
             mSubreddit = subreddit;
-            mSubredditFragment = SubredditFragment.newInstance(subreddit);
+            if (getFragmentManager().findFragmentByTag(subreddit) != null) {
+                mSubredditFragment = getFragmentManager().findFragmentByTag(subreddit);
+            } else {
+                mSubredditFragment = SubredditFragment.newInstance(subreddit);
+            }
             getFragmentManager().beginTransaction()
-                    .addToBackStack("SubredditFragment")
-                    .replace(R.id.container, mSubredditFragment, "SubredditFragment")
+                    .addToBackStack(mSubreddit)
+                    .replace(R.id.container, mSubredditFragment, mSubreddit)
                     .commit();
         }
         mSubreddit = subreddit;
