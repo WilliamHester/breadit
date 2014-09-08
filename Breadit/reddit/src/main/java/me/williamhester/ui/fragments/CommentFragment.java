@@ -224,7 +224,7 @@ public class CommentFragment extends AccountFragment {
 
             if (convertView == null) {
                 convertView = View.inflate(mContext, R.layout.list_item_comment, null);
-                convertView.setTag(new CommentViewHolder(convertView, mCommentCallbacks));
+                convertView.setTag(new CommentViewHolder(convertView, mCommentCallbacks, mSubmission.getAuthor()));
             }
             ((CommentViewHolder) convertView.getTag()).setContent(getItem(position));
 
