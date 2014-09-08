@@ -105,7 +105,7 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
             mDomain.setText(mSubmission.getDomain());
             mCommentData.setText(mSubmission.getNumberOfComments() + " comments");
             mSubreddit.setText("/r/" + mSubmission.getSubredditName());
-            mMetadata.setText(mSubmission.getAuthor() + " " + mSubmission.getScore()
+            mMetadata.setText(mSubmission.getAuthor() + " " + mSubmission.getScore() + " "
                     + itemView.getResources().getQuantityString(R.plurals.points,
                     mSubmission.getScore()));
 

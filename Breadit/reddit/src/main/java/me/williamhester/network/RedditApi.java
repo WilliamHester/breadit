@@ -136,6 +136,7 @@ public class RedditApi {
                 .load(REDDIT_URL + permalink + ".json")
                 .addHeader("User-Agent", USER_AGENT)
                 .addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+                .addHeaders(generateUserHeaders())
                 .asString()
                 .setCallback(new FutureCallback<String>() {
                     @Override
