@@ -2,6 +2,7 @@ package me.williamhester.ui.activities;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
@@ -70,16 +71,21 @@ public class MainActivity extends Activity
                     .commit();
         }
 
-//        getFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
-//            @Override
-//            public void onBackStackChanged() {
-//                mSubredditFragment = getFragmentManager().findFragmentByTag(mSubreddit);
-//                mSubreddit = ((SubredditFragment) mSubredditFragment).getSubreddit();
-//                mNavigationDrawerFragment.setSubreddit(mSubreddit,
-//                        0,  // TODO: Fix this
-//                        0); // TODO: Fix this
-//            }
-//        });
+        getFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
+            @Override
+            public void onBackStackChanged() {
+                Fragment fragment = getFragmentManager().findFragmentById(R.id.container);
+                if (fragment != null) {
+                    mSubredditFragment = fragment;
+                    if (fragment instanceof SubredditFragment) {
+                        mSubreddit = ((SubredditFragment) mSubredditFragment).getSubreddit();
+                        mNavigationDrawerFragment.setSubreddit(mSubreddit,
+                                0,  // TODO: Fix this
+                                0); // TODO: Fix this
+                    }
+                }
+            }
+        });
     }
 
     @Override
@@ -110,7 +116,6 @@ public class MainActivity extends Activity
                     .replace(R.id.container, mSubredditFragment, mSubreddit)
                     .commit();
         }
-        mSubreddit = subreddit;
     }
 
     @Override
@@ -170,11 +175,15 @@ public class MainActivity extends Activity
     public void onImagePagerFragmentCreated() {
         DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawerLayout.setEnabled(false);
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        getActionBar().setHomeButtonEnabled(false);
     }
 
     @Override
     public void onImagePagerFragmentDestroyed() {
         DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawerLayout.setEnabled(true);
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+        getActionBar().setHomeButtonEnabled(true);
     }
 }
