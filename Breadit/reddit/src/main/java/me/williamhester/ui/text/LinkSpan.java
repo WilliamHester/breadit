@@ -32,7 +32,7 @@ public class LinkSpan extends ClickableSpan {
     public void onClick(View view) {
         UrlParser parser = new UrlParser(mLink);
         Bundle args = new Bundle();
-        args.putString("link", parser.getUrl());
+        args.putString("permalink", parser.getUrl());
         Intent i = null;
         Fragment f = null;
         switch (parser.getType()) {

@@ -28,6 +28,7 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
     public static final String COMMENT_TAB = "comments";
     public static final String CONTENT_TAB = "content";
     public static final String SUBMISSION = "submission";
+    public static final String PERMALINK = "permalink";
     public static final String TAB = "tab";
 
     private Context mContext = this;
@@ -45,15 +46,16 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
         if (savedInstanceState != null) {
             mCurrentTag = savedInstanceState.getString("currentTag");
         }
-        if (getIntent().getAction() != null && getIntent().getAction().equals(Intent.ACTION_VIEW)) {
-            mPermalink = getIntent().getDataString();
-            mPermalink = "http://www.reddit.com" + mPermalink.substring(mPermalink.indexOf("/r/"));
-            mCurrentTag = COMMENT_TAB;
-        } else if (getIntent().getExtras() != null) {
-            mSubmission = (Submission) getIntent().getExtras().getSerializable(SUBMISSION);
-            mMedia = (Submission.Media) getIntent().getExtras().getSerializable("media");
-            if (mCurrentTag == null) {
-                mCurrentTag = getIntent().getExtras().getString(TAB);
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            if (extras.containsKey(PERMALINK)) {
+                mPermalink = extras.getString(PERMALINK);
+            } else {
+                mSubmission = (Submission) extras.getSerializable(SUBMISSION);
+                mMedia = (Submission.Media) extras.getSerializable("media");
+                if (mCurrentTag == null) {
+                    mCurrentTag = getIntent().getExtras().getString(TAB);
+                }
             }
         }
 
@@ -118,16 +120,16 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
         contentTab.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
         contentTab.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
 
-        Bundle args = new Bundle();
-        args.putString("permalink", mPermalink);
-        args.putSerializable("submission", mSubmission);
-
         CommentFragment comments;
         Fragment content;
-        
+
+        if (mSubmission != null) {
+            comments = CommentFragment.newInstance(mSubmission);
+        } else {
+            comments = CommentFragment.newInstance(mPermalink);
+        }
+
         mTabView = (TabView) v.findViewById(R.id.tabs);
-        comments = new CommentFragment();
-        comments.setArguments(args);
         mTabView.addTab(comments, TabView.TAB_TYPE_MAIN, commentTab, COMMENT_TAB);
         if (mSubmission == null) {
             mTabView.selectTab(COMMENT_TAB);
@@ -167,11 +169,7 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
 
             mTabView.selectTab(mCurrentTag);
         } else if (!mSubmission.isSelf()) {
-            args = new Bundle();
-            args.putParcelable("account", (Parcelable) getIntent().getExtras().get("account"));
-            args.putString("permalink", mSubmission.getUrl());
-            content = new CommentFragment();
-            content.setArguments(args);
+            content = CommentFragment.newInstance(mSubmission.getUrl());
             mTabView.addTab(content, TabView.TAB_TYPE_MAIN, contentTab, CONTENT_TAB);
             mTabView.selectTab(mCurrentTag);
         } else {

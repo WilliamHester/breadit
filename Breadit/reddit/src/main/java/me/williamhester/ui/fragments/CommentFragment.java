@@ -35,6 +35,8 @@ import me.williamhester.ui.views.CommentViewHolder;
 
 public class CommentFragment extends AccountFragment {
 
+    private static final String PERMALINK = "permalink";
+
     private ArrayList<Comment> mCommentsList;
     private CommentArrayAdapter mCommentAdapter;
     private Context mContext;
@@ -47,7 +49,22 @@ public class CommentFragment extends AccountFragment {
     private OnSubmissionLoaded mCallback;
 
     private int mSortType;
-    private boolean mLinkIsPressed = false;
+
+    public static CommentFragment newInstance(String permalink) {
+        Bundle args = new Bundle();
+        args.putString(PERMALINK, permalink);
+        CommentFragment fragment = new CommentFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static CommentFragment newInstance(Submission submission) {
+        Bundle args = new Bundle();
+        args.putSerializable("submission", submission);
+        CommentFragment fragment = new CommentFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -64,8 +81,10 @@ public class CommentFragment extends AccountFragment {
             if (mSubmission != null) {
                 mPermalink = mSubmission.getPermalink();
             } else {
-                mPermalink = args.getString("permalink");
-                mPermalink = mPermalink.substring(mPermalink.indexOf("reddit.com") + 10);
+                mPermalink = args.getString(PERMALINK);
+                if (mPermalink.contains("reddit.com")) {
+                    mPermalink = mPermalink.substring(mPermalink.indexOf("reddit.com") + 10);
+                }
                 RedditApi.getSubmissionData(mContext, mPermalink, mSubmissionCallback, mCommentCallback);
             }
             mCommentsList = new ArrayList<>();
@@ -257,7 +276,9 @@ public class CommentFragment extends AccountFragment {
             mCommentAdapter = new CommentArrayAdapter(mContext);
             mCommentsListView.setAdapter(mCommentAdapter);
             mCommentAdapter.notifyDataSetChanged();
-            mNumComments.setText("Top " + mCommentsList.size() + " comments. Sorted by");
+            if (mNumComments != null) {
+                mNumComments.setText("Top " + mCommentsList.size() + " comments. Sorted by");
+            }
         }
     };
 
