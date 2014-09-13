@@ -3,27 +3,25 @@ package me.williamhester.ui.activities;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Fragment;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Parcelable;
-import android.util.TypedValue;
-import android.view.LayoutInflater;
+import android.support.v4.widget.DrawerLayout;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.TextView;
 
+import me.williamhester.models.ImgurAlbum;
+import me.williamhester.models.ImgurImage;
 import me.williamhester.models.Submission;
 import me.williamhester.reddit.R;
+import me.williamhester.tools.UrlParser;
 import me.williamhester.ui.fragments.CommentFragment;
+import me.williamhester.ui.fragments.ImagePagerFragment;
 import me.williamhester.ui.fragments.RedditLiveFragment;
 import me.williamhester.ui.fragments.WebViewFragment;
-import me.williamhester.ui.views.TabView;
 
-public class SubmissionActivity extends Activity implements TabView.TabSwitcher {
+public class SubmissionActivity extends Activity {
 
     public static final String COMMENT_TAB = "comments";
     public static final String CONTENT_TAB = "content";
@@ -31,10 +29,9 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
     public static final String PERMALINK = "permalink";
     public static final String TAB = "tab";
 
-    private Context mContext = this;
+    private DrawerLayout mDrawerLayout;
     private Submission mSubmission;
     private Submission.Media mMedia;
-    private TabView mTabView;
     private String mPermalink;
     private String mCurrentTag;
 
@@ -59,12 +56,13 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
             }
         }
 
-        setUpActionBarTabs();
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.submission_drawer);
+        setUpContent();
 
         ActionBar actionBar = getActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setDisplayShowTitleEnabled(false);
+            actionBar.setDisplayShowTitleEnabled(true);
         }
     }
 
@@ -105,117 +103,65 @@ public class SubmissionActivity extends Activity implements TabView.TabSwitcher 
         outState.putString("currentTag", mCurrentTag);
     }
 
-    private void setUpActionBarTabs() {
-        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-        View v = inflater.inflate(R.layout.actionbar_tabview, null);
-
-        TextView commentTab = new TextView(this);
-        commentTab.setText(R.string.comments);
-        commentTab.setTextColor(getResources().getColor(R.color.ghostwhite));
-        commentTab.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
-        commentTab.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
-        TextView contentTab = new TextView(this);
-        contentTab.setText(R.string.content);
-        contentTab.setTextColor(getResources().getColor(R.color.ghostwhite));
-        contentTab.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
-        contentTab.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
-
+    private void setUpContent() {
+        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
         CommentFragment comments;
-        Fragment content;
-
-        if (mSubmission != null) {
-            comments = CommentFragment.newInstance(mSubmission);
-        } else {
-            comments = CommentFragment.newInstance(mPermalink);
-        }
-
-        mTabView = (TabView) v.findViewById(R.id.tabs);
-        mTabView.addTab(comments, TabView.TAB_TYPE_MAIN, commentTab, COMMENT_TAB);
         if (mSubmission == null) {
-            mTabView.selectTab(COMMENT_TAB);
+            comments = CommentFragment.newInstance(mPermalink);
             comments.setOnSubmissionLoadedListener(new CommentFragment.OnSubmissionLoaded() {
                 @Override
                 public void onSubmissionLoaded(Submission submission) {
                     mSubmission = submission;
-
-                    TextView contentTab = new TextView(mContext);
-                    contentTab.setText(R.string.content);
-                    contentTab.setTextColor(getResources().getColor(R.color.ghostwhite));
-                    contentTab.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
-                    contentTab.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
-
-                    if (mSubmission.getMedia() != null
-                            && mSubmission.getMedia().getType().equals(Submission.LIVE_UPDATE)) {
-                        RedditLiveFragment fragment = RedditLiveFragment.newInstance(mSubmission);
-                        mTabView.addTab(fragment, TabView.TAB_TYPE_MAIN, contentTab, CONTENT_TAB);
-                    } else if (!mSubmission.isMeta() && !mSubmission.isSelf()) {
-                        Fragment content = WebViewFragment.newInstance(mSubmission);
-                        mTabView.addTab(content, TabView.TAB_TYPE_MAIN, contentTab, CONTENT_TAB);
-                    } else if (!mSubmission.isSelf()) {
-                        Bundle args = new Bundle();
-                        args.putString("permalink", mPermalink);
-                        Fragment content = new CommentFragment();
-                        content.setArguments(args);
-                        mTabView.addTab(content, TabView.TAB_TYPE_MAIN, contentTab, CONTENT_TAB);
-                    }
+                    setUpDrawer();
                 }
             });
-        } else if (mMedia != null && mMedia.getType().equals(Submission.LIVE_UPDATE)) {
-            RedditLiveFragment fragment = RedditLiveFragment.newInstance(mSubmission);
-            mTabView.addTab(fragment, TabView.TAB_TYPE_MAIN, contentTab, CONTENT_TAB);
+        } else {
+            comments = CommentFragment.newInstance(mSubmission);
+            setUpDrawer();
+        }
+        getFragmentManager().beginTransaction()
+                .replace(R.id.comments_container, comments, "comments")
+                .commit();
+    }
+
+    private void setUpDrawer() {
+        Fragment contentFragment = null;
+        if (mSubmission.getMedia() != null
+                && mSubmission.getMedia().getType().equals(Submission.LIVE_UPDATE)) {
+            contentFragment = RedditLiveFragment.newInstance(mSubmission);
         } else if (!mSubmission.isMeta() && !mSubmission.isSelf()) {
-            content = WebViewFragment.newInstance(mSubmission);
-            mTabView.addTab(content, TabView.TAB_TYPE_MAIN, contentTab, CONTENT_TAB);
-
-            mTabView.selectTab(mCurrentTag);
-        } else if (!mSubmission.isSelf()) {
-            content = CommentFragment.newInstance(mSubmission.getUrl());
-            mTabView.addTab(content, TabView.TAB_TYPE_MAIN, contentTab, CONTENT_TAB);
-            mTabView.selectTab(mCurrentTag);
-        } else {
-            mTabView.selectTab(COMMENT_TAB);
-        }
-
-        ActionBar actionBar = getActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setDisplayShowCustomEnabled(true);
-            actionBar.setCustomView(v);
-        }
-    }
-
-    @Override
-    public void onTabSelected(String tag, Fragment fragment) {
-        getFragmentManager().executePendingTransactions();
-        Fragment f = getFragmentManager().findFragmentByTag(tag);
-        if (f != null) {
-            getFragmentManager().beginTransaction()
-                    .attach(f)
-                    .commit();
-        } else {
-            getFragmentManager().beginTransaction()
-                    .add(R.id.container, fragment, tag)
-                    .commit();
-        }
-        mCurrentTag = tag;
-    }
-
-    @Override
-    public void onTabReselected(String tag, Fragment fragment) {
-        if (fragment instanceof CommentFragment) {
-            ((CommentFragment) fragment).scrollToTop();
-        }
-    }
-
-    @Override
-    public void onTabUnSelected(String tag) {
-        if (tag != null) {
-            Fragment f = getFragmentManager().findFragmentByTag(tag);
-            if (f != null) {
-                getFragmentManager().beginTransaction()
-                        .detach(f)
-                        .commit();
+            UrlParser parser = new UrlParser(mSubmission.getUrl());
+            switch (parser.getType()) {
+                case UrlParser.IMGUR_ALBUM:
+                    contentFragment = ImagePagerFragment.newInstance((ImgurAlbum) mSubmission.getImgurData());
+                    break;
+                case UrlParser.IMGUR_IMAGE:
+                    contentFragment = ImagePagerFragment.newInstance((ImgurImage) mSubmission.getImgurData());
+                    break;
+                case UrlParser.NORMAL_IMAGE:
+                    contentFragment = ImagePagerFragment.newInstance(mSubmission.getUrl());
+                    break;
+                default:
+                    contentFragment = WebViewFragment.newInstance(mSubmission);
             }
+        } else if (!mSubmission.isSelf()) {
+            contentFragment = CommentFragment.newInstance(mSubmission.getUrl());
+        }
+
+        if (contentFragment != null) {
+            getFragmentManager().beginTransaction()
+                    .replace(R.id.content_container, contentFragment, "content")
+                    .commit();
+            mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mDrawerLayout.isDrawerOpen(Gravity.END)) {
+            mDrawerLayout.closeDrawer(Gravity.END);
+        } else {
+            super.onBackPressed();
         }
     }
 }
