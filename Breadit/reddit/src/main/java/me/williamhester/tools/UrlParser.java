@@ -1,7 +1,5 @@
 package me.williamhester.tools;
 
-import android.util.Log;
-
 /**
  * Created by william on 7/19/14.
  */

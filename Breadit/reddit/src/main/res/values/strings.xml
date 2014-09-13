@@ -38,6 +38,7 @@
     <string name="reply_hint">Enter reply</string>
     <string name="cancel">Cancel</string>
     <string name="reply">Reply</string>
+    <string name="view_link">View link</string>
 
     <!-- Comments -->
     <string name="edit">Edit</string>

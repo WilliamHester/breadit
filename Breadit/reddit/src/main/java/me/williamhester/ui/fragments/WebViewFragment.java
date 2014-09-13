@@ -110,12 +110,21 @@ public class WebViewFragment extends Fragment {
         });
         return v;
     }
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString(URI, mUri);
         if (mWebView != null)
             mWebView.saveState(outState);
+    }
+
+    public boolean onBackPressed() {
+        if (mWebView.canGoBack()) {
+            mWebView.goBack();
+            return true;
+        }
+        return false;
     }
 
     private String imgurOptimize(String s) {
