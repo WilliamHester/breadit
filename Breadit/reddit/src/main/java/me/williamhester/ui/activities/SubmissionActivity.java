@@ -82,9 +82,7 @@ public class SubmissionActivity extends Activity {
                 || mParser.getType() == UrlParser.NORMAL_IMAGE) {
             menu.findItem(R.id.action_view_link).setIcon(android.R.drawable.ic_menu_gallery);
         }
-//        if (mSubmission != null && mSubmission.isSelf()) { // We don't want people leaving the app for a self post
-            menu.removeItem(R.id.action_open_link_in_browser);
-//        }
+        menu.removeItem(R.id.action_open_link_in_browser);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -145,7 +143,7 @@ public class SubmissionActivity extends Activity {
             setUpDrawer();
         }
         getFragmentManager().beginTransaction()
-                .replace(R.id.comments_container, comments, "comments")
+                .replace(R.id.container, comments, "comments")
                 .commit();
     }
 
