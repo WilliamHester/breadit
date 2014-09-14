@@ -19,12 +19,13 @@ import me.williamhester.models.Submission;
 import me.williamhester.reddit.R;
 import me.williamhester.tools.UrlParser;
 import me.williamhester.ui.fragments.CommentFragment;
+import me.williamhester.ui.fragments.ImageFragment;
 import me.williamhester.ui.fragments.ImagePagerFragment;
 import me.williamhester.ui.fragments.RedditLiveFragment;
 import me.williamhester.ui.fragments.SubredditFragment;
 import me.williamhester.ui.fragments.WebViewFragment;
 
-public class SubmissionActivity extends Activity {
+public class SubmissionActivity extends Activity implements ImageFragment.ImageTapCallbacks {
 
     public static final String COMMENT_TAB = "comments";
     public static final String CONTENT_TAB = "content";
@@ -81,6 +82,8 @@ public class SubmissionActivity extends Activity {
                 || mParser.getType() == UrlParser.IMGUR_IMAGE
                 || mParser.getType() == UrlParser.NORMAL_IMAGE) {
             menu.findItem(R.id.action_view_link).setIcon(android.R.drawable.ic_menu_gallery);
+        } else if (mParser.getType() == UrlParser.YOUTUBE) {
+            menu.findItem(R.id.action_view_link).setIcon(R.drawable.ic_youtube);
         }
         menu.removeItem(R.id.action_open_link_in_browser);
         return super.onCreateOptionsMenu(menu);
@@ -218,6 +221,15 @@ public class SubmissionActivity extends Activity {
             }
         } else {
             super.onBackPressed();
+        }
+    }
+
+    @Override
+    public void onImageTapped() {
+        if (mDrawerLayout.isDrawerOpen(Gravity.END)) {
+            mDrawerLayout.closeDrawer(Gravity.END);
+        } else {
+            getFragmentManager().popBackStack();
         }
     }
 }

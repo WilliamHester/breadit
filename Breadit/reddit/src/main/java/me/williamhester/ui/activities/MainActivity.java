@@ -12,13 +12,14 @@ import android.view.MenuItem;
 
 import me.williamhester.models.AccountManager;
 import me.williamhester.reddit.R;
+import me.williamhester.ui.fragments.ImageFragment;
 import me.williamhester.ui.fragments.ImagePagerFragment;
 import me.williamhester.ui.fragments.NavigationDrawerFragment;
 import me.williamhester.ui.fragments.SubredditFragment;
 
 public class MainActivity extends Activity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks,
-        ImagePagerFragment.ImagePagerCallbacks {
+        ImagePagerFragment.ImagePagerCallbacks, ImageFragment.ImageTapCallbacks {
 
     public static final String SUBREDDIT = "subreddit";
 
@@ -185,5 +186,10 @@ public class MainActivity extends Activity
         drawerLayout.setEnabled(true);
         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
         getActionBar().setHomeButtonEnabled(true);
+    }
+
+    @Override
+    public void onImageTapped() {
+        getFragmentManager().popBackStack();
     }
 }

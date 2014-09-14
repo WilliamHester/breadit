@@ -1,8 +1,8 @@
 package me.williamhester.ui.fragments;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.koushikdutta.async.future.FutureCallback;
 
@@ -31,6 +32,7 @@ public class ImageFragment extends Fragment {
     private ImgurImage mImgurImage;
     private String mUrl;
     private PhotoViewAttacher mAttacher;
+    private ImageTapCallbacks mCallback;
 
     public static ImageFragment newInstance(String url) {
         ImageFragment fragment = new ImageFragment();
@@ -46,6 +48,15 @@ public class ImageFragment extends Fragment {
         args.putSerializable(IMGUR_IMAGE_KEY, image);
         fragment.setArguments(args);
         return fragment;
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        if (activity instanceof ImageTapCallbacks) {
+            mCallback = (ImageTapCallbacks) getActivity();
+        }
     }
 
     @Override
@@ -79,9 +90,24 @@ public class ImageFragment extends Fragment {
                 mAttacher = new PhotoViewAttacher(result);
                 ProgressBar progressBar = (ProgressBar) v.findViewById(R.id.progress_bar);
                 progressBar.setVisibility(View.GONE);
+                mAttacher.setOnViewTapListener(new PhotoViewAttacher.OnViewTapListener() {
+                    @Override
+                    public void onViewTap(View view, float v, float v2) {
+                        if (mCallback != null) {
+                            mCallback.onImageTapped();
+                        }
+                    }
+                });
             }
         });
-
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (mCallback != null) {
+                    mCallback.onImageTapped();
+                }
+            }
+        });
         return v;
     }
 
@@ -109,5 +135,9 @@ public class ImageFragment extends Fragment {
         if (mAttacher != null) {
             mAttacher.cleanup();
         }
+    }
+
+    public interface ImageTapCallbacks {
+        public void onImageTapped();
     }
 }

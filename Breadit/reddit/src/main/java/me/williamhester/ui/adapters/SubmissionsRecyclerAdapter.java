@@ -146,7 +146,7 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
                     } else if (linkDetails.getType() == UrlParser.YOUTUBE) {
                         imageView.setVisibility(View.VISIBLE);
                         ImgurApi.loadImage(linkDetails.getUrl(), imageView, null);
-                        button.setImageResource(android.R.drawable.ic_media_play);
+                        button.setImageResource(R.drawable.ic_youtube);
                         button.setVisibility(View.VISIBLE);
                         button.setOnClickListener(new View.OnClickListener() {
                             @Override
