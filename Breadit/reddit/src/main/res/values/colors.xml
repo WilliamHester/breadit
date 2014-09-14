@@ -10,7 +10,7 @@
     <color name="mid_gray">#A8A8A8</color>
     <color name="auburn_orange">#f68026</color>
     <color name="auburn_blue">#496e9c</color>
-    <color name="transparent_gray">#80303030</color>
+    <color name="transparent_gray">#80000000</color>
 
     <color name="transparent_white">#66ffffff</color>
     <color name="white">#ffffff</color>
