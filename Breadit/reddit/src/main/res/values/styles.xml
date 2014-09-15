@@ -181,4 +181,13 @@
         <item name="android:dropDownListViewStyle">@style/DropDownListView.Breadit</item>
     </style>
 
+    <style name="SortButton">
+        <item name="android:textAllCaps">true</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:gravity">center</item>
+        <item name="android:padding">8dp</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:background">@drawable/breadit_list_selector_holo_light</item>
+    </style>
+
 </resources>

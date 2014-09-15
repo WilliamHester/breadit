@@ -9,22 +9,29 @@ import android.support.v4.widget.DrawerLayout;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 
 import me.williamhester.models.AccountManager;
+import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.fragments.ImagePagerFragment;
 import me.williamhester.ui.fragments.NavigationDrawerFragment;
+import me.williamhester.ui.fragments.SortFragment;
 import me.williamhester.ui.fragments.SubredditFragment;
 
 public class MainActivity extends Activity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks,
-        ImagePagerFragment.ImagePagerCallbacks {
+        ImagePagerFragment.ImagePagerCallbacks,
+        SortFragment.SortFragmentCallback {
 
     public static final String SUBREDDIT = "subreddit";
 
     private NavigationDrawerFragment mNavigationDrawerFragment;
     private Fragment mSubredditFragment;
     private String mSubreddit;
+    private boolean mIsShowingSort;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,9 +62,14 @@ public class MainActivity extends Activity
         updateActionBar(null);
 
         getFragmentManager().beginTransaction()
-                .add(R.id.navigation_drawer_container, mNavigationDrawerFragment,
-                        "NavigationDrawer")
+                .replace(R.id.navigation_drawer_container, mNavigationDrawerFragment, "NavigationDrawer")
+                .replace(R.id.sort_container, new SortFragment(), "SortFragment")
                 .commit();
+
+        if (!mIsShowingSort) {
+            View sort = findViewById(R.id.sort_container);
+            sort.setVisibility(View.GONE);
+        }
 
         if (getFragmentManager().findFragmentByTag(mSubreddit) != null) {
             mSubredditFragment = getFragmentManager().findFragmentByTag(mSubreddit);
@@ -148,7 +160,7 @@ public class MainActivity extends Activity
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
         if (!AccountManager.isLoggedIn()) {
-            menu.removeItem(R.id.action_my_account);
+//            menu.removeItem(R.id.action_my_account);
         }
         return super.onCreateOptionsMenu(menu);
     }
@@ -156,17 +168,43 @@ public class MainActivity extends Activity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            Intent i = new Intent(this, SettingsActivity.class);
-            Bundle b = new Bundle();
-            i.putExtras(b);
-            startActivity(i);
-            return true;
-        } else if (id == R.id.action_my_account) {
-            Bundle b = new Bundle();
-            Intent i = new Intent(this, AccountActivity.class);
-            i.putExtras(b);
-            startActivity(i);
+        switch (id) {
+            case R.id.action_settings: {
+                Intent i = new Intent(this, SettingsActivity.class);
+                Bundle b = new Bundle();
+                i.putExtras(b);
+                startActivity(i);
+                return true;
+            }
+//            case R.id.action_my_account: {
+//                Bundle b = new Bundle();
+//                Intent i = new Intent(this, AccountActivity.class);
+//                i.putExtras(b);
+//                startActivity(i);
+//            }
+            case R.id.action_sort: {
+                if (mIsShowingSort) {
+                    Animation animation = AnimationUtils.loadAnimation(this, R.anim.slide_up);
+                    animation.setAnimationListener(new Animation.AnimationListener() {
+                        @Override
+                        public void onAnimationStart(Animation animation) { }
+
+                        @Override
+                        public void onAnimationEnd(Animation animation) {
+                            findViewById(R.id.sort_container).setVisibility(View.GONE);
+                        }
+
+                        @Override
+                        public void onAnimationRepeat(Animation animation) { }
+                    });
+                    findViewById(R.id.sort_container).startAnimation(animation);
+                } else {
+                    findViewById(R.id.sort_container).setVisibility(View.VISIBLE);
+                    Animation animation = AnimationUtils.loadAnimation(this, R.anim.slide_down);
+                    findViewById(R.id.sort_container).startAnimation(animation);
+                }
+                mIsShowingSort = !mIsShowingSort;
+            }
         }
         return super.onOptionsItemSelected(item);
     }
@@ -185,5 +223,20 @@ public class MainActivity extends Activity
         drawerLayout.setEnabled(true);
         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
         getActionBar().setHomeButtonEnabled(true);
+    }
+
+    @Override
+    public void onPrimarySortSelected(String sort) {
+
+    }
+
+    @Override
+    public void onSecondarySortSelected(String sort) {
+
+    }
+
+    @Override
+    public void onCancel() {
+
     }
 }

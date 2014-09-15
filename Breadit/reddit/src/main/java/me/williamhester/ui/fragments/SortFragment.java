@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 
 import me.williamhester.network.RedditApi;
@@ -87,8 +89,28 @@ public class SortFragment extends Fragment {
         @Override
         public void onClick(View view) {
             String tag = (String) view.getTag();
-            if (tag.equals(RedditApi.SORT_TYPE_TOP) || tag.equals(RedditApi.SORT_TYPE_CONTROVERSIAL)) {
+            final View secondarySorts = getView().findViewById(R.id.secondary_sorts);
+            if (secondarySorts.getVisibility() == View.GONE
+                    && (tag.equals(RedditApi.SORT_TYPE_TOP)
+                    || tag.equals(RedditApi.SORT_TYPE_CONTROVERSIAL))) {
+                secondarySorts.setVisibility(View.VISIBLE);
+                Animation animation = AnimationUtils.loadAnimation(getActivity(), R.anim.slide_down);
+                secondarySorts.startAnimation(animation);
+            } else if (secondarySorts.getVisibility() == View.VISIBLE) {
+                Animation animation = AnimationUtils.loadAnimation(getActivity(), R.anim.slide_up);
+                animation.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) { }
 
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        secondarySorts.setVisibility(View.GONE);
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) { }
+                });
+                secondarySorts.startAnimation(animation);
             }
             mCallback.onPrimarySortSelected(tag);
         }

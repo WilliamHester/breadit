@@ -1,109 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <Button android:id="@+id/hot_sort"
-            android:textAllCaps="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/hot"
-            android:padding="8dp"
-            style="?android:attr/buttonBarButtonStyle"/>
-
-        <Button android:id="@+id/new_sort"
-            android:textAllCaps="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/new_string"
-            android:padding="8dp"
-            style="?android:attr/buttonBarButtonStyle"/>
-
-        <Button android:id="@+id/rising_sort"
-            android:textAllCaps="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/rising"
-            android:padding="8dp"
-            style="?android:attr/buttonBarButtonStyle"/>
-
-        <Button android:id="@+id/controversial_sort"
-            android:textAllCaps="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/controversial"
-            android:padding="8dp"
-            style="?android:attr/buttonBarButtonStyle"/>
-
-        <Button android:id="@+id/top_sort"
-            android:textAllCaps="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/top"
-            android:padding="8dp"
-            style="?android:attr/buttonBarButtonStyle"/>
-
-    </LinearLayout>
-
     <LinearLayout android:id="@+id/secondary_sorts"
+        android:layout_below="@+id/primary_sorts"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="50dp"
+        android:background="@color/blackish"
+        android:visibility="gone">
 
         <Button android:id="@+id/hour_sort"
-            android:textAllCaps="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/hour"
-            android:padding="8dp"
-            style="?android:attr/buttonBarButtonStyle"/>
+            style="@style/SortButton"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:text="@string/hour"/>
 
         <Button android:id="@+id/day_sort"
-            android:textAllCaps="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/today"
-            android:padding="8dp"
-            style="?android:attr/buttonBarButtonStyle"/>
+            style="@style/SortButton"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:text="@string/today"/>
 
         <Button android:id="@+id/week_sort"
-            android:textAllCaps="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/week"
-            android:padding="8dp"
-            style="?android:attr/buttonBarButtonStyle"/>
+            style="@style/SortButton"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:text="@string/week"/>
 
         <Button android:id="@+id/month_sort"
-            android:textAllCaps="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/month"
-            android:padding="8dp"
-            style="?android:attr/buttonBarButtonStyle"/>
+            style="@style/SortButton"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:text="@string/month"/>
 
         <Button android:id="@+id/year_sort"
-            android:textAllCaps="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/year"
-            android:padding="8dp"
-            style="?android:attr/buttonBarButtonStyle"/>
+            style="@style/SortButton"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:text="@string/year"/>
 
         <Button android:id="@+id/all_sort"
-            android:textAllCaps="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/all"
-            android:padding="8dp"
-            style="?android:attr/buttonBarButtonStyle"/>
+            style="@style/SortButton"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:text="@string/all"/>
 
     </LinearLayout>
 
-</LinearLayout>
+    <LinearLayout android:id="@+id/primary_sorts"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@color/blackish">
+
+        <Button android:id="@+id/hot_sort"
+            style="@style/SortButton"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:text="@string/hot"/>
+
+        <Button android:id="@+id/new_sort"
+            style="@style/SortButton"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:text="@string/new_string"/>
+
+        <Button android:id="@+id/rising_sort"
+            style="@style/SortButton"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:text="@string/rising"/>
+
+        <Button android:id="@+id/controversial_sort"
+            style="@style/SortButton"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:text="@string/controversial"/>
+
+        <Button android:id="@+id/top_sort"
+            style="@style/SortButton"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:text="@string/top"/>
+
+    </LinearLayout>
+
+</RelativeLayout>
