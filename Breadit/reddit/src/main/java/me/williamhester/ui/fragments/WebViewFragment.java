@@ -19,23 +19,31 @@ import me.williamhester.reddit.R;
 public class WebViewFragment extends Fragment {
 
     public static final String URI = "uri";
-    public static final String SUBMISSION = "submission";
 
     private WebView mWebView;
 
     private String mUri;
-    private Submission mSubmission;
+
+    public static WebViewFragment newInstance(String uri) {
+        Bundle args = new Bundle();
+        args.putString(URI, uri);
+        WebViewFragment fragment = new WebViewFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static WebViewFragment newInstance(Submission submission) {
+        Bundle args = new Bundle();
+        args.putString(URI, submission.getUrl());
+        WebViewFragment fragment = new WebViewFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (savedInstanceState != null) {
-            mUri = savedInstanceState.getString(URI);
-            mSubmission = (Submission) savedInstanceState.getSerializable(SUBMISSION);
-        } else if (getArguments() != null) {
-            mSubmission = (Submission) getArguments().getSerializable(SUBMISSION);
-            mUri = mSubmission.getUrl();
-        }
+        mUri = getArguments().getString(URI);
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -55,12 +63,12 @@ public class WebViewFragment extends Fragment {
 
         if (savedInstanceState != null) {
             mWebView.restoreState(savedInstanceState);
-        } else if (mSubmission.getUrl() != null) {
-            if (isYoutubeLink(mSubmission.getUrl())) {
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(mSubmission.getUrl()));
+        } else if (mUri != null) {
+            if (isYoutubeLink(mUri)) {
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUri));
                 startActivity(browserIntent);
             } else {
-                mWebView.loadUrl(imgurOptimize(mSubmission.getUrl()));
+                mWebView.loadUrl(imgurOptimize(mUri));
                 mWebView.setWebChromeClient(new WebChromeClient() {
                     @Override
                     public void onProgressChanged(WebView view, int progress) {
@@ -80,7 +88,6 @@ public class WebViewFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putSerializable(SUBMISSION, mSubmission);
         outState.putString(URI, mUri);
         if (mWebView != null)
             mWebView.saveState(outState);

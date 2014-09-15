@@ -16,9 +16,9 @@ import android.view.ViewGroup;
 
 import java.util.List;
 
-import me.williamhester.BreaditApplication;
-import me.williamhester.models.Account;
 import me.williamhester.databases.AccountDataSource;
+import me.williamhester.models.Account;
+import me.williamhester.models.AccountManager;
 import me.williamhester.reddit.R;
 
 public class SettingsFragment extends PreferenceFragment {
@@ -48,7 +48,7 @@ public class SettingsFragment extends PreferenceFragment {
         mLogIn = findPreference("pref_login");
         mLogOut = findPreference("pref_logout");
         mSwitchUsers = findPreference("pref_switch_users");
-        mAccount = ((BreaditApplication) getActivity().getApplicationContext()).getAccount();
+        mAccount = AccountManager.getAccount();
     }
 
     @Override
@@ -149,9 +149,9 @@ public class SettingsFragment extends PreferenceFragment {
                                     .getListView().getCheckedItemPosition();
                             if (selection < accounts.size()) {
                                 id = accounts.get(selection).getId();
-                                ((BreaditApplication) getActivity().getApplicationContext()).setAccount(accounts.get(selection));
+                                AccountManager.setAccount(accounts.get(selection));
                             } else {
-                                ((BreaditApplication) getActivity().getApplicationContext()).setAccount(null);
+                                AccountManager.setAccount(null);
                             }
                             SharedPreferences.Editor editor = prefs.edit();
                             editor.putLong("accountId", id);
@@ -210,9 +210,9 @@ public class SettingsFragment extends PreferenceFragment {
                                     .getListView().getCheckedItemPosition();
                             if (selection < accounts.size()) {
                                 id = accounts.get(selection).getId();
-                                ((BreaditApplication) getActivity().getApplicationContext()).setAccount(accounts.get(selection));
+                                AccountManager.setAccount(accounts.get(selection));
                             } else {
-                                ((BreaditApplication) getActivity().getApplicationContext()).setAccount(null);
+                                AccountManager.setAccount(null);
                             }
                             if (id == -1) {
                                 mClearHistory.setEnabled(false);

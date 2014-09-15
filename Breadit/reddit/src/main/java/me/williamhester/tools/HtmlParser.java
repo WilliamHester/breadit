@@ -13,6 +13,7 @@ import android.text.style.StrikethroughSpan;
 import android.text.style.StyleSpan;
 import android.text.style.SuperscriptSpan;
 import android.text.style.TypefaceSpan;
+import android.text.style.UnderlineSpan;
 import android.util.Log;
 import android.view.View;
 
@@ -36,7 +37,7 @@ import me.williamhester.ui.text.SpoilerSpan;
  */
 public class HtmlParser {
 
-    private final List<String> mLinks = new ArrayList<>();
+    private final List<Link> mLinks = new ArrayList<>();
     private SpannableStringBuilder mSpannableStringBuilder;
 
     public HtmlParser(String html) {
@@ -47,14 +48,14 @@ public class HtmlParser {
         return mSpannableStringBuilder;
     }
 
-    public @NonNull List<String> getLinks() {
+    public @NonNull List<Link> getLinks() {
         return mLinks;
     }
 
     private SpannableStringBuilder parseHtml(String html) {
         if (html != null) {
             Document document = Jsoup.parse(html);
-            SpannableStringBuilder sb = generateString(document);
+            SpannableStringBuilder sb = generateString(document, new SpannableStringBuilder());
             while (sb.length() > 0 && (sb.charAt(0) == '\n' || sb.charAt(0) == ' ')) {
                 sb.delete(0, 1);
             }
@@ -63,30 +64,26 @@ public class HtmlParser {
         return new SpannableStringBuilder().append("");
     }
 
-    private SpannableStringBuilder generateString(Node node) {
-        return generateString(node, new SpannableStringBuilder());
-    }
-
-    private SpannableStringBuilder generateString(Node node, SpannableStringBuilder sb) {
+    private SpannableStringBuilder generateString(Node node, SpannableStringBuilder ssb) {
         if (node instanceof TextNode) {
-            return new SpannableStringBuilder(((TextNode) node).text());
+            return ssb.append(((TextNode) node).text());
         }
 
-        insertNewLine(node, sb);
+        insertNewLine(node, ssb);
 
         List<Node> children = node.childNodes();
         for (Node n : children) {
-            sb.append(generateString(n));
+            ssb.append(generateString(n, new SpannableStringBuilder()));
         }
 
-        if (sb.length() > 0) {
-            sb.setSpan(getSpanFromTag(node), 0, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        if (ssb.length() > 0) {
+            ssb.setSpan(getSpanFromTag(node, ssb), 0, ssb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
 
-        return sb;
+        return ssb;
     }
 
-    private Object getSpanFromTag(Node node) {
+    private Object getSpanFromTag(Node node, SpannableStringBuilder ssb) {
         if (node instanceof Element) {
             String tag = ((Element) node).tag().getName();
             if (tag.equalsIgnoreCase("code")) {
@@ -106,11 +103,15 @@ public class HtmlParser {
                 if (url.equals("/spoiler")) {
                     return new SpoilerSpan();
                 }
-                String beg = url.substring(0, 3);
-                if (beg.equals("/s") || beg.equals("#s")) {
-                    return new SpoilerSpan();
+                if (url.equals("/s") || url.equals("#s")) {
+                    String spoiler = node.attr("title");
+                    ssb.append(' ');
+                    ssb.append(spoiler);
+                    ssb.setSpan(new SpoilerSpan(), ssb.length() - spoiler.length(), ssb.length(),
+                            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    return new UnderlineSpan();
                 }
-                mLinks.add(url);
+                mLinks.add(new Link(ssb.toString(), url));
                 return new LinkSpan(url);
             } else if (tag.equalsIgnoreCase("li")) {
                 return new BulletSpan(BulletSpan.STANDARD_GAP_WIDTH, Color.CYAN);
@@ -131,6 +132,24 @@ public class HtmlParser {
                     || ((Element) node).tagName().equalsIgnoreCase("pre")) {
                 sb.append("\n");
             }
+        }
+    }
+
+    public static class Link {
+        private String mTitle;
+        private String mLink;
+
+        public Link(String title, String link) {
+            mTitle = title;
+            mLink = link;
+        }
+
+        public String getTitle() {
+            return mTitle;
+        }
+
+        public String getLink() {
+            return mLink;
         }
     }
 

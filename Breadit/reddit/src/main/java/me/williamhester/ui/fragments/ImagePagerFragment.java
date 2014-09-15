@@ -13,8 +13,12 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
+import com.koushikdutta.async.future.FutureCallback;
+
 import me.williamhester.models.ImgurAlbum;
 import me.williamhester.models.ImgurImage;
+import me.williamhester.models.ResponseImgurWrapper;
+import me.williamhester.network.ImgurApi;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.adapters.ImgurAlbumAdapter;
 import me.williamhester.ui.adapters.SingleImageAdapter;
@@ -27,6 +31,8 @@ public class ImagePagerFragment extends Fragment {
     private static final String IMAGE = "image";
     private static final String ALBUM = "album";
     private static final String IMAGE_URL = "imageUrl";
+    private static final String IMGUR_ID = "imgurUrl";
+    private static final String IMGUR_ALBUM = "imgurAlbum";
 
     private static final int PAGER_INDICATOR_MS = 1000;
 
@@ -57,6 +63,15 @@ public class ImagePagerFragment extends Fragment {
     public static ImagePagerFragment newInstance(String imageUrl) {
         Bundle args = new Bundle();
         args.putString(IMAGE_URL, imageUrl);
+        ImagePagerFragment fragment = new ImagePagerFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static ImagePagerFragment newInstanceLazyLoaded(String imgurId, boolean imgurAlbum) {
+        Bundle args = new Bundle();
+        args.putString(IMGUR_ID, imgurId);
+        args.putBoolean(IMGUR_ALBUM, imgurAlbum);
         ImagePagerFragment fragment = new ImagePagerFragment();
         fragment.setArguments(args);
         return fragment;
@@ -98,10 +113,39 @@ public class ImagePagerFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_image_pager, root, false);
-        final TextView indicator = (TextView) v.findViewById(R.id.pager_indicator);
+        final View v = inflater.inflate(R.layout.fragment_image_pager, root, false);
+
         TextView title = (TextView) v.findViewById(R.id.album_title);
         title.setText(mTitle);
+        if (getArguments().containsKey(IMGUR_ID)) {
+            String imgurId = getArguments().getString(IMGUR_ID);
+            if (getArguments().getBoolean(IMGUR_ALBUM)) {
+                ImgurApi.getAlbumDetails(imgurId, getActivity(), new FutureCallback<ResponseImgurWrapper<ImgurAlbum>>() {
+                    @Override
+                    public void onCompleted(Exception e, ResponseImgurWrapper<ImgurAlbum> result) {
+                        mAdapter = new ImgurAlbumAdapter(getChildFragmentManager(), result.getData());
+                        setUpAdapter(v);
+                    }
+                });
+            } else {
+                ImgurApi.getImageDetails(imgurId, getActivity(), new FutureCallback<ResponseImgurWrapper<ImgurImage>>() {
+                    @Override
+                    public void onCompleted(Exception e, ResponseImgurWrapper<ImgurImage> result) {
+                        mAdapter = new ImgurAlbumAdapter(getChildFragmentManager(), result.getData());
+                        setUpAdapter(v);
+                    }
+                });
+            }
+        } else {
+            setUpAdapter(v);
+        }
+        return v;
+    }
+
+    private void setUpAdapter(View v) {
+        View progressBar = v.findViewById(R.id.progress_bar);
+        progressBar.setVisibility(View.GONE);
+        final TextView indicator = (TextView) v.findViewById(R.id.pager_indicator);
         if (mAdapter.getCount() < 2) {
             indicator.setVisibility(View.INVISIBLE);
         } else {
@@ -164,7 +208,6 @@ public class ImagePagerFragment extends Fragment {
             }
         });
         pager.setAdapter(mAdapter);
-        return v;
     }
 
     @Override

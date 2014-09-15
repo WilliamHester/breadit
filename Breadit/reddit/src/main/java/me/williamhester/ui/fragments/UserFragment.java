@@ -27,7 +27,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.williamhester.BreaditApplication;
+import me.williamhester.models.AccountManager;
 import me.williamhester.models.Submission;
 import me.williamhester.models.Thing;
 import me.williamhester.models.User;
@@ -55,7 +55,7 @@ public class UserFragment extends AccountFragment {
         if (getArguments() != null) {
             mUsername = getArguments().getString("username");
         }
-        mAccount = ((BreaditApplication) getActivity().getApplicationContext()).getAccount();
+        mAccount = AccountManager.getAccount();
         if (mUsername == null && mAccount != null) {
             mUsername = mAccount.getUsername();
         }

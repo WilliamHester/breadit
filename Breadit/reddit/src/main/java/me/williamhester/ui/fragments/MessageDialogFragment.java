@@ -17,8 +17,8 @@ import org.apache.http.message.BasicNameValuePair;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.williamhester.BreaditApplication;
 import me.williamhester.models.Account;
+import me.williamhester.models.AccountManager;
 import me.williamhester.models.utils.Utilities;
 import me.williamhester.reddit.R;
 
@@ -43,7 +43,7 @@ public class MessageDialogFragment extends DialogFragment {
             mReply = getArguments().getBoolean("reply");
         }
         setStyle(STYLE_NORMAL, android.R.style.Theme_Holo_Dialog);
-        mAccount = ((BreaditApplication) getActivity().getApplicationContext()).getAccount();
+        mAccount = AccountManager.getAccount();
     }
 
     @Override

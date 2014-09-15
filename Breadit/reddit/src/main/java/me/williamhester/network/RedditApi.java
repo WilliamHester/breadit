@@ -1,8 +1,6 @@
 package me.williamhester.network;
 
 import android.content.Context;
-import android.text.Spannable;
-import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -13,19 +11,16 @@ import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
 
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.http.message.BasicNameValuePair;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 
-import me.williamhester.BreaditApplication;
 import me.williamhester.models.Account;
+import me.williamhester.models.AccountManager;
 import me.williamhester.models.Comment;
 import me.williamhester.models.Listing;
-import me.williamhester.models.RedditLive;
 import me.williamhester.models.ResponseRedditWrapper;
 import me.williamhester.models.Submission;
 import me.williamhester.models.Votable;
@@ -38,7 +33,7 @@ public class RedditApi {
 
     private static final String USER_AGENT = "Breadit_Android_App";
 
-    private static final String REDDIT_URL = "http://www.reddit.com";
+    private static final String REDDIT_URL = "https://www.reddit.com";
 
     public static String SORT_TYPE_HOT = "";
     public static String SORT_TYPE_NEW = "new";
@@ -56,7 +51,7 @@ public class RedditApi {
     public static void vote(Context context, Votable v) {
         Ion.with(context)
                 .load(REDDIT_URL + "/api/vote")
-                .addHeaders(generateUserHeaders(context))
+                .addHeaders(generateUserHeaders())
                 .setBodyParameter("dir", String.valueOf(v.getVoteStatus()))
                 .setBodyParameter("id", v.getName())
                 .asString();
@@ -93,7 +88,7 @@ public class RedditApi {
         Ion.with(context)
                 .load(REDDIT_URL + subredditName + "/" + sortType + "/.json")
                 .addQueries(generateSubmissionQueries(secondarySort, before, after))
-                .addHeaders(generateUserHeaders(context))
+                .addHeaders(generateUserHeaders())
                 .addHeader("User-Agent", USER_AGENT)
                 .asJsonObject()
                 .setCallback(callback);
@@ -120,8 +115,8 @@ public class RedditApi {
         return queries;
     }
 
-    private static Map<String, List<String>> generateUserHeaders(Context context) {
-        Account account = ((BreaditApplication) context.getApplicationContext()).getAccount();
+    private static Map<String, List<String>> generateUserHeaders() {
+        Account account = AccountManager.getAccount();
         Map<String, List<String>> headers = new HashMap<>();
         if (account != null) {
             ArrayList<String> list1 = new ArrayList<>();
@@ -141,6 +136,7 @@ public class RedditApi {
                 .load(REDDIT_URL + permalink + ".json")
                 .addHeader("User-Agent", USER_AGENT)
                 .addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+                .addHeaders(generateUserHeaders())
                 .asString()
                 .setCallback(new FutureCallback<String>() {
                     @Override
@@ -182,7 +178,7 @@ public class RedditApi {
     public static void editThing(Context context, final Votable thing, final FutureCallback<Votable> callback) {
         Ion.with(context)
                 .load(REDDIT_URL + "/api/editusertext/")
-                .addHeaders(generateUserHeaders(context))
+                .addHeaders(generateUserHeaders())
                 .addHeader("api_type", "json")
 //                .setBodyParameter("text", thing.getRawMarkdown())
                 .setBodyParameter("thing_id", thing.getName())

@@ -49,6 +49,15 @@ public class ImgurApi {
                 });
     }
 
+    public static void getImageDetails(String id, Context context,
+                                       final FutureCallback<ResponseImgurWrapper<ImgurImage>> callback) {
+        Ion.with(context)
+                .load("https://api.imgur.com/3/image/" + id)
+                .addHeader(AUTHORIZATION, CLIENT_ID)
+                .as(new TypeToken<ResponseImgurWrapper<ImgurImage>>(){})
+                .setCallback(callback);
+    }
+
     public static void getAlbumDetails(String id, Context context, final Submission submission,
                                        final FutureCallback<Submission> callback) {
         Ion.with(context)
@@ -66,6 +75,15 @@ public class ImgurApi {
                         }
                     }
                 });
+    }
+
+    public static void getAlbumDetails(String id, Context context,
+                                       final FutureCallback<ResponseImgurWrapper<ImgurAlbum>> callback) {
+        Ion.with(context)
+                .load("https://api.imgur.com/3/album/" + id)
+                .addHeader(AUTHORIZATION, CLIENT_ID)
+                .as(new TypeToken<ResponseImgurWrapper<ImgurAlbum>>(){})
+                .setCallback(callback);
     }
 
     public static void loadImage(String url, ImageView imageView, FutureCallback<ImageView> callback) {

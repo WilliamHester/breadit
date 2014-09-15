@@ -10,13 +10,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="@color/darker_gray">
+        android:background="@color/card_view_gray">
 
         <RelativeLayout android:id="@+id/comment_content"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp"
-            android:paddingBottom="8dp"
-            android:paddingTop="8dp"
+            android:padding="8dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -38,55 +35,6 @@
                 android:paddingTop="1dp"
                 android:textColor="@color/ghostwhite"
                 android:layout_below="@id/metadata"/>
-
-            <LinearLayout android:id="@+id/edited_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingTop="8dp"
-                android:visibility="gone">
-
-                <EditText android:id="@+id/reply_body"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/mid_gray"
-                    android:hint="@string/reply_hint"/>
-
-                <View android:layout_marginTop="8dp"
-                    android:layout_height="1dp"
-                    android:layout_width="match_parent"
-                    android:background="@color/dark_gray"/>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                    <Button android:id="@+id/cancel_reply"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/cancel"
-                        style="?android:buttonBarButtonStyle"
-                        android:textColor="@color/mid_gray"/>
-
-                    <View
-                        android:layout_height="match_parent"
-                        android:layout_width="1dp"
-                        android:background="@color/dark_gray"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginBottom="8dp"/>
-
-                    <Button android:id="@+id/confirm_reply"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/reply"
-                        style="?android:buttonBarButtonStyle"
-                        android:textColor="@color/mid_gray"/>
-
-                </LinearLayout>
-
-            </LinearLayout>
 
         </RelativeLayout>
 

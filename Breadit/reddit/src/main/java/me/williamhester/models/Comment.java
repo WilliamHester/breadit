@@ -34,6 +34,7 @@ public class Comment implements Serializable, Votable, Parcelable {
     private String mLinkId;
     private String mLinkTitle;
     private String mLinkUrl;
+    private String mName;
     private String mDistinguished;
     private boolean mSaved;
     private Boolean mVoteStatus;
@@ -89,6 +90,7 @@ public class Comment implements Serializable, Votable, Parcelable {
         if (!object.get("distinguished").isJsonNull()) {
             mDistinguished = object.get("distinguished").getAsString();
         }
+        mName = object.get("name").getAsString();
         mScore = object.get("score").getAsInt();
         mCreated = object.get("created").getAsLong();
         mCreatedUtc = object.get("created_utc").getAsLong();
@@ -120,7 +122,7 @@ public class Comment implements Serializable, Votable, Parcelable {
 
     @Override
     public String getName() {
-        return null;
+        return mName;
     }
 
     public int getVoteStatus() {

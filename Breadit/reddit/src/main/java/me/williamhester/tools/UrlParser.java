@@ -1,5 +1,7 @@
 package me.williamhester.tools;
 
+import android.util.Log;
+
 /**
  * Created by william on 7/19/14.
  */
@@ -11,20 +13,29 @@ public class UrlParser {
     public static final int IMGUR_GALLERY = 3;
     public static final int YOUTUBE = 4;
     public static final int NORMAL_IMAGE = 6;
+    public static final int SUBMISSION = 7;
+    public static final int SUBREDDIT = 8;
+    public static final int USER = 9;
+    public static final int REDDIT_LIVE = 10;
 
     private String mUrl;
     private String mId;
     private int mType;
-    private boolean mIsYoutube;
-    private boolean mIsImgur;
 
     public UrlParser(String url) {
         mUrl = url;
-        mIsImgur = mUrl.toLowerCase().contains("imgur");
-        mIsYoutube = mUrl.toLowerCase().contains("youtu.be") || mUrl.toLowerCase().contains("youtube.com");
-        if (mIsImgur) {
+        if (mUrl.substring(0, 3).equals("/u/") || mUrl.contains("reddit.com/u/")) { // go to a user
+            mId = mUrl.substring(mUrl.indexOf("/u/") + 3);
+            mType = USER;
+        } else if (mUrl.substring(0, 3).equals("/r/")) { // go to a subreddit
+            mId = url.substring(3);
+            mType = SUBREDDIT;
+        } else if (mUrl.toLowerCase().contains("reddit.com")) {
+            generateRedditDetails();
+        } else if (mUrl.toLowerCase().contains("imgur")) {
             generateImgurDetails();
-        } else if (mIsYoutube) {
+        } else if (mUrl.toLowerCase().contains("youtu.be")
+                || mUrl.toLowerCase().contains("youtube.com")) {
             generateYoutubeDetails();
         } else if (isDirectImageLink()) {
             mType = NORMAL_IMAGE;
@@ -37,14 +48,6 @@ public class UrlParser {
         } else {
             mType = NOT_SPECIAL;
         }
-    }
-
-    public boolean isYoutubeLink() {
-        return mIsYoutube;
-    }
-
-    public boolean isImgurLink() {
-        return mIsImgur;
     }
 
     private void generateImgurDetails() {
@@ -117,6 +120,25 @@ public class UrlParser {
             return true;
         }
         return false;
+    }
+
+    private void generateRedditDetails() {
+        int i = mUrl.indexOf("/", 17);
+        if (i == -1 || i == mUrl.length()) { // definitely a subreddit or the frontpage
+            int slashR = mUrl.indexOf("/r/");
+            if (slashR != -1) {
+                mId = mUrl.substring(slashR + 3, i == -1 ? mUrl.length() : i);
+            } else {
+                mId = "";
+            }
+            mType = SUBREDDIT;
+        } else if (mUrl.toLowerCase().contains("/live/")) {
+            mId = mUrl.substring(mUrl.indexOf("/live/") + 6);
+            mType = REDDIT_LIVE;
+        } else { // found a link to another post
+            mId = mUrl.substring(mUrl.indexOf("/r/"));
+            mType = SUBMISSION;
+        }
     }
 
     public String getLinkId() {

@@ -9,8 +9,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textColor="@color/ghostwhite"
-        android:padding="8dp"
-        android:textSize="16sp"
+        android:padding="12dp"
+        android:textSize="14sp"
         android:textAllCaps="true"
         android:fontFamily="sans-serif-condensed-light"/>
 

@@ -1,16 +1,16 @@
 package me.williamhester.ui.activities;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import me.williamhester.BreaditApplication;
+import me.williamhester.models.AccountManager;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.fragments.ImagePagerFragment;
 import me.williamhester.ui.fragments.NavigationDrawerFragment;
@@ -20,23 +20,28 @@ public class MainActivity extends Activity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks,
         ImagePagerFragment.ImagePagerCallbacks {
 
+    public static final String SUBREDDIT = "subreddit";
+
     private NavigationDrawerFragment mNavigationDrawerFragment;
     private Fragment mSubredditFragment;
     private String mSubreddit;
 
-    @SuppressLint("CommitPrefEdits")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-        if (getIntent() != null && getIntent().getAction() != null
-                && getIntent().getAction().equals(Intent.ACTION_VIEW)) {
-            mSubreddit = getIntent().getDataString();
-            if (mSubreddit != null)
-                mSubreddit = mSubreddit.substring(mSubreddit.indexOf("/subreddit/") + 11);
+        if (Intent.ACTION_VIEW.equals(getIntent().getAction())) {
+            if (getIntent().getExtras() != null) {
+                mSubreddit = getIntent().getExtras().getString(SUBREDDIT);
+            } else {
+                mSubreddit = getIntent().getDataString();
+                if (mSubreddit != null)
+                    mSubreddit = mSubreddit.substring(mSubreddit.indexOf("/subreddit/") + 11);
+            }
             mNavigationDrawerFragment = NavigationDrawerFragment.newInstance(mSubreddit);
+        } else {
+            mSubreddit = "";
         }
 
         if (getActionBar() != null) {
@@ -54,26 +59,31 @@ public class MainActivity extends Activity
                         "NavigationDrawer")
                 .commit();
 
-        if (getFragmentManager().findFragmentByTag("SubredditFragment") != null) {
-            mSubredditFragment = getFragmentManager().findFragmentByTag("SubredditFragment");
+        if (getFragmentManager().findFragmentByTag(mSubreddit) != null) {
+            mSubredditFragment = getFragmentManager().findFragmentByTag(mSubreddit);
             getFragmentManager().beginTransaction()
-                    .replace(R.id.container, mSubredditFragment, "SubredditFragment")
+                    .replace(R.id.container, mSubredditFragment, mSubreddit)
                     .commit();
         } else {
             mSubredditFragment = SubredditFragment.newInstance(mSubreddit);
             getFragmentManager().beginTransaction()
-                    .add(R.id.container, mSubredditFragment, "SubredditFragment")
+                    .add(R.id.container, mSubredditFragment, mSubreddit)
                     .commit();
         }
 
         getFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
             @Override
             public void onBackStackChanged() {
-                mSubredditFragment = getFragmentManager().findFragmentByTag("SubredditFragment");
-                mSubreddit = ((SubredditFragment) mSubredditFragment).getSubreddit();
-                mNavigationDrawerFragment.setSubreddit(mSubreddit,
-                        0,  // TODO: Fix this
-                        0); // TODO: Fix this
+                Fragment fragment = getFragmentManager().findFragmentById(R.id.container);
+                if (fragment != null) {
+                    mSubredditFragment = fragment;
+                    if (fragment instanceof SubredditFragment) {
+                        mSubreddit = ((SubredditFragment) mSubredditFragment).getSubreddit();
+                        mNavigationDrawerFragment.setSubreddit(mSubreddit,
+                                0,  // TODO: Fix this
+                                0); // TODO: Fix this
+                    }
+                }
             }
         });
     }
@@ -81,7 +91,7 @@ public class MainActivity extends Activity
     @Override
     public void onResume() {
         super.onResume();
-        mSubredditFragment = getFragmentManager().findFragmentByTag("SubredditFragment");
+        mSubredditFragment = getFragmentManager().findFragmentByTag(mSubreddit);
         mSubreddit = ((SubredditFragment) mSubredditFragment).getSubreddit();
         mNavigationDrawerFragment.setSubreddit(mSubreddit,
                 0,  // TODO: Fix this
@@ -96,22 +106,16 @@ public class MainActivity extends Activity
             ((SubredditFragment) mSubredditFragment).refreshData();
         } else {
             mSubreddit = subreddit;
-            Fragment frag = getFragmentManager().findFragmentByTag(subreddit);
-            if (frag != null) {
-                mSubredditFragment = frag;
-                getFragmentManager().beginTransaction()
-                        .addToBackStack(subreddit)
-                        .replace(R.id.container, frag, "SubredditFragment")
-                        .commit();
+            if (getFragmentManager().findFragmentByTag(subreddit) != null) {
+                mSubredditFragment = getFragmentManager().findFragmentByTag(subreddit);
             } else {
                 mSubredditFragment = SubredditFragment.newInstance(subreddit);
-                getFragmentManager().beginTransaction()
-                        .addToBackStack(subreddit)
-                        .replace(R.id.container, mSubredditFragment, "SubredditFragment")
-                        .commit();
             }
+            getFragmentManager().beginTransaction()
+                    .addToBackStack(mSubreddit)
+                    .replace(R.id.container, mSubredditFragment, mSubreddit)
+                    .commit();
         }
-        mSubreddit = subreddit;
     }
 
     @Override
@@ -134,7 +138,7 @@ public class MainActivity extends Activity
     }
 
     private void updateActionBar(String sub) {
-        if (sub == null && getActionBar() != null)
+        if (TextUtils.isEmpty(sub) && getActionBar() != null)
             getActionBar().setTitle("FrontPage");
         else if (getActionBar() != null)
             getActionBar().setTitle("/r/" + sub);
@@ -143,7 +147,7 @@ public class MainActivity extends Activity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
-        if (!((BreaditApplication) getApplicationContext()).isLoggedIn()) {
+        if (!AccountManager.isLoggedIn()) {
             menu.removeItem(R.id.action_my_account);
         }
         return super.onCreateOptionsMenu(menu);
@@ -171,11 +175,15 @@ public class MainActivity extends Activity
     public void onImagePagerFragmentCreated() {
         DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawerLayout.setEnabled(false);
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        getActionBar().setHomeButtonEnabled(false);
     }
 
     @Override
     public void onImagePagerFragmentDestroyed() {
         DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawerLayout.setEnabled(true);
+        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+        getActionBar().setHomeButtonEnabled(true);
     }
 }

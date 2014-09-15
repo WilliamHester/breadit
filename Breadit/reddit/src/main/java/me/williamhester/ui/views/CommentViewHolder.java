@@ -1,8 +1,11 @@
 package me.williamhester.ui.views;
 
+import android.graphics.Color;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
+import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
 
@@ -20,11 +23,13 @@ import me.williamhester.tools.HtmlParser;
 public class CommentViewHolder extends VotableViewHolder {
     private Comment mComment;
     private CommentClickCallbacks mCallback;
+    private String mSubmissionAuthor;
 
-    public CommentViewHolder(View itemView, CommentClickCallbacks callbacks) {
+    public CommentViewHolder(View itemView, CommentClickCallbacks callbacks, String submissionAuthor) {
         super(itemView);
         mCallback = callbacks;
         mBody.setMovementMethod(new LinkMovementMethod());
+        mSubmissionAuthor = submissionAuthor;
     }
 
     @Override
@@ -56,8 +61,19 @@ public class CommentViewHolder extends VotableViewHolder {
             }
 
             mMetadata.setVisibility(View.VISIBLE);
-            mMetadata.setText(mComment.getAuthor() + " " + mComment.getScore() + " "
-                    + itemView.getResources().getQuantityString(R.plurals.points, mComment.getScore()));
+            SpannableStringBuilder ssb = new SpannableStringBuilder();
+            ssb.append(mComment.getAuthor());
+            if (mComment.getAuthor().equals(mSubmissionAuthor)) {
+                ssb.setSpan(new ForegroundColorSpan(Color.WHITE),
+                        0, ssb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                ssb.setSpan(new BackgroundColorSpan(itemView.getResources().getColor(R.color.op)),
+                        0, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+            ssb.append(" ")
+                    .append(String.valueOf(mComment.getScore()))
+                    .append(" ")
+                    .append(itemView.getResources().getQuantityString(R.plurals.points, mComment.getScore()));
+            mMetadata.setText(ssb);
         }
     }
 
