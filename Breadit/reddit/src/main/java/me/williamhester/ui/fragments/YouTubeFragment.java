@@ -15,21 +15,16 @@ import me.williamhester.Auth;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.views.ActionBarPaddedFrameLayout;
 
-import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
-
 /**
  * Created by william on 9/15/14.
  */
-public class YouTubeFragment extends Fragment implements YouTubePlayer.OnInitializedListener,
-        YouTubePlayer.OnFullscreenListener {
+public class YouTubeFragment extends Fragment implements YouTubePlayer.OnInitializedListener {
 
     private static final String VIDEO_ID = "videoId";
 
     private ActionBarPaddedFrameLayout mLayout;
     private YouTubePlayerFragment mPlayerFragment;
     private YouTubePlayer mPlayer;
-    private int mOldOrientation;
     private boolean mIsFullscreen;
 
     public static YouTubeFragment newInstance(String videoId) {
@@ -40,28 +35,20 @@ public class YouTubeFragment extends Fragment implements YouTubePlayer.OnInitial
         return fragment;
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        mPlayerFragment = YouTubePlayerFragment.newInstance();
-        mOldOrientation = getResources().getConfiguration().orientation;
-        if (savedInstanceState != null) {
-            mPlayerFragment.setInitialSavedState((SavedState) savedInstanceState.getParcelable("childState"));
-            mOldOrientation = savedInstanceState.getInt("oldOrientation");
-            mIsFullscreen = savedInstanceState.getBoolean("isFullscreen");
-        }
-    }
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mLayout = (ActionBarPaddedFrameLayout) inflater.inflate(R.layout.fragment_youtube, container, false);
 
-        getChildFragmentManager().beginTransaction()
-                .replace(R.id.video_container, mPlayerFragment, "youTube")
-                .commit();
-
+        Fragment f = getChildFragmentManager().findFragmentByTag("YouTubePlayerFragment");
+        if (f == null) {
+            mPlayerFragment = YouTubePlayerFragment.newInstance();
+            getChildFragmentManager().beginTransaction()
+                    .add(R.id.video_container, mPlayerFragment, "YouTubePlayerFragment")
+                    .commit();
+        } else {
+            mPlayerFragment = (YouTubePlayerFragment) f;
+        }
         mPlayerFragment.initialize(Auth.YOUTUBE_AUTH, this);
 
         mLayout.setOnClickListener(new View.OnClickListener() {
@@ -75,28 +62,14 @@ public class YouTubeFragment extends Fragment implements YouTubePlayer.OnInitial
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-
-        mPlayer.release();
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        outState.putParcelable("childState", getChildFragmentManager()
-                .saveFragmentInstanceState(mPlayerFragment));
-        outState.putInt("oldOrientation", mOldOrientation);
-        outState.putBoolean("isFullscreen", mIsFullscreen);
-    }
-
-    @Override
     public void onInitializationSuccess(YouTubePlayer.Provider provider, YouTubePlayer youTubePlayer, boolean wasRestored) {
-        youTubePlayer.setOnFullscreenListener(this);
-//        youTubePlayer.addFullscreenControlFlag(YouTubePlayer.FULLSCREEN_FLAG_CONTROL_SYSTEM_UI);
-//        youTubePlayer.addFullscreenControlFlag(YouTubePlayer.FULLSCREEN_FLAG_CONTROL_ORIENTATION);
-        youTubePlayer.addFullscreenControlFlag(YouTubePlayer.FULLSCREEN_FLAG_CUSTOM_LAYOUT);
+        youTubePlayer.setShowFullscreenButton(true);
+        youTubePlayer.setOnFullscreenListener(new YouTubePlayer.OnFullscreenListener() {
+            @Override
+            public void onFullscreen(boolean b) {
+                mIsFullscreen = b;
+            }
+        });
         mPlayer = youTubePlayer;
         if (!wasRestored) {
             youTubePlayer.cueVideo(getArguments().getString(VIDEO_ID));
@@ -113,19 +86,5 @@ public class YouTubeFragment extends Fragment implements YouTubePlayer.OnInitial
             mPlayer.setFullscreen(false);
         }
         return mIsFullscreen;
-    }
-
-    @Override
-    public void onFullscreen(boolean fullscreen) {
-        mLayout.setEnablePadding(!fullscreen);
-        mIsFullscreen = fullscreen;
-        ViewGroup.LayoutParams playerParams = mPlayerFragment.getView().getLayoutParams();
-        if (fullscreen) {
-            playerParams.width = MATCH_PARENT;
-            playerParams.height = MATCH_PARENT;
-        } else {
-            playerParams.width = 0;
-            playerParams.height = WRAP_CONTENT;
-        }
     }
 }
