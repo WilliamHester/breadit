@@ -214,7 +214,6 @@ public class ImagePagerFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
 
-        mAdapter = null;
         mAnimHandler.removeCallbacks(mAnimRunnable);
     }
 

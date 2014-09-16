@@ -1,9 +1,12 @@
 package me.williamhester.tools;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * Created by william on 7/19/14.
  */
-public class UrlParser {
+public class UrlParser implements Parcelable {
 
     public static final int NOT_SPECIAL = 0;
     public static final int IMGUR_IMAGE = 1;
@@ -150,4 +153,32 @@ public class UrlParser {
     public String getUrl() {
         return mUrl;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.mUrl);
+        dest.writeString(this.mId);
+        dest.writeInt(this.mType);
+    }
+
+    private UrlParser(Parcel in) {
+        this.mUrl = in.readString();
+        this.mId = in.readString();
+        this.mType = in.readInt();
+    }
+
+    public static final Creator<UrlParser> CREATOR = new Creator<UrlParser>() {
+        public UrlParser createFromParcel(Parcel source) {
+            return new UrlParser(source);
+        }
+
+        public UrlParser[] newArray(int size) {
+            return new UrlParser[size];
+        }
+    };
 }

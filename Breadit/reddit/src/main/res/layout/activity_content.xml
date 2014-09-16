@@ -1,17 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<me.williamhester.ui.views.HackyDrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/submission_drawer"
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/container"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <FrameLayout android:id="@+id/container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
-
-    <FrameLayout android:id="@+id/content_container"
-        android:layout_marginStart="-64dp"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="end"/>
-
-</me.williamhester.ui.views.HackyDrawerLayout>
+    android:layout_height="match_parent"/>

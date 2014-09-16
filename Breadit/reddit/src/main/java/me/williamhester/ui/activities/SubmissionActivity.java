@@ -7,11 +7,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.widget.DrawerLayout;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 
 import me.williamhester.models.ImgurAlbum;
 import me.williamhester.models.ImgurImage;
@@ -24,6 +21,7 @@ import me.williamhester.ui.fragments.ImagePagerFragment;
 import me.williamhester.ui.fragments.RedditLiveFragment;
 import me.williamhester.ui.fragments.SubredditFragment;
 import me.williamhester.ui.fragments.WebViewFragment;
+import me.williamhester.ui.fragments.YouTubeFragment;
 
 public class SubmissionActivity extends Activity implements ImageFragment.ImageTapCallbacks {
 
@@ -33,8 +31,6 @@ public class SubmissionActivity extends Activity implements ImageFragment.ImageT
     public static final String PERMALINK = "permalink";
     public static final String TAB = "tab";
 
-    private DrawerLayout mDrawerLayout;
-    private Fragment mContentFragment;
     private Submission mSubmission;
     private Submission.Media mMedia;
     private String mPermalink;
@@ -48,6 +44,7 @@ public class SubmissionActivity extends Activity implements ImageFragment.ImageT
 
         if (savedInstanceState != null) {
             mCurrentTag = savedInstanceState.getString("currentTag");
+            mParser = savedInstanceState.getParcelable("urlParser");
         }
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
@@ -62,7 +59,6 @@ public class SubmissionActivity extends Activity implements ImageFragment.ImageT
             }
         }
 
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.submission_drawer);
         setUpContent();
 
         ActionBar actionBar = getActionBar();
@@ -75,8 +71,7 @@ public class SubmissionActivity extends Activity implements ImageFragment.ImageT
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.submission, menu);
-        if (mDrawerLayout.getDrawerLockMode(Gravity.END) != DrawerLayout.LOCK_MODE_UNLOCKED
-                && mParser.getType() != UrlParser.YOUTUBE) {
+        if (mSubmission.isSelf()) {
             menu.removeItem(R.id.action_view_link);
         } else if (mParser.getType() == UrlParser.IMGUR_ALBUM
                 || mParser.getType() == UrlParser.IMGUR_IMAGE
@@ -101,15 +96,14 @@ public class SubmissionActivity extends Activity implements ImageFragment.ImageT
                 startActivity(Intent.createChooser(sendIntent, getResources().getText(R.string.share_with)));
                 return true;
             case R.id.action_view_link:
-                if (mParser.getType() != UrlParser.YOUTUBE) {
-                    if (mDrawerLayout.isDrawerOpen(Gravity.END)) {
-                        mDrawerLayout.closeDrawer(Gravity.END);
-                    } else {
-                        mDrawerLayout.openDrawer(Gravity.END);
-                    }
+                Fragment f = getFragmentManager().findFragmentByTag("content");
+                if (f != null) {
+                    getFragmentManager().popBackStack();
                 } else {
-                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(mSubmission.getUrl()));
-                    startActivity(browserIntent);
+                    getFragmentManager().beginTransaction()
+                            .add(R.id.container, getContentFragment(), "content")
+                            .addToBackStack("content")
+                            .commit();
                 }
                 return true;
             case R.id.action_open_link_in_browser:
@@ -127,97 +121,78 @@ public class SubmissionActivity extends Activity implements ImageFragment.ImageT
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString("currentTag", mCurrentTag);
+        outState.putParcelable("urlParser", mParser);
     }
 
     private void setUpContent() {
-        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-        CommentFragment comments;
-        if (mSubmission == null) {
-            comments = CommentFragment.newInstance(mPermalink);
-            comments.setOnSubmissionLoadedListener(new CommentFragment.OnSubmissionLoaded() {
-                @Override
-                public void onSubmissionLoaded(Submission submission) {
-                    mSubmission = submission;
-                    setUpDrawer();
-                }
-            });
-        } else {
-            comments = CommentFragment.newInstance(mSubmission);
-            setUpDrawer();
+        Fragment f = getFragmentManager().findFragmentByTag("comments");
+        if (f == null) {
+            CommentFragment comments;
+            if (mSubmission == null) {
+                comments = CommentFragment.newInstance(mPermalink);
+                comments.setOnSubmissionLoadedListener(new CommentFragment.OnSubmissionLoaded() {
+                    @Override
+                    public void onSubmissionLoaded(Submission submission) {
+                        mSubmission = submission;
+                        mParser = new UrlParser(mSubmission.getUrl());
+                        invalidateOptionsMenu();
+                    }
+                });
+            } else {
+                comments = CommentFragment.newInstance(mSubmission);
+                mParser = new UrlParser(mSubmission.getUrl());
+            }
+            getFragmentManager().beginTransaction()
+                    .replace(R.id.container, comments, "comments")
+                    .commit();
         }
-        getFragmentManager().beginTransaction()
-                .replace(R.id.container, comments, "comments")
-                .commit();
     }
 
-    private void setUpDrawer() {
-        mParser = new UrlParser(mSubmission.getUrl());
-        mContentFragment = null;
-        View contentFrame = findViewById(R.id.content_container);
+    private Fragment getContentFragment() {
         if (!mSubmission.isSelf()) {
             switch (mParser.getType()) {
                 case UrlParser.NOT_SPECIAL:
-                    mContentFragment = WebViewFragment.newInstance(mParser.getUrl());
-                    break;
+                    return WebViewFragment.newInstance(mParser.getUrl());
                 case UrlParser.IMGUR_IMAGE:
-                    if (mSubmission != null && mSubmission.getImgurData() != null)
-                        mContentFragment = ImagePagerFragment
+                    if (mSubmission.getImgurData() != null)
+                        return ImagePagerFragment
                                 .newInstance((ImgurImage) mSubmission.getImgurData());
                     else
-                        mContentFragment = ImagePagerFragment
+                        return ImagePagerFragment
                                 .newInstanceLazyLoaded(mParser.getLinkId(), false);
-                    break;
                 case UrlParser.IMGUR_ALBUM:
-                    if (mSubmission != null && mSubmission.getImgurData() != null)
-                        mContentFragment = ImagePagerFragment
+                    if (mSubmission.getImgurData() != null)
+                        return ImagePagerFragment
                                 .newInstance((ImgurAlbum) mSubmission.getImgurData());
                     else
-                        mContentFragment = ImagePagerFragment
+                        return ImagePagerFragment
                                 .newInstanceLazyLoaded(mParser.getLinkId(), true);
-                    break;
                 case UrlParser.IMGUR_GALLERY:
-                    break;
+                    return WebViewFragment.newInstance(mParser.getUrl());
                 case UrlParser.YOUTUBE:
-                    break;
+                    return YouTubeFragment.newInstance(mParser.getLinkId());
                 case UrlParser.NORMAL_IMAGE:
-                    mContentFragment = ImagePagerFragment.newInstance(mParser.getUrl());
-                    break;
+                    return ImagePagerFragment.newInstance(mParser.getUrl());
                 case UrlParser.SUBMISSION:
-                    mContentFragment = CommentFragment.newInstance(mParser.getUrl());
-                    contentFrame.setBackgroundColor(getResources().getColor(R.color.blackish));
-                    break;
+                    return CommentFragment.newInstance(mParser.getUrl());
                 case UrlParser.SUBREDDIT:
-                    mContentFragment = SubredditFragment.newInstance(mParser.getLinkId());
-                    contentFrame.setBackgroundColor(getResources().getColor(R.color.blackish));
-                    break;
+                    return SubredditFragment.newInstance(mParser.getLinkId());
                 case UrlParser.USER:
                     break;
                 case UrlParser.REDDIT_LIVE:
-                    mContentFragment = RedditLiveFragment.newInstance(mSubmission);
-                    contentFrame.setBackgroundColor(getResources().getColor(R.color.blackish));
-                    break;
+                    return RedditLiveFragment.newInstance(mSubmission);
             }
         }
-
-        if (mContentFragment != null) {
-            getFragmentManager().beginTransaction()
-                    .replace(R.id.content_container, mContentFragment, "content")
-                    .commit();
-            mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-        }
-        invalidateOptionsMenu();
+        return null;
     }
 
     @Override
     public void onBackPressed() {
-        if (mDrawerLayout.isDrawerOpen(Gravity.END)) {
-            if (mContentFragment instanceof WebViewFragment) {
-                WebViewFragment web = (WebViewFragment) mContentFragment;
-                if (!web.onBackPressed()) {
-                    mDrawerLayout.closeDrawer(Gravity.END);
-                }
-            } else {
-                mDrawerLayout.closeDrawer(Gravity.END);
+        Fragment f = getFragmentManager().findFragmentByTag("content");
+        if (f != null && f instanceof WebViewFragment) {
+            WebViewFragment web = (WebViewFragment) f;
+            if (!web.onBackPressed()) {
+                super.onBackPressed();
             }
         } else {
             super.onBackPressed();
@@ -226,10 +201,6 @@ public class SubmissionActivity extends Activity implements ImageFragment.ImageT
 
     @Override
     public void onImageTapped() {
-        if (mDrawerLayout.isDrawerOpen(Gravity.END)) {
-            mDrawerLayout.closeDrawer(Gravity.END);
-        } else {
-            getFragmentManager().popBackStack();
-        }
+        getFragmentManager().popBackStack();
     }
 }
