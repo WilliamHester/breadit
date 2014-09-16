@@ -16,6 +16,7 @@ import me.williamhester.ui.activities.SubmissionActivity;
 import me.williamhester.ui.activities.UserActivity;
 import me.williamhester.ui.fragments.ImagePagerFragment;
 import me.williamhester.ui.fragments.WebViewFragment;
+import me.williamhester.ui.fragments.YouTubeFragment;
 
 /**
  * Created by William on 6/15/14.
@@ -58,8 +59,7 @@ public class LinkSpan extends ClickableSpan {
                 f = ImagePagerFragment.newInstanceLazyLoaded(parser.getLinkId(), false);
                 break;
             case UrlParser.YOUTUBE:
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(mLink));
-                view.getContext().startActivity(browserIntent);
+                f = YouTubeFragment.newInstance(parser.getLinkId());
                 break;
             case UrlParser.NORMAL_IMAGE:
                 f = ImagePagerFragment.newInstance(parser.getUrl());

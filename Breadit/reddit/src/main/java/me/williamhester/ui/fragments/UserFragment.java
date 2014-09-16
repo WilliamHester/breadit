@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,8 +19,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
-import org.apache.commons.lang3.StringEscapeUtils;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -226,7 +225,7 @@ public class UserFragment extends AccountFragment {
                         break;
                 }
 
-                title.setText(StringEscapeUtils.unescapeHtml4(s.getTitle()));
+                title.setText(Html.fromHtml(s.getTitle()).toString());
 //                author.setText(s.getAuthor());
                 domain.setText("(" + s.getDomain() + ")");
                 points.setText(s.getScore() + " points by ");

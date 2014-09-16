@@ -1,6 +1,7 @@
 package me.williamhester.ui.views;
 
 import android.content.Context;
+import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
@@ -15,8 +16,6 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
-import org.apache.commons.lang3.StringEscapeUtils;
 
 import java.text.DecimalFormat;
 
@@ -120,7 +119,7 @@ public class CommentView extends RelativeLayout {
         }
 
         String bodyText = formatHtmlForMeta(mComment.getBodyHtml());
-        HtmlParser parser = new HtmlParser(StringEscapeUtils.unescapeHtml4(bodyText));
+        HtmlParser parser = new HtmlParser(Html.fromHtml(bodyText).toString());
         mSpannable = parser.getSpannableString();
         mBody.setText(mSpannable);
         mBody.setMovementMethod(mLinkMovementMethod);

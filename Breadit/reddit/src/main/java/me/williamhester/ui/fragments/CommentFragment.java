@@ -17,7 +17,6 @@ import android.widget.TextView;
 
 import com.koushikdutta.async.future.FutureCallback;
 
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
@@ -145,13 +144,13 @@ public class CommentFragment extends AccountFragment {
         LinearLayout edit = (LinearLayout) v.findViewById(R.id.edited_text);
         edit.setVisibility(View.GONE);
 
-        title.setText(StringEscapeUtils.unescapeHtml4(mSubmission.getTitle()));
+        title.setText(Html.fromHtml(mSubmission.getTitle()).toString());
 //        author.setText(mSubmission.getAuthor());
         domain.setText("(" + mSubmission.getDomain() + ")");
         points.setText(mSubmission.getScore() + " points by ");
 
         if (mSubmission.isSelf() && mSubmission.getBodyHtml() != null) {
-            selfText.setText(Html.fromHtml(StringEscapeUtils.unescapeHtml4(mSubmission.getBodyHtml())));
+            selfText.setText(Html.fromHtml(Html.fromHtml(mSubmission.getBodyHtml()).toString()));
             selfText.setMovementMethod(new LinkMovementMethod());
         } else {
             selfText.setVisibility(View.GONE);

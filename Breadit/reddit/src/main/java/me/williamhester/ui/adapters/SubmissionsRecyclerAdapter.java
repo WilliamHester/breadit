@@ -2,6 +2,7 @@ package me.williamhester.ui.adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,8 +15,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.koushikdutta.async.future.FutureCallback;
-
-import org.apache.commons.lang3.StringEscapeUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -99,7 +98,7 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
             super.setContent(votable);
             mSubmission = (Submission) votable;
 
-            mBody.setText(StringEscapeUtils.unescapeHtml4(mSubmission.getTitle()));
+            mBody.setText(Html.fromHtml(mSubmission.getTitle()).toString());
             mDomain.setText(mSubmission.getDomain());
             mCommentData.setText(mSubmission.getNumberOfComments() + " comments");
             mSubreddit.setText("/r/" + mSubmission.getSubredditName());
@@ -199,7 +198,7 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
                 }
                 imageView.setVisibility(View.GONE);
                 button.setVisibility(View.GONE);
-                HtmlParser parser = new HtmlParser(StringEscapeUtils.unescapeHtml4(mSubmission.getBodyHtml()));
+                HtmlParser parser = new HtmlParser(Html.fromHtml(mSubmission.getBodyHtml()).toString());
                 content.setText(parser.getSpannableString());
                 content.setMovementMethod(new LinkMovementMethod());
             } else {

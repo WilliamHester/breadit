@@ -1,6 +1,7 @@
 package me.williamhester.network;
 
 import android.content.Context;
+import android.text.Html;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -9,8 +10,6 @@ import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
-
-import org.apache.commons.lang3.StringEscapeUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -191,7 +190,7 @@ public class RedditApi {
                             return;
                         }
                         String escapedHtml = result.substring(result.indexOf("\"contentHTML\": ") + 16, result.indexOf(";\",") + 2);
-                        HtmlParser parser = new HtmlParser(StringEscapeUtils.unescapeHtml4(escapedHtml));
+                        HtmlParser parser = new HtmlParser(Html.fromHtml(escapedHtml).toString());
                         thing.setSpannableBody(parser.getSpannableString());
                         callback.onCompleted(null, thing);
                     }

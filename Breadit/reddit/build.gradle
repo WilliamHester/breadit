@@ -19,7 +19,7 @@ android {
         minSdkVersion 17
         targetSdkVersion 21
         versionCode 3
-        versionName '0.2-L'
+        versionName '0.3'
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
@@ -41,7 +41,6 @@ dependencies {
     compile 'com.github.chrisbanes.photoview:library:1.2.2'       // PhotoView
     compile 'com.koushikdutta.ion:ion:1.+'                        // Ion
     compile 'org.jsoup:jsoup:1.7.3'                               // Jsoup
-    compile 'org.apache.commons:commons-lang3:3.3.1'              // Html Unescaping
     compile 'com.google.code.gson:gson:2.2.4'                     // Gson
     compile 'com.android.support:support-v4:+'                    // Support Library
     compile 'com.android.support:support-v13:+'                   // Supprot Library

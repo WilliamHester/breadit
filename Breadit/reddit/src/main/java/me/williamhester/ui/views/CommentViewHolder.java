@@ -1,6 +1,7 @@
 package me.williamhester.ui.views;
 
 import android.graphics.Color;
+import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -8,8 +9,6 @@ import android.text.method.LinkMovementMethod;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
-
-import org.apache.commons.lang3.StringEscapeUtils;
 
 import me.williamhester.models.Comment;
 import me.williamhester.models.MoreComments;
@@ -50,7 +49,7 @@ public class CommentViewHolder extends VotableViewHolder {
             itemView.findViewById(R.id.comment_content).setOnClickListener(mHideCommentsClickListener);
 
             if (mComment.getSpannableBody() == null && mComment.getBodyHtml() != null) {
-                HtmlParser parser = new HtmlParser(StringEscapeUtils.unescapeHtml4(mComment.getBodyHtml()));
+                HtmlParser parser = new HtmlParser(Html.fromHtml(mComment.getBodyHtml()).toString());
                 mComment.setSpannableBody(parser.getSpannableString());
             }
             mBody.setText(mComment.getSpannableBody());

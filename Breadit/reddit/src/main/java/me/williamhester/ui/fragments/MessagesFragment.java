@@ -2,7 +2,6 @@ package me.williamhester.ui.fragments;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -22,7 +21,6 @@ import android.widget.TextView;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
@@ -31,7 +29,6 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.williamhester.models.Account;
 import me.williamhester.models.Message;
 import me.williamhester.models.Votable;
 import me.williamhester.models.utils.Utilities;
@@ -255,7 +252,7 @@ public class MessagesFragment extends AccountFragment {
 
             author.setText(m.getAuthor());
             metadata.setText(" " + Utilities.calculateTimeShort(m.getCreatedUtc()));
-            String unescaped = StringEscapeUtils.unescapeHtml4(m.getBodyHtml());
+            String unescaped = Html.fromHtml(m.getBodyHtml()).toString();
             String formatted = unescaped.substring(31, unescaped.length() - 20);
             body.setText(Html.fromHtml(formatted));
 
