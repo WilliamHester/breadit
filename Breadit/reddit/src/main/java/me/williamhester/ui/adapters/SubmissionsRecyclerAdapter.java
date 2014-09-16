@@ -1,8 +1,6 @@
 package me.williamhester.ui.adapters;
 
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
@@ -151,8 +149,7 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
                         button.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
-                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(mSubmission.getUrl()));
-                                mContext.startActivity(browserIntent);
+                                mCallback.onYouTubeVideoClicked(linkDetails.getLinkId());
                             }
                         });
                     } else if (linkDetails.getType() == UrlParser.NORMAL_IMAGE) {
@@ -290,6 +287,7 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
         public void onImageViewClicked(ImgurImage image);
         public void onImageViewClicked(ImgurAlbum album);
         public void onImageViewClicked(String imageUrl);
+        public void onYouTubeVideoClicked(String videoId);
         public void onCardClicked(Submission submission);
     }
 }

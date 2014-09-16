@@ -305,6 +305,14 @@ public class SubredditFragment extends AccountFragment implements SubmissionsRec
     }
 
     @Override
+    public void onYouTubeVideoClicked(String videoId) {
+        getFragmentManager().beginTransaction()
+                .add(R.id.container, YouTubeFragment.newInstance(videoId), "YouTubeFragment")
+                .addToBackStack("YouTubeFragment")
+                .commit();
+    }
+
+    @Override
     public void onCardClicked(Submission submission) {
         Intent i = new Intent(getActivity(), SubmissionActivity.class);
         Bundle args = new Bundle();

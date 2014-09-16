@@ -15,6 +15,7 @@ import me.williamhester.reddit.R;
 import me.williamhester.ui.fragments.ImagePagerFragment;
 import me.williamhester.ui.fragments.NavigationDrawerFragment;
 import me.williamhester.ui.fragments.SubredditFragment;
+import me.williamhester.ui.fragments.YouTubeFragment;
 
 public class MainActivity extends Activity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks,
@@ -59,12 +60,7 @@ public class MainActivity extends Activity
                         "NavigationDrawer")
                 .commit();
 
-        if (getFragmentManager().findFragmentByTag(mSubreddit) != null) {
-            mSubredditFragment = getFragmentManager().findFragmentByTag(mSubreddit);
-            getFragmentManager().beginTransaction()
-                    .replace(R.id.container, mSubredditFragment, mSubreddit)
-                    .commit();
-        } else {
+        if (getFragmentManager().findFragmentByTag(mSubreddit) == null) {
             mSubredditFragment = SubredditFragment.newInstance(mSubreddit);
             getFragmentManager().beginTransaction()
                     .add(R.id.container, mSubredditFragment, mSubreddit)
@@ -120,6 +116,11 @@ public class MainActivity extends Activity
 
     @Override
     public void onBackPressed()  {
+        Fragment fragment = getFragmentManager().findFragmentByTag("YouTubeFragment");
+        if (fragment != null && fragment instanceof YouTubeFragment
+                && ((YouTubeFragment) fragment).onBackPressed()) {
+            return;
+        }
         if (mNavigationDrawerFragment.isOpen()) {
             mNavigationDrawerFragment.toggle();
         } else {
@@ -174,9 +175,11 @@ public class MainActivity extends Activity
     @Override
     public void onImagePagerFragmentCreated() {
         DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawerLayout.setEnabled(false);
-        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-        getActionBar().setHomeButtonEnabled(false);
+        if (drawerLayout != null) {
+            drawerLayout.setEnabled(false);
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+            getActionBar().setHomeButtonEnabled(false);
+        }
     }
 
     @Override
