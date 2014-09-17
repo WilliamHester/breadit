@@ -38,7 +38,7 @@
                 android:textSize="10sp"
                 android:layout_marginRight="8dp"/>
 
-            <TextView
+            <me.williamhester.ui.views.CondensedLightTextView
                 android:id="@+id/body"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
