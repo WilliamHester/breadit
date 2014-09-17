@@ -46,7 +46,6 @@ public class CommentFragment extends AccountFragment {
     private CommentArrayAdapter mCommentAdapter;
     private Context mContext;
     private ListView mCommentsListView;
-    private HashMap<String, HiddenComments> mHiddenComments;
     private String mPermalink;
     private Submission mSubmission;
     private TextView mNumComments;
@@ -95,7 +94,6 @@ public class CommentFragment extends AccountFragment {
             }
             mCommentsList = new ArrayList<>();
         }
-        mHiddenComments = new HashMap<>();
     }
 
     @Override
@@ -300,16 +298,11 @@ public class CommentFragment extends AccountFragment {
         @Override
         public void onHideClick(Comment comment) {
             comment.setHidden(!comment.isHidden());
+            int position = mCommentAdapter.getPosition(comment);
             if (comment.isHidden()) {
-                int position = mCommentAdapter.getPosition(comment);
-                mHiddenComments.put(comment.getName(), new HiddenComments(position));
+                hideComment(position);
             } else {
-                ArrayList<Comment> hc = mHiddenComments.get(comment.getName()).getHiddenComments();
-                mHiddenComments.remove(comment.getName());
-                int position = mCommentAdapter.getPosition(comment);
-                for (Comment c : hc) {
-                    mCommentsList.add(++position, c);
-                }
+                showComment(position);
             }
             mCommentAdapter.notifyDataSetChanged();
         }
@@ -451,22 +444,23 @@ public class CommentFragment extends AccountFragment {
         }
     }
 
-    private class HiddenComments {
-
-        private ArrayList<Comment> mHiddenCommentsList = new ArrayList<>();
-
-        public HiddenComments(int position) {
-            int level = mCommentsList.get(position).getLevel();
-            position++;
-            while (position < mCommentsList.size() && mCommentsList.get(position).getLevel() > level) {
-                mHiddenCommentsList.add(mCommentsList.remove(position));
-            }
+    private void hideComment(int position) {
+        Comment comment = mCommentsList.get(position);
+        int level = comment.getLevel();
+        position++;
+        ArrayList<Comment> children = new ArrayList<>();
+        while (position < mCommentsList.size() && mCommentsList.get(position).getLevel() > level) {
+            children.add(mCommentsList.remove(position));
         }
+        comment.hide(children);
+    }
 
-        public ArrayList<Comment> getHiddenComments() {
-            return mHiddenCommentsList;
+    private void showComment(int position) {
+        Comment comment = mCommentsList.get(position);
+        ArrayList<Comment> children = comment.unhideComment();
+        for (Comment c : children) {
+            mCommentsList.add(++position, c);
         }
-
     }
 
     public interface OnSubmissionLoaded {

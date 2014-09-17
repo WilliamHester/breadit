@@ -8,10 +8,13 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Stack;
 
-public class Comment implements Serializable, Votable, Parcelable {
+public class Comment implements Votable, Parcelable {
     private static final long serialVersionUID = -8883017260375266824L;
 
     public static final int BEST = 0;
@@ -43,6 +46,7 @@ public class Comment implements Serializable, Votable, Parcelable {
     private String mUps;
     private int mScore;
     private Spannable mSpannableBody;
+    private ArrayList<Comment> mChildren;
 
     private int mLevel = 0;
     private boolean mIsHidden = false;
@@ -236,6 +240,18 @@ public class Comment implements Serializable, Votable, Parcelable {
         return mSpannableBody;
     }
 
+    public void hide(ArrayList<Comment> children) {
+        mIsHidden = true;
+        mChildren = children;
+    }
+
+    public ArrayList<Comment> unhideComment() {
+        mIsHidden = false;
+        ArrayList<Comment> children = mChildren;
+        mChildren = null;
+        return children;
+    }
+
     public static class CommentIterator implements Iterator<Comment> {
 
         private Stack<ResponseRedditWrapper> mStack;
@@ -315,8 +331,14 @@ public class Comment implements Serializable, Votable, Parcelable {
         dest.writeByte(mIsHidden ? (byte) 1 : (byte) 0);
         dest.writeByte(mIsBeingEdited ? (byte) 1 : (byte) 0);
         dest.writeString(this.mReplyText);
+        if (mChildren != null) {
+            Comment[] children = new Comment[mChildren.size()];
+            mChildren.toArray(children);
+            dest.writeParcelableArray(children, 0);
+        }
     }
 
+    @SuppressWarnings("unchecked")
     private Comment(Parcel in) {
         this.mReplies = (ResponseRedditWrapper) in.readSerializable();
         this.mApprovedBy = in.readString();
@@ -342,6 +364,11 @@ public class Comment implements Serializable, Votable, Parcelable {
         this.mIsHidden = in.readByte() != 0;
         this.mIsBeingEdited = in.readByte() != 0;
         this.mReplyText = in.readString();
+        Comment[] children = (Comment[]) in.readParcelableArray(Comment.class.getClassLoader());
+        if (children != null) {
+            this.mChildren = new ArrayList<>();
+            Collections.addAll(this.mChildren, children);
+        }
     }
 
     public static final Creator<Comment> CREATOR = new Creator<Comment>() {
