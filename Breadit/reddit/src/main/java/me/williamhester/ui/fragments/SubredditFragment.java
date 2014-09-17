@@ -121,6 +121,8 @@ public class SubredditFragment extends AccountFragment implements SubmissionsRec
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == VOTE_REQUEST_CODE) {
+            if (data == null)
+                return;
             Bundle b = data.getExtras();
             String name = b.getString("name");
             int status = b.getInt("status");

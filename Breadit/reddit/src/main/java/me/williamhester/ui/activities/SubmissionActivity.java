@@ -71,7 +71,7 @@ public class SubmissionActivity extends Activity implements ImageFragment.ImageT
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.submission, menu);
-        if (mSubmission.isSelf()) {
+        if (mSubmission == null || mSubmission.isSelf()) {
             menu.removeItem(R.id.action_view_link);
         } else if (mParser.getType() == UrlParser.IMGUR_ALBUM
                 || mParser.getType() == UrlParser.IMGUR_IMAGE
