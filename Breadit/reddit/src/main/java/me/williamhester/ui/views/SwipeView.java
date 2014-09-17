@@ -160,7 +160,7 @@ public class SwipeView extends LinearLayout {
 
         float deltaX = ev.getRawX() - mDownRawX;
         float deltaY = ev.getRawY() - mDownRawY;
-        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaY) < mTouchSlop) {
+        if (Math.abs(deltaX) > Math.abs(deltaY) * 2 && Math.abs(deltaY) < mTouchSlop) {
             getParent().requestDisallowInterceptTouchEvent(true);
             if (Math.abs(deltaX) > mTouchSlop) {
                 return true;

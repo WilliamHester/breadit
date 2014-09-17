@@ -58,7 +58,7 @@ public class CommentViewHolder extends VotableViewHolder {
                     break;
             }
         } else {
-            mLevelIndicator.setVisibility(View.GONE);
+            mLevelIndicator.setBackgroundColor(mLevelIndicator.getResources().getColor(R.color.card_view_gray));
         }
         if (votable instanceof MoreComments) {
             mContent.setOnClickListener(mMoreClickListener);
