@@ -33,6 +33,8 @@ import me.williamhester.ui.adapters.SubmissionsRecyclerAdapter;
 
 public class SubredditFragment extends AccountFragment implements SubmissionsRecyclerAdapter.AdapterCallbacks {
 
+    public static final int VOTE_REQUEST_CODE = 1;
+
     private Context mContext;
     private String mSubredditName;
     private SubmissionsRecyclerAdapter mSubmissionsAdapter;
@@ -114,6 +116,25 @@ public class SubredditFragment extends AccountFragment implements SubmissionsRec
             getActivity().getActionBar().setTitle(title);
         }
         loadPrefs();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == VOTE_REQUEST_CODE) {
+            Bundle b = data.getExtras();
+            String name = b.getString("name");
+            int status = b.getInt("status");
+            if (name != null) {
+                for (Submission submission : mSubmissionList) {
+                    if (submission.getName().equals(name)) {
+                        submission.setVoteStatus(status);
+                        mSubmissionsAdapter.notifyDataSetChanged();
+                        return;
+                    }
+                }
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -320,7 +341,7 @@ public class SubredditFragment extends AccountFragment implements SubmissionsRec
         args.putSerializable("media", submission.getMedia());
         args.putString(SubmissionActivity.TAB, SubmissionActivity.COMMENT_TAB);
         i.putExtras(args);
-        getActivity().startActivity(i);
+        startActivityForResult(i, VOTE_REQUEST_CODE);
     }
 
     public class InfiniteLoadingScrollListener implements RecyclerView.OnScrollListener {

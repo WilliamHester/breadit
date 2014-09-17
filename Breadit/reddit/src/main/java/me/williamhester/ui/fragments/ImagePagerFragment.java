@@ -68,6 +68,16 @@ public class ImagePagerFragment extends Fragment {
         return fragment;
     }
 
+    public static ImagePagerFragment newInstance(Object object) {
+        if (object instanceof ImgurImage) {
+            return newInstance((ImgurImage) object);
+        }
+        if (object instanceof ImgurAlbum) {
+            return newInstance((ImgurAlbum) object);
+        }
+        return null;
+    }
+
     public static ImagePagerFragment newInstanceLazyLoaded(String imgurId, boolean imgurAlbum) {
         Bundle args = new Bundle();
         args.putString(IMGUR_ID, imgurId);

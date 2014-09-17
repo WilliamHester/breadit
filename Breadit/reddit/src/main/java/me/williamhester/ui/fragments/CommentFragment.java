@@ -1,6 +1,8 @@
 package me.williamhester.ui.fragments;
 
+import android.app.Fragment;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
@@ -138,21 +140,34 @@ public class CommentFragment extends AccountFragment {
         TextView body = (TextView) mHeaderView.findViewById(R.id.body);
         TextView selfText = (TextView) mHeaderView.findViewById(R.id.self_text);
         SwipeView swipeView = (SwipeView) mHeaderView.findViewById(R.id.swipe_view);
+        swipeView.recycle(mSubmission);
         swipeView.setUp(mHeaderView.findViewById(R.id.vote_background),
                 mHeaderView.findViewById(R.id.vote_foreground), new SwipeView.SwipeListener() {
-            @Override
-            public void onRightToLeftSwipe() {
-                mSubmission.setVoteStatus(mSubmission.getVoteStatus() == Votable.DOWNVOTED ? Votable.NEUTRAL : Votable.DOWNVOTED);
-                RedditApi.vote(getActivity(), mSubmission);
-            }
+                    @Override
+                    public void onRightToLeftSwipe() {
+                        mSubmission.setVoteStatus(mSubmission.getVoteStatus() == Votable.DOWNVOTED ? Votable.NEUTRAL : Votable.DOWNVOTED);
+                        RedditApi.vote(getActivity(), mSubmission);
+                        Intent result = new Intent();
+                        Bundle extras = new Bundle();
+                        extras.putString("name", mSubmission.getName());
+                        extras.putInt("status", mSubmission.getVoteStatus());
+                        result.putExtras(extras);
+                        getActivity().setResult(SubredditFragment.VOTE_REQUEST_CODE, result);
+                    }
 
-            @Override
-            public void onLeftToRightSwipe() {
-                mSubmission.setVoteStatus(mSubmission.getVoteStatus() == Votable.UPVOTED ? Votable.NEUTRAL : Votable.UPVOTED);
-                RedditApi.vote(getActivity(), mSubmission);
-            }
-        });
-        swipeView.recycle(mSubmission);
+                    @Override
+                    public void onLeftToRightSwipe() {
+                        mSubmission.setVoteStatus(mSubmission.getVoteStatus() == Votable.UPVOTED ? Votable.NEUTRAL : Votable.UPVOTED);
+                        RedditApi.vote(getActivity(), mSubmission);
+                        Intent result = new Intent();
+                        Bundle extras = new Bundle();
+                        extras.putString("name", mSubmission.getName());
+                        extras.putInt("status", mSubmission.getVoteStatus());
+                        result.putExtras(extras);
+                        getActivity().setResult(SubredditFragment.VOTE_REQUEST_CODE, result);
+                    }
+                });
+        swipeView.invalidate();
         View nsfwWarning = mHeaderView.findViewById(R.id.nsfw_warning);
         View submissionData = mHeaderView.findViewById(R.id.submission_data);
         final ImageButton button = (ImageButton) mHeaderView.findViewById(R.id.preview_button);
@@ -181,7 +196,7 @@ public class CommentFragment extends AccountFragment {
                 selfText.setVisibility(View.VISIBLE);
             }
         } else {
-            UrlParser linkDetails = new UrlParser(mSubmission.getUrl());
+            final UrlParser linkDetails = new UrlParser(mSubmission.getUrl());
             if (linkDetails.getType() != UrlParser.NOT_SPECIAL) {
                 String id = linkDetails.getLinkId();
                 if (linkDetails.getType() == UrlParser.IMGUR_IMAGE) {
@@ -202,10 +217,14 @@ public class CommentFragment extends AccountFragment {
                     imageView.setVisibility(View.VISIBLE);
                     ImgurApi.loadImage(linkDetails.getUrl(), imageView, null);
                     button.setImageResource(R.drawable.ic_youtube);
+                    button.setVisibility(View.VISIBLE);
                     button.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-
+                            getFragmentManager().beginTransaction()
+                                    .add(R.id.container, YouTubeFragment.newInstance(linkDetails.getLinkId()), "youtube")
+                                    .addToBackStack("youtube")
+                                    .commit();
                         }
                     });
                 } else if (linkDetails.getType() == UrlParser.NORMAL_IMAGE) {
@@ -214,7 +233,10 @@ public class CommentFragment extends AccountFragment {
                     imageView.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-
+                            getFragmentManager().beginTransaction()
+                                    .add(R.id.container, ImagePagerFragment.newInstance(linkDetails.getUrl()), "picture")
+                                    .addToBackStack("picture")
+                                    .commit();
                         }
                     });
                 }
@@ -259,10 +281,12 @@ public class CommentFragment extends AccountFragment {
             imageView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (mSubmission.getImgurData() instanceof ImgurImage) {
-//                        mCallback.onImageViewClicked((ImgurImage) mSubmission.getImgurData());
-                    } else if (mSubmission.getImgurData() instanceof ImgurAlbum) {
-//                        mCallback.onImageViewClicked((ImgurAlbum) mSubmission.getImgurData());
+                    Fragment f = ImagePagerFragment.newInstance(mSubmission.getImgurData());
+                    if (f != null) {
+                        getFragmentManager().beginTransaction()
+                                .add(R.id.container, f, "imgur")
+                                .addToBackStack("imgur")
+                                .commit();
                     }
                 }
             });
@@ -322,7 +346,11 @@ public class CommentFragment extends AccountFragment {
             if (e != null) {
                 return;
             }
+            Object imgurData = null;
+            if (mSubmission != null)
+                imgurData = mSubmission.getImgurData();
             mSubmission = result;
+            mSubmission.setImgurData(imgurData);
             if (mCallback != null) {
                 createHeaderView();
                 mCommentsListView.addHeaderView(mHeaderView);
