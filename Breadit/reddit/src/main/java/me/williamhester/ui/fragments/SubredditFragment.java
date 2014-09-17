@@ -69,7 +69,7 @@ public class SubredditFragment extends AccountFragment implements SubmissionsRec
         if (mSubredditName == null) {
             mSubredditName = "";
         }
-        mSubmissionsAdapter = new SubmissionsRecyclerAdapter(mSubmissionList, this, getActivity());
+        mSubmissionsAdapter = new SubmissionsRecyclerAdapter(mSubmissionList, this);
         loadPrefs();
     }
 

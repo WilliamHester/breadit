@@ -4,15 +4,13 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
-import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.LinearLayout;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.koushikdutta.async.future.FutureCallback;
@@ -25,12 +23,18 @@ import java.util.HashMap;
 import java.util.List;
 
 import me.williamhester.models.Comment;
+import me.williamhester.models.ImgurAlbum;
+import me.williamhester.models.ImgurImage;
 import me.williamhester.models.Submission;
 import me.williamhester.models.Votable;
 import me.williamhester.models.utils.Utilities;
+import me.williamhester.network.ImgurApi;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
+import me.williamhester.tools.HtmlParser;
+import me.williamhester.tools.UrlParser;
 import me.williamhester.ui.views.CommentViewHolder;
+import me.williamhester.ui.views.SwipeView;
 
 public class CommentFragment extends AccountFragment {
 
@@ -79,6 +83,7 @@ public class CommentFragment extends AccountFragment {
             mSubmission = (Submission) args.getSerializable("submission");
             if (mSubmission != null) {
                 mPermalink = mSubmission.getPermalink();
+                RedditApi.getSubmissionData(getActivity(), mPermalink, mSubmissionCallback, mCommentCallback);
             } else {
                 mPermalink = args.getString(PERMALINK);
                 if (mPermalink.contains("reddit.com")) {
@@ -96,7 +101,7 @@ public class CommentFragment extends AccountFragment {
         View v = inflater.inflate(R.layout.fragment_comment, null);
         mCommentsListView = (ListView) v.findViewById(R.id.comments);
         if (mHeaderView == null && mSubmission != null) {
-            mHeaderView = createHeaderView(inflater);
+            createHeaderView(inflater);
         }
         if (mCommentsListView.getHeaderViewsCount() == 0 && mHeaderView != null) {
             mCommentsListView.addHeaderView(mHeaderView);
@@ -119,90 +124,151 @@ public class CommentFragment extends AccountFragment {
         mCallback = listener;
     }
 
-    private View createHeaderView() {
-        return createHeaderView((LayoutInflater)
+    private void createHeaderView() {
+        createHeaderView((LayoutInflater)
                 mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE));
     }
 
-    private View createHeaderView(LayoutInflater inflater) {
-        View v = inflater.inflate(R.layout.view_comments_header, null);
-
-        TextView selfText = (TextView) v.findViewById(R.id.body);
-
-        View subView = v.findViewById(R.id.submission);
-
-        final View voteStatus = v.findViewById(R.id.vote_status);
-//        TextView nameAndTime
-//                = (TextView) subView.findViewById(R.id.subreddit_name_and_time);
-        TextView author = (TextView) subView.findViewById(R.id.author);
-//        ImageView thumbnail = (ImageView) subView.findViewById(R.id.thumbnail);
-        TextView title = (TextView) subView.findViewById(R.id.body);
-        TextView domain = (TextView) subView.findViewById(R.id.domain);
-        final TextView points = (TextView) subView.findViewById(R.id.metadata);
-        mNumComments = (TextView) v.findViewById(R.id.num_comments);
-        Spinner sortBy = (Spinner) v.findViewById(R.id.sort_by);
-        LinearLayout edit = (LinearLayout) v.findViewById(R.id.edited_text);
-        edit.setVisibility(View.GONE);
-
-        title.setText(Html.fromHtml(mSubmission.getTitle()).toString());
-//        author.setText(mSubmission.getAuthor());
-        domain.setText("(" + mSubmission.getDomain() + ")");
-        points.setText(mSubmission.getScore() + " points by ");
-
-        if (mSubmission.isSelf() && mSubmission.getBodyHtml() != null) {
-            selfText.setText(Html.fromHtml(Html.fromHtml(mSubmission.getBodyHtml()).toString()));
-            selfText.setMovementMethod(new LinkMovementMethod());
-        } else {
-            selfText.setVisibility(View.GONE);
-        }
-
-        final String[] sortTypes = getResources().getStringArray(R.array.sort_types);
-
-        mNumComments.setText("Top " + mCommentsList.size() + " comments. Sorted by");
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(mContext,
-                R.layout.spinner_item, R.id.orange_spinner_text, sortTypes);
-        sortBy.setAdapter(adapter);
-        sortBy.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+    private void createHeaderView(LayoutInflater inflater) {
+        mHeaderView = inflater.inflate(R.layout.header_comments, null);
+        TextView domain = (TextView) mHeaderView.findViewById(R.id.domain);
+        TextView commentData = (TextView) mHeaderView.findViewById(R.id.num_comments);
+        TextView metadata = (TextView) mHeaderView.findViewById(R.id.metadata);
+        TextView subreddit = (TextView) mHeaderView.findViewById(R.id.subreddit_title);
+        TextView body = (TextView) mHeaderView.findViewById(R.id.body);
+        TextView selfText = (TextView) mHeaderView.findViewById(R.id.self_text);
+        SwipeView swipeView = (SwipeView) mHeaderView.findViewById(R.id.swipe_view);
+        swipeView.setUp(mHeaderView.findViewById(R.id.vote_background),
+                mHeaderView.findViewById(R.id.vote_foreground), new SwipeView.SwipeListener() {
             @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                int old = mSortType;
-                switch (i) {
-                    case 0:
-                        mSortType = Comment.TOP;
-                        break;
-                    case 1:
-                        mSortType = Comment.BEST;
-                        break;
-                    case 2:
-                        mSortType = Comment.NEW;
-                        break;
-                    case 3:
-                        mSortType = Comment.HOT;
-                        break;
-                    case 4:
-                        mSortType = Comment.CONTROVERSIAL;
-                        break;
-                    case 5:
-                        mSortType = Comment.OLD;
-                        break;
-                }
-                if (old != mSortType) {
-                    RedditApi.getSubmissionData(mContext, mPermalink, mSubmissionCallback, mCommentCallback);
-                }
+            public void onRightToLeftSwipe() {
+                mSubmission.setVoteStatus(mSubmission.getVoteStatus() == Votable.DOWNVOTED ? Votable.NEUTRAL : Votable.DOWNVOTED);
+                RedditApi.vote(getActivity(), mSubmission);
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-                // Do nothing
+            public void onLeftToRightSwipe() {
+                mSubmission.setVoteStatus(mSubmission.getVoteStatus() == Votable.UPVOTED ? Votable.NEUTRAL : Votable.UPVOTED);
+                RedditApi.vote(getActivity(), mSubmission);
             }
         });
+        swipeView.recycle(mSubmission);
+        View nsfwWarning = mHeaderView.findViewById(R.id.nsfw_warning);
+        View submissionData = mHeaderView.findViewById(R.id.submission_data);
+        final ImageButton button = (ImageButton) mHeaderView.findViewById(R.id.preview_button);
 
-        return v;
+        body.setText(Html.fromHtml(mSubmission.getTitle()).toString());
+        domain.setText(mSubmission.getDomain());
+        commentData.setText(mSubmission.getNumberOfComments() + " comments");
+        subreddit.setText("/r/" + mSubmission.getSubredditName());
+        metadata.setText(mSubmission.getAuthor() + " " + mSubmission.getScore() + " "
+                + getResources().getQuantityString(R.plurals.points,
+                mSubmission.getScore()));
+
+        if (mSubmission.isNsfw()) {
+            nsfwWarning.setVisibility(View.VISIBLE);
+        } else {
+            nsfwWarning.setVisibility(View.GONE);
+        }
+
+        View container = mHeaderView.findViewById(R.id.content_preview);
+        ImageView imageView = (ImageView) mHeaderView.findViewById(R.id.image);
+
+        if (mSubmission.isSelf()) {
+            if (mSubmission.getBodyHtml() != null) {
+                HtmlParser parser = new HtmlParser(Html.fromHtml(mSubmission.getBodyHtml()).toString());
+                selfText.setText(parser.getSpannableString());
+                selfText.setVisibility(View.VISIBLE);
+            }
+        } else {
+            UrlParser linkDetails = new UrlParser(mSubmission.getUrl());
+            if (linkDetails.getType() != UrlParser.NOT_SPECIAL) {
+                String id = linkDetails.getLinkId();
+                if (linkDetails.getType() == UrlParser.IMGUR_IMAGE) {
+                    if (mSubmission.getImgurData() == null) {
+                        imageView.setImageDrawable(null);
+                        ImgurApi.getImageDetails(id, mHeaderView.getContext(), mSubmission, mImgurCallback);
+                    } else {
+                        setImagePreview(mHeaderView);
+                    }
+                } else if (linkDetails.getType() == UrlParser.IMGUR_ALBUM) {
+                    if (mSubmission.getImgurData() == null) {
+                        imageView.setImageDrawable(null);
+                        ImgurApi.getAlbumDetails(id, mHeaderView.getContext(), mSubmission, mImgurCallback);
+                    } else {
+                        setImagePreview(mHeaderView);
+                    }
+                } else if (linkDetails.getType() == UrlParser.YOUTUBE) {
+                    imageView.setVisibility(View.VISIBLE);
+                    ImgurApi.loadImage(linkDetails.getUrl(), imageView, null);
+                    button.setImageResource(R.drawable.ic_youtube);
+                    button.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+
+                        }
+                    });
+                } else if (linkDetails.getType() == UrlParser.NORMAL_IMAGE) {
+                    imageView.setVisibility(View.VISIBLE);
+                    ImgurApi.loadImage(linkDetails.getUrl(), imageView, null);
+                    imageView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+
+                        }
+                    });
+                }
+            } else {
+                container.setVisibility(View.GONE);
+            }
+        }
     }
 
-    public void scrollToTop() {
-        mCommentsListView.smoothScrollToPositionFromTop(0, 0,
-                mCommentsListView.getFirstVisiblePosition() * 5);
+
+    private FutureCallback<Submission> mImgurCallback = new FutureCallback<Submission>() {
+        @Override
+        public void onCompleted(Exception e, Submission result) {
+            if (e != null) {
+                e.printStackTrace();
+            } else if (mSubmission == result) {
+                setImagePreview(mHeaderView);
+            }
+        }
+    };
+
+    /**
+     * Attempts to set the image preview
+     *
+     * @return returns whether or not the data has been set.
+     */
+    private void setImagePreview(View v) {
+        final ImgurImage image;
+        if (mSubmission.getImgurData() instanceof ImgurAlbum) {
+            image = ((ImgurAlbum) mSubmission.getImgurData()).getImages().get(0);
+        } else if (mSubmission.getImgurData() instanceof ImgurImage) {
+            image = (ImgurImage) mSubmission.getImgurData();
+        } else {
+            image = null;
+        }
+        ImageView imageView = (ImageView) v.findViewById(R.id.image);
+        if (image != null && !image.isAnimated()) {
+            imageView.setVisibility(View.VISIBLE);
+            ImgurApi.loadImage(image.getUrl(), imageView, null);
+            ImageButton button = (ImageButton) v.findViewById(R.id.preview_button);
+            button.setVisibility(View.INVISIBLE);
+            imageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (mSubmission.getImgurData() instanceof ImgurImage) {
+//                        mCallback.onImageViewClicked((ImgurImage) mSubmission.getImgurData());
+                    } else if (mSubmission.getImgurData() instanceof ImgurAlbum) {
+//                        mCallback.onImageViewClicked((ImgurAlbum) mSubmission.getImgurData());
+                    }
+                }
+            });
+        } else {
+            v.findViewById(R.id.content_preview).setVisibility(View.GONE);
+        }
     }
 
     private CommentViewHolder.CommentClickCallbacks mCommentCallbacks = new CommentViewHolder.CommentClickCallbacks() {
@@ -258,7 +324,7 @@ public class CommentFragment extends AccountFragment {
             }
             mSubmission = result;
             if (mCallback != null) {
-                mHeaderView = createHeaderView();
+                createHeaderView();
                 mCommentsListView.addHeaderView(mHeaderView);
                 mCallback.onSubmissionLoaded(mSubmission);
             }

@@ -1,14 +1,12 @@
 package me.williamhester.ui.views;
 
-import android.graphics.Color;
 import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
-import android.text.Spanned;
 import android.text.method.LinkMovementMethod;
-import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
+import android.widget.TextView;
 
 import me.williamhester.models.Comment;
 import me.williamhester.models.MoreComments;
@@ -23,12 +21,18 @@ public class CommentViewHolder extends VotableViewHolder {
     private Comment mComment;
     private CommentClickCallbacks mCallback;
     private String mSubmissionAuthor;
+    private View mContent;
+    private TextView mAuthor;
+    private View mLevelIndicator;
 
     public CommentViewHolder(View itemView, CommentClickCallbacks callbacks, String submissionAuthor) {
         super(itemView);
         mCallback = callbacks;
         mBody.setMovementMethod(new LinkMovementMethod());
         mSubmissionAuthor = submissionAuthor;
+        mContent = itemView.findViewById(R.id.comment_content);
+        mAuthor = (TextView) itemView.findViewById(R.id.author);
+        mLevelIndicator = itemView.findViewById(R.id.level_indicator);
     }
 
     @Override
@@ -37,16 +41,38 @@ public class CommentViewHolder extends VotableViewHolder {
         mComment = (Comment) votable;
         float dp = itemView.getResources().getDisplayMetrics().density;
         itemView.setPadding(Math.round(4 * dp * mComment.getLevel()), 0, 0, 0);
+        if (mComment.getLevel() > 0) {
+            mLevelIndicator.setVisibility(View.VISIBLE);
+            switch (mComment.getLevel() % 4) {
+                case 1:
+                    mLevelIndicator.setBackgroundColor(mLevelIndicator.getResources().getColor(R.color.green));
+                    break;
+                case 2:
+                    mLevelIndicator.setBackgroundColor(mLevelIndicator.getResources().getColor(R.color.cyan));
+                    break;
+                case 3:
+                    mLevelIndicator.setBackgroundColor(mLevelIndicator.getResources().getColor(R.color.blue));
+                    break;
+                case 0:
+                    mLevelIndicator.setBackgroundColor(mLevelIndicator.getResources().getColor(R.color.pink));
+                    break;
+            }
+        } else {
+            mLevelIndicator.setVisibility(View.GONE);
+        }
         if (votable instanceof MoreComments) {
-            itemView.findViewById(R.id.comment_content).setOnClickListener(mMoreClickListener);
+            mContent.setOnClickListener(mMoreClickListener);
             mMetadata.setVisibility(View.GONE);
+            mAuthor.setVisibility(View.GONE);
             SpannableStringBuilder sb = new SpannableStringBuilder();
             sb.append("Load more comments...");
             sb.setSpan(new ForegroundColorSpan(itemView.getResources().getColor(R.color.auburn_blue)),
                     0, sb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             mBody.setText(sb);
         } else {
-            itemView.findViewById(R.id.comment_content).setOnClickListener(mHideCommentsClickListener);
+            mMetadata.setVisibility(View.VISIBLE);
+            mAuthor.setVisibility(View.VISIBLE);
+            mContent.setOnClickListener(mHideCommentsClickListener);
 
             if (mComment.getSpannableBody() == null && mComment.getBodyHtml() != null) {
                 HtmlParser parser = new HtmlParser(Html.fromHtml(mComment.getBodyHtml()).toString());
@@ -59,20 +85,19 @@ public class CommentViewHolder extends VotableViewHolder {
                 mBody.setVisibility(View.VISIBLE);
             }
 
-            mMetadata.setVisibility(View.VISIBLE);
-            SpannableStringBuilder ssb = new SpannableStringBuilder();
-            ssb.append(mComment.getAuthor());
             if (mComment.getAuthor().equals(mSubmissionAuthor)) {
-                ssb.setSpan(new ForegroundColorSpan(Color.WHITE),
-                        0, ssb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                ssb.setSpan(new BackgroundColorSpan(itemView.getResources().getColor(R.color.op)),
-                        0, ssb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                mAuthor.setBackgroundResource(R.drawable.author_background);
+                mAuthor.setTextColor(itemView.getResources().getColor(R.color.ghostwhite));
+            } else {
+                mAuthor.setBackground(null);
+                mAuthor.setTextColor(itemView.getResources().getColor(R.color.comment_metadata_gray));
             }
-            ssb.append(" ")
-                    .append(String.valueOf(mComment.getScore()))
+            mAuthor.setText(mComment.getAuthor());
+            StringBuilder sb = new StringBuilder();
+            sb.append(String.valueOf(mComment.getScore()))
                     .append(" ")
                     .append(itemView.getResources().getQuantityString(R.plurals.points, mComment.getScore()));
-            mMetadata.setText(ssb);
+            mMetadata.setText(sb);
         }
     }
 
@@ -94,6 +119,10 @@ public class CommentViewHolder extends VotableViewHolder {
             mBody.setVisibility(View.GONE);
         }
     };
+
+    private static class CommentLinkMovementMethod extends LinkMovementMethod {
+
+    }
 
     public interface CommentClickCallbacks {
         public void onMoreClick(CommentViewHolder viewHolder, Comment comment);

@@ -37,24 +37,20 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
     private List<Submission> mSubmissions;
     private final List<String> mExpandedSubmissions = new ArrayList<>();
     private AdapterCallbacks mCallback;
-    private Context mContext;
 
-    public SubmissionsRecyclerAdapter(List<Submission> submissions, AdapterCallbacks callbacks, 
-                                      Context context) {
+    public SubmissionsRecyclerAdapter(List<Submission> submissions, AdapterCallbacks callbacks) {
         mSubmissions = submissions;
         mCallback = callbacks;
-        mContext = context;
     }
 
     @Override
     public SubmissionViewHolder onCreateViewHolder(ViewGroup parent, int position) {
         final View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_post, parent, false);
-        return new SubmissionViewHolder(v);
+        return new SubmissionViewHolder(v, mCallback);
     }
 
     @Override
     public void onBindViewHolder(SubmissionViewHolder submissionViewHolder, int position) {
-
         submissionViewHolder.setContent(mSubmissions.get(position));
     }
 
@@ -70,12 +66,14 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
         private TextView mSubreddit;
         private View mNsfwWarning;
         private View mExpandButton;
+        private AdapterCallbacks mCallback;
 
         private Submission mSubmission;
 
-        public SubmissionViewHolder(View itemView) {
+        public SubmissionViewHolder(View itemView, AdapterCallbacks callbacks) {
             super(itemView);
 
+            mCallback = callbacks;
             mDomain = (TextView) itemView.findViewById(R.id.domain);
             mCommentData = (TextView) itemView.findViewById(R.id.num_comments);
             mSubreddit = (TextView) itemView.findViewById(R.id.subreddit_title);
@@ -129,14 +127,14 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
                     if (linkDetails.getType() == UrlParser.IMGUR_IMAGE) {
                         if (mSubmission.getImgurData() == null) {
                             imageView.setImageDrawable(null);
-                            ImgurApi.getImageDetails(id, mContext, mSubmission, mImgurCallback);
+                            ImgurApi.getImageDetails(id, itemView.getContext(), mSubmission, mImgurCallback);
                         } else {
                             setImagePreview();
                         }
                     } else if (linkDetails.getType() == UrlParser.IMGUR_ALBUM) {
                         if (mSubmission.getImgurData() == null) {
                             imageView.setImageDrawable(null);
-                            ImgurApi.getAlbumDetails(id, mContext, mSubmission, mImgurCallback);
+                            ImgurApi.getAlbumDetails(id, itemView.getContext(), mSubmission, mImgurCallback);
                         } else {
                             setImagePreview();
                         }
@@ -282,7 +280,7 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
         }
     }
 
-    public interface AdapterCallbacks {
+    public static interface AdapterCallbacks {
         public void onImageViewClicked(ImgurImage image);
         public void onImageViewClicked(ImgurAlbum album);
         public void onImageViewClicked(String imageUrl);
