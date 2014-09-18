@@ -23,7 +23,7 @@
                 android:layout_height="wrap_content"
                 android:textAllCaps="true"
                 android:fontFamily="sans-serif-condensed"
-                android:textSize="10sp"
+                android:textSize="11sp"
                 android:paddingLeft="8dp" />
 
             <TextView android:id="@+id/nsfw_warning"
@@ -35,24 +35,24 @@
                 android:fontFamily="sans-serif-condensed"
                 android:text="@string/nsfw"
                 android:textColor="@color/nsfw_red"
-                android:textSize="10sp"
+                android:textSize="11sp"
                 android:layout_marginRight="8dp"/>
 
-            <me.williamhester.ui.views.CondensedLightTextView
+            <TextView
                 android:id="@+id/body"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"
                 android:textSize="16sp"
-                android:fontFamily="sans-serif-condensed-light"
+                android:fontFamily="sans-serif-light"
                 android:textColor="@color/ghostwhite"
                 android:layout_below="@id/subreddit_title"/>
 
             <TextView android:id="@+id/metadata"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="10sp"
+                android:textSize="11sp"
                 android:paddingLeft="8dp"
                 android:fontFamily="sans-serif-condensed"
                 android:textColor="@color/auburn_orange"
@@ -62,7 +62,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
-                android:textSize="10sp"
+                android:textSize="11sp"
                 android:paddingRight="8dp"
                 android:fontFamily="sans-serif-condensed"
                 android:textColor="@color/auburn_orange"
@@ -72,7 +72,7 @@
                 android:paddingRight="8dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="10sp"
+                android:textSize="11sp"
                 android:fontFamily="sans-serif-condensed"
                 android:layout_alignParentRight="true"
                 android:layout_below="@id/metadata"/>
@@ -82,7 +82,7 @@
                 android:paddingBottom="6dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="10sp"
+                android:textSize="11sp"
                 android:fontFamily="sans-serif-condensed"
                 android:layout_below="@id/metadata"/>
 
