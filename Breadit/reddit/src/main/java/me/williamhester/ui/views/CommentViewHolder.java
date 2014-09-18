@@ -1,6 +1,5 @@
 package me.williamhester.ui.views;
 
-import android.support.annotation.NonNull;
 import android.text.Html;
 import android.text.Layout;
 import android.text.Selection;

@@ -1,11 +1,14 @@
 package me.williamhester.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.io.Serializable;
 
 /**
  * Created by william on 6/22/14.
  */
-public class ImgurImage implements Serializable {
+public class ImgurImage implements Serializable, Parcelable {
 
     private static final long serialVersionUID = 5186779065758496400L;
 
@@ -52,4 +55,54 @@ public class ImgurImage implements Serializable {
         return o != null && o instanceof ImgurImage && ((ImgurImage) o).id.equals(id);
     }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.id);
+        dest.writeString(this.title);
+        dest.writeString(this.description);
+        dest.writeString(this.type);
+        dest.writeString(this.deletehash);
+        dest.writeString(this.section);
+        dest.writeString(this.link);
+        dest.writeByte(animated ? (byte) 1 : (byte) 0);
+        dest.writeInt(this.width);
+        dest.writeInt(this.height);
+        dest.writeLong(this.size);
+        dest.writeLong(this.views);
+        dest.writeLong(this.bandwidth);
+    }
+
+    public ImgurImage() {
+    }
+
+    private ImgurImage(Parcel in) {
+        this.id = in.readString();
+        this.title = in.readString();
+        this.description = in.readString();
+        this.type = in.readString();
+        this.deletehash = in.readString();
+        this.section = in.readString();
+        this.link = in.readString();
+        this.animated = in.readByte() != 0;
+        this.width = in.readInt();
+        this.height = in.readInt();
+        this.size = in.readLong();
+        this.views = in.readLong();
+        this.bandwidth = in.readLong();
+    }
+
+    public static final Creator<ImgurImage> CREATOR = new Creator<ImgurImage>() {
+        public ImgurImage createFromParcel(Parcel source) {
+            return new ImgurImage(source);
+        }
+
+        public ImgurImage[] newArray(int size) {
+            return new ImgurImage[size];
+        }
+    };
 }

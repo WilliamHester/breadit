@@ -57,7 +57,7 @@ public class SubredditFragment extends AccountFragment implements SubmissionAdap
         mContext = getActivity();
         if (savedInstanceState != null) {
             mSubredditName = savedInstanceState.getString("subreddit");
-            mSubmissionList = (ArrayList<Submission>) savedInstanceState.getSerializable("submissions");
+            mSubmissionList = savedInstanceState.getParcelableArrayList("submissions");
             String[] array = savedInstanceState.getStringArray("names");
             mNames = new HashSet<>();
             for (String name : array) {
@@ -142,7 +142,7 @@ public class SubredditFragment extends AccountFragment implements SubmissionAdap
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putSerializable("submissions", mSubmissionList);
+        outState.putParcelableArrayList("submissions", mSubmissionList);
         outState.putString("subreddit", mSubredditName);
         String[] array = new String[mNames.size()];
         mNames.toArray(array);
@@ -335,7 +335,7 @@ public class SubredditFragment extends AccountFragment implements SubmissionAdap
     public void onCardClicked(Submission submission) {
         Intent i = new Intent(getActivity(), SubmissionActivity.class);
         Bundle args = new Bundle();
-        args.putSerializable(SubmissionActivity.SUBMISSION, submission);
+        args.putParcelable(SubmissionActivity.SUBMISSION, submission);
         args.putSerializable("media", submission.getMedia());
         args.putString(SubmissionActivity.TAB, SubmissionActivity.COMMENT_TAB);
         i.putExtras(args);

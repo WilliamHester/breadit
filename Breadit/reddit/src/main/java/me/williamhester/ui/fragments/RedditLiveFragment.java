@@ -40,7 +40,7 @@ public class RedditLiveFragment extends Fragment {
 
     public static RedditLiveFragment newInstance(Submission submission) {
         Bundle args = new Bundle();
-        args.putSerializable(SUBMISSION, submission);
+        args.putParcelable(SUBMISSION, submission);
         RedditLiveFragment fragment = new RedditLiveFragment();
         fragment.setArguments(args);
         return fragment;
@@ -51,7 +51,7 @@ public class RedditLiveFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
-            mSubmission = (Submission) getArguments().getSerializable(SUBMISSION);
+            mSubmission = getArguments().getParcelable(SUBMISSION);
         }
     }
 

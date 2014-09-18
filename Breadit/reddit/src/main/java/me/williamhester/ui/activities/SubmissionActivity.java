@@ -51,7 +51,7 @@ public class SubmissionActivity extends Activity implements ImageFragment.ImageT
             if (extras.containsKey(PERMALINK)) {
                 mPermalink = extras.getString(PERMALINK);
             } else {
-                mSubmission = (Submission) extras.getSerializable(SUBMISSION);
+                mSubmission = extras.getParcelable(SUBMISSION);
                 mMedia = (Submission.Media) extras.getSerializable("media");
                 if (mCurrentTag == null) {
                     mCurrentTag = getIntent().getExtras().getString(TAB);

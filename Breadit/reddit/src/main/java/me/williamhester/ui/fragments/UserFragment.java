@@ -196,7 +196,8 @@ public class UserFragment extends AccountFragment {
                     convertView = inflater.inflate(R.layout.list_item_post, null);
                     convertView.setTag("t3");
                 }
-                Submission s = (Submission) getItem(position);
+//                Submission s = (Submission) getItem(position);
+            Submission s = null;
 
                 convertView.invalidate();
 

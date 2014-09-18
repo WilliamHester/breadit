@@ -64,7 +64,7 @@ public class CommentFragment extends AccountFragment {
 
     public static CommentFragment newInstance(Submission submission) {
         Bundle args = new Bundle();
-        args.putSerializable("submission", submission);
+        args.putParcelable("submission", submission);
         CommentFragment fragment = new CommentFragment();
         fragment.setArguments(args);
         return fragment;
@@ -77,11 +77,11 @@ public class CommentFragment extends AccountFragment {
         mContext = getActivity();
         if (savedInstanceState != null) {
             mCommentsList = savedInstanceState.getParcelableArrayList("comments");
-            mSubmission = (Submission) savedInstanceState.getSerializable("submission");
+            mSubmission = savedInstanceState.getParcelable("submission");
             mPermalink = savedInstanceState.getString("permalink");
             mSortType = savedInstanceState.getInt("sortType");
         } else if (args != null) {
-            mSubmission = (Submission) args.getSerializable("submission");
+            mSubmission = args.getParcelable("submission");
             if (mSubmission != null) {
                 mPermalink = mSubmission.getPermalink();
                 RedditApi.getSubmissionData(getActivity(), mPermalink, mSubmissionCallback, mCommentCallback);
@@ -115,7 +115,7 @@ public class CommentFragment extends AccountFragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelableArrayList("comments", mCommentsList);
-        outState.putSerializable("submission", mSubmission);
+        outState.putParcelable("submission", mSubmission);
         outState.putString("permalink", mPermalink);
         outState.putInt("sortType", mSortType);
     }

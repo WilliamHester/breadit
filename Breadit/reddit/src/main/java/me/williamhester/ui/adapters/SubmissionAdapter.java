@@ -197,11 +197,8 @@ public class SubmissionAdapter extends ArrayAdapter<Submission> {
                 }
                 imageView.setVisibility(View.GONE);
                 button.setVisibility(View.GONE);
-                if (mSubmission.getSpannableBody() == null) {
-                    HtmlParser parser = new HtmlParser(Html.fromHtml(mSubmission.getBodyHtml()).toString());
-                    mSubmission.setSpannableBody(parser.getSpannableString());
-                }
-                content.setText(mSubmission.getSpannableBody());
+                HtmlParser parser = new HtmlParser(Html.fromHtml(mSubmission.getBodyHtml()).toString());
+                content.setText(parser.getSpannableString());
                 content.setMovementMethod(new LinkMovementMethod());
             } else {
                 itemView.findViewById(R.id.show_self_text).setVisibility(View.GONE);
