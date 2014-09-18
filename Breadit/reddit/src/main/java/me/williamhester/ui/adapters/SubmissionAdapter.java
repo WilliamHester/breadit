@@ -1,7 +1,6 @@
 package me.williamhester.ui.adapters;
 
 import android.content.Context;
-import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
@@ -10,13 +9,13 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.ScaleAnimation;
+import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.koushikdutta.async.future.FutureCallback;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import me.williamhester.models.ImgurAlbum;
@@ -32,30 +31,34 @@ import me.williamhester.ui.views.VotableViewHolder;
 /**
  * Created by william on 6/27/14.
  */
-public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<SubmissionsRecyclerAdapter.SubmissionViewHolder> {
+public class SubmissionAdapter extends ArrayAdapter<Submission> {
 
     private List<Submission> mSubmissions;
-    private final List<String> mExpandedSubmissions = new ArrayList<>();
     private AdapterCallbacks mCallback;
+    private Context mContext;
 
-    public SubmissionsRecyclerAdapter(List<Submission> submissions, AdapterCallbacks callbacks) {
+    public SubmissionAdapter(Context context, AdapterCallbacks callbacks, List<Submission> submissions) {
+        super(context, R.layout.list_item_post, submissions);
+        mContext = context;
         mSubmissions = submissions;
         mCallback = callbacks;
     }
 
     @Override
-    public SubmissionViewHolder onCreateViewHolder(ViewGroup parent, int position) {
-        final View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_post, parent, false);
-        return new SubmissionViewHolder(v, mCallback);
-    }
-
-    @Override
-    public void onBindViewHolder(SubmissionViewHolder submissionViewHolder, int position) {
+    public View getView (int position, View convertView, ViewGroup parent) {
+        if (convertView == null) {
+            LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            convertView = inflater.inflate(R.layout.list_item_post, parent, false);
+            SubmissionViewHolder viewHolder = new SubmissionViewHolder(convertView);
+            convertView.setTag(viewHolder);
+        }
+        SubmissionViewHolder submissionViewHolder = (SubmissionViewHolder) convertView.getTag();
         submissionViewHolder.setContent(mSubmissions.get(position));
+        return convertView;
     }
 
     @Override
-    public int getItemCount() {
+    public int getCount() {
         return mSubmissions.size();
     }
 
@@ -66,14 +69,12 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
         private TextView mSubreddit;
         private View mNsfwWarning;
         private View mExpandButton;
-        private AdapterCallbacks mCallback;
 
         private Submission mSubmission;
 
-        public SubmissionViewHolder(View itemView, AdapterCallbacks callbacks) {
+        public SubmissionViewHolder(View itemView) {
             super(itemView);
 
-            mCallback = callbacks;
             mDomain = (TextView) itemView.findViewById(R.id.domain);
             mCommentData = (TextView) itemView.findViewById(R.id.num_comments);
             mSubreddit = (TextView) itemView.findViewById(R.id.subreddit_title);
@@ -187,7 +188,7 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
                 itemView.findViewById(R.id.show_self_text).setVisibility(View.VISIBLE);
                 container.setVisibility(View.VISIBLE);
                 TextView content = (TextView) itemView.findViewById(R.id.self_text);
-                if (mExpandedSubmissions.contains(mSubmission.getName())) {
+                if (mSubmission.isSelftextOpen()) {
                     expandButton.setRotation(-180f);
                     content.setVisibility(View.VISIBLE);
                 } else {
@@ -224,11 +225,10 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
             public void onClick(final View view) {
                 Animation anim;
                 Animation textAnim;
-                final boolean expanded = mExpandedSubmissions.contains(mSubmission.getName());
-                if (expanded) {
+                if (mSubmission.isSelftextOpen()) {
                     anim = AnimationUtils.loadAnimation(view.getContext(), R.anim.rotate_left);
                     mTextView.setVisibility(View.GONE);
-                    mExpandedSubmissions.remove(mSubmission.getName());
+                    mSubmission.setSelftextOpen(false);
                 } else {
                     anim = AnimationUtils.loadAnimation(view.getContext(), R.anim.rotate_right);
                     textAnim = new ScaleAnimation(1, 1, 0, 1);
@@ -236,7 +236,7 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
                     textAnim.setDuration(300l);
                     mTextView.setVisibility(View.VISIBLE);
                     mTextView.startAnimation(textAnim);
-                    mExpandedSubmissions.add(mSubmission.getName());
+                    mSubmission.setSelftextOpen(true);
                 }
                 anim.setFillBefore(true);
                 anim.setFillAfter(true);

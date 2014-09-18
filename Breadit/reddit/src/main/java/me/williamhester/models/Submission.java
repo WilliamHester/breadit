@@ -58,7 +58,8 @@ public class Submission extends Thing implements Votable, Serializable {
     private Boolean likes;
     private Media media;
     private int mVoteStatus;
-    private boolean mIsBeingEdited = false;
+    private boolean mIsBeingEdited;
+    private boolean mSelftextIsOpen;
     private Object mImgurData;
     private Spannable mSpannableBody;
 
@@ -115,6 +116,18 @@ public class Submission extends Thing implements Votable, Serializable {
     @Override
     public void setSpannableBody(Spannable body) {
         mSpannableBody = body;
+    }
+
+    public Spannable getSpannableBody() {
+        return mSpannableBody;
+    }
+
+    public void setSelftextOpen(boolean open) {
+        mSelftextIsOpen = open;
+    }
+
+    public boolean isSelftextOpen() {
+        return mSelftextIsOpen;
     }
 
     public void setBody(String body) {
