@@ -90,6 +90,7 @@ public class ImageFragment extends Fragment {
                 mAttacher = new PhotoViewAttacher(result);
                 ProgressBar progressBar = (ProgressBar) v.findViewById(R.id.progress_bar);
                 progressBar.setVisibility(View.GONE);
+                imageView.setOnClickListener(null);
                 mAttacher.setOnViewTapListener(new PhotoViewAttacher.OnViewTapListener() {
                     @Override
                     public void onViewTap(View view, float v, float v2) {
