@@ -37,6 +37,7 @@ public class Submission implements Votable, Parcelable {
     private String author_flair_text;
     private String domain;
     private String id;
+    @SerializedName("name")
     private String mName;
     private String link_flair_css_class;
     private String link_flair_text;
