@@ -277,13 +277,21 @@ public class Comment extends AbsComment implements Votable, Parcelable {
         dest.writeString(this.mReplyText);
         if (mChildren != null) {
             dest.writeInt(HAS_CHILDREN);
-            dest.writeTypedList(mChildren);
+            dest.writeInt(mChildren.size());
+            for (AbsComment c : mChildren) {
+                if (c instanceof Comment) {
+                    dest.writeInt(AbsComment.COMMENT);
+                    dest.writeParcelable(c, AbsComment.COMMENT);
+                } else {
+                    dest.writeInt(AbsComment.MORE_COMMENTS);
+                    dest.writeParcelable(c, AbsComment.MORE_COMMENTS);
+                }
+            }
         } else {
             dest.writeInt(DOES_NOT_HAVE_CHILDREN);
         }
     }
 
-    @SuppressWarnings("unchecked")
     private Comment(Parcel in) {
         super(in);
         this.mReplies = (ResponseRedditWrapper) in.readSerializable();
@@ -309,9 +317,16 @@ public class Comment extends AbsComment implements Votable, Parcelable {
         this.mIsHidden = in.readByte() != 0;
         this.mIsBeingEdited = in.readByte() != 0;
         this.mReplyText = in.readString();
-        int hasChildren = in.readInt();
-        if (hasChildren == HAS_CHILDREN) {
-            this.mChildren = in.createTypedArrayList(AbsComment.CREATOR);
+        if (in.readInt() == HAS_CHILDREN) {
+            mChildren = new ArrayList<>();
+            int count = in.readInt();
+            for (int i = 0; i < count; i++) {
+                if (in.readInt() == AbsComment.COMMENT) {
+                    mChildren.add((Comment) in.readParcelable(Comment.class.getClassLoader()));
+                } else {
+                    mChildren.add((AbsComment) in.readParcelable(MoreComments.class.getClassLoader()));
+                }
+            }
         }
     }
 
