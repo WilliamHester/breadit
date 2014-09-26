@@ -17,6 +17,7 @@ import com.google.gson.JsonObject;
 import com.koushikdutta.async.future.FutureCallback;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
@@ -57,9 +58,7 @@ public class SubredditFragment extends AccountFragment implements SubmissionAdap
             mSubmissionList = savedInstanceState.getParcelableArrayList("submissions");
             String[] array = savedInstanceState.getStringArray("names");
             mNames = new HashSet<>();
-            for (String name : array) {
-                mNames.add(name);
-            }
+            Collections.addAll(mNames, array);
         } else if (getArguments() != null) {
             mSubredditName = getArguments().getString("subreddit");
             mNames = new HashSet<>();

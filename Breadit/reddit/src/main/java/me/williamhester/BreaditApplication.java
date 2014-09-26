@@ -3,6 +3,8 @@ package me.williamhester;
 import android.app.Application;
 import android.content.SharedPreferences;
 
+import com.crittercism.app.Crittercism;
+
 import me.williamhester.databases.AccountDataSource;
 import me.williamhester.models.Account;
 import me.williamhester.models.AccountManager;
@@ -17,5 +19,6 @@ public class BreaditApplication extends Application {
         super.onCreate();
 
         AccountManager.init(this);
+        Crittercism.initialize(getApplicationContext(), Auth.CRITTERCISM_APP_ID);
     }
 }

@@ -18,8 +18,8 @@ android {
     defaultConfig {
         minSdkVersion 17
         targetSdkVersion 21
-        versionCode 3
-        versionName '0.3'
+        versionCode 5
+        versionName '0.3.2'
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
@@ -37,6 +37,7 @@ android {
 }
 
 dependencies {
+    compile 'com.crittercism:crittercism-android-agent:+'         // Crittercism // TODO: remove this later
     compile 'com.koushikdutta.async:androidasync:1.+'             // AndroidAsync
     compile 'com.github.chrisbanes.photoview:library:1.2.3'       // PhotoView
     compile 'com.koushikdutta.ion:ion:1.+'                        // Ion

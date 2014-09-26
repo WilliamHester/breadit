@@ -15,7 +15,9 @@ import java.util.List;
 import java.util.Stack;
 
 public class Comment implements Votable, Parcelable {
-    private static final long serialVersionUID = -8883017260375266824L;
+
+    private static final int DOES_NOT_HAVE_CHILDREN = 0;
+    private static final int HAS_CHILDREN = 1;
 
     public static final int BEST = 0;
     public static final int TOP = 1;
@@ -332,9 +334,12 @@ public class Comment implements Votable, Parcelable {
         dest.writeByte(mIsBeingEdited ? (byte) 1 : (byte) 0);
         dest.writeString(this.mReplyText);
         if (mChildren != null) {
+            dest.writeInt(HAS_CHILDREN);
             Comment[] children = new Comment[mChildren.size()];
             mChildren.toArray(children);
             dest.writeParcelableArray(children, 0);
+        } else {
+            dest.writeInt(DOES_NOT_HAVE_CHILDREN);
         }
     }
 
@@ -364,8 +369,9 @@ public class Comment implements Votable, Parcelable {
         this.mIsHidden = in.readByte() != 0;
         this.mIsBeingEdited = in.readByte() != 0;
         this.mReplyText = in.readString();
-        Comment[] children = (Comment[]) in.readParcelableArray(Comment.class.getClassLoader());
-        if (children != null) {
+        int hasChildren = in.readInt();
+        if (hasChildren == HAS_CHILDREN) {
+            Comment[] children = (Comment[]) in.readParcelableArray(Comment.class.getClassLoader());
             this.mChildren = new ArrayList<>();
             Collections.addAll(this.mChildren, children);
         }

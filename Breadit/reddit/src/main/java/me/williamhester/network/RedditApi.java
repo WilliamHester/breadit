@@ -146,30 +146,36 @@ public class RedditApi {
                             commentCallback.onCompleted(e, null);
                             return;
                         }
-                        Gson gson = new Gson();
-                        JsonArray array = new JsonParser().parse(result).getAsJsonArray();
-                        TypeToken<Submission> sub = new TypeToken<Submission>() {};
-                        Submission submission = gson.fromJson(array.get(0).getAsJsonObject()
-                                .get("data").getAsJsonObject()
-                                .get("children").getAsJsonArray().get(0).getAsJsonObject()
-                                .get("data"),
-                                sub.getType());
+                        try {
+                            Gson gson = new Gson();
+                            JsonArray array = new JsonParser().parse(result).getAsJsonArray();
+                            TypeToken<Submission> sub = new TypeToken<Submission>() {
+                            };
+                            Submission submission = gson.fromJson(array.get(0).getAsJsonObject()
+                                            .get("data").getAsJsonObject()
+                                            .get("children").getAsJsonArray().get(0).getAsJsonObject()
+                                            .get("data"),
+                                    sub.getType());
 
-                        ResponseRedditWrapper wrapper = new ResponseRedditWrapper(array.get(1).getAsJsonObject(), gson);
-                        Listing listing = null;
-                        if (wrapper.getData() instanceof Listing) {
-                            listing = (Listing) wrapper.getData();
-                        }
-
-                        List<Comment> comments = new ArrayList<>();
-                        for (ResponseRedditWrapper wrap : listing.getChildren()) {
-                            Comment.CommentIterator iterator = new Comment.CommentIterator(wrap);
-                            while (iterator.hasNext()) {
-                                comments.add(iterator.next());
+                            ResponseRedditWrapper wrapper = new ResponseRedditWrapper(array.get(1).getAsJsonObject(), gson);
+                            Listing listing = null;
+                            if (wrapper.getData() instanceof Listing) {
+                                listing = (Listing) wrapper.getData();
                             }
+
+                            List<Comment> comments = new ArrayList<>();
+                            for (ResponseRedditWrapper wrap : listing.getChildren()) {
+                                Comment.CommentIterator iterator = new Comment.CommentIterator(wrap);
+                                while (iterator.hasNext()) {
+                                    comments.add(iterator.next());
+                                }
+                            }
+                            submissionCallback.onCompleted(null, submission);
+                            commentCallback.onCompleted(null, comments);
+                        } catch (Exception e2) {
+                            submissionCallback.onCompleted(e2, null);
+                            commentCallback.onCompleted(e2, null);
                         }
-                        submissionCallback.onCompleted(null, submission);
-                        commentCallback.onCompleted(null, comments);
                     }
                 });
     }
