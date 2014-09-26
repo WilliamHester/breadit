@@ -2,6 +2,7 @@ package me.williamhester.tools;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 /**
  * Created by william on 7/19/14.
@@ -77,21 +78,27 @@ public class UrlParser implements Parcelable {
     }
 
     private void generateYoutubeDetails() {
-        int amp = mUrl.indexOf('&');
-        int slash = mUrl.indexOf('/');
+        int start = mUrl.indexOf("v=") + 2;
+        if (start == 1) {
+            start = mUrl.indexOf(".be/") + 4;
+        }
+        if (start == 3) {
+            start = mUrl.indexOf("a=") + 2;
+        }
+        int amp = mUrl.indexOf('&', start);
+        int quest = mUrl.indexOf('?', start);
+        int pound = mUrl.indexOf('#', start);
+        int slash = mUrl.indexOf('/', start);
         int end = mUrl.length();
         if (amp != -1) {
-            end = amp - 1;
+            end = amp;
+        } else if (quest != -1) {
+            end = quest;
+        } else if (pound != -1) {
+            end = pound;
         } else if (slash + 1 == end) {
             end = slash;
         }
-        int start = end - 1;
-        char c = mUrl.charAt(start);
-        while (c != '=' && c != '/') {
-            start--;
-            c = mUrl.charAt(start);
-        }
-        start += 1;
         mId = mUrl.substring(start, end);
         mType = YOUTUBE;
         mUrl = "http://img.youtube.com/vi/" + mId + "/maxresdefault.jpg";
