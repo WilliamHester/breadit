@@ -2,6 +2,7 @@ package me.williamhester.network;
 
 import android.content.Context;
 import android.text.Html;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -16,10 +17,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import me.williamhester.models.AbsComment;
 import me.williamhester.models.Account;
 import me.williamhester.models.AccountManager;
 import me.williamhester.models.Comment;
 import me.williamhester.models.Listing;
+import me.williamhester.models.MoreComments;
 import me.williamhester.models.ResponseRedditWrapper;
 import me.williamhester.models.Submission;
 import me.williamhester.models.Votable;
@@ -130,7 +133,7 @@ public class RedditApi {
 
     public static void getSubmissionData(Context context, String permalink,
                                          final FutureCallback<Submission> submissionCallback,
-                                         final FutureCallback<List<Comment>> commentCallback) {
+                                         final FutureCallback<List<AbsComment>> commentCallback) {
         Ion.with(context)
                 .load(REDDIT_URL + permalink + ".json")
                 .addHeader("User-Agent", USER_AGENT)
@@ -163,7 +166,7 @@ public class RedditApi {
                                 listing = (Listing) wrapper.getData();
                             }
 
-                            List<Comment> comments = new ArrayList<>();
+                            List<AbsComment> comments = new ArrayList<>();
                             for (ResponseRedditWrapper wrap : listing.getChildren()) {
                                 Comment.CommentIterator iterator = new Comment.CommentIterator(wrap);
                                 while (iterator.hasNext()) {

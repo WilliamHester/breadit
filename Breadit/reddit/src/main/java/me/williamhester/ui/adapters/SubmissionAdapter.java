@@ -93,9 +93,9 @@ public class SubmissionAdapter extends ArrayAdapter<Submission> {
         }
 
         @Override
-        public void setContent(Votable votable) {
-            super.setContent(votable);
-            mSubmission = (Submission) votable;
+        public void setContent(Object object) {
+            super.setContent(object);
+            mSubmission = (Submission) object;
 
             mBody.setText(Html.fromHtml(mSubmission.getTitle()).toString());
             mDomain.setText(mSubmission.getDomain());

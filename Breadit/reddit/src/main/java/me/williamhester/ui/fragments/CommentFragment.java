@@ -24,9 +24,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import me.williamhester.models.AbsComment;
 import me.williamhester.models.Comment;
 import me.williamhester.models.ImgurAlbum;
 import me.williamhester.models.ImgurImage;
+import me.williamhester.models.MoreComments;
 import me.williamhester.models.Submission;
 import me.williamhester.models.Votable;
 import me.williamhester.models.utils.Utilities;
@@ -42,7 +44,7 @@ public class CommentFragment extends AccountFragment {
 
     private static final String PERMALINK = "permalink";
 
-    private ArrayList<Comment> mCommentsList;
+    private ArrayList<AbsComment> mCommentsList;
     private CommentArrayAdapter mCommentAdapter;
     private Context mContext;
     private ListView mCommentsListView;
@@ -308,13 +310,13 @@ public class CommentFragment extends AccountFragment {
         }
 
         @Override
-        public void onMoreClick(CommentViewHolder commentView, Comment comment) {
+        public void onMoreClick(CommentViewHolder commentView, MoreComments comment) {
 
         }
 
     };
 
-    private class CommentArrayAdapter extends ArrayAdapter<Comment> {
+    private class CommentArrayAdapter extends ArrayAdapter<AbsComment> {
 
         public CommentArrayAdapter(Context context) {
             super(context, R.layout.list_item_comment, mCommentsList);
@@ -352,9 +354,9 @@ public class CommentFragment extends AccountFragment {
         }
     };
 
-    private FutureCallback<List<Comment>> mCommentCallback = new FutureCallback<List<Comment>>() {
+    private FutureCallback<List<AbsComment>> mCommentCallback = new FutureCallback<List<AbsComment>>() {
         @Override
-        public void onCompleted(Exception e, List<Comment> result) {
+        public void onCompleted(Exception e, List<AbsComment> result) {
             if (e != null) {
                 return;
             }
@@ -445,20 +447,20 @@ public class CommentFragment extends AccountFragment {
     }
 
     private void hideComment(int position) {
-        Comment comment = mCommentsList.get(position);
+        AbsComment comment = mCommentsList.get(position);
         int level = comment.getLevel();
         position++;
-        ArrayList<Comment> children = new ArrayList<>();
+        ArrayList<AbsComment> children = new ArrayList<>();
         while (position < mCommentsList.size() && mCommentsList.get(position).getLevel() > level) {
             children.add(mCommentsList.remove(position));
         }
-        comment.hide(children);
+        ((Comment) comment).hide(children);
     }
 
     private void showComment(int position) {
-        Comment comment = mCommentsList.get(position);
-        ArrayList<Comment> children = comment.unhideComment();
-        for (Comment c : children) {
+        AbsComment comment = mCommentsList.get(position);
+        ArrayList<AbsComment> children = ((Comment) comment).unhideComment();
+        for (AbsComment c : children) {
             mCommentsList.add(++position, c);
         }
     }

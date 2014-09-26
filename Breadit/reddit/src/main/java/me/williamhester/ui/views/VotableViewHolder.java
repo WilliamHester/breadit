@@ -52,14 +52,17 @@ public abstract class VotableViewHolder extends RecyclerView.ViewHolder {
         });
     }
 
-    public void setContent(Votable votable) {
-        mVotable = votable;
-
-        mSwipeView.recycle(mVotable);
-        if (mTime != null) {
-            mTime.setText(Utilities.calculateTimeShort(mVotable.getCreatedUtc()));
+    public void setContent(Object object) {
+        if (object instanceof Votable) {
+            mVotable = (Votable) object;
+            mSwipeView.recycle(mVotable);
+            if (mTime != null) {
+                mTime.setText(Utilities.calculateTimeShort(mVotable.getCreatedUtc()));
+            }
+            setVoteStatus();
+        } else {
+            mSwipeView.setEnabled(false);
         }
-        setVoteStatus();
     }
 
     private void setVoteStatus() {

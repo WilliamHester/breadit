@@ -70,6 +70,7 @@ public class SwipeView extends LinearLayout {
 
     public void recycle(Votable votable) {
         mVotable = votable;
+        setEnabled(true);
     }
 
     public void setUp(View backgroundView, View foregroundView,

@@ -14,8 +14,7 @@ import java.util.List;
 /**
  * Created by william on 8/15/14.
  */
-public class MoreComments extends Comment implements Serializable, Parcelable {
-    private static final long serialVersionUID = 8781777510019675672L;
+public class MoreComments extends AbsComment implements Parcelable {
 
     private int mCount;
     private String mParentId;
@@ -24,6 +23,7 @@ public class MoreComments extends Comment implements Serializable, Parcelable {
     private String mName;
 
     public MoreComments(JsonObject object) {
+        super(0);
         mCount = object.get("count").getAsInt();
         mParentId = object.get("parent_id").getAsString();
         mId = object.get("id").getAsString();
@@ -37,11 +37,12 @@ public class MoreComments extends Comment implements Serializable, Parcelable {
 
     @Override
     public int describeContents() {
-        return 1;
+        return AbsComment.MORE_COMMENTS;
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
         dest.writeInt(this.mCount);
         dest.writeString(this.mParentId);
         dest.writeString(this.mId);
@@ -50,6 +51,7 @@ public class MoreComments extends Comment implements Serializable, Parcelable {
     }
 
     private MoreComments(Parcel in) {
+        super(in);
         this.mCount = in.readInt();
         this.mParentId = in.readString();
         this.mId = in.readString();
