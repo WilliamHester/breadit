@@ -30,6 +30,7 @@ public class SwipeView extends LinearLayout {
     private float mDownRawX;
     private float mDownRawY;
     private float mDownX;
+    private float mDownY;
     private float mSwipeDistance;
     private float mMinFlingDistance;
     private boolean mSwiping;
@@ -69,6 +70,7 @@ public class SwipeView extends LinearLayout {
 
     public void recycle(Votable votable) {
         mVotable = votable;
+        setEnabled(true);
     }
 
     public void setUp(View backgroundView, View foregroundView,
@@ -126,6 +128,7 @@ public class SwipeView extends LinearLayout {
      */
     private void onDown(MotionEvent ev) {
         mDownX = ev.getX();
+        mDownY = ev.getY();
         mDownRawX = ev.getRawX();
         mDownRawY = ev.getRawY();
         mVelocityTracker = VelocityTracker.obtain();
@@ -158,7 +161,7 @@ public class SwipeView extends LinearLayout {
 
         float deltaX = ev.getRawX() - mDownRawX;
         float deltaY = ev.getRawY() - mDownRawY;
-        if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaY) < mTouchSlop) {
+        if (Math.abs(deltaX) > Math.abs(deltaY) * 2 && Math.abs(deltaY) < mTouchSlop) {
             getParent().requestDisallowInterceptTouchEvent(true);
             if (Math.abs(deltaX) > mTouchSlop) {
                 return true;
@@ -171,10 +174,16 @@ public class SwipeView extends LinearLayout {
         if (mVelocityTracker != null) {
             mVelocityTracker.addMovement(ev);
 
-            float swipeDistance = ev.getX() - mDownX;
-            float percent = Math.abs(swipeDistance / mSwipeDistance);
+            float swipeDistanceX = ev.getX() - mDownX;
+            float swipeDistanceY = ev.getY() - mDownY;
+            float percent = Math.abs(swipeDistanceX / mSwipeDistance);
             mForegroundView.setVisibility(VISIBLE);
-            if (swipeDistance > 0) {
+            if (Math.abs(swipeDistanceY) > Math.abs(swipeDistanceX)) {
+                onCancelSwipe();
+                mSwiping = false;
+                return;
+            }
+            if (swipeDistanceX > 0) {
                 if (mVotable.getVoteStatus() == Votable.UPVOTED) {
                     if (mForegroundView.getVisibility() == VISIBLE) {
                         mForegroundView.setVisibility(GONE);
@@ -235,6 +244,7 @@ public class SwipeView extends LinearLayout {
             mVelocityTracker.recycle();
         }
         mDownX = 0;
+        mDownY = 0;
         mDownRawY = 0;
         mDownRawX = 0;
         mSwiping = false;

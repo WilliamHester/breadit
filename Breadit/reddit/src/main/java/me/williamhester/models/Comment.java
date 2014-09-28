@@ -8,11 +8,16 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Stack;
 
-public class Comment implements Serializable, Votable, Parcelable {
-    private static final long serialVersionUID = -8883017260375266824L;
+public class Comment extends AbsComment implements Votable, Parcelable {
+
+    private static final int DOES_NOT_HAVE_CHILDREN = 0;
+    private static final int HAS_CHILDREN = 1;
 
     public static final int BEST = 0;
     public static final int TOP = 1;
@@ -43,13 +48,11 @@ public class Comment implements Serializable, Votable, Parcelable {
     private String mUps;
     private int mScore;
     private Spannable mSpannableBody;
+    private ArrayList<AbsComment> mChildren;
 
-    private int mLevel = 0;
     private boolean mIsHidden = false;
     private boolean mIsBeingEdited = false;
     private String mReplyText;
-
-    protected Comment() {}
 
     /**
      * Creates a comment from a JsonObject. Because a comment is a tree node, we also need to pass
@@ -60,6 +63,7 @@ public class Comment implements Serializable, Votable, Parcelable {
      * @param gson the Gson object
      */
     public Comment(JsonObject object, Gson gson) {
+        super(0);
         if (!object.get("approved_by").isJsonNull()) {
             mApprovedBy = object.get("approved_by").getAsString();
         }
@@ -112,11 +116,11 @@ public class Comment implements Serializable, Votable, Parcelable {
 
     // For use when replying to comments
     public Comment(Account account, int level) {
+        super(level);
         mAuthor = account.getUsername();
         mUps = "";
         mCreatedUtc = System.currentTimeMillis() / 1000;
         mBodyHtml = "";
-        mLevel = level;
         mIsBeingEdited = true;
     }
 
@@ -195,10 +199,6 @@ public class Comment implements Serializable, Votable, Parcelable {
         return mCreatedUtc;
     }
 
-    public int getLevel() {
-        return mLevel;
-    }
-
     public void setHidden(boolean hidden) {
         mIsHidden = hidden;
     }
@@ -219,10 +219,6 @@ public class Comment implements Serializable, Votable, Parcelable {
         mReplies = replies;
     }
 
-    public void setLevel(int level) {
-        mLevel = level;
-    }
-
     @Override
     public void setBodyHtml(String body) {
         mBodyHtml = body;
@@ -236,61 +232,26 @@ public class Comment implements Serializable, Votable, Parcelable {
         return mSpannableBody;
     }
 
-    public static class CommentIterator implements Iterator<Comment> {
+    public void hide(ArrayList<AbsComment> children) {
+        mIsHidden = true;
+        mChildren = children;
+    }
 
-        private Stack<ResponseRedditWrapper> mStack;
-
-        public CommentIterator(ResponseRedditWrapper root) {
-            mStack = new Stack<>();
-            mStack.add(root);
-        }
-
-        @Override
-        public boolean hasNext() {
-            return !mStack.isEmpty();
-        }
-
-        @Override
-        public Comment next() {
-            Object object = mStack.peek().getData();
-            if (object instanceof MoreComments) {
-                return (MoreComments) mStack.pop().getData();
-            } else {
-                Comment comment = (Comment) object;
-                if (comment.mReplies == null
-                        || comment.mReplies.getData() instanceof MoreComments
-                        || ((Listing) comment.mReplies.getData()).size() == 0) {
-                    return (Comment) mStack.pop().getData();
-                } else {
-                    mStack.pop();
-                    Listing replies = (Listing) comment.mReplies.getData();
-                    for (int i = replies.size() - 1; i >= 0; i--) {
-                        ResponseRedditWrapper tempComment = replies.getChildren().get(i);
-                        if (tempComment.getData() instanceof Comment) {
-                            ((Comment) tempComment.getData()).setLevel(comment.getLevel() + 1);
-                            mStack.add(tempComment);
-                        }
-                    }
-                    comment.setReplies(null);
-                    return comment;
-                }
-            }
-
-        }
-
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException();
-        }
+    public ArrayList<AbsComment> unhideComment() {
+        mIsHidden = false;
+        ArrayList<AbsComment> children = mChildren;
+        mChildren = null;
+        return children;
     }
 
     @Override
     public int describeContents() {
-        return 0;
+        return AbsComment.COMMENT;
     }
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
         dest.writeSerializable(this.mReplies);
         dest.writeString(this.mApprovedBy);
         dest.writeString(this.mAuthor);
@@ -311,13 +272,28 @@ public class Comment implements Serializable, Votable, Parcelable {
         dest.writeLong(this.mCreatedUtc);
         dest.writeString(this.mUps);
         dest.writeInt(this.mScore);
-        dest.writeInt(this.mLevel);
         dest.writeByte(mIsHidden ? (byte) 1 : (byte) 0);
         dest.writeByte(mIsBeingEdited ? (byte) 1 : (byte) 0);
         dest.writeString(this.mReplyText);
+        if (mChildren != null) {
+            dest.writeInt(HAS_CHILDREN);
+            dest.writeInt(mChildren.size());
+            for (AbsComment c : mChildren) {
+                if (c instanceof Comment) {
+                    dest.writeInt(AbsComment.COMMENT);
+                    dest.writeParcelable(c, AbsComment.COMMENT);
+                } else {
+                    dest.writeInt(AbsComment.MORE_COMMENTS);
+                    dest.writeParcelable(c, AbsComment.MORE_COMMENTS);
+                }
+            }
+        } else {
+            dest.writeInt(DOES_NOT_HAVE_CHILDREN);
+        }
     }
 
     private Comment(Parcel in) {
+        super(in);
         this.mReplies = (ResponseRedditWrapper) in.readSerializable();
         this.mApprovedBy = in.readString();
         this.mAuthor = in.readString();
@@ -338,10 +314,20 @@ public class Comment implements Serializable, Votable, Parcelable {
         this.mCreatedUtc = in.readLong();
         this.mUps = in.readString();
         this.mScore = in.readInt();
-        this.mLevel = in.readInt();
         this.mIsHidden = in.readByte() != 0;
         this.mIsBeingEdited = in.readByte() != 0;
         this.mReplyText = in.readString();
+        if (in.readInt() == HAS_CHILDREN) {
+            mChildren = new ArrayList<>();
+            int count = in.readInt();
+            for (int i = 0; i < count; i++) {
+                if (in.readInt() == AbsComment.COMMENT) {
+                    mChildren.add((Comment) in.readParcelable(Comment.class.getClassLoader()));
+                } else {
+                    mChildren.add((AbsComment) in.readParcelable(MoreComments.class.getClassLoader()));
+                }
+            }
+        }
     }
 
     public static final Creator<Comment> CREATOR = new Creator<Comment>() {

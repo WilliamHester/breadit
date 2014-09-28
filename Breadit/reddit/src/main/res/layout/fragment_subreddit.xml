@@ -5,10 +5,14 @@
     android:layout_height="match_parent"
     android:layout_width="match_parent">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/Submissions_recycler"
+    <ListView
+        android:id="@+id/submissions_list"
         android:scrollbars="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="4dp"
+        android:paddingLeft="4dp"
+        android:paddingRight="4dp"/>
 
 </android.support.v4.widget.SwipeRefreshLayout>

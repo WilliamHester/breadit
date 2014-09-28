@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebChromeClient;
@@ -64,27 +65,52 @@ public class WebViewFragment extends Fragment {
         if (savedInstanceState != null) {
             mWebView.restoreState(savedInstanceState);
         } else if (mUri != null) {
-            if (isYoutubeLink(mUri)) {
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(mUri));
-                startActivity(browserIntent);
-            } else {
-                mWebView.loadUrl(imgurOptimize(mUri));
-                mWebView.setWebChromeClient(new WebChromeClient() {
-                    @Override
-                    public void onProgressChanged(WebView view, int progress) {
-                        if (progress < 100 && progressBar.getVisibility() == View.GONE){
-                            progressBar.setVisibility(View.VISIBLE);
-                        }
-                        progressBar.setProgress(progress);
-                        if (progress == 100) {
-                            progressBar.setVisibility(ProgressBar.GONE);
-                        }
+            mWebView.loadUrl(imgurOptimize(mUri));
+            mWebView.setWebChromeClient(new WebChromeClient() {
+                @Override
+                public void onProgressChanged(WebView view, int progress) {
+                    if (progress < 100 && progressBar.getVisibility() == View.GONE){
+                        progressBar.setVisibility(View.VISIBLE);
                     }
-                });
-            }
+                    progressBar.setProgress(progress);
+                    if (progress == 100) {
+                        progressBar.setVisibility(ProgressBar.GONE);
+                    }
+                }
+            });
         }
+        mWebView.setOnTouchListener(new View.OnTouchListener() {
+            private boolean mHandle;
+
+            @Override
+            public boolean onTouch(View view, MotionEvent event) {
+                int action = event.getAction();
+                switch (action) {
+                    case MotionEvent.ACTION_DOWN:
+                        mHandle = true;
+                        // Disallow Drawer to intercept touch events.
+                        view.getParent().requestDisallowInterceptTouchEvent(true);
+                        break;
+
+                    case MotionEvent.ACTION_UP:
+                        // Allow Drawer to intercept touch events.
+                        view.getParent().requestDisallowInterceptTouchEvent(false);
+                        break;
+                }
+                if (!mHandle) {
+                    view.getParent().requestDisallowInterceptTouchEvent(false);
+                }
+
+                // Handle seekbar touch events.
+                if (!view.onTouchEvent(event)) {
+                    mHandle = false;
+                }
+                return true;
+            }
+        });
         return v;
     }
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -93,17 +119,20 @@ public class WebViewFragment extends Fragment {
             mWebView.saveState(outState);
     }
 
+    public boolean onBackPressed() {
+        if (mWebView.canGoBack()) {
+            mWebView.goBack();
+            return true;
+        }
+        return false;
+    }
+
     private String imgurOptimize(String s) {
         if (s.contains("imgur.com")
                 && !(s.contains("imgur.com/a/") || s.contains("imgur.com/gallery/"))) {
             s += ".png";
         }
         return s;
-    }
-
-    private boolean isYoutubeLink(String s) {
-        s = s.toLowerCase();
-        return s.contains("youtu.be") || s.contains("youtube.com");
     }
 
 }

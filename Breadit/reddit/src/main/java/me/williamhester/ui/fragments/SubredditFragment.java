@@ -5,19 +5,19 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.ListView;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.koushikdutta.async.future.FutureCallback;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
@@ -29,19 +29,19 @@ import me.williamhester.models.Submission;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.activities.SubmissionActivity;
-import me.williamhester.ui.adapters.SubmissionsRecyclerAdapter;
+import me.williamhester.ui.adapters.SubmissionAdapter;
 
-public class SubredditFragment extends AccountFragment implements SubmissionsRecyclerAdapter.AdapterCallbacks {
+public class SubredditFragment extends AccountFragment implements SubmissionAdapter.AdapterCallbacks {
+
+    public static final int VOTE_REQUEST_CODE = 1;
 
     private Context mContext;
+    private ListView mListView;
     private String mSubredditName;
-    private SubmissionsRecyclerAdapter mSubmissionsAdapter;
+    private SubmissionAdapter mSubmissionsAdapter;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private ArrayList<Submission> mSubmissionList;
     private HashSet<String> mNames;
-
-    private RecyclerView mSubmissionsView;
-    private LinearLayoutManager mLayoutManager;
 
     private boolean mHideNsfw = true;
     private boolean mHideViewed = false;
@@ -55,12 +55,10 @@ public class SubredditFragment extends AccountFragment implements SubmissionsRec
         mContext = getActivity();
         if (savedInstanceState != null) {
             mSubredditName = savedInstanceState.getString("subreddit");
-            mSubmissionList = (ArrayList<Submission>) savedInstanceState.getSerializable("submissions");
+            mSubmissionList = savedInstanceState.getParcelableArrayList("submissions");
             String[] array = savedInstanceState.getStringArray("names");
             mNames = new HashSet<>();
-            for (String name : array) {
-                mNames.add(name);
-            }
+            Collections.addAll(mNames, array);
         } else if (getArguments() != null) {
             mSubredditName = getArguments().getString("subreddit");
             mNames = new HashSet<>();
@@ -69,7 +67,7 @@ public class SubredditFragment extends AccountFragment implements SubmissionsRec
         if (mSubredditName == null) {
             mSubredditName = "";
         }
-        mSubmissionsAdapter = new SubmissionsRecyclerAdapter(mSubmissionList, this, getActivity());
+        mSubmissionsAdapter = new SubmissionAdapter(getActivity(), this, mSubmissionList);
         loadPrefs();
     }
 
@@ -77,13 +75,9 @@ public class SubredditFragment extends AccountFragment implements SubmissionsRec
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle bundle) {
         View v = inflater.inflate(R.layout.fragment_subreddit, null);
 
-        mSubmissionsView = (RecyclerView) v.findViewById(R.id.Submissions_recycler);
-        mSubmissionsView.setHasFixedSize(false);
-        mLayoutManager = new LinearLayoutManager(getActivity());
-        mSubmissionsView.setLayoutManager(mLayoutManager);
-        mSubmissionsView.setAdapter(mSubmissionsAdapter);
-        mSubmissionsView.setOnScrollListener(new InfiniteLoadingScrollListener());
-        mSubmissionsView.setItemAnimator(new DefaultItemAnimator());
+        mListView = (ListView) v.findViewById(R.id.submissions_list);
+        mListView.setAdapter(mSubmissionsAdapter);
+        mListView.setOnScrollListener(new InfiniteLoadingScrollListener());
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.swipe_refresh);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -117,13 +111,34 @@ public class SubredditFragment extends AccountFragment implements SubmissionsRec
     }
 
     @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == VOTE_REQUEST_CODE) {
+            if (data == null)
+                return;
+            Bundle b = data.getExtras();
+            String name = b.getString("name");
+            int status = b.getInt("status");
+            if (name != null) {
+                for (Submission submission : mSubmissionList) {
+                    if (submission.getName().equals(name)) {
+                        submission.setVoteStatus(status);
+                        mSubmissionsAdapter.notifyDataSetChanged();
+                        return;
+                    }
+                }
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
     protected void onAccountChanged() {
         refreshData();
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        outState.putSerializable("submissions", mSubmissionList);
+        outState.putParcelableArrayList("submissions", mSubmissionList);
         outState.putString("subreddit", mSubredditName);
         String[] array = new String[mNames.size()];
         mNames.toArray(array);
@@ -305,37 +320,45 @@ public class SubredditFragment extends AccountFragment implements SubmissionsRec
     }
 
     @Override
+    public void onYouTubeVideoClicked(String videoId) {
+        getFragmentManager().beginTransaction()
+                .add(R.id.container, YouTubeFragment.newInstance(videoId), "YouTubeFragment")
+                .addToBackStack("YouTubeFragment")
+                .commit();
+    }
+
+    @Override
     public void onCardClicked(Submission submission) {
         Intent i = new Intent(getActivity(), SubmissionActivity.class);
         Bundle args = new Bundle();
-        args.putSerializable(SubmissionActivity.SUBMISSION, submission);
+        args.putParcelable(SubmissionActivity.SUBMISSION, submission);
         args.putSerializable("media", submission.getMedia());
         args.putString(SubmissionActivity.TAB, SubmissionActivity.COMMENT_TAB);
         i.putExtras(args);
-        getActivity().startActivity(i);
+        startActivityForResult(i, VOTE_REQUEST_CODE);
     }
 
-    public class InfiniteLoadingScrollListener implements RecyclerView.OnScrollListener {
+    public class InfiniteLoadingScrollListener implements AbsListView.OnScrollListener {
 
         private final int VISIBLE_THRESHOLD = 5;
         private int previousTotal = 0;
         private boolean loading = true;
 
         @Override
-        public void onScrollStateChanged(int i) {
-            // Don't care
+        public void onScrollStateChanged(AbsListView absListView, int i) {
+
         }
 
         @Override
-        public void onScrolled(int i, int i2) {
+        public void onScroll(AbsListView absListView, int i, int i2, int i3) {
             if (loading) {
-                if (mSubmissionsAdapter.getItemCount() > previousTotal) {
-                    previousTotal = mSubmissionsAdapter.getItemCount();
+                if (mSubmissionsAdapter.getCount() > previousTotal) {
+                    previousTotal = mSubmissionsAdapter.getCount();
                     loading = false;
                 }
             } else if (mSubmissionList.size() > 0
-                    && (mSubmissionsAdapter.getItemCount() - mLayoutManager.getChildCount()) // 25 - 4 = 21
-                    <= (mLayoutManager.findFirstVisibleItemPosition() + VISIBLE_THRESHOLD)) { // 20 + 5 = 25
+                    && (mSubmissionsAdapter.getCount() - mListView.getChildCount()) // 25 - 4 = 21
+                    <= (mListView.getFirstVisiblePosition() + VISIBLE_THRESHOLD)) { // 20 + 5 = 25
                 String after;
                 if (mSubmissionList == null || mSubmissionList.size() == 0) {
                     after = null;

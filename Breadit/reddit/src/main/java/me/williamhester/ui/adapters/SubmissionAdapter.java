@@ -1,9 +1,7 @@
 package me.williamhester.ui.adapters;
 
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
-import android.support.v7.widget.RecyclerView;
+import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,15 +9,13 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.ScaleAnimation;
+import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.koushikdutta.async.future.FutureCallback;
 
-import org.apache.commons.lang3.StringEscapeUtils;
-
-import java.util.ArrayList;
 import java.util.List;
 
 import me.williamhester.models.ImgurAlbum;
@@ -35,34 +31,34 @@ import me.williamhester.ui.views.VotableViewHolder;
 /**
  * Created by william on 6/27/14.
  */
-public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<SubmissionsRecyclerAdapter.SubmissionViewHolder> {
+public class SubmissionAdapter extends ArrayAdapter<Submission> {
 
     private List<Submission> mSubmissions;
-    private final List<String> mExpandedSubmissions = new ArrayList<>();
     private AdapterCallbacks mCallback;
     private Context mContext;
 
-    public SubmissionsRecyclerAdapter(List<Submission> submissions, AdapterCallbacks callbacks, 
-                                      Context context) {
+    public SubmissionAdapter(Context context, AdapterCallbacks callbacks, List<Submission> submissions) {
+        super(context, R.layout.list_item_post, submissions);
+        mContext = context;
         mSubmissions = submissions;
         mCallback = callbacks;
-        mContext = context;
     }
 
     @Override
-    public SubmissionViewHolder onCreateViewHolder(ViewGroup parent, int position) {
-        final View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_post, parent, false);
-        return new SubmissionViewHolder(v);
-    }
-
-    @Override
-    public void onBindViewHolder(SubmissionViewHolder submissionViewHolder, int position) {
-
+    public View getView (int position, View convertView, ViewGroup parent) {
+        if (convertView == null) {
+            LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            convertView = inflater.inflate(R.layout.list_item_post, parent, false);
+            SubmissionViewHolder viewHolder = new SubmissionViewHolder(convertView);
+            convertView.setTag(viewHolder);
+        }
+        SubmissionViewHolder submissionViewHolder = (SubmissionViewHolder) convertView.getTag();
         submissionViewHolder.setContent(mSubmissions.get(position));
+        return convertView;
     }
 
     @Override
-    public int getItemCount() {
+    public int getCount() {
         return mSubmissions.size();
     }
 
@@ -97,15 +93,15 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
         }
 
         @Override
-        public void setContent(Votable votable) {
-            super.setContent(votable);
-            mSubmission = (Submission) votable;
+        public void setContent(Object object) {
+            super.setContent(object);
+            mSubmission = (Submission) object;
 
-            mBody.setText(StringEscapeUtils.unescapeHtml4(mSubmission.getTitle()));
+            mBody.setText(Html.fromHtml(mSubmission.getTitle()).toString());
             mDomain.setText(mSubmission.getDomain());
             mCommentData.setText(mSubmission.getNumberOfComments() + " comments");
             mSubreddit.setText("/r/" + mSubmission.getSubredditName());
-            mMetadata.setText(mSubmission.getAuthor() + " " + mSubmission.getScore()
+            mMetadata.setText(mSubmission.getAuthor() + " " + mSubmission.getScore() + " "
                     + itemView.getResources().getQuantityString(R.plurals.points,
                     mSubmission.getScore()));
 
@@ -132,27 +128,26 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
                     if (linkDetails.getType() == UrlParser.IMGUR_IMAGE) {
                         if (mSubmission.getImgurData() == null) {
                             imageView.setImageDrawable(null);
-                            ImgurApi.getImageDetails(id, mContext, mSubmission, mImgurCallback);
+                            ImgurApi.getImageDetails(id, itemView.getContext(), mSubmission, mImgurCallback);
                         } else {
                             setImagePreview();
                         }
                     } else if (linkDetails.getType() == UrlParser.IMGUR_ALBUM) {
                         if (mSubmission.getImgurData() == null) {
                             imageView.setImageDrawable(null);
-                            ImgurApi.getAlbumDetails(id, mContext, mSubmission, mImgurCallback);
+                            ImgurApi.getAlbumDetails(id, itemView.getContext(), mSubmission, mImgurCallback);
                         } else {
                             setImagePreview();
                         }
                     } else if (linkDetails.getType() == UrlParser.YOUTUBE) {
                         imageView.setVisibility(View.VISIBLE);
                         ImgurApi.loadImage(linkDetails.getUrl(), imageView, null);
-                        button.setImageResource(android.R.drawable.ic_media_play);
+                        button.setImageResource(R.drawable.ic_youtube);
                         button.setVisibility(View.VISIBLE);
                         button.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
-                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(mSubmission.getUrl()));
-                                mContext.startActivity(browserIntent);
+                                mCallback.onYouTubeVideoClicked(linkDetails.getLinkId());
                             }
                         });
                     } else if (linkDetails.getType() == UrlParser.NORMAL_IMAGE) {
@@ -193,7 +188,7 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
                 itemView.findViewById(R.id.show_self_text).setVisibility(View.VISIBLE);
                 container.setVisibility(View.VISIBLE);
                 TextView content = (TextView) itemView.findViewById(R.id.self_text);
-                if (mExpandedSubmissions.contains(mSubmission.getName())) {
+                if (mSubmission.isSelftextOpen()) {
                     expandButton.setRotation(-180f);
                     content.setVisibility(View.VISIBLE);
                 } else {
@@ -202,7 +197,7 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
                 }
                 imageView.setVisibility(View.GONE);
                 button.setVisibility(View.GONE);
-                HtmlParser parser = new HtmlParser(StringEscapeUtils.unescapeHtml4(mSubmission.getBodyHtml()));
+                HtmlParser parser = new HtmlParser(Html.fromHtml(mSubmission.getBodyHtml()).toString());
                 content.setText(parser.getSpannableString());
                 content.setMovementMethod(new LinkMovementMethod());
             } else {
@@ -230,11 +225,10 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
             public void onClick(final View view) {
                 Animation anim;
                 Animation textAnim;
-                final boolean expanded = mExpandedSubmissions.contains(mSubmission.getName());
-                if (expanded) {
+                if (mSubmission.isSelftextOpen()) {
                     anim = AnimationUtils.loadAnimation(view.getContext(), R.anim.rotate_left);
                     mTextView.setVisibility(View.GONE);
-                    mExpandedSubmissions.remove(mSubmission.getName());
+                    mSubmission.setSelftextOpen(false);
                 } else {
                     anim = AnimationUtils.loadAnimation(view.getContext(), R.anim.rotate_right);
                     textAnim = new ScaleAnimation(1, 1, 0, 1);
@@ -242,7 +236,7 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
                     textAnim.setDuration(300l);
                     mTextView.setVisibility(View.VISIBLE);
                     mTextView.startAnimation(textAnim);
-                    mExpandedSubmissions.add(mSubmission.getName());
+                    mSubmission.setSelftextOpen(true);
                 }
                 anim.setFillBefore(true);
                 anim.setFillAfter(true);
@@ -286,10 +280,11 @@ public class SubmissionsRecyclerAdapter extends RecyclerView.Adapter<Submissions
         }
     }
 
-    public interface AdapterCallbacks {
+    public static interface AdapterCallbacks {
         public void onImageViewClicked(ImgurImage image);
         public void onImageViewClicked(ImgurAlbum album);
         public void onImageViewClicked(String imageUrl);
+        public void onYouTubeVideoClicked(String videoId);
         public void onCardClicked(Submission submission);
     }
 }

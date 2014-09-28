@@ -2,6 +2,10 @@ package me.williamhester.ui.views;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.Transformation;
+import android.widget.AbsListView;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import me.williamhester.models.Votable;
@@ -24,7 +28,7 @@ public abstract class VotableViewHolder extends RecyclerView.ViewHolder {
     protected SwipeView mSwipeView;
     private Votable mVotable;
 
-    public VotableViewHolder(View itemView) {
+    public VotableViewHolder(final View itemView) {
         super(itemView);
 
         mBody = (TextView) itemView.findViewById(R.id.body);
@@ -33,17 +37,32 @@ public abstract class VotableViewHolder extends RecyclerView.ViewHolder {
         mForegroundVoteView = itemView.findViewById(R.id.vote_foreground);
         mMetadata = (TextView) itemView.findViewById(R.id.metadata);
         mSwipeView = (SwipeView) itemView.findViewById(R.id.swipe_view);
-        mSwipeView.setUp(mBackgroundVoteView, mForegroundVoteView, mVoteListener);
+        mSwipeView.setUp(mBackgroundVoteView, mForegroundVoteView, new SwipeView.SwipeListener() {
+            @Override
+            public void onRightToLeftSwipe() {
+                mVotable.setVoteStatus(mVotable.getVoteStatus() == Votable.DOWNVOTED ? Votable.NEUTRAL : Votable.DOWNVOTED);
+                RedditApi.vote(itemView.getContext(), mVotable);
+            }
+
+            @Override
+            public void onLeftToRightSwipe() {
+                mVotable.setVoteStatus(mVotable.getVoteStatus() == Votable.UPVOTED ? Votable.NEUTRAL : Votable.UPVOTED);
+                RedditApi.vote(itemView.getContext(), mVotable);
+            }
+        });
     }
 
-    public void setContent(Votable votable) {
-        mVotable = votable;
-
-        mSwipeView.recycle(mVotable);
-        if (mTime != null) {
-            mTime.setText(Utilities.calculateTimeShort(mVotable.getCreatedUtc()));
+    public void setContent(Object object) {
+        if (object instanceof Votable) {
+            mVotable = (Votable) object;
+            mSwipeView.recycle(mVotable);
+            if (mTime != null) {
+                mTime.setText(Utilities.calculateTimeShort(mVotable.getCreatedUtc()));
+            }
+            setVoteStatus();
+        } else {
+            mSwipeView.setEnabled(false);
         }
-        setVoteStatus();
     }
 
     private void setVoteStatus() {
@@ -67,17 +86,54 @@ public abstract class VotableViewHolder extends RecyclerView.ViewHolder {
         }
     }
 
-    private SwipeView.SwipeListener mVoteListener = new SwipeView.SwipeListener() {
-        @Override
-        public void onRightToLeftSwipe() {
-            mVotable.setVoteStatus(mVotable.getVoteStatus() == Votable.DOWNVOTED ? Votable.NEUTRAL : Votable.DOWNVOTED);
-            RedditApi.vote(itemView.getContext(), mVotable);
-        }
+    public static void expand(final View v) {
+        v.measure(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT);
+        final int targtetHeight = v.getMeasuredHeight();
 
-        @Override
-        public void onLeftToRightSwipe() {
-            mVotable.setVoteStatus(mVotable.getVoteStatus() == Votable.UPVOTED ? Votable.NEUTRAL : Votable.UPVOTED);
-            RedditApi.vote(itemView.getContext(), mVotable);
-        }
-    };
+        v.getLayoutParams().height = 0;
+        v.setVisibility(View.VISIBLE);
+        Animation a = new Animation() {
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                v.getLayoutParams().height = interpolatedTime == 1
+                        ? FrameLayout.LayoutParams.WRAP_CONTENT
+                        : (int)(targtetHeight * interpolatedTime);
+                v.requestLayout();
+            }
+
+            @Override
+            public boolean willChangeBounds() {
+                return true;
+            }
+        };
+
+        // 1dp/ms
+        a.setDuration((int)(targtetHeight / v.getContext().getResources().getDisplayMetrics().density));
+        v.startAnimation(a);
+    }
+
+    public static void collapse(final View v) {
+        final int initialHeight = v.getMeasuredHeight();
+
+        Animation a = new Animation() {
+            @Override
+            protected void applyTransformation(float interpolatedTime, Transformation t) {
+                if (interpolatedTime == 1){
+                    v.setVisibility(View.GONE);
+                } else {
+                    v.getLayoutParams().height = initialHeight - (int)(initialHeight * interpolatedTime);
+                    v.requestLayout();
+                }
+            }
+
+            @Override
+            public boolean willChangeBounds() {
+                return true;
+            }
+        };
+
+        // 1dp/ms
+        a.setDuration((int)(initialHeight / v.getContext().getResources().getDisplayMetrics().density));
+        v.startAnimation(a);
+    }
 }

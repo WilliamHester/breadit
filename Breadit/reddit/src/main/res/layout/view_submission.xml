@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <me.williamhester.ui.views.SwipeView
+        android:id="@+id/swipe_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <RelativeLayout android:id="@+id/submission_data"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="6dp"
+            android:background="@drawable/breadit_list_selector_holo_light"
+            tools:ignore="SmallSp">
+
+            <TextView android:id="@+id/subreddit_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAllCaps="true"
+                android:fontFamily="sans-serif-condensed"
+                android:textSize="11sp"
+                android:paddingLeft="8dp" />
+
+            <TextView android:id="@+id/nsfw_warning"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:textAllCaps="true"
+                android:fontFamily="sans-serif-condensed"
+                android:text="@string/nsfw"
+                android:textColor="@color/nsfw_red"
+                android:textSize="11sp"
+                android:layout_marginRight="8dp"/>
+
+            <TextView
+                android:id="@+id/body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:textSize="16sp"
+                android:fontFamily="sans-serif-light"
+                android:textColor="@color/ghostwhite"
+                android:layout_below="@id/subreddit_title"/>
+
+            <TextView android:id="@+id/metadata"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="11sp"
+                android:paddingLeft="8dp"
+                android:fontFamily="sans-serif-condensed"
+                android:textColor="@color/auburn_orange"
+                android:layout_below="@id/body"/>
+
+            <TextView android:id="@+id/time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:textSize="11sp"
+                android:paddingRight="8dp"
+                android:fontFamily="sans-serif-condensed"
+                android:textColor="@color/auburn_orange"
+                android:layout_below="@id/body"/>
+
+            <TextView android:id="@+id/domain"
+                android:paddingRight="8dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="11sp"
+                android:fontFamily="sans-serif-condensed"
+                android:layout_alignParentRight="true"
+                android:layout_below="@id/metadata"/>
+
+            <TextView android:id="@+id/num_comments"
+                android:paddingLeft="8dp"
+                android:paddingBottom="6dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="11sp"
+                android:fontFamily="sans-serif-condensed"
+                android:layout_below="@id/metadata"/>
+
+        </RelativeLayout>
+
+        <LinearLayout android:id="@+id/show_self_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:visibility="gone">
+
+            <View
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="1dp"
+                android:background="@color/dark_gray"
+                android:layout_gravity="center_vertical"/>
+
+            <ImageButton android:id="@+id/expand_self_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_action_expand"
+                android:background="?android:activatedBackgroundIndicator"/>
+
+        </LinearLayout>
+
+        <RelativeLayout android:id="@+id/content_preview"
+            android:paddingTop="2dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView android:id="@+id/image"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:scaleType="centerCrop"
+                android:visibility="gone"/>
+
+            <ImageButton android:id="@+id/preview_button"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:background="?android:activatedBackgroundIndicator"
+                android:visibility="gone"/>
+
+            <TextView android:id="@+id/self_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/ghostwhite"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:paddingBottom="6dp"
+                android:textSize="14sp"
+                android:visibility="gone"/>
+
+        </RelativeLayout>
+    </me.williamhester.ui.views.SwipeView>
+
+    <View android:id="@+id/vote_background"
+        android:layout_width="4dp"
+        android:layout_height="match_parent"/>
+
+    <View android:id="@+id/vote_foreground"
+        android:layout_width="4dp"
+        android:layout_height="match_parent"/>
+
+</FrameLayout>

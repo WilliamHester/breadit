@@ -1,103 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/root"
-    android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
+    <FrameLayout
+        android:layout_width="4dp"
+        android:layout_height="match_parent">
+
+        <View android:id="@+id/level_indicator"
+            android:layout_width="4dp"
+            android:layout_height="match_parent"/>
+
+        <View android:id="@+id/vote_background"
+            android:layout_width="4dp"
+            android:layout_height="match_parent"/>
+
+        <View android:id="@+id/vote_foreground"
+            android:layout_width="4dp"
+            android:layout_height="match_parent"/>
+
+    </FrameLayout>
+
     <me.williamhester.ui.views.SwipeView android:id="@+id/swipe_view"
+        android:layout_toRightOf="@+id/level_indicator"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="@color/card_view_gray">
 
         <RelativeLayout android:id="@+id/comment_content"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp"
-            android:paddingBottom="8dp"
-            android:paddingTop="8dp"
+            android:padding="4dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:background="@drawable/breadit_list_selector_holo_light">
 
+            <TextView android:id="@+id/author"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:layout_marginEnd="4dp"/>
+
             <TextView android:id="@+id/metadata"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-bold"
-                android:textSize="12sp"
-                android:textColor="@color/auburn_orange"/>
+                android:textSize="13sp"
+                android:textColor="@color/comment_metadata_gray"
+                android:layout_toEndOf="@id/author"/>
 
             <!--Todo: add an ImageView for if the account has a gilded comment-->
 
             <TextView android:id="@+id/body"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="13sp"
+                android:textSize="14sp"
                 android:paddingTop="1dp"
                 android:textColor="@color/ghostwhite"
                 android:layout_below="@id/metadata"/>
-
-            <LinearLayout android:id="@+id/edited_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingTop="8dp"
-                android:visibility="gone">
-
-                <EditText android:id="@+id/reply_body"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/mid_gray"
-                    android:hint="@string/reply_hint"/>
-
-                <View android:layout_marginTop="8dp"
-                    android:layout_height="1dp"
-                    android:layout_width="match_parent"
-                    android:background="@color/dark_gray"/>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                    <Button android:id="@+id/cancel_reply"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/cancel"
-                        style="?android:buttonBarButtonStyle"
-                        android:textColor="@color/mid_gray"/>
-
-                    <View
-                        android:layout_height="match_parent"
-                        android:layout_width="1dp"
-                        android:background="@color/dark_gray"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginBottom="8dp"/>
-
-                    <Button android:id="@+id/confirm_reply"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/reply"
-                        style="?android:buttonBarButtonStyle"
-                        android:textColor="@color/mid_gray"/>
-
-                </LinearLayout>
-
-            </LinearLayout>
 
         </RelativeLayout>
 
     </me.williamhester.ui.views.SwipeView>
 
-    <View android:id="@+id/vote_background"
-        android:layout_width="4dp"
-        android:layout_height="match_parent"/>
-
-    <View android:id="@+id/vote_foreground"
-        android:layout_width="4dp"
-        android:layout_height="match_parent"/>
-
-</FrameLayout>
+</LinearLayout>

@@ -1,6 +1,8 @@
 package me.williamhester.network;
 
 import android.content.Context;
+import android.text.Html;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -10,17 +12,17 @@ import com.google.gson.reflect.TypeToken;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
 
-import org.apache.commons.lang3.StringEscapeUtils;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import me.williamhester.models.AbsComment;
 import me.williamhester.models.Account;
 import me.williamhester.models.AccountManager;
 import me.williamhester.models.Comment;
 import me.williamhester.models.Listing;
+import me.williamhester.models.MoreComments;
 import me.williamhester.models.ResponseRedditWrapper;
 import me.williamhester.models.Submission;
 import me.williamhester.models.Votable;
@@ -33,7 +35,7 @@ public class RedditApi {
 
     private static final String USER_AGENT = "Breadit_Android_App";
 
-    private static final String REDDIT_URL = "http://www.reddit.com";
+    private static final String REDDIT_URL = "https://www.reddit.com";
 
     public static String SORT_TYPE_HOT = "";
     public static String SORT_TYPE_NEW = "new";
@@ -131,11 +133,12 @@ public class RedditApi {
 
     public static void getSubmissionData(Context context, String permalink,
                                          final FutureCallback<Submission> submissionCallback,
-                                         final FutureCallback<List<Comment>> commentCallback) {
+                                         final FutureCallback<List<AbsComment>> commentCallback) {
         Ion.with(context)
                 .load(REDDIT_URL + permalink + ".json")
                 .addHeader("User-Agent", USER_AGENT)
                 .addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+                .addHeaders(generateUserHeaders())
                 .asString()
                 .setCallback(new FutureCallback<String>() {
                     @Override
@@ -146,30 +149,36 @@ public class RedditApi {
                             commentCallback.onCompleted(e, null);
                             return;
                         }
-                        Gson gson = new Gson();
-                        JsonArray array = new JsonParser().parse(result).getAsJsonArray();
-                        TypeToken<Submission> sub = new TypeToken<Submission>() {};
-                        Submission submission = gson.fromJson(array.get(0).getAsJsonObject()
-                                .get("data").getAsJsonObject()
-                                .get("children").getAsJsonArray().get(0).getAsJsonObject()
-                                .get("data"),
-                                sub.getType());
+                        try {
+                            Gson gson = new Gson();
+                            JsonArray array = new JsonParser().parse(result).getAsJsonArray();
+                            TypeToken<Submission> sub = new TypeToken<Submission>() {
+                            };
+                            Submission submission = gson.fromJson(array.get(0).getAsJsonObject()
+                                            .get("data").getAsJsonObject()
+                                            .get("children").getAsJsonArray().get(0).getAsJsonObject()
+                                            .get("data"),
+                                    sub.getType());
 
-                        ResponseRedditWrapper wrapper = new ResponseRedditWrapper(array.get(1).getAsJsonObject(), gson);
-                        Listing listing = null;
-                        if (wrapper.getData() instanceof Listing) {
-                            listing = (Listing) wrapper.getData();
-                        }
-
-                        List<Comment> comments = new ArrayList<>();
-                        for (ResponseRedditWrapper wrap : listing.getChildren()) {
-                            Comment.CommentIterator iterator = new Comment.CommentIterator(wrap);
-                            while (iterator.hasNext()) {
-                                comments.add(iterator.next());
+                            ResponseRedditWrapper wrapper = new ResponseRedditWrapper(array.get(1).getAsJsonObject(), gson);
+                            Listing listing = null;
+                            if (wrapper.getData() instanceof Listing) {
+                                listing = (Listing) wrapper.getData();
                             }
+
+                            List<AbsComment> comments = new ArrayList<>();
+                            for (ResponseRedditWrapper wrap : listing.getChildren()) {
+                                Comment.CommentIterator iterator = new Comment.CommentIterator(wrap);
+                                while (iterator.hasNext()) {
+                                    comments.add(iterator.next());
+                                }
+                            }
+                            submissionCallback.onCompleted(null, submission);
+                            commentCallback.onCompleted(null, comments);
+                        } catch (Exception e2) {
+                            submissionCallback.onCompleted(e2, null);
+                            commentCallback.onCompleted(e2, null);
                         }
-                        submissionCallback.onCompleted(null, submission);
-                        commentCallback.onCompleted(null, comments);
                     }
                 });
     }
@@ -190,7 +199,7 @@ public class RedditApi {
                             return;
                         }
                         String escapedHtml = result.substring(result.indexOf("\"contentHTML\": ") + 16, result.indexOf(";\",") + 2);
-                        HtmlParser parser = new HtmlParser(StringEscapeUtils.unescapeHtml4(escapedHtml));
+                        HtmlParser parser = new HtmlParser(Html.fromHtml(escapedHtml).toString());
                         thing.setSpannableBody(parser.getSpannableString());
                         callback.onCompleted(null, thing);
                     }
