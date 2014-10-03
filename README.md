@@ -18,8 +18,9 @@ previews with Imgur titles and descriptions.
 
 **Further optimizations include**
 * Tap-to-hide to hide the rest of a comment tree from any comment
-* Watch YouTube videos without ever leaving the app and large,
-beautiful video previews
+* Large, beautiful YouTube previews
+* Watch YouTube videos without ever leaving the app
+* Complete Gfycat support and caching - never waste mobile data
 * Image caching, so you don't download the same image multiple times
 * More to come
 
