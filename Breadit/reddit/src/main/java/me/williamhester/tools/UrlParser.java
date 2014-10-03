@@ -142,10 +142,7 @@ public class UrlParser implements Parcelable {
             start--;
         }
         String suffix = mUrl.substring(start + 1);
-        if (suffix.equalsIgnoreCase("gif")) {
-            return true;
-        }
-        return false;
+        return suffix.equalsIgnoreCase("gif");
     }
 
     private void generateRedditDetails() {

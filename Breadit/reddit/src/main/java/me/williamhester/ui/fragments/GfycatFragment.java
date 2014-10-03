@@ -59,12 +59,12 @@ public class GfycatFragment extends Fragment {
                     }
                     if (result.getWebmUrl() != null) {
                         setUrl(result.getWebmUrl());
-                        GfycatApi.downloadWebmGif(getActivity(), result.getWebmUrl(), result.getGfyName(), progressBar, gif);
+                        GfycatApi.downloadWebmGif(getActivity(), result.getWebmUrl(), progressBar, gif);
                     }
                 }
             });
         } else {
-            GfycatApi.downloadWebmGif(getActivity(), mParser.getUrl(), mParser.getLinkId(), progressBar, gif);
+            GfycatApi.downloadWebmGif(getActivity(), mParser.getUrl(), progressBar, gif);
         }
 
         return v;

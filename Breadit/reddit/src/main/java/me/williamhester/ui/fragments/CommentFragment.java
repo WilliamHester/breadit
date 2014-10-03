@@ -234,7 +234,7 @@ public class CommentFragment extends AccountFragment {
                         @Override
                         public void onClick(View view) {
                             getFragmentManager().beginTransaction()
-                                    .add(R.id.container, ImagePagerFragment.newInstance(linkDetails.getUrl()), "picture")
+                                    .add(R.id.container, ImagePagerFragment.newInstance(linkDetails), "picture")
                                     .addToBackStack("picture")
                                     .commit();
                         }

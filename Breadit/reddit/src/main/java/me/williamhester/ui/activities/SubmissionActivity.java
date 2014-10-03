@@ -176,7 +176,7 @@ public class SubmissionActivity extends Activity implements ImageFragment.ImageT
                 case UrlParser.GFYCAT_LINK:
                 case UrlParser.GIF:
                 case UrlParser.NORMAL_IMAGE:
-                    return ImagePagerFragment.newInstance(mParser.getUrl());
+                    return ImagePagerFragment.newInstance(mParser);
                 case UrlParser.SUBMISSION:
                     return CommentFragment.newInstance(mParser.getUrl());
                 case UrlParser.SUBREDDIT:
