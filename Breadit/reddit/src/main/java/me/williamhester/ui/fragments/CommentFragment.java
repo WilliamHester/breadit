@@ -21,7 +21,6 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import me.williamhester.models.AbsComment;
@@ -36,7 +35,7 @@ import me.williamhester.network.ImgurApi;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 import me.williamhester.tools.HtmlParser;
-import me.williamhester.tools.UrlParser;
+import me.williamhester.tools.Url;
 import me.williamhester.ui.views.CommentViewHolder;
 import me.williamhester.ui.views.SwipeView;
 
@@ -196,24 +195,24 @@ public class CommentFragment extends AccountFragment {
                 selfText.setVisibility(View.VISIBLE);
             }
         } else {
-            final UrlParser linkDetails = new UrlParser(mSubmission.getUrl());
-            if (linkDetails.getType() != UrlParser.NOT_SPECIAL) {
+            final Url linkDetails = new Url(mSubmission.getUrl());
+            if (linkDetails.getType() != Url.NOT_SPECIAL) {
                 String id = linkDetails.getLinkId();
-                if (linkDetails.getType() == UrlParser.IMGUR_IMAGE) {
+                if (linkDetails.getType() == Url.IMGUR_IMAGE) {
                     if (mSubmission.getImgurData() == null) {
                         imageView.setImageDrawable(null);
                         ImgurApi.getImageDetails(id, mHeaderView.getContext(), mSubmission, mImgurCallback);
                     } else {
                         setImagePreview(mHeaderView);
                     }
-                } else if (linkDetails.getType() == UrlParser.IMGUR_ALBUM) {
+                } else if (linkDetails.getType() == Url.IMGUR_ALBUM) {
                     if (mSubmission.getImgurData() == null) {
                         imageView.setImageDrawable(null);
                         ImgurApi.getAlbumDetails(id, mHeaderView.getContext(), mSubmission, mImgurCallback);
                     } else {
                         setImagePreview(mHeaderView);
                     }
-                } else if (linkDetails.getType() == UrlParser.YOUTUBE) {
+                } else if (linkDetails.getType() == Url.YOUTUBE) {
                     imageView.setVisibility(View.VISIBLE);
                     ImgurApi.loadImage(linkDetails.getUrl(), imageView, null);
                     button.setImageResource(R.drawable.ic_youtube);
@@ -227,7 +226,7 @@ public class CommentFragment extends AccountFragment {
                                     .commit();
                         }
                     });
-                } else if (linkDetails.getType() == UrlParser.NORMAL_IMAGE) {
+                } else if (linkDetails.getType() == Url.NORMAL_IMAGE) {
                     imageView.setVisibility(View.VISIBLE);
                     ImgurApi.loadImage(linkDetails.getUrl(), imageView, null);
                     imageView.setOnClickListener(new View.OnClickListener() {

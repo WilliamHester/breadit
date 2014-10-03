@@ -1,12 +1,13 @@
 package me.williamhester.tools;
 
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
  * Created by william on 7/19/14.
  */
-public class UrlParser implements Parcelable {
+public class Url implements Parcelable {
 
     public static final int NOT_SPECIAL = 0;
     public static final int IMGUR_IMAGE = 1;
@@ -21,40 +22,46 @@ public class UrlParser implements Parcelable {
     public static final int GFYCAT_LINK = 11;
     public static final int GIF = 12;
 
+    private Uri mUri;
     private String mUrl;
     private String mId;
     private int mType;
 
-    public UrlParser(String url) {
+    public Url(String url) {
         mUrl = url;
-        if (mUrl.substring(0, 3).equals("/u/") || mUrl.contains("reddit.com/u/")) { // go to a user
-            mId = mUrl.substring(mUrl.indexOf("/u/") + 3);
-            mType = USER;
-        } else if (mUrl.substring(0, 3).equals("/r/")) { // go to a subreddit
-            mId = url.substring(3);
-            mType = SUBREDDIT;
-        } else if (mUrl.toLowerCase().contains("reddit.com")) {
-            generateRedditDetails();
-        } else if (mUrl.toLowerCase().contains("imgur")) {
-            generateImgurDetails();
-        } else if (mUrl.toLowerCase().contains("youtu.be")
-                || mUrl.toLowerCase().contains("youtube.com")) {
-            generateYoutubeDetails();
-        } else if (isDirectImageLink()) {
-            mType = NORMAL_IMAGE;
-        } else if (isGif()) {
-            mType = GIF;
-        } else if (mUrl.toLowerCase().contains("livememe.com")) {
-            mType = NORMAL_IMAGE;
-            generateLiveMemeDetails();
-        } else if (mUrl.toLowerCase().contains("imgflip.com")) {
-            mType = NORMAL_IMAGE;
-            generateImgFlipDetails();
-        } else if (mUrl.contains("gfycat.com")) {
-            mType = GFYCAT_LINK;
-            generateGfycatDetails();
+        if (mUrl.charAt(0) == '/') {
+            if (mUrl.charAt(1) == 'u') { // go to a user
+                mId = mUrl.substring(mUrl.indexOf("/u/") + 3);
+                mType = USER;
+            } else if (mUrl.charAt(1) == 'r') { // go to a subreddit
+                mId = url.substring(3);
+                mType = SUBREDDIT;
+            }
         } else {
-            mType = NOT_SPECIAL;
+            mUri = Uri.parse(url);
+            if (mUri.getHost().contains("reddit.com")) {
+                generateRedditDetails();
+            } else if (mUri.getHost().contains("imgur")) {
+                generateImgurDetails();
+            } else if (mUri.getHost().contains("youtu.be")
+                    || mUri.getHost().contains("youtube.com")) {
+                generateYoutubeDetails();
+            } else if (isDirectImageLink()) {
+                mType = NORMAL_IMAGE;
+            } else if (isGif()) {
+                mType = GIF;
+            } else if (mUri.getHost().contains("livememe.com")) {
+                mType = NORMAL_IMAGE;
+                generateLiveMemeDetails();
+            } else if (mUri.getHost().contains("imgflip.com")) {
+                mType = NORMAL_IMAGE;
+                generateImgFlipDetails();
+            } else if (mUrl.contains("gfycat.com")) {
+                mType = GFYCAT_LINK;
+                generateGfycatDetails();
+            } else {
+                mType = NOT_SPECIAL;
+            }
         }
     }
 
@@ -84,28 +91,11 @@ public class UrlParser implements Parcelable {
     }
 
     private void generateYoutubeDetails() {
-        int start = mUrl.indexOf("v=") + 2;
-        if (start == 1) {
-            start = mUrl.indexOf(".be/") + 4;
+        if (mUri.getHost().equals("youtu.be")) {
+            mId = mUri.getPathSegments().get(0);
+        } else {
+            mId = mUri.getQueryParameter("v");
         }
-        if (start == 3) {
-            start = mUrl.indexOf("a=") + 2;
-        }
-        int amp = mUrl.indexOf('&', start);
-        int quest = mUrl.indexOf('?', start);
-        int pound = mUrl.indexOf('#', start);
-        int slash = mUrl.indexOf('/', start);
-        int end = mUrl.length();
-        if (amp != -1) {
-            end = amp;
-        } else if (quest != -1) {
-            end = quest;
-        } else if (pound != -1) {
-            end = pound;
-        } else if (slash + 1 == end) {
-            end = slash;
-        }
-        mId = mUrl.substring(start, end);
         mType = YOUTUBE;
         mUrl = "http://img.youtube.com/vi/" + mId + "/maxresdefault.jpg";
     }
@@ -124,24 +114,15 @@ public class UrlParser implements Parcelable {
     }
 
     private boolean isDirectImageLink() {
-        int start = mUrl.length() - 2;
-        while (mUrl.charAt(start) != '.') {
-            start--;
-        }
-        String suffix = mUrl.substring(start + 1);
-        if (suffix.equalsIgnoreCase("png") || suffix.equalsIgnoreCase("jpg")
-                || suffix.equalsIgnoreCase("jpeg") || suffix.equalsIgnoreCase("bmp")) {
-            return true;
-        }
-        return false;
+        String lps = mUri.getLastPathSegment();
+        String suffix = mUrl.substring(mUrl.indexOf(".", mUrl.indexOf(lps)) + 1);
+        return suffix.equalsIgnoreCase("png") || suffix.equalsIgnoreCase("jpg")
+                || suffix.equalsIgnoreCase("jpeg") || suffix.equalsIgnoreCase("bmp");
     }
 
     private boolean isGif() {
-        int start = mUrl.length() - 2;
-        while (mUrl.charAt(start) != '.') {
-            start--;
-        }
-        String suffix = mUrl.substring(start + 1);
+        String lps = mUri.getLastPathSegment();
+        String suffix = mUrl.substring(mUrl.indexOf(".", mUrl.indexOf(lps)) + 1);
         return suffix.equalsIgnoreCase("gif");
     }
 
@@ -203,19 +184,20 @@ public class UrlParser implements Parcelable {
         dest.writeInt(this.mType);
     }
 
-    private UrlParser(Parcel in) {
+    private Url(Parcel in) {
         this.mUrl = in.readString();
         this.mId = in.readString();
         this.mType = in.readInt();
+        mUri = Uri.parse(mUrl);
     }
 
-    public static final Creator<UrlParser> CREATOR = new Creator<UrlParser>() {
-        public UrlParser createFromParcel(Parcel source) {
-            return new UrlParser(source);
+    public static final Creator<Url> CREATOR = new Creator<Url>() {
+        public Url createFromParcel(Parcel source) {
+            return new Url(source);
         }
 
-        public UrlParser[] newArray(int size) {
-            return new UrlParser[size];
+        public Url[] newArray(int size) {
+            return new Url[size];
         }
     };
 }

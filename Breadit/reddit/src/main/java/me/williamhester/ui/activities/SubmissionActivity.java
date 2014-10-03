@@ -14,7 +14,7 @@ import me.williamhester.models.ImgurAlbum;
 import me.williamhester.models.ImgurImage;
 import me.williamhester.models.Submission;
 import me.williamhester.reddit.R;
-import me.williamhester.tools.UrlParser;
+import me.williamhester.tools.Url;
 import me.williamhester.ui.fragments.CommentFragment;
 import me.williamhester.ui.fragments.ImageFragment;
 import me.williamhester.ui.fragments.ImagePagerFragment;
@@ -35,7 +35,7 @@ public class SubmissionActivity extends Activity implements ImageFragment.ImageT
     private Submission.Media mMedia;
     private String mPermalink;
     private String mCurrentTag;
-    private UrlParser mParser;
+    private Url mParser;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -73,13 +73,13 @@ public class SubmissionActivity extends Activity implements ImageFragment.ImageT
         getMenuInflater().inflate(R.menu.submission, menu);
         if (mSubmission == null || mSubmission.isSelf()) {
             menu.removeItem(R.id.action_view_link);
-        } else if (mParser.getType() == UrlParser.IMGUR_ALBUM
-                || mParser.getType() == UrlParser.IMGUR_IMAGE
-                || mParser.getType() == UrlParser.NORMAL_IMAGE
-                || mParser.getType() == UrlParser.GIF
-                || mParser.getType() == UrlParser.GFYCAT_LINK) {
+        } else if (mParser.getType() == Url.IMGUR_ALBUM
+                || mParser.getType() == Url.IMGUR_IMAGE
+                || mParser.getType() == Url.NORMAL_IMAGE
+                || mParser.getType() == Url.GIF
+                || mParser.getType() == Url.GFYCAT_LINK) {
             menu.findItem(R.id.action_view_link).setIcon(android.R.drawable.ic_menu_gallery);
-        } else if (mParser.getType() == UrlParser.YOUTUBE) {
+        } else if (mParser.getType() == Url.YOUTUBE) {
             menu.findItem(R.id.action_view_link).setIcon(R.drawable.ic_youtube);
         }
         menu.removeItem(R.id.action_open_link_in_browser);
@@ -136,13 +136,13 @@ public class SubmissionActivity extends Activity implements ImageFragment.ImageT
                     @Override
                     public void onSubmissionLoaded(Submission submission) {
                         mSubmission = submission;
-                        mParser = new UrlParser(mSubmission.getUrl());
+                        mParser = new Url(mSubmission.getUrl());
                         invalidateOptionsMenu();
                     }
                 });
             } else {
                 comments = CommentFragment.newInstance(mSubmission);
-                mParser = new UrlParser(mSubmission.getUrl());
+                mParser = new Url(mSubmission.getUrl());
             }
             getFragmentManager().beginTransaction()
                     .replace(R.id.container, comments, "comments")
@@ -153,37 +153,37 @@ public class SubmissionActivity extends Activity implements ImageFragment.ImageT
     private Fragment getContentFragment() {
         if (!mSubmission.isSelf()) {
             switch (mParser.getType()) {
-                case UrlParser.NOT_SPECIAL:
+                case Url.NOT_SPECIAL:
                     return WebViewFragment.newInstance(mParser.getUrl());
-                case UrlParser.IMGUR_IMAGE:
+                case Url.IMGUR_IMAGE:
                     if (mSubmission.getImgurData() != null)
                         return ImagePagerFragment
                                 .newInstance((ImgurImage) mSubmission.getImgurData());
                     else
                         return ImagePagerFragment
                                 .newInstanceLazyLoaded(mParser.getLinkId(), false);
-                case UrlParser.IMGUR_ALBUM:
+                case Url.IMGUR_ALBUM:
                     if (mSubmission.getImgurData() != null)
                         return ImagePagerFragment
                                 .newInstance((ImgurAlbum) mSubmission.getImgurData());
                     else
                         return ImagePagerFragment
                                 .newInstanceLazyLoaded(mParser.getLinkId(), true);
-                case UrlParser.IMGUR_GALLERY:
+                case Url.IMGUR_GALLERY:
                     return WebViewFragment.newInstance(mParser.getUrl());
-                case UrlParser.YOUTUBE:
+                case Url.YOUTUBE:
                     return YouTubeFragment.newInstance(mParser.getLinkId());
-                case UrlParser.GFYCAT_LINK:
-                case UrlParser.GIF:
-                case UrlParser.NORMAL_IMAGE:
+                case Url.GFYCAT_LINK:
+                case Url.GIF:
+                case Url.NORMAL_IMAGE:
                     return ImagePagerFragment.newInstance(mParser);
-                case UrlParser.SUBMISSION:
+                case Url.SUBMISSION:
                     return CommentFragment.newInstance(mParser.getUrl());
-                case UrlParser.SUBREDDIT:
+                case Url.SUBREDDIT:
                     return SubredditFragment.newInstance(mParser.getLinkId());
-                case UrlParser.USER:
+                case Url.USER:
                     break;
-                case UrlParser.REDDIT_LIVE:
+                case Url.REDDIT_LIVE:
                     return RedditLiveFragment.newInstance(mSubmission);
             }
         }

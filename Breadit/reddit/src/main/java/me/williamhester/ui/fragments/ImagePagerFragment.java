@@ -20,7 +20,7 @@ import me.williamhester.models.ImgurImage;
 import me.williamhester.models.ResponseImgurWrapper;
 import me.williamhester.network.ImgurApi;
 import me.williamhester.reddit.R;
-import me.williamhester.tools.UrlParser;
+import me.williamhester.tools.Url;
 import me.williamhester.ui.adapters.ImgurAlbumAdapter;
 import me.williamhester.ui.adapters.SingleImageAdapter;
 
@@ -70,7 +70,7 @@ public class ImagePagerFragment extends Fragment {
         return fragment;
     }
 
-    public static ImagePagerFragment newInstance(UrlParser parser) {
+    public static ImagePagerFragment newInstance(Url parser) {
         Bundle args = new Bundle();
         args.putParcelable(URL_PARSER, parser);
         ImagePagerFragment fragment = new ImagePagerFragment();
@@ -127,7 +127,7 @@ public class ImagePagerFragment extends Fragment {
                 String imageUrl = getArguments().getString(IMAGE_URL);
                 mAdapter = new SingleImageAdapter(getChildFragmentManager(), imageUrl);
             } else if (getArguments().containsKey(URL_PARSER)) {
-                UrlParser parser = getArguments().getParcelable(URL_PARSER);
+                Url parser = getArguments().getParcelable(URL_PARSER);
                 mAdapter = new SingleImageAdapter(getChildFragmentManager(), parser);
             }
         }

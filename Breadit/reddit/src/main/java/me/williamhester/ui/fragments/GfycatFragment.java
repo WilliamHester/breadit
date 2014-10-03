@@ -1,12 +1,13 @@
 package me.williamhester.ui.fragments;
 
 import android.app.Fragment;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
+import android.gesture.GestureOverlayView;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.VideoView;
 
@@ -15,7 +16,7 @@ import com.koushikdutta.async.future.FutureCallback;
 import me.williamhester.models.ResponseGfycatUrlUpload;
 import me.williamhester.network.GfycatApi;
 import me.williamhester.reddit.R;
-import me.williamhester.tools.UrlParser;
+import me.williamhester.tools.Url;
 
 /**
  * Created by william on 6/22/14.
@@ -23,7 +24,7 @@ import me.williamhester.tools.UrlParser;
  */
 public class GfycatFragment extends Fragment {
 
-    private UrlParser mParser;
+    private Url mParser;
 
     public static GfycatFragment newInstance(String url) {
         Bundle args = new Bundle();
@@ -40,7 +41,7 @@ public class GfycatFragment extends Fragment {
         if (savedInstanceState != null) {
             mParser = savedInstanceState.getParcelable("parser");
         } else {
-            mParser = new UrlParser(getArguments().getString("url"));
+            mParser = new Url(getArguments().getString("url"));
         }
     }
 
@@ -51,14 +52,7 @@ public class GfycatFragment extends Fragment {
         final VideoView gif = (VideoView) v.findViewById(R.id.gif_view);
         final ProgressBar progressBar = (ProgressBar) v.findViewById(R.id.progress_bar);
 
-        gif.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                getFragmentManager().popBackStack();
-            }
-        });
-
-        if (mParser.getType() != UrlParser.GFYCAT_LINK) {
+        if (mParser.getType() != Url.GFYCAT_LINK) {
             GfycatApi.uploadOrConvertGif(getActivity(), mParser.getUrl(), new FutureCallback<ResponseGfycatUrlUpload>() {
                 @Override
                 public void onCompleted(Exception e, ResponseGfycatUrlUpload result) {
@@ -87,7 +81,7 @@ public class GfycatFragment extends Fragment {
     }
 
     private void setUrl(String url) {
-        mParser = new UrlParser(url);
+        mParser = new Url(url);
     }
 
 }

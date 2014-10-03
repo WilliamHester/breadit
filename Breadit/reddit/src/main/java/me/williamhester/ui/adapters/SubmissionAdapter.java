@@ -21,11 +21,10 @@ import java.util.List;
 import me.williamhester.models.ImgurAlbum;
 import me.williamhester.models.ImgurImage;
 import me.williamhester.models.Submission;
-import me.williamhester.models.Votable;
 import me.williamhester.network.ImgurApi;
 import me.williamhester.reddit.R;
 import me.williamhester.tools.HtmlParser;
-import me.williamhester.tools.UrlParser;
+import me.williamhester.tools.Url;
 import me.williamhester.ui.views.VotableViewHolder;
 
 /**
@@ -123,26 +122,26 @@ public class SubmissionAdapter extends ArrayAdapter<Submission> {
             } else {
                 itemView.findViewById(R.id.show_self_text).setVisibility(View.GONE);
                 itemView.findViewById(R.id.self_text).setVisibility(View.GONE);
-                final UrlParser linkDetails = new UrlParser(mSubmission.getUrl());
-                if (linkDetails.getType() != UrlParser.NOT_SPECIAL) {
+                final Url linkDetails = new Url(mSubmission.getUrl());
+                if (linkDetails.getType() != Url.NOT_SPECIAL) {
                     mSelfText.setVisibility(View.GONE);
                     container.setVisibility(View.VISIBLE);
                     String id = linkDetails.getLinkId();
-                    if (linkDetails.getType() == UrlParser.IMGUR_IMAGE) {
+                    if (linkDetails.getType() == Url.IMGUR_IMAGE) {
                         if (mSubmission.getImgurData() == null) {
                             imageView.setImageDrawable(null);
                             ImgurApi.getImageDetails(id, itemView.getContext(), mSubmission, mImgurCallback);
                         } else {
                             setImagePreview();
                         }
-                    } else if (linkDetails.getType() == UrlParser.IMGUR_ALBUM) {
+                    } else if (linkDetails.getType() == Url.IMGUR_ALBUM) {
                         if (mSubmission.getImgurData() == null) {
                             imageView.setImageDrawable(null);
                             ImgurApi.getAlbumDetails(id, itemView.getContext(), mSubmission, mImgurCallback);
                         } else {
                             setImagePreview();
                         }
-                    } else if (linkDetails.getType() == UrlParser.YOUTUBE) {
+                    } else if (linkDetails.getType() == Url.YOUTUBE) {
                         imageView.setVisibility(View.VISIBLE);
                         ImgurApi.loadImage(linkDetails.getUrl(), imageView, null);
                         button.setImageResource(R.drawable.ic_youtube);
@@ -153,7 +152,7 @@ public class SubmissionAdapter extends ArrayAdapter<Submission> {
                                 mCallback.onYouTubeVideoClicked(linkDetails.getLinkId());
                             }
                         });
-                    } else if (linkDetails.getType() == UrlParser.NORMAL_IMAGE) {
+                    } else if (linkDetails.getType() == Url.NORMAL_IMAGE) {
                         imageView.setVisibility(View.VISIBLE);
                         ImgurApi.loadImage(linkDetails.getUrl(), imageView, null);
                         imageView.setOnClickListener(new View.OnClickListener() {
