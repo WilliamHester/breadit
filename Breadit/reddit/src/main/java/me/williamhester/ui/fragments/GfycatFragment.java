@@ -1,6 +1,8 @@
 package me.williamhester.ui.fragments;
 
 import android.app.Fragment;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -48,6 +50,13 @@ public class GfycatFragment extends Fragment {
 
         final VideoView gif = (VideoView) v.findViewById(R.id.gif_view);
         final ProgressBar progressBar = (ProgressBar) v.findViewById(R.id.progress_bar);
+
+        gif.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getFragmentManager().popBackStack();
+            }
+        });
 
         if (mParser.getType() != UrlParser.GFYCAT_LINK) {
             GfycatApi.uploadOrConvertGif(getActivity(), mParser.getUrl(), new FutureCallback<ResponseGfycatUrlUpload>() {

@@ -47,7 +47,7 @@ public class ImgurImage implements Serializable, Parcelable {
     }
 
     public String getHugeThumbnail() {
-        return link.replace(".", "h.");
+        return "http://i.imgur.com/" + id + "h.png";
     }
 
     @Override

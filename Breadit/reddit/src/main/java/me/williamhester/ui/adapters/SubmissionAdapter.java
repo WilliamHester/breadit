@@ -67,6 +67,7 @@ public class SubmissionAdapter extends ArrayAdapter<Submission> {
         private TextView mDomain;
         private TextView mCommentData;
         private TextView mSubreddit;
+        private TextView mSelfText;
         private View mNsfwWarning;
         private View mExpandButton;
 
@@ -80,6 +81,7 @@ public class SubmissionAdapter extends ArrayAdapter<Submission> {
             mSubreddit = (TextView) itemView.findViewById(R.id.subreddit_title);
             mNsfwWarning = itemView.findViewById(R.id.nsfw_warning);
             mExpandButton = itemView.findViewById(R.id.expand_self_text);
+            mSelfText = (TextView) itemView.findViewById(R.id.self_text);
             View submissionData = itemView.findViewById(R.id.submission_data);
 
             submissionData.setOnClickListener(new View.OnClickListener() {
@@ -123,6 +125,7 @@ public class SubmissionAdapter extends ArrayAdapter<Submission> {
                 itemView.findViewById(R.id.self_text).setVisibility(View.GONE);
                 final UrlParser linkDetails = new UrlParser(mSubmission.getUrl());
                 if (linkDetails.getType() != UrlParser.NOT_SPECIAL) {
+                    mSelfText.setVisibility(View.GONE);
                     container.setVisibility(View.VISIBLE);
                     String id = linkDetails.getLinkId();
                     if (linkDetails.getType() == UrlParser.IMGUR_IMAGE) {
@@ -159,6 +162,8 @@ public class SubmissionAdapter extends ArrayAdapter<Submission> {
                                 mCallback.onImageViewClicked(mSubmission.getUrl());
                             }
                         });
+                    } else {
+                        container.setVisibility(View.GONE);
                     }
                 } else {
                     container.setVisibility(View.GONE);
@@ -259,9 +264,9 @@ public class SubmissionAdapter extends ArrayAdapter<Submission> {
                 image = null;
             }
             ImageView imageView = (ImageView) itemView.findViewById(R.id.image);
-            if (image != null && !image.isAnimated()) {
+            if (image != null) {
                 imageView.setVisibility(View.VISIBLE);
-                ImgurApi.loadImage(image.getUrl(), imageView, null);
+                ImgurApi.loadImage(image.getHugeThumbnail(), imageView, null);
                 ImageButton button = (ImageButton) itemView.findViewById(R.id.preview_button);
                 button.setVisibility(View.INVISIBLE);
                 imageView.setOnClickListener(new View.OnClickListener() {

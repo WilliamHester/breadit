@@ -67,7 +67,7 @@ public class ImageFragment extends Fragment {
             mUrl = getArguments().getString(IMAGE_URL_KEY);
             mImgurImage = (ImgurImage) getArguments().getSerializable(IMGUR_IMAGE_KEY);
             if (mImgurImage != null) {
-                mUrl = mImgurImage.getUrl();
+                mUrl = mImgurImage.getHugeThumbnail();
             }
         }
         if (mImgurImage != null && mImgurImage.getDescription() != null) {

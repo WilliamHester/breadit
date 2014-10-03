@@ -26,6 +26,7 @@ public class SingleImageAdapter extends FragmentPagerAdapter {
     public SingleImageAdapter(FragmentManager fm, String imageUrl) {
         super(fm);
         mUrl = imageUrl;
+        mParser = new UrlParser(mUrl);
     }
 
     public SingleImageAdapter(FragmentManager fm, UrlParser parser) {

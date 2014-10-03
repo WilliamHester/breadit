@@ -84,7 +84,6 @@ public class GfycatApi {
                 videoView.post(new Runnable() {
                     @Override
                     public void run() {
-                        videoView.setVisibility(View.VISIBLE);
                         videoView.setVideoPath(result.getAbsolutePath());
                         videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                             @Override

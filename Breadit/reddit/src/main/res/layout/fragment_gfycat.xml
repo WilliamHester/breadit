@@ -6,9 +6,9 @@
 
     <VideoView android:id="@+id/gif_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_centerInParent="true"
-        android:visibility="invisible"/>
+        android:background="#00ffffff"/>
 
     <ProgressBar android:id="@+id/progress_bar"
         style="?android:progressBarStyleHorizontal"
