@@ -1,17 +1,15 @@
 package me.williamhester.network;
 
 import android.content.Context;
-import android.util.Log;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 
-import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import com.koushikdutta.async.future.FutureCallback;
+import com.koushikdutta.async.http.AsyncHttpClientMiddleware;
+import com.koushikdutta.async.http.ResponseCacheMiddleware;
 import com.koushikdutta.ion.Ion;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
+import java.util.ArrayList;
 
 import me.williamhester.models.ImgurAlbum;
 import me.williamhester.models.ImgurImage;
@@ -28,11 +26,23 @@ public class ImgurApi {
     private static final String AUTHORIZATION = "Authorization";
     private static final String CLIENT_ID = "Client-ID 2bdd3ec7a3fa918";
 
+    private static Ion mImgurClient;
+
     private ImgurApi() {}
+
+    public static void init(Context context) {
+        mImgurClient = Ion.getInstance(context, "imgur");
+        ArrayList<AsyncHttpClientMiddleware> middlewares = mImgurClient.getHttpClient().getMiddleware();
+        for (AsyncHttpClientMiddleware middleware : middlewares) { // Set the cache size to 1MB. That's a lot of Imgur data
+            if (middleware instanceof ResponseCacheMiddleware) {
+                ((ResponseCacheMiddleware) middleware).getFileCache().setMaxSize(1024 * 1024);
+            }
+        }
+    }
 
     public static void getImageDetails(String id, Context context, final Submission submission,
                                        final FutureCallback<Submission> callback) {
-        Ion.with(context)
+        mImgurClient.build(context)
                 .load("https://api.imgur.com/3/image/" + id)
                 .addHeader(AUTHORIZATION, CLIENT_ID)
                 .as(new TypeToken<ResponseImgurWrapper<ImgurImage>>(){})
@@ -51,7 +61,7 @@ public class ImgurApi {
 
     public static void getImageDetails(String id, Context context,
                                        final FutureCallback<ResponseImgurWrapper<ImgurImage>> callback) {
-        Ion.with(context)
+        mImgurClient.build(context)
                 .load("https://api.imgur.com/3/image/" + id)
                 .addHeader(AUTHORIZATION, CLIENT_ID)
                 .as(new TypeToken<ResponseImgurWrapper<ImgurImage>>(){})
@@ -60,7 +70,7 @@ public class ImgurApi {
 
     public static void getAlbumDetails(String id, Context context, final Submission submission,
                                        final FutureCallback<Submission> callback) {
-        Ion.with(context)
+        mImgurClient.build(context)
                 .load("https://api.imgur.com/3/album/" + id)
                 .addHeader(AUTHORIZATION, CLIENT_ID)
                 .as(new TypeToken<ResponseImgurWrapper<ImgurAlbum>>(){})
@@ -79,7 +89,7 @@ public class ImgurApi {
 
     public static void getAlbumDetails(String id, Context context,
                                        final FutureCallback<ResponseImgurWrapper<ImgurAlbum>> callback) {
-        Ion.with(context)
+        mImgurClient.build(context)
                 .load("https://api.imgur.com/3/album/" + id)
                 .addHeader(AUTHORIZATION, CLIENT_ID)
                 .as(new TypeToken<ResponseImgurWrapper<ImgurAlbum>>(){})
