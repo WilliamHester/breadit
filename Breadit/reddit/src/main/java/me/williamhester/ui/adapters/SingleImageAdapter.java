@@ -11,6 +11,7 @@ import java.util.List;
 
 import me.williamhester.models.ImgurAlbum;
 import me.williamhester.models.ImgurImage;
+import me.williamhester.tools.UrlParser;
 import me.williamhester.ui.fragments.GfycatFragment;
 import me.williamhester.ui.fragments.ImageFragment;
 
@@ -19,18 +20,23 @@ import me.williamhester.ui.fragments.ImageFragment;
  */
 public class SingleImageAdapter extends FragmentPagerAdapter {
 
-    private FragmentManager mFragmentManager;
     private String mUrl;
+    private UrlParser mParser;
 
     public SingleImageAdapter(FragmentManager fm, String imageUrl) {
         super(fm);
-        mFragmentManager = fm;
         mUrl = imageUrl;
+    }
+
+    public SingleImageAdapter(FragmentManager fm, UrlParser parser) {
+        super(fm);
+        mUrl = parser.getUrl();
+        mParser = parser;
     }
 
     @Override
     public Fragment getItem(int position) {
-        if (mUrl.contains(".gif")) {
+        if (mUrl.contains(".gif") || mParser.getType() == UrlParser.GFYCAT_LINK) {
             return GfycatFragment.newInstance(mUrl);
         }
         return ImageFragment.newInstance(mUrl);

@@ -3,10 +3,8 @@ package me.williamhester.ui.text;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.text.style.ClickableSpan;
-import android.util.Log;
 import android.view.View;
 
 import me.williamhester.reddit.R;
@@ -64,7 +62,7 @@ public class LinkSpan extends ClickableSpan {
             case UrlParser.GFYCAT_LINK:
             case UrlParser.GIF:
             case UrlParser.NORMAL_IMAGE:
-                f = ImagePagerFragment.newInstance(parser.getUrl());
+                f = ImagePagerFragment.newInstance(parser);
                 break;
         }
         if (i != null) {

@@ -20,6 +20,7 @@ import me.williamhester.models.ImgurImage;
 import me.williamhester.models.ResponseImgurWrapper;
 import me.williamhester.network.ImgurApi;
 import me.williamhester.reddit.R;
+import me.williamhester.tools.UrlParser;
 import me.williamhester.ui.adapters.ImgurAlbumAdapter;
 import me.williamhester.ui.adapters.SingleImageAdapter;
 
@@ -33,6 +34,7 @@ public class ImagePagerFragment extends Fragment {
     private static final String IMAGE_URL = "imageUrl";
     private static final String IMGUR_ID = "imgurUrl";
     private static final String IMGUR_ALBUM = "imgurAlbum";
+    private static final String URL_PARSER = "urlParser";
 
     private static final int PAGER_INDICATOR_MS = 1000;
 
@@ -63,6 +65,14 @@ public class ImagePagerFragment extends Fragment {
     public static ImagePagerFragment newInstance(String imageUrl) {
         Bundle args = new Bundle();
         args.putString(IMAGE_URL, imageUrl);
+        ImagePagerFragment fragment = new ImagePagerFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static ImagePagerFragment newInstance(UrlParser parser) {
+        Bundle args = new Bundle();
+        args.putParcelable(URL_PARSER, parser);
         ImagePagerFragment fragment = new ImagePagerFragment();
         fragment.setArguments(args);
         return fragment;
@@ -116,6 +126,9 @@ public class ImagePagerFragment extends Fragment {
             } else if (getArguments().containsKey(IMAGE_URL)) {
                 String imageUrl = getArguments().getString(IMAGE_URL);
                 mAdapter = new SingleImageAdapter(getChildFragmentManager(), imageUrl);
+            } else if (getArguments().containsKey(URL_PARSER)) {
+                UrlParser parser = getArguments().getParcelable(URL_PARSER);
+                mAdapter = new SingleImageAdapter(getChildFragmentManager(), parser);
             }
         }
         mAnimHandler = new Handler();
