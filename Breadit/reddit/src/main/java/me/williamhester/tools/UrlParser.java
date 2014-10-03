@@ -2,7 +2,6 @@ package me.williamhester.tools;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 /**
  * Created by william on 7/19/14.
@@ -19,6 +18,8 @@ public class UrlParser implements Parcelable {
     public static final int SUBREDDIT = 8;
     public static final int USER = 9;
     public static final int REDDIT_LIVE = 10;
+    public static final int GFYCAT_LINK = 11;
+    public static final int GIF = 12;
 
     private String mUrl;
     private String mId;
@@ -41,12 +42,17 @@ public class UrlParser implements Parcelable {
             generateYoutubeDetails();
         } else if (isDirectImageLink()) {
             mType = NORMAL_IMAGE;
+        } else if (isGif()) {
+            mType = GIF;
         } else if (mUrl.toLowerCase().contains("livememe.com")) {
             mType = NORMAL_IMAGE;
             generateLiveMemeDetails();
         } else if (mUrl.toLowerCase().contains("imgflip.com")) {
             mType = NORMAL_IMAGE;
             generateImgFlipDetails();
+        } else if (mUrl.contains("gfycat.com")) {
+            mType = GFYCAT_LINK;
+            generateGfycatDetails();
         } else {
             mType = NOT_SPECIAL;
         }
@@ -130,6 +136,18 @@ public class UrlParser implements Parcelable {
         return false;
     }
 
+    private boolean isGif() {
+        int start = mUrl.length() - 2;
+        while (mUrl.charAt(start) != '.') {
+            start--;
+        }
+        String suffix = mUrl.substring(start + 1);
+        if (suffix.equalsIgnoreCase("gif")) {
+            return true;
+        }
+        return false;
+    }
+
     private void generateRedditDetails() {
         int i = mUrl.indexOf("/", 17);
         if (i == -1 || i == mUrl.length()) { // definitely a subreddit or the frontpage
@@ -147,6 +165,21 @@ public class UrlParser implements Parcelable {
             mId = mUrl.substring(mUrl.indexOf("/r/"));
             mType = SUBMISSION;
         }
+    }
+
+    private void generateGfycatDetails() {
+        int start = mUrl.toLowerCase().indexOf("gfycat.com/");
+        if (start < 0) {
+            mType = NOT_SPECIAL;
+            return;
+        }
+        start += 11;
+        int end = mUrl.indexOf(".", start);
+        if (end < 0) {
+            end = mUrl.length();
+        }
+        mId = mUrl.substring(start, end);
+        mUrl = "http://zippy.gfycat.com/" + mId + ".webm";
     }
 
     public String getLinkId() {

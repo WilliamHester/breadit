@@ -75,7 +75,9 @@ public class SubmissionActivity extends Activity implements ImageFragment.ImageT
             menu.removeItem(R.id.action_view_link);
         } else if (mParser.getType() == UrlParser.IMGUR_ALBUM
                 || mParser.getType() == UrlParser.IMGUR_IMAGE
-                || mParser.getType() == UrlParser.NORMAL_IMAGE) {
+                || mParser.getType() == UrlParser.NORMAL_IMAGE
+                || mParser.getType() == UrlParser.GIF
+                || mParser.getType() == UrlParser.GFYCAT_LINK) {
             menu.findItem(R.id.action_view_link).setIcon(android.R.drawable.ic_menu_gallery);
         } else if (mParser.getType() == UrlParser.YOUTUBE) {
             menu.findItem(R.id.action_view_link).setIcon(R.drawable.ic_youtube);
@@ -171,6 +173,8 @@ public class SubmissionActivity extends Activity implements ImageFragment.ImageT
                     return WebViewFragment.newInstance(mParser.getUrl());
                 case UrlParser.YOUTUBE:
                     return YouTubeFragment.newInstance(mParser.getLinkId());
+                case UrlParser.GFYCAT_LINK:
+                case UrlParser.GIF:
                 case UrlParser.NORMAL_IMAGE:
                     return ImagePagerFragment.newInstance(mParser.getUrl());
                 case UrlParser.SUBMISSION:

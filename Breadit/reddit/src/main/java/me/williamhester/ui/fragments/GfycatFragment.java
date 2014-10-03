@@ -10,9 +10,10 @@ import android.widget.VideoView;
 
 import com.koushikdutta.async.future.FutureCallback;
 
-import java.io.File;
-
+import me.williamhester.models.ResponseGfycatUrlUpload;
+import me.williamhester.network.GfycatApi;
 import me.williamhester.reddit.R;
+import me.williamhester.tools.UrlParser;
 
 /**
  * Created by william on 6/22/14.
@@ -20,26 +21,64 @@ import me.williamhester.reddit.R;
  */
 public class GfycatFragment extends Fragment {
 
+    private UrlParser mParser;
+
     public static GfycatFragment newInstance(String url) {
-        return new GfycatFragment();
+        Bundle args = new Bundle();
+        args.putString("url", url);
+        GfycatFragment fragment = new GfycatFragment();
+        fragment.setArguments(args);
+        return fragment;
     }
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        if (savedInstanceState != null) {
+            mParser = savedInstanceState.getParcelable("parser");
+        } else {
+            mParser = new UrlParser(getArguments().getString("url"));
+        }
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_gfycat, root, false);
 
-        VideoView gif = (VideoView) v.findViewById(R.id.gif_view);
-        ProgressBar progressBar = (ProgressBar) v.findViewById(R.id.progress_bar);
+        final VideoView gif = (VideoView) v.findViewById(R.id.gif_view);
+        final ProgressBar progressBar = (ProgressBar) v.findViewById(R.id.progress_bar);
+
+        if (mParser.getType() != UrlParser.GFYCAT_LINK) {
+            GfycatApi.uploadOrConvertGif(getActivity(), mParser.getUrl(), new FutureCallback<ResponseGfycatUrlUpload>() {
+                @Override
+                public void onCompleted(Exception e, ResponseGfycatUrlUpload result) {
+                    if (e != null) {
+                        e.printStackTrace();
+                        return;
+                    }
+                    if (result.getWebmUrl() != null) {
+                        setUrl(result.getWebmUrl());
+                        GfycatApi.downloadWebmGif(getActivity(), result.getWebmUrl(), result.getGfyName(), progressBar, gif);
+                    }
+                }
+            });
+        } else {
+            GfycatApi.downloadWebmGif(getActivity(), mParser.getUrl(), mParser.getLinkId(), progressBar, gif);
+        }
 
         return v;
     }
 
-    private FutureCallback<File> mFutureCallback = new FutureCallback<File>() {
-        @Override
-        public void onCompleted(Exception e, File result) {
-            VideoView gif = (VideoView) getView().findViewById(R.id.gif_view);
-            gif.setVideoPath(result.getPath());
-            gif.start();
-        }
-    };
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putParcelable("parser", mParser);
+    }
+
+    private void setUrl(String url) {
+        mParser = new UrlParser(url);
+    }
 
 }

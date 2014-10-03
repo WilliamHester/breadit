@@ -4,14 +4,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ProgressBar android:id="@+id/progress_bar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"/>
-
     <VideoView android:id="@+id/gif_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"/>
+        android:layout_centerInParent="true"
+        android:visibility="invisible"/>
+
+    <ProgressBar android:id="@+id/progress_bar"
+        style="?android:progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="100"
+        android:layout_marginTop="-7dp" />
 
 </RelativeLayout>

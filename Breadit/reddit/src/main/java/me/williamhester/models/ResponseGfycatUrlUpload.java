@@ -5,7 +5,6 @@ package me.williamhester.models;
  */
 public class ResponseGfycatUrlUpload {
 
-    private String gfyname;
     private String gfyName;
     private String webmUrl;
     private String gifUrl;
@@ -15,5 +14,13 @@ public class ResponseGfycatUrlUpload {
 
     private int gifWidth;
     private int frameRate;
+
+    public String getWebmUrl() {
+        return webmUrl;
+    }
+
+    public String getGfyName() {
+        return gfyName;
+    }
 
 }

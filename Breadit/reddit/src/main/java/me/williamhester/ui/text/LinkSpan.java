@@ -61,6 +61,8 @@ public class LinkSpan extends ClickableSpan {
             case UrlParser.YOUTUBE:
                 f = YouTubeFragment.newInstance(parser.getLinkId());
                 break;
+            case UrlParser.GFYCAT_LINK:
+            case UrlParser.GIF:
             case UrlParser.NORMAL_IMAGE:
                 f = ImagePagerFragment.newInstance(parser.getUrl());
                 break;
