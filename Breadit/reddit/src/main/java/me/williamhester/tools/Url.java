@@ -22,6 +22,7 @@ public class Url implements Parcelable {
     public static final int REDDIT_LIVE = 10;
     public static final int GFYCAT_LINK = 11;
     public static final int GIF = 12;
+    public static final int DIRECT_GFY = 13;
 
     private Uri mUri;
     private String mUrl;
@@ -58,7 +59,6 @@ public class Url implements Parcelable {
                 mType = NORMAL_IMAGE;
                 generateImgFlipDetails();
             } else if (mUrl.contains("gfycat.com")) {
-                mType = GFYCAT_LINK;
                 generateGfycatDetails();
             } else {
                 mType = NOT_SPECIAL;
@@ -162,6 +162,10 @@ public class Url implements Parcelable {
     }
 
     private void generateGfycatDetails() {
+        if (mUrl.contains("zippy") || mUrl.contains("fat") || mUrl.contains("giant")) {
+            mType = DIRECT_GFY;
+            return;
+        }
         int start = mUrl.toLowerCase().indexOf("gfycat.com/");
         if (start < 0) {
             mType = NOT_SPECIAL;
@@ -173,7 +177,7 @@ public class Url implements Parcelable {
             end = mUrl.length();
         }
         mId = mUrl.substring(start, end);
-        mUrl = "http://zippy.gfycat.com/" + mId + ".webm";
+        mType = GFYCAT_LINK;
     }
 
     public String getLinkId() {

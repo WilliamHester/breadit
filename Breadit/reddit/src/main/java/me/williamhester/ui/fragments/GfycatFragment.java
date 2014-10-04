@@ -13,6 +13,7 @@ import android.widget.VideoView;
 
 import com.koushikdutta.async.future.FutureCallback;
 
+import me.williamhester.models.GfycatResponse;
 import me.williamhester.models.ResponseGfycatUrlUpload;
 import me.williamhester.network.GfycatApi;
 import me.williamhester.reddit.R;
@@ -52,7 +53,23 @@ public class GfycatFragment extends Fragment {
         final VideoView gif = (VideoView) v.findViewById(R.id.gif_view);
         final ProgressBar progressBar = (ProgressBar) v.findViewById(R.id.progress_bar);
 
-        if (mParser.getType() != Url.GFYCAT_LINK) {
+        if (mParser.getType() == Url.GFYCAT_LINK) {
+            GfycatApi.getGfyDetails(getActivity(), mParser.getLinkId(), new FutureCallback<GfycatResponse>() {
+                @Override
+                public void onCompleted(Exception e, GfycatResponse result) {
+                    if (e != null) {
+                        e.printStackTrace();
+                        return;
+                    }
+                    if (result.getGfyUrl() != null) {
+                        setUrl(result.getGfyUrl());
+                        GfycatApi.downloadWebmGif(result.getGfyUrl(), progressBar, gif);
+                    }
+                }
+            });
+        } else if (mParser.getType() == Url.DIRECT_GFY) {
+            GfycatApi.downloadWebmGif(mParser.getUrl(), progressBar, gif);
+        } else {
             GfycatApi.uploadOrConvertGif(getActivity(), mParser.getUrl(), new FutureCallback<ResponseGfycatUrlUpload>() {
                 @Override
                 public void onCompleted(Exception e, ResponseGfycatUrlUpload result) {
@@ -62,12 +79,10 @@ public class GfycatFragment extends Fragment {
                     }
                     if (result.getWebmUrl() != null) {
                         setUrl(result.getWebmUrl());
-                        GfycatApi.downloadWebmGif(getActivity(), result.getWebmUrl(), progressBar, gif);
+                        GfycatApi.downloadWebmGif(result.getWebmUrl(), progressBar, gif);
                     }
                 }
             });
-        } else {
-            GfycatApi.downloadWebmGif(getActivity(), mParser.getUrl(), progressBar, gif);
         }
 
         return v;

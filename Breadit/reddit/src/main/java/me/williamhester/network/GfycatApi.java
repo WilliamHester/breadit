@@ -2,6 +2,7 @@ package me.williamhester.network;
 
 import android.content.Context;
 import android.media.MediaPlayer;
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.VideoView;
@@ -10,6 +11,7 @@ import com.google.gson.reflect.TypeToken;
 import com.koushikdutta.async.AsyncServer;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.async.http.AsyncHttpClient;
+import com.koushikdutta.async.http.AsyncHttpClientMiddleware;
 import com.koushikdutta.async.http.AsyncHttpGet;
 import com.koushikdutta.async.http.AsyncHttpResponse;
 import com.koushikdutta.async.http.ResponseCacheMiddleware;
@@ -19,7 +21,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 
+import me.williamhester.models.GfycatResponse;
 import me.williamhester.models.ResponseGfycatUrlCheck;
 import me.williamhester.models.ResponseGfycatUrlUpload;
 
@@ -29,11 +33,21 @@ import me.williamhester.models.ResponseGfycatUrlUpload;
 public class GfycatApi {
 
     private static final AsyncHttpClient mGfyClient = new AsyncHttpClient(AsyncServer.getDefault());
+    private static Ion mGfyIon;
+    private static String mGfyFileName;
 
     private GfycatApi() {}
 
     public static void init(Context context) {
+        mGfyIon = Ion.getInstance(context, "gfy");
+        ArrayList<AsyncHttpClientMiddleware> middlewares = mGfyIon.getHttpClient().getMiddleware();
+        for (AsyncHttpClientMiddleware middleware : middlewares) { // Set the cache size to 1MB. That's a lot of Imgur data
+            if (middleware instanceof ResponseCacheMiddleware) {
+                ((ResponseCacheMiddleware) middleware).getFileCache().setMaxSize(1024 * 256);
+            }
+        }
         try {
+            mGfyFileName = context.getCacheDir() + "/gfy.webm";
             ResponseCacheMiddleware.addCache(mGfyClient,
                     new File(context.getCacheDir(), "gifcache"),
                     1024 * 1024 * 8);
@@ -60,11 +74,19 @@ public class GfycatApi {
                 .setCallback(callback);
     }
 
-    public static void downloadWebmGif(Context context, String url,
+    public static void getGfyDetails(Context context, String gfyname,
+                                     FutureCallback<GfycatResponse> callback) {
+        String url = "http://gfycat.com/cajax/get/" + gfyname;
+        mGfyIon.build(context)
+                .load(url)
+                .as(new TypeToken<GfycatResponse>() {})
+                .setCallback(callback);
+    }
+
+    public static void downloadWebmGif(String url,
                                        final ProgressBar progressBar,
                                        final VideoView videoView) {
-        String fileName = context.getCacheDir() + "/gfy.webm";
-        mGfyClient.executeFile(new AsyncHttpGet(url), fileName, new AsyncHttpClient.FileCallback() {
+        mGfyClient.executeFile(new AsyncHttpGet(url), mGfyFileName, new AsyncHttpClient.FileCallback() {
             @Override
             public void onProgress(AsyncHttpResponse response, final long downloaded, final long total) {
                 progressBar.post(new Runnable() {

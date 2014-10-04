@@ -45,6 +45,7 @@ public class LinkSpan extends ClickableSpan {
             case Url.NORMAL_IMAGE:
             case Url.GFYCAT_LINK:
             case Url.GIF:
+            case Url.DIRECT_GFY:
                 ds.setColor(GREEN);
                 break;
             case Url.YOUTUBE:
@@ -90,6 +91,7 @@ public class LinkSpan extends ClickableSpan {
             case Url.YOUTUBE:
                 f = YouTubeFragment.newInstance(mUrl.getLinkId());
                 break;
+            case Url.DIRECT_GFY:
             case Url.GFYCAT_LINK:
             case Url.GIF:
             case Url.NORMAL_IMAGE:
