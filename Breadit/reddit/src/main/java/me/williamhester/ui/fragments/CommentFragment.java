@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -168,7 +169,6 @@ public class CommentFragment extends AccountFragment {
                 });
         swipeView.invalidate();
         View nsfwWarning = mHeaderView.findViewById(R.id.nsfw_warning);
-        View submissionData = mHeaderView.findViewById(R.id.submission_data);
         final ImageButton button = (ImageButton) mHeaderView.findViewById(R.id.preview_button);
 
         body.setText(Html.fromHtml(mSubmission.getTitle()).toString());
@@ -193,6 +193,7 @@ public class CommentFragment extends AccountFragment {
                 HtmlParser parser = new HtmlParser(Html.fromHtml(mSubmission.getBodyHtml()).toString());
                 selfText.setText(parser.getSpannableString());
                 selfText.setVisibility(View.VISIBLE);
+                selfText.setMovementMethod(new LinkMovementMethod());
             }
         } else {
             final Url linkDetails = new Url(mSubmission.getUrl());
