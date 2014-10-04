@@ -120,11 +120,11 @@ public class SubmissionAdapter extends ArrayAdapter<Submission> {
             if (mSubmission.isSelf()) {
                 showSelfText(mExpandButton, container, imageView, button);
             } else {
+                mSelfText.setText("");
+                mSelfText.setVisibility(View.GONE);
                 itemView.findViewById(R.id.show_self_text).setVisibility(View.GONE);
-                itemView.findViewById(R.id.self_text).setVisibility(View.GONE);
                 final Url linkDetails = new Url(mSubmission.getUrl());
                 if (linkDetails.getType() != Url.NOT_SPECIAL) {
-                    mSelfText.setVisibility(View.GONE);
                     container.setVisibility(View.VISIBLE);
                     String id = linkDetails.getLinkId();
                     if (linkDetails.getType() == Url.IMGUR_IMAGE) {
@@ -146,7 +146,7 @@ public class SubmissionAdapter extends ArrayAdapter<Submission> {
                         ImgurApi.loadImage(linkDetails.getUrl(), imageView, null);
                         button.setImageResource(R.drawable.ic_youtube);
                         button.setVisibility(View.VISIBLE);
-                        button.setOnClickListener(new View.OnClickListener() {
+                        container.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
                                 mCallback.onYouTubeVideoClicked(linkDetails.getLinkId());
@@ -155,7 +155,7 @@ public class SubmissionAdapter extends ArrayAdapter<Submission> {
                     } else if (linkDetails.getType() == Url.NORMAL_IMAGE) {
                         imageView.setVisibility(View.VISIBLE);
                         ImgurApi.loadImage(linkDetails.getUrl(), imageView, null);
-                        imageView.setOnClickListener(new View.OnClickListener() {
+                        container.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
                                 mCallback.onImageViewClicked(mSubmission.getUrl());
@@ -168,7 +168,6 @@ public class SubmissionAdapter extends ArrayAdapter<Submission> {
                     container.setVisibility(View.GONE);
                 }
             }
-            itemView.invalidate();
         }
 
         private void setUpNsfw(final ImageButton button) {
@@ -205,7 +204,7 @@ public class SubmissionAdapter extends ArrayAdapter<Submission> {
                 content.setText(parser.getSpannableString());
                 content.setMovementMethod(new LinkMovementMethod());
             } else {
-                itemView.findViewById(R.id.show_self_text).setVisibility(View.GONE);
+                mSelfText.setVisibility(View.GONE);
                 container.setVisibility(View.GONE);
             }
         }

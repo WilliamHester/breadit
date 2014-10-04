@@ -3,6 +3,7 @@ package me.williamhester.tools;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 /**
  * Created by william on 7/19/14.
@@ -115,6 +116,9 @@ public class Url implements Parcelable {
 
     private boolean isDirectImageLink() {
         String lps = mUri.getLastPathSegment();
+        if (lps == null) {
+            return false;
+        }
         String suffix = mUrl.substring(mUrl.indexOf(".", mUrl.indexOf(lps)) + 1);
         return suffix.equalsIgnoreCase("png") || suffix.equalsIgnoreCase("jpg")
                 || suffix.equalsIgnoreCase("jpeg") || suffix.equalsIgnoreCase("bmp");
@@ -122,6 +126,9 @@ public class Url implements Parcelable {
 
     private boolean isGif() {
         String lps = mUri.getLastPathSegment();
+        if (lps == null) {
+            return false;
+        }
         String suffix = mUrl.substring(mUrl.indexOf(".", mUrl.indexOf(lps)) + 1);
         return suffix.equalsIgnoreCase("gif");
     }
@@ -139,9 +146,18 @@ public class Url implements Parcelable {
         } else if (mUrl.toLowerCase().contains("/live/")) {
             mId = mUrl.substring(mUrl.indexOf("/live/") + 6);
             mType = REDDIT_LIVE;
+        } else if (mUrl.contains("/user/")) {
+            mId = mUrl.substring(mUrl.indexOf("/user/") + 6);
+            mType = USER;
         } else { // found a link to another post
-            mId = mUrl.substring(mUrl.indexOf("/r/"));
-            mType = SUBMISSION;
+            try {
+                mId = mUrl.substring(mUrl.indexOf("/r/"));
+                mType = SUBMISSION;
+            } catch (StringIndexOutOfBoundsException e) {
+                Log.e("Url", "Could not properly parse: " + mUrl);
+                mType = NOT_SPECIAL;
+                mId = null;
+            }
         }
     }
 
