@@ -149,9 +149,9 @@ public class MainActivity extends Activity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
-        if (!AccountManager.isLoggedIn()) {
-            menu.removeItem(R.id.action_my_account);
-        }
+//        if (!AccountManager.isLoggedIn()) {
+//            menu.removeItem(R.id.action_my_account);
+//        }
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -164,11 +164,11 @@ public class MainActivity extends Activity
             i.putExtras(b);
             startActivity(i);
             return true;
-        } else if (id == R.id.action_my_account) {
-            Bundle b = new Bundle();
-            Intent i = new Intent(this, AccountActivity.class);
-            i.putExtras(b);
-            startActivity(i);
+//        } else if (id == R.id.action_my_account) {
+//            Bundle b = new Bundle();
+//            Intent i = new Intent(this, AccountActivity.class);
+//            i.putExtras(b);
+//            startActivity(i);
         }
         return super.onOptionsItemSelected(item);
     }

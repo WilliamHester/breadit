@@ -45,39 +45,6 @@
 
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="8dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/sort_by"
-            android:textColor="@color/mid_gray"
-            android:textSize="16sp"
-            android:fontFamily="sans-serif-condensed"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp" />
-
-        <Spinner android:id="@+id/header_spinner1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="visible"
-            android:paddingTop="8dp"
-            android:paddingLeft="8dp"
-            android:paddingBottom="8dp" />
-
-        <Spinner android:id="@+id/header_spinner2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="visible"
-            android:paddingTop="8dp"
-            android:paddingLeft="8dp"
-            android:paddingBottom="8dp" />
-
-    </LinearLayout>
-
     <CheckBox android:id="@+id/subscribed_CheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

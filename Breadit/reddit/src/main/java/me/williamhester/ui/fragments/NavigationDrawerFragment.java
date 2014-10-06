@@ -84,8 +84,6 @@ public class NavigationDrawerFragment extends AccountFragment {
     private Context mContext;
     private CheckBox mCheckbox;
     private Subreddit mSubreddit;
-    private Spinner mFilterSpinner;
-    private Spinner mSubSpinner;
     private String mSubName;
 
     @Override
@@ -394,51 +392,6 @@ public class NavigationDrawerFragment extends AccountFragment {
         });
         mCheckbox = (CheckBox) v.findViewById(R.id.subscribed_CheckBox);
         mCheckbox.setVisibility(View.GONE);
-
-        mSubSpinner = (Spinner) v.findViewById(R.id.header_spinner1);
-        mFilterSpinner = (Spinner) v.findViewById(R.id.header_spinner2);
-
-        ArrayAdapter<String> adapter1 = new ArrayAdapter<String>(mContext,
-                R.layout.spinner_item,
-                R.id.orange_spinner_text,
-                getResources().getStringArray(R.array.subreddit_sort_types));
-        mSubSpinner.setAdapter(adapter1);
-
-        ArrayAdapter<String> adapter2 = new ArrayAdapter<String>(mContext,
-                R.layout.spinner_item,
-                R.id.orange_spinner_text,
-                getResources().getStringArray(R.array.sub_sort_types));
-        mFilterSpinner.setAdapter(adapter2);
-        mFilterSpinner.setSelection(Submission.ALL);
-
-        mSubSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                if (i > 2) {
-                    mFilterSpinner.setVisibility(View.VISIBLE);
-                } else {
-                    mFilterSpinner.setVisibility(View.GONE);
-                }
-                mCallbacks.onSortSelected(i);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-                return;
-            }
-        });
-
-        mFilterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                mCallbacks.onSubSortSelected(i);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-                return;
-            }
-        });
 
         TextView frontpage = (TextView) v.findViewById(R.id.subreddit_list_item_title);
         frontpage.setText("Front Page");
