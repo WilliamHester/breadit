@@ -50,7 +50,6 @@ public class CommentFragment extends AccountFragment {
     private ListView mCommentsListView;
     private String mPermalink;
     private Submission mSubmission;
-    private TextView mNumComments;
     private View mHeaderView;
     private OnSubmissionLoaded mCallback;
 
@@ -140,6 +139,28 @@ public class CommentFragment extends AccountFragment {
         TextView body = (TextView) mHeaderView.findViewById(R.id.body);
         TextView selfText = (TextView) mHeaderView.findViewById(R.id.self_text);
         SwipeView swipeView = (SwipeView) mHeaderView.findViewById(R.id.swipe_view);
+        View foregroundVote = mHeaderView.findViewById(R.id.vote_foreground);
+        View backgroundVote = mHeaderView.findViewById(R.id.vote_background);
+        
+        switch (mSubmission.getVoteStatus()) {
+            case Votable.DOWNVOTED:
+                foregroundVote.setScaleY(0f);
+                backgroundVote.setVisibility(View.VISIBLE);
+                backgroundVote.setBackgroundColor(
+                        backgroundVote.getResources().getColor(R.color.periwinkle));
+                break;
+            case Votable.UPVOTED:
+                foregroundVote.setScaleY(0f);
+                backgroundVote.setVisibility(View.VISIBLE);
+                backgroundVote.setBackgroundColor(
+                        backgroundVote.getResources().getColor(R.color.orangered));
+                break;
+            default:
+                backgroundVote.setVisibility(View.GONE);
+                foregroundVote.setScaleY(0f);
+                break;
+        }
+
         swipeView.recycle(mSubmission);
         swipeView.setUp(mHeaderView.findViewById(R.id.vote_background),
                 mHeaderView.findViewById(R.id.vote_foreground), new SwipeView.SwipeListener() {
@@ -246,6 +267,9 @@ public class CommentFragment extends AccountFragment {
         }
     }
 
+    private void setVoteStatus() {
+
+    }
 
     private FutureCallback<Submission> mImgurCallback = new FutureCallback<Submission>() {
         @Override
@@ -364,9 +388,6 @@ public class CommentFragment extends AccountFragment {
             mCommentAdapter = new CommentArrayAdapter(mContext);
             mCommentsListView.setAdapter(mCommentAdapter);
             mCommentAdapter.notifyDataSetChanged();
-            if (mNumComments != null) {
-                mNumComments.setText("Top " + mCommentsList.size() + " comments. Sorted by");
-            }
         }
     };
 

@@ -68,6 +68,7 @@ public class Submission implements Votable, Parcelable {
     private int mVoteStatus;
     private boolean mIsBeingEdited;
     private boolean mSelftextIsOpen;
+    private boolean mIsNsfwShowing = false;
     private Object mImgurData;
     private int mImgurDataType = NO_IMGUR_DATA;
 
@@ -174,6 +175,14 @@ public class Submission implements Votable, Parcelable {
 
     public boolean isNsfw() {
         return over_18;
+    }
+
+    public void setShowNsfwContent() {
+        mIsNsfwShowing = true;
+    }
+
+    public boolean isShowingNsfw() {
+        return mIsNsfwShowing;
     }
 
     public boolean isHidden() {
@@ -293,6 +302,7 @@ public class Submission implements Votable, Parcelable {
         dest.writeInt(this.mVoteStatus);
         dest.writeByte(mIsBeingEdited ? (byte) 1 : (byte) 0);
         dest.writeByte(mSelftextIsOpen ? (byte) 1 : (byte) 0);
+        dest.writeByte(mIsNsfwShowing ? (byte) 1 : (byte) 0);
         dest.writeString(this.id);
         dest.writeString(this.mName);
         if (mImgurData != null) {
@@ -342,6 +352,7 @@ public class Submission implements Votable, Parcelable {
         this.mVoteStatus = in.readInt();
         this.mIsBeingEdited = in.readByte() != 0;
         this.mSelftextIsOpen = in.readByte() != 0;
+        this.mIsNsfwShowing = in.readByte() != 0;
         this.id = in.readString();
         this.mName = in.readString();
         int flag = in.readInt();

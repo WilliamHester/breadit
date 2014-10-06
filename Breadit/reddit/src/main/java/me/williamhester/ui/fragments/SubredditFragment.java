@@ -296,17 +296,9 @@ public class SubredditFragment extends AccountFragment implements SubmissionAdap
     }
 
     @Override
-    public void onImageViewClicked(ImgurImage image) {
+    public void onImageViewClicked(Object imgurData) {
         getFragmentManager().beginTransaction()
-                .add(R.id.container, ImagePagerFragment.newInstance(image), "ImagePagerFragment")
-                .addToBackStack("ImagePagerFragment")
-                .commit();
-    }
-
-    @Override
-    public void onImageViewClicked(ImgurAlbum album) {
-        getFragmentManager().beginTransaction()
-                .add(R.id.container, ImagePagerFragment.newInstance(album), "ImagePagerFragment")
+                .add(R.id.container, ImagePagerFragment.newInstance(imgurData), "ImagePagerFragment")
                 .addToBackStack("ImagePagerFragment")
                 .commit();
     }

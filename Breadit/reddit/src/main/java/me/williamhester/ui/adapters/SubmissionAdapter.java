@@ -1,6 +1,7 @@
 package me.williamhester.ui.adapters;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
@@ -28,7 +29,7 @@ import me.williamhester.tools.Url;
 import me.williamhester.ui.views.VotableViewHolder;
 
 /**
- * Created by william on 6/27/14.
+ * Created by William on 6/27/14.
  */
 public class SubmissionAdapter extends ArrayAdapter<Submission> {
 
@@ -67,26 +68,43 @@ public class SubmissionAdapter extends ArrayAdapter<Submission> {
         private TextView mCommentData;
         private TextView mSubreddit;
         private TextView mSelfText;
+        private ImageView mImageView;
+        private ImageButton mImageButton;
+        private View mContainer;
         private View mNsfwWarning;
+        private View mNsfwBlocker;
         private View mExpandButton;
+        private View mShowSelfText;
 
         private Submission mSubmission;
 
         public SubmissionViewHolder(View itemView) {
             super(itemView);
 
+            mContainer = itemView.findViewById(R.id.content_preview);
             mDomain = (TextView) itemView.findViewById(R.id.domain);
             mCommentData = (TextView) itemView.findViewById(R.id.num_comments);
             mSubreddit = (TextView) itemView.findViewById(R.id.subreddit_title);
             mNsfwWarning = itemView.findViewById(R.id.nsfw_warning);
+            mNsfwBlocker = itemView.findViewById(R.id.nsfw_blocker);
             mExpandButton = itemView.findViewById(R.id.expand_self_text);
             mSelfText = (TextView) itemView.findViewById(R.id.self_text);
+            mShowSelfText = itemView.findViewById(R.id.show_self_text);
+            mImageView = (ImageView) itemView.findViewById(R.id.image);
+            mImageButton = (ImageButton) itemView.findViewById(R.id.preview_button);
             View submissionData = itemView.findViewById(R.id.submission_data);
 
             submissionData.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     mCallback.onCardClicked(mSubmission);
+                }
+            });
+            mNsfwBlocker.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    view.setVisibility(View.GONE);
+                    mSubmission.setShowNsfwContent();
                 }
             });
 
@@ -105,104 +123,108 @@ public class SubmissionAdapter extends ArrayAdapter<Submission> {
             mMetadata.setText(mSubmission.getAuthor() + " " + mSubmission.getScore() + " "
                     + itemView.getResources().getQuantityString(R.plurals.points,
                     mSubmission.getScore()));
-
-            if (mSubmission.isNsfw()) {
-                mNsfwWarning.setVisibility(View.VISIBLE);
-            } else {
-                mNsfwWarning.setVisibility(View.GONE);
-            }
-
-            View container = itemView.findViewById(R.id.content_preview);
-            ImageView imageView = (ImageView) itemView.findViewById(R.id.image);
-            final ImageButton button = (ImageButton) itemView.findViewById(R.id.preview_button);
-            setUpNsfw(button);
+            setUpNsfw();
 
             if (mSubmission.isSelf()) {
-                showSelfText(mExpandButton, container, imageView, button);
+                showSelfText(mExpandButton, mContainer, mImageView, mImageButton);
             } else {
                 mSelfText.setText("");
                 mSelfText.setVisibility(View.GONE);
-                itemView.findViewById(R.id.show_self_text).setVisibility(View.GONE);
+                mShowSelfText.setVisibility(View.GONE);
                 final Url linkDetails = new Url(mSubmission.getUrl());
-                if (linkDetails.getType() != Url.NOT_SPECIAL) {
-                    container.setVisibility(View.VISIBLE);
-                    String id = linkDetails.getLinkId();
-                    if (linkDetails.getType() == Url.IMGUR_IMAGE) {
+                mContainer.setVisibility(View.VISIBLE);
+                String id = linkDetails.getLinkId();
+                switch (linkDetails.getType()) {
+                    case Url.IMGUR_IMAGE: {
+                        mContainer.setVisibility(View.VISIBLE);
+                        mImageView.setVisibility(View.VISIBLE);
                         if (mSubmission.getImgurData() == null) {
-                            imageView.setImageDrawable(null);
+                            mImageView.setImageDrawable(null);
                             ImgurApi.getImageDetails(id, itemView.getContext(), mSubmission, mImgurCallback);
                         } else {
                             setImagePreview();
                         }
-                    } else if (linkDetails.getType() == Url.IMGUR_ALBUM) {
+                        break;
+                    }
+                    case Url.IMGUR_ALBUM: {
+                        mContainer.setVisibility(View.VISIBLE);
+                        mImageView.setVisibility(View.VISIBLE);
                         if (mSubmission.getImgurData() == null) {
-                            imageView.setImageDrawable(null);
+                            mImageView.setImageDrawable(null);
                             ImgurApi.getAlbumDetails(id, itemView.getContext(), mSubmission, mImgurCallback);
                         } else {
                             setImagePreview();
                         }
-                    } else if (linkDetails.getType() == Url.YOUTUBE) {
-                        imageView.setVisibility(View.VISIBLE);
-                        ImgurApi.loadImage(linkDetails.getUrl(), imageView, null);
-                        button.setImageResource(R.drawable.ic_youtube);
-                        button.setVisibility(View.VISIBLE);
-                        container.setOnClickListener(new View.OnClickListener() {
+                        break;
+                    }
+                    case Url.YOUTUBE: {
+                        mContainer.setVisibility(View.VISIBLE);
+                        mImageView.setVisibility(View.VISIBLE);
+                        ImgurApi.loadImage(linkDetails.getUrl(), mImageView, null);
+                        mImageButton.setImageResource(R.drawable.ic_youtube);
+                        mImageButton.setVisibility(View.VISIBLE);
+                        mImageButton.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
                                 mCallback.onYouTubeVideoClicked(linkDetails.getLinkId());
                             }
                         });
-                    } else if (linkDetails.getType() == Url.NORMAL_IMAGE) {
-                        imageView.setVisibility(View.VISIBLE);
-                        ImgurApi.loadImage(linkDetails.getUrl(), imageView, null);
-                        container.setOnClickListener(new View.OnClickListener() {
+                        break;
+                    }
+                    case Url.NORMAL_IMAGE: {
+                        mContainer.setVisibility(View.VISIBLE);
+                        mImageView.setVisibility(View.VISIBLE);
+                        ImgurApi.loadImage(linkDetails.getUrl(), mImageView, null);
+                        mImageView.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
                                 mCallback.onImageViewClicked(mSubmission.getUrl());
                             }
                         });
-                    } else {
-                        container.setVisibility(View.GONE);
+                        break;
                     }
-                } else {
-                    container.setVisibility(View.GONE);
+                    default: { // It's special, but not special enough
+                        mContainer.setVisibility(View.GONE);
+                    }
                 }
             }
         }
 
-        private void setUpNsfw(final ImageButton button) {
-            if (mSubmission.isNsfw()) {
-                button.setVisibility(View.VISIBLE);
-                button.setBackgroundColor(button.getContext().getResources()
-                        .getColor(android.R.color.black));
-                button.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        button.setVisibility(View.GONE);
-                    }
-                });
+        private void setUpNsfw() {
+            if (!mSubmission.isNsfw()) {
+                mNsfwWarning.setVisibility(View.GONE);
+                if (!mSubmission.isSelf()) {
+                    mNsfwBlocker.setVisibility(View.GONE);
+                }
+            } else if (mSubmission.isShowingNsfw()) {
+                mNsfwWarning.setVisibility(View.VISIBLE);
+                mNsfwBlocker.setVisibility(View.GONE);
             } else {
-                button.setVisibility(View.GONE);
+                mNsfwWarning.setVisibility(View.VISIBLE);
+                if (!mSubmission.isSelf()) {
+                    mNsfwBlocker.setVisibility(View.VISIBLE);
+                } else {
+                    mNsfwBlocker.setVisibility(View.GONE);
+                }
             }
         }
 
         private void showSelfText(View expandButton, View container, ImageView imageView, ImageButton button) {
             if (mSubmission.getBodyHtml() != null) {
-                itemView.findViewById(R.id.show_self_text).setVisibility(View.VISIBLE);
+                mShowSelfText.setVisibility(View.VISIBLE);
                 container.setVisibility(View.VISIBLE);
-                TextView content = (TextView) itemView.findViewById(R.id.self_text);
                 if (mSubmission.isSelftextOpen()) {
                     expandButton.setRotation(-180f);
-                    content.setVisibility(View.VISIBLE);
+                    mSelfText.setVisibility(View.VISIBLE);
                 } else {
                     expandButton.setRotation(0f);
-                    content.setVisibility(View.GONE);
+                    mSelfText.setVisibility(View.GONE);
                 }
                 imageView.setVisibility(View.GONE);
                 button.setVisibility(View.GONE);
                 HtmlParser parser = new HtmlParser(Html.fromHtml(mSubmission.getBodyHtml()).toString());
-                content.setText(parser.getSpannableString());
-                content.setMovementMethod(new LinkMovementMethod());
+                mSelfText.setText(parser.getSpannableString());
+                mSelfText.setMovementMethod(new LinkMovementMethod());
             } else {
                 mSelfText.setVisibility(View.GONE);
                 container.setVisibility(View.GONE);
@@ -221,24 +243,21 @@ public class SubmissionAdapter extends ArrayAdapter<Submission> {
         };
 
         private View.OnClickListener mExpandListener = new View.OnClickListener() {
-
-            private View mTextView = itemView.findViewById(R.id.self_text);
-
             @Override
             public void onClick(final View view) {
                 Animation anim;
                 Animation textAnim;
                 if (mSubmission.isSelftextOpen()) {
                     anim = AnimationUtils.loadAnimation(view.getContext(), R.anim.rotate_left);
-                    mTextView.setVisibility(View.GONE);
+                    mSelfText.setVisibility(View.GONE);
                     mSubmission.setSelftextOpen(false);
                 } else {
                     anim = AnimationUtils.loadAnimation(view.getContext(), R.anim.rotate_right);
                     textAnim = new ScaleAnimation(1, 1, 0, 1);
                     textAnim.setFillAfter(true);
                     textAnim.setDuration(300l);
-                    mTextView.setVisibility(View.VISIBLE);
-                    mTextView.startAnimation(textAnim);
+                    mSelfText.setVisibility(View.VISIBLE);
+                    mSelfText.startAnimation(textAnim);
                     mSubmission.setSelftextOpen(true);
                 }
                 anim.setFillBefore(true);
@@ -261,31 +280,22 @@ public class SubmissionAdapter extends ArrayAdapter<Submission> {
             } else {
                 image = null;
             }
-            ImageView imageView = (ImageView) itemView.findViewById(R.id.image);
             if (image != null) {
-                imageView.setVisibility(View.VISIBLE);
-                ImgurApi.loadImage(image.getHugeThumbnail(), imageView, null);
-                ImageButton button = (ImageButton) itemView.findViewById(R.id.preview_button);
-                button.setVisibility(View.INVISIBLE);
-                imageView.setOnClickListener(new View.OnClickListener() {
+                ImgurApi.loadImage(image.getHugeThumbnail(), mImageView, null);
+                mImageView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        if (mSubmission.getImgurData() instanceof ImgurImage) {
-                            mCallback.onImageViewClicked((ImgurImage) mSubmission.getImgurData());
-                        } else if (mSubmission.getImgurData() instanceof ImgurAlbum) {
-                            mCallback.onImageViewClicked((ImgurAlbum) mSubmission.getImgurData());
-                        }
+                            mCallback.onImageViewClicked(mSubmission.getImgurData());
                     }
                 });
             } else {
-                itemView.findViewById(R.id.content_preview).setVisibility(View.GONE);
+                mContainer.setVisibility(View.GONE);
             }
         }
     }
 
     public static interface AdapterCallbacks {
-        public void onImageViewClicked(ImgurImage image);
-        public void onImageViewClicked(ImgurAlbum album);
+        public void onImageViewClicked(Object imgurData);
         public void onImageViewClicked(String imageUrl);
         public void onYouTubeVideoClicked(String videoId);
         public void onCardClicked(Submission submission);

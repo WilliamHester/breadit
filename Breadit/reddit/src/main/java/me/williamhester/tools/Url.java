@@ -98,7 +98,7 @@ public class Url implements Parcelable {
             mId = mUri.getQueryParameter("v");
         }
         mType = YOUTUBE;
-        mUrl = "http://img.youtube.com/vi/" + mId + "/maxresdefault.jpg";
+        mUrl = "http://img.youtube.com/vi/" + mId + "/0.jpg";
     }
 
     private void generateLiveMemeDetails() {

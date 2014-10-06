@@ -545,9 +545,11 @@ public class NavigationDrawerFragment extends AccountFragment {
         @Override
         protected void onPostExecute(Boolean result) {
             if (result) {
-                mCheckbox.setChecked(mSubreddit.userIsSubscriber());
-                mCheckbox.setEnabled(true);
-            } else {
+                if (mCheckbox != null && mSubreddit != null) {
+                    mCheckbox.setChecked(mSubreddit.userIsSubscriber());
+                    mCheckbox.setEnabled(true);
+                }
+            } else if (mCheckbox != null) {
                 mCheckbox.setChecked(false);
                 mCheckbox.setEnabled(false);
             }

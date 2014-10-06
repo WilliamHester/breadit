@@ -138,6 +138,12 @@
                 android:textSize="14sp"
                 android:visibility="gone"/>
 
+            <View android:id="@+id/nsfw_blocker"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:background="@android:color/black"
+                android:visibility="gone"/>
+
         </RelativeLayout>
     </me.williamhester.ui.views.SwipeView>
 
