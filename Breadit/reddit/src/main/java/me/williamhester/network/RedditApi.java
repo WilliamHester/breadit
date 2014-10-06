@@ -99,11 +99,11 @@ public class RedditApi {
     private static Map<String, List<String>> generateSubmissionQueries(String secondarySort,
                                                                          String before, String after) {
         Map<String, List<String>> queries = new HashMap<>();
-//        if (secondarySort != null) {
-//            ArrayList<String> query = new ArrayList<>();
-//            query.add(secondarySort);
-//            queries.put("t", query);
-//        }
+        if (secondarySort != null) {
+            ArrayList<String> query = new ArrayList<>();
+            query.add(secondarySort);
+            queries.put("t", query);
+        }
         if (before != null) {
             ArrayList<String> query = new ArrayList<>();
             query.add(before);

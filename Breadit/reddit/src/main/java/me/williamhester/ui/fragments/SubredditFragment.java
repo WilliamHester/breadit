@@ -7,10 +7,14 @@ import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.ListView;
+import android.widget.PopupMenu;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -21,8 +25,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
-import me.williamhester.models.ImgurAlbum;
-import me.williamhester.models.ImgurImage;
 import me.williamhester.models.Listing;
 import me.williamhester.models.ResponseRedditWrapper;
 import me.williamhester.models.Submission;
@@ -69,6 +71,7 @@ public class SubredditFragment extends AccountFragment implements SubmissionAdap
         }
         mSubmissionsAdapter = new SubmissionAdapter(getActivity(), this, mSubmissionList);
         loadPrefs();
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -93,6 +96,12 @@ public class SubredditFragment extends AccountFragment implements SubmissionAdap
             populateSubmissions();
         }
         return v;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.subreddit, menu);
     }
 
     @Override
@@ -132,6 +141,19 @@ public class SubredditFragment extends AccountFragment implements SubmissionAdap
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_sort) {
+            View anchor = getActivity().findViewById(R.id.action_sort);
+            PopupMenu popupMenu = new PopupMenu(getActivity(), getActivity().findViewById(R.id.action_sort));
+            popupMenu.setOnMenuItemClickListener(new PrimarySortClickListener(anchor));
+            popupMenu.inflate(R.menu.primary_sorts);
+            popupMenu.show();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     protected void onAccountChanged() {
         refreshData();
     }
@@ -144,6 +166,17 @@ public class SubredditFragment extends AccountFragment implements SubmissionAdap
         mNames.toArray(array);
         outState.putStringArray("names", array);
         super.onSaveInstanceState(outState);
+    }
+
+    private void setSort(String primary, String secondary) {
+        if (!primary.equals(mPrimarySortType)
+                || secondary == null && mSecondarySortType != null
+                || secondary != null && mSecondarySortType == null
+                || (secondary != null && !secondary.equals(mSecondarySortType))) {
+            mPrimarySortType = primary;
+            mSecondarySortType = secondary;
+            refreshData();
+        }
     }
 
     public void setPrimarySort(int sortType) {
@@ -328,6 +361,89 @@ public class SubredditFragment extends AccountFragment implements SubmissionAdap
         args.putString(SubmissionActivity.TAB, SubmissionActivity.COMMENT_TAB);
         i.putExtras(args);
         startActivityForResult(i, VOTE_REQUEST_CODE);
+    }
+
+    private class PrimarySortClickListener implements PopupMenu.OnMenuItemClickListener {
+
+        private View mAnchor;
+
+        public PrimarySortClickListener(View anchor) {
+            mAnchor = anchor;
+        }
+
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+            String tempSortType;
+            switch (item.getItemId()) {
+                case R.id.sort_hot:
+                    tempSortType = RedditApi.SORT_TYPE_HOT;
+                    break;
+                case R.id.sort_new:
+                    tempSortType = RedditApi.SORT_TYPE_NEW;
+                    break;
+                case R.id.sort_rising:
+                    tempSortType = RedditApi.SORT_TYPE_RISING;
+                    break;
+                case R.id.sort_controversial: {
+                    tempSortType = RedditApi.SORT_TYPE_CONTROVERSIAL;
+                    PopupMenu popupMenu = new PopupMenu(getActivity(), mAnchor);
+                    popupMenu.setOnMenuItemClickListener(new SecondarySortClickListener(tempSortType));
+                    popupMenu.inflate(R.menu.secondary_sorts);
+                    popupMenu.show();
+                    return true;
+                }
+                case R.id.sort_top: {
+                    tempSortType = RedditApi.SORT_TYPE_TOP;
+                    PopupMenu popupMenu = new PopupMenu(getActivity(), mAnchor);
+                    popupMenu.setOnMenuItemClickListener(new SecondarySortClickListener(tempSortType));
+                    popupMenu.inflate(R.menu.secondary_sorts);
+                    popupMenu.show();
+                    return true;
+                }
+                default:
+                    tempSortType = RedditApi.SORT_TYPE_HOT;
+            }
+            setSort(tempSortType, null);
+            return true;
+        }
+    }
+
+    private class SecondarySortClickListener implements PopupMenu.OnMenuItemClickListener {
+
+        private String mPrimary;
+
+        public SecondarySortClickListener(String primary) {
+            mPrimary = primary;
+        }
+
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+            String tempSortType;
+            switch (item.getItemId()) {
+                case R.id.sort_hour:
+                    tempSortType = RedditApi.SECONDARY_SORT_HOUR;
+                    break;
+                case R.id.sort_today:
+                    tempSortType = RedditApi.SECONDARY_SORT_DAY;
+                    break;
+                case R.id.sort_week:
+                    tempSortType = RedditApi.SECONDARY_SORT_WEEK;
+                    break;
+                case R.id.sort_month:
+                    tempSortType = RedditApi.SECONDARY_SORT_MONTH;
+                    break;
+                case R.id.sort_year:
+                    tempSortType = RedditApi.SECONDARY_SORT_YEAR;
+                    break;
+                case R.id.sort_all:
+                    tempSortType = RedditApi.SECONDARY_SORT_ALL;
+                    break;
+                default:
+                    tempSortType = RedditApi.SECONDARY_SORT_ALL;
+            }
+            setSort(mPrimary, tempSortType);
+            return true;
+        }
     }
 
     public class InfiniteLoadingScrollListener implements AbsListView.OnScrollListener {
