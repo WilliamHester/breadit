@@ -141,7 +141,7 @@ public class CommentFragment extends AccountFragment {
         SwipeView swipeView = (SwipeView) mHeaderView.findViewById(R.id.swipe_view);
         View foregroundVote = mHeaderView.findViewById(R.id.vote_foreground);
         View backgroundVote = mHeaderView.findViewById(R.id.vote_background);
-        
+
         switch (mSubmission.getVoteStatus()) {
             case Votable.DOWNVOTED:
                 foregroundVote.setScaleY(0f);
@@ -374,6 +374,9 @@ public class CommentFragment extends AccountFragment {
                 createHeaderView();
                 mCommentsListView.addHeaderView(mHeaderView);
                 mCallback.onSubmissionLoaded(mSubmission);
+            } else { // need to replace the submission object inside the SwipeView header
+                SwipeView swipeView = (SwipeView) mHeaderView.findViewById(R.id.swipe_view);
+                swipeView.recycle(mSubmission);
             }
         }
     };
