@@ -41,26 +41,30 @@ public class Url implements Parcelable {
             }
         } else {
             mUri = Uri.parse(url);
-            if (mUri.getHost().contains("reddit.com")) {
-                generateRedditDetails();
-            } else if (mUri.getHost().contains("imgur")) {
-                generateImgurDetails();
-            } else if (mUri.getHost().contains("youtu.be")
-                    || mUri.getHost().contains("youtube.com")) {
-                generateYoutubeDetails();
-            } else if (isDirectImageLink()) {
-                mType = NORMAL_IMAGE;
-            } else if (isGif()) {
-                mType = GIF;
-            } else if (mUri.getHost().contains("livememe.com")) {
-                mType = NORMAL_IMAGE;
-                generateLiveMemeDetails();
-            } else if (mUri.getHost().contains("imgflip.com")) {
-                mType = NORMAL_IMAGE;
-                generateImgFlipDetails();
-            } else if (mUrl.contains("gfycat.com")) {
-                generateGfycatDetails();
-            } else {
+            try {
+                if (mUri.getHost().contains("reddit.com")) {
+                    generateRedditDetails();
+                } else if (mUri.getHost().contains("imgur")) {
+                    generateImgurDetails();
+                } else if (mUri.getHost().contains("youtu.be")
+                        || mUri.getHost().contains("youtube.com")) {
+                    generateYoutubeDetails();
+                } else if (isDirectImageLink()) {
+                    mType = NORMAL_IMAGE;
+                } else if (isGif()) {
+                    mType = GIF;
+                } else if (mUri.getHost().contains("livememe.com")) {
+                    mType = NORMAL_IMAGE;
+                    generateLiveMemeDetails();
+                } else if (mUri.getHost().contains("imgflip.com")) {
+                    mType = NORMAL_IMAGE;
+                    generateImgFlipDetails();
+                } else if (mUrl.contains("gfycat.com")) {
+                    generateGfycatDetails();
+                } else {
+                    mType = NOT_SPECIAL;
+                }
+            } catch (NullPointerException e) {
                 mType = NOT_SPECIAL;
             }
         }
