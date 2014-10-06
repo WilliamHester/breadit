@@ -91,6 +91,7 @@ public class SwipeView extends LinearLayout {
                 break;
             case MotionEvent.ACTION_MOVE:
                 mSwiping = onStart(ev);
+                if (!mSwiping) super.onTouchEvent(ev);
                 break;
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
