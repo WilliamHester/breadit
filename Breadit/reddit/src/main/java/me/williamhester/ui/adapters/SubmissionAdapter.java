@@ -229,6 +229,7 @@ public class SubmissionAdapter extends ArrayAdapter<Submission> {
                 mSelfText.setText(parser.getSpannableString());
                 mSelfText.setMovementMethod(new LinkMovementMethod());
             } else {
+                mShowSelfText.setVisibility(View.GONE);
                 mSelfText.setVisibility(View.GONE);
                 container.setVisibility(View.GONE);
             }
