@@ -12,6 +12,8 @@ import com.google.gson.reflect.TypeToken;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
 
+import org.apache.http.message.BasicNameValuePair;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,7 +27,9 @@ import me.williamhester.models.Listing;
 import me.williamhester.models.MoreComments;
 import me.williamhester.models.ResponseRedditWrapper;
 import me.williamhester.models.Submission;
+import me.williamhester.models.Subreddit;
 import me.williamhester.models.Votable;
+import me.williamhester.models.utils.Utilities;
 import me.williamhester.tools.HtmlParser;
 
 /**
@@ -93,6 +97,41 @@ public class RedditApi {
                 .addHeaders(generateUserHeaders())
                 .addHeader("User-Agent", USER_AGENT)
                 .asJsonObject()
+                .setCallback(callback);
+    }
+
+    public static void getSubredditDetails(Context context, String subredditName,
+                                           final FutureCallback<Subreddit> callback) {
+        if (subredditName != null && subredditName.length() > 0) {
+            subredditName = "/r/" + subredditName;
+        }
+        Ion.with(context)
+                .load(REDDIT_URL + subredditName + "/about.json")
+                .addHeaders(generateUserHeaders())
+                .addHeader("User-Agent", USER_AGENT)
+                .asJsonObject()
+                .setCallback(new FutureCallback<JsonObject>() {
+                    @Override
+                    public void onCompleted(Exception e, JsonObject result) {
+                        if (e != null) {
+                            callback.onCompleted(e, null);
+                            return;
+                        }
+                        ResponseRedditWrapper wrapper = new ResponseRedditWrapper(result, new Gson());
+                        callback.onCompleted(null, (Subreddit) wrapper.getData());
+                    }
+                });
+    }
+
+    public static void subscribeSubreddit(Context context, boolean sub, Subreddit subreddit,
+                                          FutureCallback<String> callback) {
+        Ion.with(context)
+                .load(REDDIT_URL + "/api/subscribe/")
+                .addHeaders(generateUserHeaders())
+                .addHeader("User-Agent", USER_AGENT)
+                .setBodyParameter("action", sub ? "sub" : "unsub")
+                .setBodyParameter("sr", subreddit.getName())
+                .asString()
                 .setCallback(callback);
     }
 

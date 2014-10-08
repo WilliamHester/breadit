@@ -8,6 +8,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -72,22 +73,22 @@ public class Account implements Parcelable {
         }
         if (mSubredditsString != null) {
             Scanner scan = new Scanner(mSubredditsString).useDelimiter(",");
-            mSubreddits = new ArrayList<String>();
+            mSubreddits = new ArrayList<>();
             while (scan.hasNext()) {
                 mSubreddits.add(scan.next());
             }
         } else {
-            mSubreddits = new ArrayList<String>();
+            mSubreddits = new ArrayList<>();
         }
         if (mHistory != null) {
             Scanner scan = new Scanner(mHistory).useDelimiter(",");
-            mHistoryTree = new TreeSet<String>();
+            mHistoryTree = new TreeSet<>();
             while (scan.hasNext()) {
                 mHistoryTree.add(scan.next());
             }
         } else {
             mHistory = "";
-            mHistoryTree = new TreeSet<String>();
+            mHistoryTree = new TreeSet<>();
         }
     }
 
@@ -116,19 +117,19 @@ public class Account implements Parcelable {
         mSavedComments = c.getString(6);
         mHistory = c.getString(7);
         Scanner scan = new Scanner(subs).useDelimiter(",");
-        mSubreddits = new ArrayList<String>();
+        mSubreddits = new ArrayList<>();
         while (scan.hasNext()) {
             mSubreddits.add(scan.next());
         }
         if (mHistory != null) {
             scan = new Scanner(mHistory).useDelimiter(",");
-            mHistoryTree = new TreeSet<String>();
+            mHistoryTree = new TreeSet<>();
             while (scan.hasNext()) {
                 mHistoryTree.add(scan.next());
             }
         } else {
             mHistory = "";
-            mHistoryTree = new TreeSet<String>();
+            mHistoryTree = new TreeSet<>();
         }
     }
 
@@ -337,9 +338,10 @@ public class Account implements Parcelable {
         JsonObject data = object.get("data").getAsJsonObject();
         JsonArray array = data.get("children").getAsJsonArray();
 
+        Gson gson = new Gson();
         for (int i = 0; i < array.size(); i++) {
             JsonObject jsonData = array.get(i).getAsJsonObject();
-            subreddits.add(new Subreddit(jsonData));
+            subreddits.add((Subreddit) new ResponseRedditWrapper(jsonData, gson).getData());
         }
 
         String after = null;
@@ -363,7 +365,7 @@ public class Account implements Parcelable {
 
             for (int i = 0; i < array.size(); i++) {
                 JsonObject jsonData = array.get(i).getAsJsonObject();
-                subreddits.add(new Subreddit(jsonData));
+                subreddits.add((Subreddit) new ResponseRedditWrapper(jsonData, gson).getData());
             }
 
             je = data.get("after");

@@ -17,29 +17,31 @@ public class ResponseRedditWrapper implements Serializable {
     private Object mData;
 
     public ResponseRedditWrapper(JsonObject object, Gson gson) {
-        mKind = object.get("kind").getAsString();
-        if (mKind.equals("t1")) {
-            mData = new Comment(object.get("data").getAsJsonObject(), gson);
-        } else if (mKind.equals("more")) {
-            mData = new MoreComments(object.get("data").getAsJsonObject());
-        } else if (mKind.equals("Listing")) {
-            mData = new Listing(object.get("data").getAsJsonObject(), gson);
-        } else if (mKind.equals("t2")) {
-            // Account
-        } else if (mKind.equals("t3")) {
-            TypeToken<Submission> token = new TypeToken<Submission>() {};
-            mData = gson.fromJson(object.get("data"), token.getType());
-        } else if (mKind.equals("t4")) {
-            // Message
-        } else if (mKind.equals("t5")) {
-            // Subreddit
-        } else if (mKind.equals("t6")) {
-            // Award
-        } else if (mKind.equals("t8")) {
-            // Promo Campaign
-        } else if (mKind.equals("LiveUpdateEvent")) {
-            TypeToken<RedditLive> token = new TypeToken<RedditLive>() {};
-            mData = gson.fromJson(object.get("data"), token.getType());
+        if (object != null) {
+            mKind = object.get("kind").getAsString();
+            if (mKind.equals("t1")) {
+                mData = new Comment(object.get("data").getAsJsonObject(), gson);
+            } else if (mKind.equals("more")) {
+                mData = new MoreComments(object.get("data").getAsJsonObject());
+            } else if (mKind.equals("Listing")) {
+                mData = new Listing(object.get("data").getAsJsonObject(), gson);
+            } else if (mKind.equals("t2")) {
+                // Account
+            } else if (mKind.equals("t3")) {
+                mData = gson.fromJson(object.get("data"), Submission.class);
+            } else if (mKind.equals("t4")) {
+                // Message
+            } else if (mKind.equals("t5")) {
+                mData = gson.fromJson(object.get("data"), Subreddit.class);
+            } else if (mKind.equals("t6")) {
+                // Award
+            } else if (mKind.equals("t8")) {
+                // Promo Campaign
+            } else if (mKind.equals("LiveUpdateEvent")) {
+                TypeToken<RedditLive> token = new TypeToken<RedditLive>() {
+                };
+                mData = gson.fromJson(object.get("data"), token.getType());
+            }
         }
     }
 

@@ -5,70 +5,60 @@ import android.os.Parcelable;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.annotations.SerializedName;
 
-public class Subreddit extends Thing implements Parcelable {
+public class Subreddit implements Parcelable {
 
+
+    protected String id;
+    protected String name;
+
+    @SerializedName("accounts_active")
     private int mAccountsActive;
+    @SerializedName("comment_score_hide_mins")
     private int mCommentScoreHideMins;
+    @SerializedName("created")
     private long mCreated;
+    @SerializedName("created_utc")
     private long mCreatedUtc;
+    @SerializedName("subscribers")
     private long mSubscribers;
+    @SerializedName("description")
     private String mDescription;
+    @SerializedName("description_html")
     private String mDescriptionHtml;
+    @SerializedName("display_name")
     private String mDisplayName;
+    @SerializedName("header_img")
     private String mHeaderImg;
+    @SerializedName("header_title")
     private String mHeaderTitle;
+    @SerializedName("public_description")
     private String mPublicDescription;
+    @SerializedName("submission_type")
     private String mSubmissionType;
+    @SerializedName("submit_link_label")
     private String mSubmitLinkLabel;
+    @SerializedName("submit_text_label")
     private String mSubmitTextLabel;
+    @SerializedName("subreddit_type")
     private String mSubredditType;
+    @SerializedName("title")
     private String mTitle;
+    @SerializedName("url")
     private String mUrl;
+    @SerializedName("over18")
     private boolean mOver18;
+    @SerializedName("public_traffic")
     private boolean mPublicTraffic;
+    @SerializedName("user_is_banned")
     private boolean mUserIsBanned;
+    @SerializedName("user_is_contributor")
     private boolean mUserIsContributor;
+    @SerializedName("user_is_moderator")
     private boolean mUserIsModerator;
+    @SerializedName("user_is_subscriber")
     private boolean mUserIsSubscriber;
-
-    public Subreddit(JsonObject data) {
-        super(data);
-        if (data != null) {
-            data = data.get("data").getAsJsonObject();
-//        mAccountsActive = data.get("accounts_active").getAsInt();
-//        mCommentScoreHideMins = data.get("comment_score_hide_mins").getAsInt();
-            mCreated = data.get("created").getAsLong();
-            mCreatedUtc = data.get("created_utc").getAsLong();
-            mSubscribers = data.get("subscribers").getAsLong();
-//        mDescription = data.get("description").getAsString();
-//        mDescriptionHtml = data.get("description_html").getAsString();
-            mDisplayName = data.get("display_name").getAsString();
-//        mHeaderImg = data.get("header_img").getAsString();
-//        mHeaderTitle = data.get("header_title").getAsString();
-//        mPublicDescription = data.get("public_description").getAsString();
-//        mSubmissionType = data.get("submission_type").getAsString();
-//        mSubmitLinkLabel = data.get("submit_link_label").getAsString();
-//        mSubmitTextLabel = data.get("submit_text_label").getAsString();
-//        mSubredditType = data.get("subreddit_type").getAsString();
-            mTitle = data.get("title").getAsString();
-            mUrl = data.get("url").getAsString();
-            mOver18 = data.get("over18").getAsBoolean();
-            mPublicTraffic = data.get("public_traffic").getAsBoolean();
-            if (!data.get("user_is_banned").isJsonNull()) {
-                mUserIsBanned = data.get("user_is_banned").getAsBoolean();
-                mUserIsContributor = data.get("user_is_contributor").getAsBoolean();
-                mUserIsModerator = data.get("user_is_moderator").getAsBoolean();
-                mUserIsSubscriber = data.get("user_is_subscriber").getAsBoolean();
-            }
-        }
-    }
-
-    public static Subreddit fromString(String dataString) {
-        JsonParser parser = new JsonParser();
-        JsonObject data = parser.parse(dataString).getAsJsonObject();
-        return new Subreddit(data);
-    }
 
     public boolean userIsBanned() {
         return mUserIsBanned;
@@ -125,33 +115,37 @@ public class Subreddit extends Thing implements Parcelable {
     public long getCreated() {
         return  mCreated;
     }
-//
-//    public long getCreatedUtc() {
-//        return  mCreatedUtc;
-//    }
-//
-//    public boolean userIsContributor() {
-//        return mUserIsContributor;
-//    }
-//
-//    public String getPublicDescription() {
-//        return  mPublicDescription;
-//    }
-//
-//    public long getCommentScoreHideMins() {
-//        return mCommentScoreHideMins;
-//    }
-//
-//    public String getSubredditType() {
-//        return  mSubredditType;
-//    }
-//
-//    public String getSubmissionType() {
-//        return  mSubmissionType;
-//    }
+
+    public long getCreatedUtc() {
+        return  mCreatedUtc;
+    }
+
+    public boolean userIsContributor() {
+        return mUserIsContributor;
+    }
+
+    public String getPublicDescription() {
+        return  mPublicDescription;
+    }
+
+    public long getCommentScoreHideMins() {
+        return mCommentScoreHideMins;
+    }
+
+    public String getSubredditType() {
+        return  mSubredditType;
+    }
+
+    public String getSubmissionType() {
+        return  mSubmissionType;
+    }
 
     public boolean userIsSubscriber() {
         return mUserIsSubscriber;
+    }
+
+    public String getName() {
+        return name;
     }
 
     @Override
@@ -186,7 +180,6 @@ public class Subreddit extends Thing implements Parcelable {
         dest.writeByte(mUserIsSubscriber ? (byte) 1 : (byte) 0);
         dest.writeString(this.id);
         dest.writeString(this.name);
-        dest.writeString(this.kind);
     }
 
     private Subreddit(Parcel in) {
@@ -215,7 +208,6 @@ public class Subreddit extends Thing implements Parcelable {
         this.mUserIsSubscriber = in.readByte() != 0;
         this.id = in.readString();
         this.name = in.readString();
-        this.kind = in.readString();
     }
 
     public static Creator<Subreddit> CREATOR = new Creator<Subreddit>() {

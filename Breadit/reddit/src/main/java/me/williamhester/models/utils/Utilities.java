@@ -82,20 +82,6 @@ public class Utilities {
         return null;
     }
 
-//    public static String imgurPostImage() {
-//        DefaultHttpClient httpClient = new DefaultHttpClient();
-//        HttpPost httpPost = new HttpPost("https://api.imgur.com/3/image");
-//        httpPost.addHeader("User-Agent", USER_AGENT);
-//        httpPost.addHeader("Authorization", "CLIENT-ID 2bdd3ec7a3fa918");
-//
-//        BufferedImage image = ImageIO.read(file);
-//        ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
-//        ImageIO.write(image, "png", byteArray);
-//        byte[] byteImage = byteArray.toByteArray();
-//        String imageString = new Base64().encodeAsString(byteImage);
-//        return null;
-//    }
-
     private static String readStream(InputStream in) {
         BufferedReader reader = new BufferedReader(new InputStreamReader(in));
         StringBuilder sb = new StringBuilder();

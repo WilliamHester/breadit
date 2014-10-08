@@ -76,9 +76,7 @@ public class MainActivity extends Activity
                     mSubredditFragment = fragment;
                     if (fragment instanceof SubredditFragment) {
                         mSubreddit = ((SubredditFragment) mSubredditFragment).getSubreddit();
-                        mNavigationDrawerFragment.setSubreddit(mSubreddit,
-                                0,  // TODO: Fix this
-                                0); // TODO: Fix this
+                        mNavigationDrawerFragment.setSubreddit(mSubreddit);
                     }
                 }
             }
@@ -90,9 +88,7 @@ public class MainActivity extends Activity
         super.onResume();
         mSubredditFragment = getFragmentManager().findFragmentByTag(mSubreddit);
         mSubreddit = ((SubredditFragment) mSubredditFragment).getSubreddit();
-        mNavigationDrawerFragment.setSubreddit(mSubreddit,
-                0,  // TODO: Fix this
-                0); // TODO: Fix this
+        mNavigationDrawerFragment.setSubreddit(mSubreddit);
         invalidateOptionsMenu();
     }
 
@@ -129,16 +125,6 @@ public class MainActivity extends Activity
         }
     }
 
-    @Override
-    public void onSortSelected(int sort) {
-        ((SubredditFragment) mSubredditFragment).setPrimarySort(sort);
-    }
-
-    @Override
-    public void onSubSortSelected(int sort) {
-        ((SubredditFragment) mSubredditFragment).setSecondarySort(sort);
-    }
-
     private void updateActionBar(String sub) {
         if (TextUtils.isEmpty(sub) && getActionBar() != null)
             getActionBar().setTitle("FrontPage");
@@ -149,9 +135,6 @@ public class MainActivity extends Activity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
-//        if (!AccountManager.isLoggedIn()) {
-//            menu.removeItem(R.id.action_my_account);
-//        }
         return super.onCreateOptionsMenu(menu);
     }
 
