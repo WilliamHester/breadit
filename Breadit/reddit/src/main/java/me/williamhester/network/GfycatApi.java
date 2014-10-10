@@ -2,7 +2,6 @@ package me.williamhester.network;
 
 import android.content.Context;
 import android.media.MediaPlayer;
-import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.VideoView;
@@ -24,6 +23,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 
 import me.williamhester.models.GfycatResponse;
+import me.williamhester.models.ImgurImage;
 import me.williamhester.models.ResponseGfycatUrlCheck;
 import me.williamhester.models.ResponseGfycatUrlUpload;
 
@@ -34,7 +34,7 @@ public class GfycatApi {
 
     private static final AsyncHttpClient mGfyClient = new AsyncHttpClient(AsyncServer.getDefault());
     private static Ion mGfyIon;
-    private static String mGfyFileName;
+    private static String mVideoFileName;
 
     private GfycatApi() {}
 
@@ -47,7 +47,7 @@ public class GfycatApi {
             }
         }
         try {
-            mGfyFileName = context.getCacheDir() + "/gfy.webm";
+            mVideoFileName = context.getCacheDir() + "/gif.video";
             ResponseCacheMiddleware.addCache(mGfyClient,
                     new File(context.getCacheDir(), "gifcache"),
                     1024 * 1024 * 8);
@@ -86,7 +86,57 @@ public class GfycatApi {
     public static void downloadWebmGif(String url,
                                        final ProgressBar progressBar,
                                        final VideoView videoView) {
-        mGfyClient.executeFile(new AsyncHttpGet(url), mGfyFileName, new AsyncHttpClient.FileCallback() {
+        mGfyClient.executeFile(new AsyncHttpGet(url), mVideoFileName, new AsyncHttpClient.FileCallback() {
+            @Override
+            public void onProgress(AsyncHttpResponse response, final long downloaded, final long total) {
+                progressBar.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        progressBar.setProgress((int) (downloaded * 100 / total));
+                    }
+                });
+            }
+
+            @Override
+            public void onCompleted(Exception e, final AsyncHttpResponse response, final File result) {
+                if (e != null) {
+                    e.printStackTrace();
+                    return;
+                }
+                videoView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        videoView.setVideoPath(result.getAbsolutePath());
+                        videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                            @Override
+                            public void onPrepared(MediaPlayer mediaPlayer) {
+                                videoView.start();
+                                result.delete();
+                            }
+                        });
+                        videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                            @Override
+                            public void onCompletion(MediaPlayer mediaPlayer) {
+                                videoView.start();
+                            }
+                        });
+                    }
+                });
+                progressBar.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        progressBar.setVisibility(View.GONE);
+                    }
+                });
+            }
+        });
+    }
+
+    public static void downloadImgurGif(ImgurImage image,
+                                       final ProgressBar progressBar,
+                                       final VideoView videoView) {
+        String url = "http://i.imgur.com/" + image.getId() + ".mp4";
+        mGfyClient.executeFile(new AsyncHttpGet(url), mVideoFileName, new AsyncHttpClient.FileCallback() {
             @Override
             public void onProgress(AsyncHttpResponse response, final long downloaded, final long total) {
                 progressBar.post(new Runnable() {

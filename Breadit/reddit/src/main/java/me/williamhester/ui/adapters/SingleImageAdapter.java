@@ -5,7 +5,7 @@ import android.app.FragmentManager;
 import android.support.v13.app.FragmentPagerAdapter;
 
 import me.williamhester.tools.Url;
-import me.williamhester.ui.fragments.GfycatFragment;
+import me.williamhester.ui.fragments.GifFragment;
 import me.williamhester.ui.fragments.ImageFragment;
 
 /**
@@ -31,7 +31,7 @@ public class SingleImageAdapter extends FragmentPagerAdapter {
     @Override
     public Fragment getItem(int position) {
         if (mUrl.contains(".gif") || mParser.getType() == Url.GFYCAT_LINK) {
-            return GfycatFragment.newInstance(mUrl);
+            return GifFragment.newInstance(mUrl);
         }
         return ImageFragment.newInstance(mUrl);
     }
