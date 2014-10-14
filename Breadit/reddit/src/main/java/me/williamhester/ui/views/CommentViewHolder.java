@@ -29,6 +29,7 @@ public class CommentViewHolder extends VotableViewHolder {
     private View mContent;
     private TextView mAuthor;
     private View mLevelIndicator;
+    private View mGoldIndicator;
 
     public CommentViewHolder(View itemView, CommentClickCallbacks callbacks, String submissionAuthor) {
         super(itemView);
@@ -38,6 +39,7 @@ public class CommentViewHolder extends VotableViewHolder {
         mContent = itemView.findViewById(R.id.comment_content);
         mAuthor = (TextView) itemView.findViewById(R.id.author);
         mLevelIndicator = itemView.findViewById(R.id.level_indicator);
+        mGoldIndicator = itemView.findViewById(R.id.gold_indicator);
     }
 
     @Override
@@ -74,6 +76,7 @@ public class CommentViewHolder extends VotableViewHolder {
             sb.setSpan(new ForegroundColorSpan(itemView.getResources().getColor(R.color.auburn_blue)),
                     0, sb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             mBody.setText(sb);
+            mGoldIndicator.setVisibility(View.GONE);
         } else {
             Comment comment1 = (Comment) mComment;
             mMetadata.setVisibility(View.VISIBLE);
@@ -90,6 +93,8 @@ public class CommentViewHolder extends VotableViewHolder {
             } else {
                 mBody.setVisibility(View.VISIBLE);
             }
+
+            mGoldIndicator.setVisibility(comment1.isGilded() ? View.VISIBLE : View.INVISIBLE);
 
             if (comment1.getAuthor().equals(mSubmissionAuthor)) {
                 mAuthor.setBackgroundResource(R.drawable.author_background);

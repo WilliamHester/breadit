@@ -196,7 +196,7 @@ public class SubmissionAdapter extends ArrayAdapter<Submission> {
                 if (!mSubmission.isSelf()) {
                     mNsfwBlocker.setVisibility(View.GONE);
                 }
-            } else if (mSubmission.isShowingNsfw()) {
+            } else if (!mSubmission.isSelf() && mSubmission.isShowingNsfw()) {
                 mNsfwWarning.setVisibility(View.VISIBLE);
                 mNsfwBlocker.setVisibility(View.GONE);
             } else {

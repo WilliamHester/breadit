@@ -7,24 +7,12 @@ import android.text.Spannable;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Stack;
 
 public class Comment extends AbsComment implements Votable, Parcelable {
 
     private static final int DOES_NOT_HAVE_CHILDREN = 0;
     private static final int HAS_CHILDREN = 1;
-
-    public static final int BEST = 0;
-    public static final int TOP = 1;
-    public static final int HOT = 2;
-    public static final int CONTROVERSIAL = 3;
-    public static final int NEW = 4;
-    public static final int OLD = 5;
 
     private ResponseRedditWrapper mReplies;
     private String mApprovedBy;
@@ -47,6 +35,7 @@ public class Comment extends AbsComment implements Votable, Parcelable {
     private long mCreatedUtc;
     private String mUps;
     private int mScore;
+    private int mGilded;
     private Spannable mSpannableBody;
     private ArrayList<AbsComment> mChildren;
 
@@ -98,6 +87,7 @@ public class Comment extends AbsComment implements Votable, Parcelable {
         mScore = object.get("score").getAsInt();
         mCreated = object.get("created").getAsLong();
         mCreatedUtc = object.get("created_utc").getAsLong();
+        mGilded = object.get("gilded").getAsInt();
         if (!object.get("ups").isJsonNull()) {
             mUps = object.get("ups").getAsString();
         }
@@ -230,6 +220,10 @@ public class Comment extends AbsComment implements Votable, Parcelable {
 
     public Spannable getSpannableBody() {
         return mSpannableBody;
+    }
+
+    public boolean isGilded() {
+        return mGilded > 0;
     }
 
     public void hide(ArrayList<AbsComment> children) {
