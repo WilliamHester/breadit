@@ -9,6 +9,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -257,6 +258,7 @@ public class NavigationDrawerFragment extends AccountFragment {
         super.onAccountChanged();
         selectCurrentAccount(getView());
         loadSubreddits();
+        mCheckbox.setVisibility(mAccount == null || mSubreddit == null ? View.GONE : View.VISIBLE);
     }
 
     private void selectCurrentAccount(View v) {
@@ -293,54 +295,57 @@ public class NavigationDrawerFragment extends AccountFragment {
     }
 
     public void setSubreddit(String subreddit) {
-        RedditApi.getSubredditDetails(getActivity(), subreddit, new FutureCallback<Subreddit>() {
-            @Override
-            public void onCompleted(Exception e, Subreddit result) {
-                if (e != null) {
-                    e.printStackTrace();
-                    return;
-                }
-                mSubreddit = result;
-                if (mCheckbox != null) {
-                    if (mSubreddit != null) {
-                        mCheckbox.setChecked(mSubreddit.userIsSubscriber());
-                        mCheckbox.setEnabled(true);
-                    } else {
-                        mCheckbox.setChecked(false);
-                        mCheckbox.setEnabled(false);
-                    }
-                }
-            }
-        });
-        if (!AccountManager.isLoggedIn()) {
-            mCheckbox.setVisibility(View.GONE);
-        } else if (subreddit == null || subreddit.equals("")) {
+        if (TextUtils.isEmpty(subreddit)) {
+            mSubreddit = null;
             mCheckbox.setVisibility(View.GONE);
         } else {
-            mCheckbox.setVisibility(View.VISIBLE);
-        }
-        mCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, final boolean b) {
-                final Subreddit subreddit1 = mSubreddit;
-                if (b != subreddit1.userIsSubscriber()) { // Only need to call this if one has changed
-                    RedditApi.subscribeSubreddit(getActivity(), b, subreddit1, new FutureCallback<String>() {
-                        @Override
-                        public void onCompleted(Exception e, String result) {
-                            boolean contains = mSubredditList.contains(subreddit1.getTitle());
-                            if (b && !contains) {
-                                mSubredditList.add(subreddit1.getDisplayName());
-                                Collections.sort(mSubredditList, String.CASE_INSENSITIVE_ORDER);
-                                mSubredditArrayAdapter.notifyDataSetChanged();
-                            } else if (contains) {
-                                mSubredditList.remove(subreddit1.getDisplayName());
-                                mSubredditArrayAdapter.notifyDataSetChanged();
-                            }
+            RedditApi.getSubredditDetails(getActivity(), subreddit, new FutureCallback<Subreddit>() {
+                @Override
+                public void onCompleted(Exception e, Subreddit result) {
+                    if (e != null) {
+                        e.printStackTrace();
+                        return;
+                    }
+                    mSubreddit = result;
+                    if (mCheckbox != null) {
+                        if (mSubreddit != null) {
+                            mCheckbox.setChecked(mSubreddit.userIsSubscriber());
+                            mCheckbox.setEnabled(true);
+                        } else {
+                            mCheckbox.setChecked(false);
+                            mCheckbox.setEnabled(false);
                         }
-                    });
+                    }
                 }
+            });
+            if (!AccountManager.isLoggedIn()) {
+                mCheckbox.setVisibility(View.GONE);
+            } else {
+                mCheckbox.setVisibility(View.VISIBLE);
             }
-        });
+            mCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton compoundButton, final boolean b) {
+                    final Subreddit subreddit1 = mSubreddit;
+                    if (b != subreddit1.userIsSubscriber()) { // Only need to call this if one has changed
+                        RedditApi.subscribeSubreddit(getActivity(), b, subreddit1, new FutureCallback<String>() {
+                            @Override
+                            public void onCompleted(Exception e, String result) {
+                                boolean contains = mSubredditList.contains(subreddit1.getTitle());
+                                if (b && !contains) {
+                                    mSubredditList.add(subreddit1.getDisplayName());
+                                    Collections.sort(mSubredditList, String.CASE_INSENSITIVE_ORDER);
+                                    mSubredditArrayAdapter.notifyDataSetChanged();
+                                } else if (contains) {
+                                    mSubredditList.remove(subreddit1.getDisplayName());
+                                    mSubredditArrayAdapter.notifyDataSetChanged();
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+        }
     }
 
     @Override
