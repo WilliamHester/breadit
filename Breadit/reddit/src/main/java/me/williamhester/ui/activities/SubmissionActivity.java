@@ -52,6 +52,7 @@ public class SubmissionActivity extends Activity implements ImageFragment.ImageT
                 mPermalink = extras.getString(PERMALINK);
             } else {
                 mSubmission = extras.getParcelable(SUBMISSION);
+                setTitle("/r/" + mSubmission.getSubredditName());
                 mMedia = (Submission.Media) extras.getSerializable("media");
                 if (mCurrentTag == null) {
                     mCurrentTag = getIntent().getExtras().getString(TAB);
@@ -135,6 +136,7 @@ public class SubmissionActivity extends Activity implements ImageFragment.ImageT
                 comments.setOnSubmissionLoadedListener(new CommentFragment.OnSubmissionLoaded() {
                     @Override
                     public void onSubmissionLoaded(Submission submission) {
+                        setTitle("/r/" + mSubmission.getSubredditName());
                         mSubmission = submission;
                         mParser = new Url(mSubmission.getUrl());
                         invalidateOptionsMenu();

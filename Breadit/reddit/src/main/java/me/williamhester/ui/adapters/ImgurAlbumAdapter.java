@@ -11,7 +11,7 @@ import java.util.List;
 
 import me.williamhester.models.ImgurAlbum;
 import me.williamhester.models.ImgurImage;
-import me.williamhester.ui.fragments.GfycatFragment;
+import me.williamhester.ui.fragments.GifFragment;
 import me.williamhester.ui.fragments.ImageFragment;
 
 /**
@@ -55,7 +55,7 @@ public class ImgurAlbumAdapter extends FragmentPagerAdapter {
     @Override
     public Fragment getItem(int position) {
         if (mImages.get(position).isAnimated()) {
-            return GfycatFragment.newInstance(mImages.get(position).getUrl());
+            return GifFragment.newInstance(mImages.get(position));
         }
         return ImageFragment.newInstance(mImages.get(position));
     }

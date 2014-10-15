@@ -284,8 +284,6 @@ public class CommentFragment extends AccountFragment {
 
     /**
      * Attempts to set the image preview
-     *
-     * @return returns whether or not the data has been set.
      */
     private void setImagePreview(View v) {
         final ImgurImage image;

@@ -1,19 +1,17 @@
 package me.williamhester.ui.fragments;
 
 import android.app.Fragment;
-import android.gesture.GestureOverlayView;
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.VideoView;
 
 import com.koushikdutta.async.future.FutureCallback;
 
 import me.williamhester.models.GfycatResponse;
+import me.williamhester.models.ImgurImage;
 import me.williamhester.models.ResponseGfycatUrlUpload;
 import me.williamhester.network.GfycatApi;
 import me.williamhester.reddit.R;
@@ -23,14 +21,23 @@ import me.williamhester.tools.Url;
  * Created by william on 6/22/14.
  *
  */
-public class GfycatFragment extends Fragment {
+public class GifFragment extends Fragment {
 
     private Url mParser;
+    private ImgurImage mImage;
 
-    public static GfycatFragment newInstance(String url) {
+    public static GifFragment newInstance(String url) {
         Bundle args = new Bundle();
         args.putString("url", url);
-        GfycatFragment fragment = new GfycatFragment();
+        GifFragment fragment = new GifFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static GifFragment newInstance(ImgurImage image) {
+        Bundle args = new Bundle();
+        args.putParcelable("image", image);
+        GifFragment fragment = new GifFragment();
         fragment.setArguments(args);
         return fragment;
     }
@@ -42,7 +49,13 @@ public class GfycatFragment extends Fragment {
         if (savedInstanceState != null) {
             mParser = savedInstanceState.getParcelable("parser");
         } else {
-            mParser = new Url(getArguments().getString("url"));
+            if (getArguments().containsKey("url")) {
+                mParser = new Url(getArguments().getString("url"));
+            }
+            if (getArguments().containsKey("image")) {
+                mImage = getArguments().getParcelable("image");
+            }
+
         }
     }
 
@@ -53,7 +66,9 @@ public class GfycatFragment extends Fragment {
         final VideoView gif = (VideoView) v.findViewById(R.id.gif_view);
         final ProgressBar progressBar = (ProgressBar) v.findViewById(R.id.progress_bar);
 
-        if (mParser.getType() == Url.GFYCAT_LINK) {
+        if (mImage != null) {
+            GfycatApi.downloadImgurGif(mImage, progressBar, gif);
+        } else if (mParser.getType() == Url.GFYCAT_LINK) {
             GfycatApi.getGfyDetails(getActivity(), mParser.getLinkId(), new FutureCallback<GfycatResponse>() {
                 @Override
                 public void onCompleted(Exception e, GfycatResponse result) {

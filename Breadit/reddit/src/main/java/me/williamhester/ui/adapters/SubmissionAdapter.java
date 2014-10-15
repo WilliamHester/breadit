@@ -138,6 +138,7 @@ public class SubmissionAdapter extends ArrayAdapter<Submission> {
                     case Url.IMGUR_IMAGE: {
                         mContainer.setVisibility(View.VISIBLE);
                         mImageView.setVisibility(View.VISIBLE);
+                        mImageButton.setVisibility(View.GONE);
                         if (mSubmission.getImgurData() == null) {
                             mImageView.setImageDrawable(null);
                             ImgurApi.getImageDetails(id, itemView.getContext(), mSubmission, mImgurCallback);
@@ -149,6 +150,7 @@ public class SubmissionAdapter extends ArrayAdapter<Submission> {
                     case Url.IMGUR_ALBUM: {
                         mContainer.setVisibility(View.VISIBLE);
                         mImageView.setVisibility(View.VISIBLE);
+                        mImageButton.setVisibility(View.GONE);
                         if (mSubmission.getImgurData() == null) {
                             mImageView.setImageDrawable(null);
                             ImgurApi.getAlbumDetails(id, itemView.getContext(), mSubmission, mImgurCallback);
@@ -174,6 +176,7 @@ public class SubmissionAdapter extends ArrayAdapter<Submission> {
                     case Url.NORMAL_IMAGE: {
                         mContainer.setVisibility(View.VISIBLE);
                         mImageView.setVisibility(View.VISIBLE);
+                        mImageButton.setVisibility(View.GONE);
                         ImgurApi.loadImage(linkDetails.getUrl(), mImageView, null);
                         mImageView.setOnClickListener(new View.OnClickListener() {
                             @Override
@@ -226,6 +229,7 @@ public class SubmissionAdapter extends ArrayAdapter<Submission> {
                 mSelfText.setText(parser.getSpannableString());
                 mSelfText.setMovementMethod(new LinkMovementMethod());
             } else {
+                mShowSelfText.setVisibility(View.GONE);
                 mSelfText.setVisibility(View.GONE);
                 container.setVisibility(View.GONE);
             }
