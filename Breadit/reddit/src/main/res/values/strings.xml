@@ -94,7 +94,7 @@
     <string name="warn_nsfw">Warn before entering NSFW Subreddit</string>
     <string name="user_options">User Options</string>
     <string name="login">Log In</string>
-    <string name="logout">Log Out</string>
+    <string name="log_out">Log Out</string>
     <string name="switch_users">Switch users or log out</string>
     <string name="clear_history">Clear History</string>
     <string name="title_activity_settings">Settings</string>
@@ -123,6 +123,11 @@
 
     <!-- NavigationDrawerFragment -->
     <string name="go">Go</string>
+    <string name="messages">Unread Messages</string>
+    <string name="front_page">Front Page</string>
+    <string name="logged_out">Logged out</string>
+    <string name="preferences">Preferences</string>
+    <string name="subreddits">Subreddits</string>
 
     <!-- ImgurImageFragment -->
     <string name="toggle_description">Toggle description</string>
@@ -144,7 +149,5 @@
     <string name="month">This month</string>
     <string name="year">This year</string>
     <string name="all">All time</string>
-
-
 
 </resources>

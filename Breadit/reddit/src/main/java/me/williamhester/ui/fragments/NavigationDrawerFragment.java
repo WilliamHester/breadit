@@ -3,6 +3,7 @@ package me.williamhester.ui.fragments;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -27,26 +28,20 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.google.gson.JsonParseException;
 import com.koushikdutta.async.future.FutureCallback;
-
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import me.williamhester.databases.AccountDataSource;
+import me.williamhester.models.Account;
 import me.williamhester.models.AccountManager;
-import me.williamhester.models.RedditLive;
-import me.williamhester.models.Submission;
 import me.williamhester.models.Subreddit;
-import me.williamhester.models.utils.Utilities;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
+import me.williamhester.ui.activities.SettingsActivity;
 
 ;
 
@@ -57,32 +52,17 @@ import me.williamhester.reddit.R;
  */
 public class NavigationDrawerFragment extends AccountFragment {
 
-    /**
-     * Remember the position of the selected item.
-     */
-    private static final String STATE_SELECTED_POSITION = "selected_navigation_drawer_position";
-
-    /**
-     * A pointer to the current callbacks instance (the Activity).
-     */
     private NavigationDrawerCallbacks mCallbacks;
-
-    /**
-     * Helper component that ties the action bar to the navigation drawer.
-     */
     private ActionBarDrawerToggle mDrawerToggle;
 
     private DrawerLayout mDrawerLayout;
-    private ListView mDrawerListView;
-    private List<String> mSubredditList;
+    private final ArrayList<String> mSubredditList = new ArrayList<>();
     private ArrayAdapter<String> mSubredditArrayAdapter;
 
-    private int mCurrentSelectedPosition = 0;
     private boolean mIsOpen = false;
     private Context mContext;
     private CheckBox mCheckbox;
     private Subreddit mSubreddit;
-    private String mSubName;
 
     public static NavigationDrawerFragment newInstance() {
         return newInstance(null);
@@ -108,24 +88,8 @@ public class NavigationDrawerFragment extends AccountFragment {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mSubName = getArguments().getString("subreddit");
-            if (mSubName == null) {
-                mSubName = "";
-            }
-        }
-
-        if (savedInstanceState != null) {
-            mCurrentSelectedPosition = savedInstanceState.getInt(STATE_SELECTED_POSITION);
-        }
-    }
-
-    @Override
     public void onActivityCreated (Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        // Indicate that this fragment would like to influence the set of actions in the action bar.
         setHasOptionsMenu(true);
     }
 
@@ -135,29 +99,16 @@ public class NavigationDrawerFragment extends AccountFragment {
             Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_navigation_drawer, container, false);
         mDrawerLayout = (DrawerLayout) container.getRootView().findViewById(R.id.drawer_layout);
-        mDrawerListView = (ListView) v.findViewById(R.id.list);
-        View headerView = createHeaderView(inflater);
-        mDrawerListView.addHeaderView(headerView);
-        // make default alphabetical
-        if (mAccount != null) {
-            mSubredditList = mAccount.getSubreddits();
-            Collections.sort(mSubredditList, String.CASE_INSENSITIVE_ORDER);
-            mSubredditArrayAdapter = new SubredditAdapter(mSubredditList);
-            mDrawerListView.setAdapter(mSubredditArrayAdapter);
-        } else {
-            mSubredditList = new ArrayList<>();
-            String[] subs = getResources().getStringArray(R.array.default_subreddits);
-            for (String s : subs) {
-                mSubredditList.add(s);
-            }
-            mSubredditArrayAdapter = new SubredditAdapter(mSubredditList);
-            mDrawerListView.setAdapter(mSubredditArrayAdapter);
-        }
+        mSubredditArrayAdapter = new SubredditAdapter(mSubredditList);
+        ListView drawerListView = (ListView) v.findViewById(R.id.list);
+        drawerListView.addHeaderView(createHeaderView(inflater));
+        drawerListView.setAdapter(mSubredditArrayAdapter);
+        loadSubreddits();
 
-        mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        drawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                selectItem(mSubredditList.get(i - 1));
+                selectItem(i - 2 >= 0 ? mSubredditList.get(i - 2) : null);
             }
         });
 
@@ -242,39 +193,94 @@ public class NavigationDrawerFragment extends AccountFragment {
                 subredditSearch.setText("");
             }
         });
-        mCheckbox = (CheckBox) v.findViewById(R.id.subscribed_CheckBox);
-        mCheckbox.setVisibility(View.GONE);
 
-        TextView frontpage = (TextView) v.findViewById(R.id.subreddit_list_item_title);
-        frontpage.setText("Front Page");
-        frontpage.setBackgroundResource(R.drawable.breadit_activated_background_holo_light);
-        frontpage.setOnClickListener(new View.OnClickListener() {
+        Spinner accountSpinner = (Spinner) v.findViewById(R.id.accounts_spinner);
+        accountSpinner.setAdapter(new AccountAdapter());
+        accountSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onClick(View view) {
-                selectItem("");
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                if (i == AccountManager.getAccounts().size()) {
+                    if (AccountManager.getAccount() != null) {
+                        AccountManager.setAccount(null);
+                        mCallbacks.onAccountChanged();
+                        onAccountChanged();
+                    }
+                } else {
+                    Account a = AccountManager.getAccounts().get(i);
+                    if (!a.equals(AccountManager.getAccount())) {
+                        AccountManager.setAccount(AccountManager.getAccounts().get(i));
+                        mCallbacks.onAccountChanged();
+                        onAccountChanged();
+                    }
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+                // Do nothing
             }
         });
+        selectCurrentAccount(v);
+        View unread = v.findViewById(R.id.messages);
+        unread.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Do nothing for now
+            }
+        });
+        TextView unreadMessages = (TextView) v.findViewById(R.id.unread_count);
+        unreadMessages.setText("0 Unread Messages");
+
+        View settings = v.findViewById(R.id.preferences);
+        settings.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i = new Intent(getActivity(), SettingsActivity.class);
+                Bundle b = new Bundle();
+                i.putExtras(b);
+                startActivity(i);
+            }
+        });
+        mCheckbox = (CheckBox) v.findViewById(R.id.subscribed_checkbox);
+        mCheckbox.setVisibility(View.GONE);
         return v;
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        loadSubreddits();
+    }
+
+    @Override
+    public void onAccountChanged() {
+        super.onAccountChanged();
+        selectCurrentAccount(getView());
+        loadSubreddits();
+    }
+
+    private void selectCurrentAccount(View v) {
+        if (v != null) {
+            Spinner accountSpinner = (Spinner) v.findViewById(R.id.accounts_spinner);
+            if (AccountManager.getAccount() == null) {
+                accountSpinner.setSelection(AccountManager.getAccounts().size());
+            } else {
+                accountSpinner.setSelection(AccountManager.getAccounts().indexOf(AccountManager.getAccount()));
+            }
+        }
+    }
+
+    private void loadSubreddits() {
+        mSubredditList.clear();
         if (mAccount != null) {
-            mSubredditList = mAccount.getSubreddits();
+            mSubredditList.addAll(mAccount.getSubreddits());
             Collections.sort(mSubredditList, String.CASE_INSENSITIVE_ORDER);
-            mSubredditArrayAdapter = new SubredditAdapter(mSubredditList);
-            mDrawerListView.setAdapter(mSubredditArrayAdapter);
             new GetUserSubreddits().execute();
         } else {
-            mSubredditList = new ArrayList<String>();
             String[] subs = getResources().getStringArray(R.array.default_subreddits);
-            for (String s : subs) {
-                mSubredditList.add(s);
-            }
-            mSubredditArrayAdapter = new SubredditAdapter(mSubredditList);
-            mDrawerListView.setAdapter(mSubredditArrayAdapter);
+            Collections.addAll(mSubredditList, subs);
         }
+        mSubredditArrayAdapter.notifyDataSetChanged();
     }
 
     private void selectItem(String subreddit) {
@@ -344,12 +350,6 @@ public class NavigationDrawerFragment extends AccountFragment {
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putInt(STATE_SELECTED_POSITION, mCurrentSelectedPosition);
-    }
-
-    @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         // Forward the new configuration the drawer toggle component.
@@ -372,16 +372,10 @@ public class NavigationDrawerFragment extends AccountFragment {
             mDrawerLayout.openDrawer(Gravity.START);
     }
 
-    /**
-     * Callbacks interface that all activities using this fragment must implement.
-     */
     public static interface NavigationDrawerCallbacks {
-        /**
-         * Called when an item in the navigation drawer is selected.
-         */
-        void onNavigationDrawerItemSelected(String subreddit);
+        public void onNavigationDrawerItemSelected(String subreddit);
+        public void onAccountChanged();
     }
-
 
     private class GetUserSubreddits extends AsyncTask<Void, Void, Boolean> {
 
@@ -426,21 +420,42 @@ public class NavigationDrawerFragment extends AccountFragment {
     private class SubredditAdapter extends ArrayAdapter<String> {
 
         public SubredditAdapter(List<String> items) {
-            super(mContext, 0, items);
+            super(mContext, R.layout.list_item_subreddit, R.id.subreddit_list_item_title, items);
         }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            View v = convertView;
-            if (v == null) {
-                v = getActivity().getLayoutInflater().inflate(R.layout.list_item_subreddit, parent, false);
+        public String getItem(int position) {
+            if (position == 0) {
+                return getResources().getString(R.string.front_page);
+            } else {
+                return super.getItem(position - 1);
             }
-            if (position == mDrawerListView.getSelectedItemPosition())
-                v.setBackgroundColor(getResources().getColor(R.color.auburn_orange));
-            String subreddit = mSubredditList.get(position);
-            TextView subredditName = (TextView)v.findViewById(R.id.subreddit_list_item_title);
-            subredditName.setText(subreddit);
-            return v;
+        }
+
+        @Override
+        public int getCount() {
+            return super.getCount() + 1; // Have to account for the "Front Page" option
+        }
+    }
+
+    private class AccountAdapter extends ArrayAdapter<String> {
+
+        public AccountAdapter() {
+            super(mContext, android.R.layout.simple_spinner_dropdown_item, android.R.id.text1);
+        }
+
+        @Override
+        public String getItem(int position) {
+            if (position == AccountManager.getAccounts().size()) {
+                return getResources().getString(R.string.logged_out);
+            } else {
+                return AccountManager.getAccounts().get(position).getUsername();
+            }
+        }
+
+        @Override
+        public int getCount() {
+            return AccountManager.getAccounts().size() + 1; // Have to account for the "Not Logged In" option
         }
     }
 }

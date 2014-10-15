@@ -8,10 +8,10 @@
         android:id="@+id/subreddit_list_item_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@color/ghostwhite"
+        android:textColor="@color/gainsboro"
         android:padding="12dp"
         android:textSize="14sp"
         android:textAllCaps="true"
-        android:fontFamily="sans-serif-condensed-light"/>
+        android:fontFamily="sans-serif-light"/>
 
 </LinearLayout>

@@ -8,7 +8,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:choiceMode="singleChoice"
-        android:divider="@color/cardview_dark_background"
+        android:divider="@android:color/transparent"
         android:dividerHeight="1dp"
-        android:background="@color/blackish"/>
+        android:background="@color/cardview_dark_background"/>
+
 </LinearLayout>

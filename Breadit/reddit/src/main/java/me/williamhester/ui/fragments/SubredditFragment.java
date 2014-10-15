@@ -154,7 +154,8 @@ public class SubredditFragment extends AccountFragment implements SubmissionAdap
     }
 
     @Override
-    protected void onAccountChanged() {
+    public void onAccountChanged() {
+        super.onAccountChanged();
         refreshData();
     }
 

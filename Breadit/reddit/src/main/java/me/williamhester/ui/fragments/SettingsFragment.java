@@ -144,18 +144,13 @@ public class SettingsFragment extends PreferenceFragment {
                     .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
-                            long id = -1;
                             int selection = ((AlertDialog)dialogInterface)
                                     .getListView().getCheckedItemPosition();
                             if (selection < accounts.size()) {
-                                id = accounts.get(selection).getId();
                                 AccountManager.setAccount(accounts.get(selection));
                             } else {
                                 AccountManager.setAccount(null);
                             }
-                            SharedPreferences.Editor editor = prefs.edit();
-                            editor.putLong("accountId", id);
-                            editor.commit();
                         }
                     });
             Dialog d = builder.create();
@@ -205,23 +200,15 @@ public class SettingsFragment extends PreferenceFragment {
                     .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
-                            long id = -1;
                             int selection = ((AlertDialog)dialogInterface)
                                     .getListView().getCheckedItemPosition();
                             if (selection < accounts.size()) {
-                                id = accounts.get(selection).getId();
+                                mClearHistory.setEnabled(true);
                                 AccountManager.setAccount(accounts.get(selection));
                             } else {
+                                mClearHistory.setEnabled(false);
                                 AccountManager.setAccount(null);
                             }
-                            if (id == -1) {
-                                mClearHistory.setEnabled(false);
-                            } else {
-                                mClearHistory.setEnabled(true);
-                            }
-                            SharedPreferences.Editor editor = prefs.edit();
-                            editor.putLong("accountId", id);
-                            editor.commit();
                         }
                     });
             Dialog d = builder.create();

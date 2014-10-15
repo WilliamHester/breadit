@@ -10,7 +10,6 @@ import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import me.williamhester.models.AccountManager;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.fragments.ImageFragment;
 import me.williamhester.ui.fragments.ImagePagerFragment;
@@ -25,7 +24,7 @@ public class MainActivity extends Activity
     public static final String SUBREDDIT = "subreddit";
 
     private NavigationDrawerFragment mNavigationDrawerFragment;
-    private Fragment mSubredditFragment;
+    private SubredditFragment mSubredditFragment;
     private String mSubreddit;
 
     @Override
@@ -72,12 +71,10 @@ public class MainActivity extends Activity
             @Override
             public void onBackStackChanged() {
                 Fragment fragment = getFragmentManager().findFragmentById(R.id.container);
-                if (fragment != null) {
-                    mSubredditFragment = fragment;
-                    if (fragment instanceof SubredditFragment) {
-                        mSubreddit = ((SubredditFragment) mSubredditFragment).getSubreddit();
-                        mNavigationDrawerFragment.setSubreddit(mSubreddit);
-                    }
+                if (fragment != null && fragment instanceof SubredditFragment) {
+                    mSubredditFragment = (SubredditFragment) fragment;
+                    mSubreddit = mSubredditFragment.getSubreddit();
+                    mNavigationDrawerFragment.setSubreddit(mSubreddit);
                 }
             }
         });
@@ -86,8 +83,8 @@ public class MainActivity extends Activity
     @Override
     public void onResume() {
         super.onResume();
-        mSubredditFragment = getFragmentManager().findFragmentByTag(mSubreddit);
-        mSubreddit = ((SubredditFragment) mSubredditFragment).getSubreddit();
+        mSubredditFragment = (SubredditFragment) getFragmentManager().findFragmentByTag(mSubreddit);
+        mSubreddit = mSubredditFragment.getSubreddit();
         mNavigationDrawerFragment.setSubreddit(mSubreddit);
         invalidateOptionsMenu();
     }
@@ -96,11 +93,11 @@ public class MainActivity extends Activity
     public void onNavigationDrawerItemSelected(String subreddit) {
         if ((mSubreddit == null && subreddit == null)
                 || (mSubreddit != null && mSubreddit.equals(subreddit))) {
-            ((SubredditFragment) mSubredditFragment).refreshData();
+            mSubredditFragment.refreshData();
         } else {
             mSubreddit = subreddit;
             if (getFragmentManager().findFragmentByTag(subreddit) != null) {
-                mSubredditFragment = getFragmentManager().findFragmentByTag(subreddit);
+                mSubredditFragment = (SubredditFragment) getFragmentManager().findFragmentByTag(subreddit);
             } else {
                 mSubredditFragment = SubredditFragment.newInstance(subreddit);
             }
@@ -109,6 +106,11 @@ public class MainActivity extends Activity
                     .replace(R.id.container, mSubredditFragment, mSubreddit)
                     .commit();
         }
+    }
+
+    @Override
+    public void onAccountChanged() {
+        mSubredditFragment.onAccountChanged();
     }
 
     @Override
@@ -136,24 +138,6 @@ public class MainActivity extends Activity
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
         return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            Intent i = new Intent(this, SettingsActivity.class);
-            Bundle b = new Bundle();
-            i.putExtras(b);
-            startActivity(i);
-            return true;
-//        } else if (id == R.id.action_my_account) {
-//            Bundle b = new Bundle();
-//            Intent i = new Intent(this, AccountActivity.class);
-//            i.putExtras(b);
-//            startActivity(i);
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override

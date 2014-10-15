@@ -265,6 +265,11 @@ public class Account implements Parcelable {
         return mHistoryTree.contains(fullname);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof Account && o != null && ((Account) o).getUsername().equals(mUsername);
+    }
+
 	/**
 	 * This function logs in to reddit and returns an ArrayList containing a
 	 * modhash and cookie.
