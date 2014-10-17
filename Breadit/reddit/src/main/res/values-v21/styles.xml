@@ -1,5 +1,5 @@
 <resources>
-    <style name="_Breadit" parent="android:Theme.Material">
+    <style name="_Breadit" parent="Theme.AppCompat">
         <item name="android:colorPrimary">@color/darkest_gray</item>
         <item name="android:colorPrimaryDark">@color/card_view_gray</item>
         <item name="android:colorAccent">@color/auburn_orange</item>
