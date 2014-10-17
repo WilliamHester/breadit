@@ -1,7 +1,6 @@
 package me.williamhester.ui.adapters;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
@@ -278,7 +277,12 @@ public class SubmissionAdapter extends ArrayAdapter<Submission> {
         private void setImagePreview() {
             final ImgurImage image;
             if (mSubmission.getImgurData() instanceof ImgurAlbum) {
-                image = ((ImgurAlbum) mSubmission.getImgurData()).getImages().get(0);
+                List<ImgurImage> images = ((ImgurAlbum) mSubmission.getImgurData()).getImages();
+                if (images != null) {
+                    image = images.get(0);
+                } else {
+                    image = null;
+                }
             } else if (mSubmission.getImgurData() instanceof ImgurImage) {
                 image = (ImgurImage) mSubmission.getImgurData();
             } else {

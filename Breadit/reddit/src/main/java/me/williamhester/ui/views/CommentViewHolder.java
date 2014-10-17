@@ -15,7 +15,6 @@ import android.widget.TextView;
 import me.williamhester.models.AbsComment;
 import me.williamhester.models.Comment;
 import me.williamhester.models.MoreComments;
-import me.williamhester.models.Votable;
 import me.williamhester.reddit.R;
 import me.williamhester.tools.HtmlParser;
 
@@ -73,7 +72,7 @@ public class CommentViewHolder extends VotableViewHolder {
             mAuthor.setVisibility(View.GONE);
             SpannableStringBuilder sb = new SpannableStringBuilder();
             sb.append("Load more comments...");
-            sb.setSpan(new ForegroundColorSpan(itemView.getResources().getColor(R.color.auburn_blue)),
+            sb.setSpan(new ForegroundColorSpan(itemView.getResources().getColor(R.color.light_blue)),
                     0, sb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             mBody.setText(sb);
             mGoldIndicator.setVisibility(View.GONE);

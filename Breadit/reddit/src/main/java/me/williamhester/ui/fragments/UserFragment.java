@@ -231,11 +231,11 @@ public class UserFragment extends AccountFragment {
                 domain.setText("(" + s.getDomain() + ")");
                 points.setText(s.getScore() + " points by ");
 
-                if (mAccount != null && mAccount.hasVisited(getItem(position).getName())) {
-                    title.setTypeface(title.getTypeface(), Typeface.ITALIC);
-                } else {
-                    title.setTypeface(Typeface.create("sans-serif-light", Typeface.NORMAL));
-                }
+//                if (mAccount != null && mAccount.hasVisited(getItem(position).getName())) {
+//                    title.setTypeface(title.getTypeface(), Typeface.ITALIC);
+//                } else {
+//                    title.setTypeface(Typeface.create("sans-serif-light", Typeface.NORMAL));
+//                }
 //            } else {
 //                Log.i("UserFragment", "Something bad happened");
 //            }

@@ -7,10 +7,9 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -21,6 +20,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -53,8 +53,8 @@ public class NavigationDrawerFragment extends AccountFragment {
     private ActionBarDrawerToggle mDrawerToggle;
 
     private DrawerLayout mDrawerLayout;
-    private final ArrayList<String> mSubredditList = new ArrayList<>();
-    private ArrayAdapter<String> mSubredditArrayAdapter;
+    private final ArrayList<Subreddit> mSubredditList = new ArrayList<>();
+    private BaseAdapter mSubredditArrayAdapter;
 
     private boolean mIsOpen = false;
     private Context mContext;
@@ -105,20 +105,19 @@ public class NavigationDrawerFragment extends AccountFragment {
         drawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                selectItem(i - 2 >= 0 ? mSubredditList.get(i - 2) : null);
+                selectItem(i - 2 >= 0 ? mSubredditList.get(i - 2).getDisplayName() : null);
             }
         });
 
         ActionBar actionBar = getActivity().getActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeButtonEnabled(true);
-//
+
         // ActionBarDrawerToggle ties together the the proper interactions
         // between the navigation drawer and the action bar app icon.
         mDrawerToggle = new ActionBarDrawerToggle(
                 getActivity(),                    /* host Activity */
                 mDrawerLayout,                    /* DrawerLayout object */
-                R.drawable.ic_drawer,             /* nav drawer image to replace 'Up' caret */
                 R.string.navigation_drawer_open,  /* "open drawer" description for accessibility */
                 R.string.navigation_drawer_close  /* "close drawer" description for accessibility */
         ) {
@@ -270,15 +269,25 @@ public class NavigationDrawerFragment extends AccountFragment {
 
     private void loadSubreddits() {
         mSubredditList.clear();
-        if (mAccount != null) {
-            mSubredditList.addAll(mAccount.getSubreddits());
-            Collections.sort(mSubredditList, String.CASE_INSENSITIVE_ORDER);
-            new GetUserSubreddits().execute();
-        } else {
-            String[] subs = getResources().getStringArray(R.array.default_subreddits);
-            Collections.addAll(mSubredditList, subs);
+        if (getView() != null) {
+            ListView listView = (ListView) getView().findViewById(R.id.list);
+            if (mAccount != null) {
+                mSubredditList.clear();
+                AccountDataSource dataSource = new AccountDataSource(mContext);
+                dataSource.open();
+                mSubredditList.addAll(dataSource.getCurrentAccountSubreddits());
+                dataSource.close();
+                Collections.sort(mSubredditList);
+                new GetUserSubreddits().execute();
+                if (listView.getAdapter() != mSubredditArrayAdapter) {
+                    listView.setAdapter(mSubredditArrayAdapter);
+                }
+                mSubredditArrayAdapter.notifyDataSetChanged();
+            } else {
+                String[] subs = getResources().getStringArray(R.array.default_subreddits);
+                listView.setAdapter(new SubredditStringAdapter(subs));
+            }
         }
-        mSubredditArrayAdapter.notifyDataSetChanged();
     }
 
     private void selectItem(String subreddit) {
@@ -330,8 +339,8 @@ public class NavigationDrawerFragment extends AccountFragment {
                             public void onCompleted(Exception e, String result) {
                                 boolean contains = mSubredditList.contains(subreddit1.getTitle());
                                 if (b && !contains) {
-                                    mSubredditList.add(subreddit1.getDisplayName());
-                                    Collections.sort(mSubredditList, String.CASE_INSENSITIVE_ORDER);
+                                    mSubredditList.add(subreddit1);
+                                    Collections.sort(mSubredditList);
                                     mSubredditArrayAdapter.notifyDataSetChanged();
                                 } else if (contains) {
                                     mSubredditList.remove(subreddit1.getDisplayName());
@@ -384,22 +393,29 @@ public class NavigationDrawerFragment extends AccountFragment {
         @Override
         protected Boolean doInBackground(Void... voids) {
             try {
-                List<Subreddit> subreddits = mAccount.getSubscribedSubreddits();
-                List<String> newSubs = new ArrayList<String>();
+                AccountDataSource dataSource = new AccountDataSource(mContext);
+                dataSource.open();
+                ArrayList<Subreddit> allSubs = dataSource.getAllSubreddits();
+                ArrayList<Subreddit> savedSubscriptions = dataSource.getCurrentAccountSubreddits();
+                ArrayList<Subreddit> subreddits = mAccount.getSubscribedSubreddits();
+
                 for (Subreddit s : subreddits) {
-                    newSubs.add(s.getDisplayName());
-                }
-                Boolean isNew = !newSubs.equals(mSubredditList);
-                if (isNew) {
-                    mAccount.setSubreddits(newSubs);
-                    AccountDataSource dataSource = new AccountDataSource(mContext);
-                    try {
-                        dataSource.open();
-                        dataSource.setSubredditList(mAccount);
-                        dataSource.close();
-                    } catch (NullPointerException e) {
-                        Log.e("Breadit", "Error accessing SQLite database");
+                    int index = allSubs.indexOf(s); // Get the subreddit WITH the table id
+                    if (index < 0) { // if it doesn't exist, create one with a table id
+                        dataSource.addSubreddit(s);
+                        dataSource.addSubscriptionToCurrentAccount(s);
+                    } else if (!savedSubscriptions.contains(s)) {
+                        dataSource.addSubscriptionToCurrentAccount(allSubs.get(index));
                     }
+                }
+
+                dataSource.close();
+
+                boolean isNew = subreddits.equals(savedSubscriptions);
+
+                if (isNew) {
+                    mSubredditList.clear();
+                    mSubredditList.addAll(subreddits);
                 }
                 return isNew;
             } catch (IOException | NullPointerException e) {
@@ -411,15 +427,48 @@ public class NavigationDrawerFragment extends AccountFragment {
         @Override
         protected void onPostExecute(Boolean isNew) {
             if (isNew) {
-                Collections.sort(mSubredditList, String.CASE_INSENSITIVE_ORDER);
+                Collections.sort(mSubredditList);
                 mSubredditArrayAdapter.notifyDataSetChanged();
             }
         }
     }
 
-    private class SubredditAdapter extends ArrayAdapter<String> {
+    private class SubredditAdapter extends ArrayAdapter<Subreddit> {
 
-        public SubredditAdapter(List<String> items) {
+        public SubredditAdapter(List<Subreddit> items) {
+            super(mContext, R.layout.list_item_subreddit, R.id.subreddit_list_item_title, items);
+        }
+        @Override
+        public View getView (int position, View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                LayoutInflater inflater =
+                        (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                convertView = inflater.inflate(R.layout.list_item_subreddit, parent, false);
+            }
+            TextView text = (TextView) convertView;
+            text.setText(getItem(position) == null ? getResources().getString(R.string.front_page) : getItem(position).getDisplayName());
+
+            return convertView;
+        }
+
+        @Override
+        public Subreddit getItem(int position) {
+            if (position == 0) {
+                return null;
+            } else {
+                return super.getItem(position - 1);
+            }
+        }
+
+        @Override
+        public int getCount() {
+            return super.getCount() + 1; // Have to account for the "Front Page" option
+        }
+    }
+
+    private class SubredditStringAdapter extends ArrayAdapter<String> {
+
+        public SubredditStringAdapter(String[] items) {
             super(mContext, R.layout.list_item_subreddit, R.id.subreddit_list_item_title, items);
         }
 

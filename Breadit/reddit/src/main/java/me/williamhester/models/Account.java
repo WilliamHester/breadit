@@ -14,19 +14,15 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
-import com.google.gson.annotations.SerializedName;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Scanner;
-import java.util.TreeSet;
 
 import me.williamhester.models.utils.Utilities;
-import me.williamhester.reddit.R;
 
 public class Account implements Parcelable {
 
@@ -35,22 +31,12 @@ public class Account implements Parcelable {
     public static final String COOKIE = "cookie";
     public static final String JS_STRING = "jsstring";
     public static final String TABLE_ID = "table_id";
-    public static final String SUBSCRIBED_SUBREDDITS = "subscribed_subreddits";
-    public static final String SAVED_SUBMISSIONS = "saved_submissions";
-    public static final String SAVED_COMMENTS = "saved_comments";
-    public static final String HISTORY = "history";
 
 	private String mUsername;
 	private String mModhash;
     private String mCookie;
     private String mDataString;
-    private String mSavedSubmissions;
-    private String mSavedComments;
-    private String mSubredditsString;
-    private String mHistory;
-    private TreeSet<String> mHistoryTree;
     private long mId;
-    private List<String> mSubreddits;
 
     private JsonObject mData;
 
@@ -63,32 +49,9 @@ public class Account implements Parcelable {
         mCookie = b.getString(COOKIE);
         mDataString = b.getString(JS_STRING);
         mId = b.getLong(TABLE_ID);
-        mSubredditsString = b.getString(SUBSCRIBED_SUBREDDITS);
-        mSavedSubmissions = b.getString(SAVED_SUBMISSIONS);
-        mSavedComments = b.getString(SAVED_COMMENTS);
-        mHistory = b.getString(HISTORY);
 
         if (mDataString != null) {
             mData = new JsonParser().parse(mDataString).getAsJsonObject();
-        }
-        if (mSubredditsString != null) {
-            Scanner scan = new Scanner(mSubredditsString).useDelimiter(",");
-            mSubreddits = new ArrayList<>();
-            while (scan.hasNext()) {
-                mSubreddits.add(scan.next());
-            }
-        } else {
-            mSubreddits = new ArrayList<>();
-        }
-        if (mHistory != null) {
-            Scanner scan = new Scanner(mHistory).useDelimiter(",");
-            mHistoryTree = new TreeSet<>();
-            while (scan.hasNext()) {
-                mHistoryTree.add(scan.next());
-            }
-        } else {
-            mHistory = "";
-            mHistoryTree = new TreeSet<>();
         }
     }
 
@@ -112,28 +75,6 @@ public class Account implements Parcelable {
         mUsername = c.getString(1);
         mCookie = c.getString(2);
         mModhash = c.getString(3);
-<<<<<<< Updated upstream
-        String subs = c.getString(4);
-        mSavedSubmissions = c.getString(5);
-        mSavedComments = c.getString(6);
-        mHistory = c.getString(7);
-        Scanner scan = new Scanner(subs).useDelimiter(",");
-        mSubreddits = new ArrayList<>();
-        while (scan.hasNext()) {
-            mSubreddits.add(scan.next());
-        }
-        if (mHistory != null) {
-            scan = new Scanner(mHistory).useDelimiter(",");
-            mHistoryTree = new TreeSet<>();
-            while (scan.hasNext()) {
-                mHistoryTree.add(scan.next());
-            }
-        } else {
-            mHistory = "";
-            mHistoryTree = new TreeSet<>();
-        }
-=======
->>>>>>> Stashed changes
     }
 
     public static final Parcelable.Creator<Account> CREATOR
@@ -166,34 +107,6 @@ public class Account implements Parcelable {
         HashMap<String, String> hashCookiePair = hashCookiePair(username, password);
         a.mCookie = hashCookiePair.get("cookie");
         a.mModhash = hashCookiePair.get("modhash");
-        a.mHistory = "";
-        a.mSavedSubmissions = "";
-        List<Subreddit> subs = a.getSubscribedSubreddits();
-        a.mSubreddits = new ArrayList<String>();
-        StringBuilder sb = new StringBuilder();
-        if (subs != null) {
-            for (Subreddit s : subs) {
-                a.mSubreddits.add(s.getDisplayName());
-                sb.append(s.getDisplayName());
-                sb.append(',');
-            }
-        } else {
-            String[] defaults = context.getResources().getStringArray(R.array.default_subreddits);
-            for (String s : defaults) {
-                a.mSubreddits.add(s);
-                sb.append(s);
-                sb.append(",");
-            }
-        }
-        a.mSubredditsString = sb.toString();
-
-        try {
-            a.mDataString = a.getUserData().toString();
-        } catch (NullPointerException e) {
-            if (a.mData == null) {
-                Log.e("BreaditDebug", "mData is null");
-            }
-        }
         return a;
     }
 
@@ -209,30 +122,6 @@ public class Account implements Parcelable {
 		return mCookie;
 	}
 
-    public String getHistory() {
-        return mHistory;
-    }
-
-    public void setHistory(String historyIn) {
-        mHistory = historyIn;
-    }
-
-    public String getSavedComments() {
-        return mSavedComments;
-    }
-
-    public void addSavedComment(String fullname) {
-        mSavedComments = fullname + "," + mSavedComments;
-    }
-
-    public String getSavedSubmissions() {
-        return mSavedSubmissions;
-    }
-
-    public void addSavedSubmission(String fullname) {
-        mSavedSubmissions = fullname + "," + mSavedSubmissions;
-    }
-
     public void setId(long id) {
         mId = id;
     }
@@ -241,36 +130,9 @@ public class Account implements Parcelable {
         return mId;
     }
 
-    public String getCommaSepSubs() {
-        return mSubredditsString;
-    }
-
-    public List<String> getSubreddits() {
-        return mSubreddits;
-    }
-
-    public void setSubreddits(List<String> subreddits) {
-        mSubreddits = subreddits;
-        StringBuilder sb = new StringBuilder();
-        for (String s : subreddits) {
-            sb.append(s);
-            sb.append(',');
-        }
-        mSubredditsString = sb.toString();
-    }
-
-    public void visit(String fullname) {
-        mHistory = fullname + "," + mHistory;
-        mHistoryTree.add(fullname);
-    }
-
-    public boolean hasVisited(String fullname) {
-        return mHistoryTree.contains(fullname);
-    }
-
     @Override
     public boolean equals(Object o) {
-        return o instanceof Account && o != null && ((Account) o).getUsername().equals(mUsername);
+        return o instanceof Account && ((Account) o).getUsername().equals(mUsername);
     }
 
 	/**
@@ -316,17 +178,6 @@ public class Account implements Parcelable {
 		return jsonObject.getAsJsonObject("data");
 	}
 
-    public boolean refreshUserData() {
-        try {
-            mData = getUserData();
-        } catch (IOException e) {
-            return false;
-        }
-        mModhash = Utilities.removeEndQuotes(mData.get("modhash").getAsString());
-        mDataString = mData.toString();
-        return true;
-    }
-
     /**
      * This loads in all of the subreddits for a user, but due to the fact that Reddit limits the number that can be
      * loaded at one time to 25, it must be iterative.
@@ -336,7 +187,7 @@ public class Account implements Parcelable {
      * @throws java.io.IOException if connection fails
      */
 
-    public List<Subreddit> getSubscribedSubreddits() throws IOException {
+    public ArrayList<Subreddit> getSubscribedSubreddits() throws IOException {
 
         ArrayList<Subreddit> subreddits = new ArrayList<Subreddit>();
 
@@ -401,10 +252,6 @@ public class Account implements Parcelable {
         b.putString(COOKIE, mCookie);
         b.putString(JS_STRING, mDataString);
         b.putLong(TABLE_ID, mId);
-        b.putString(SAVED_SUBMISSIONS, mSavedSubmissions);
-        b.putString(SUBSCRIBED_SUBREDDITS, mSubredditsString);
-        b.putString(SAVED_COMMENTS, mSavedComments);
-        b.putString(HISTORY, mHistory);
         dest.writeBundle(b);
     }
 

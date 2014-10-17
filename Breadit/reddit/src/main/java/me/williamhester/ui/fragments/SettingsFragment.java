@@ -79,12 +79,7 @@ public class SettingsFragment extends PreferenceFragment {
             builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
-                    mAccount.setHistory("");
                     Log.i("SettingsFragment", mAccount.getUsername());
-                    AccountDataSource dataSource = new AccountDataSource(getActivity());
-                    dataSource.open();
-                    dataSource.setHistory(mAccount);
-                    dataSource.close();
                 }
             });
             builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {

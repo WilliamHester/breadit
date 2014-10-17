@@ -3,13 +3,12 @@ package me.williamhester.models;
 import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
+import android.util.Log;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.annotations.SerializedName;
 
-public class Subreddit implements Parcelable {
-
+public class Subreddit implements Parcelable, Comparable<Subreddit> {
 
     protected String id;
     protected String name;
@@ -71,6 +70,10 @@ public class Subreddit implements Parcelable {
         name = cursor.getString(4);
         mCreated = cursor.getLong(5);
         mSubmissionType = cursor.getString(6);
+        if (cursor.getColumnCount() > 7) { // In case the cursor does not have the account-related info
+            mUserIsModerator = cursor.getInt(7) == 1;
+            mUserIsBanned = cursor.getInt(8) == 1;
+        }
     }
 
     public boolean userIsBanned() {
@@ -80,7 +83,7 @@ public class Subreddit implements Parcelable {
     public String getDisplayName() {
         return  mDisplayName;
     }
-//
+
     public String getHeaderImgUrl() {
         return  mHeaderImg;
     }
@@ -170,6 +173,14 @@ public class Subreddit implements Parcelable {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (o instanceof Subreddit && ((Subreddit) o).name == null) {
+            Log.d("Subreddit", "breakpoint");
+        }
+        return o instanceof Subreddit && name != null && (((Subreddit) o).name).equals(name);
+    }
+
+    @Override
     public int describeContents() {
         return 0;
     }
@@ -240,4 +251,11 @@ public class Subreddit implements Parcelable {
             return new Subreddit[size];
         }
     };
+
+    @Override
+    public int compareTo(Subreddit subreddit) {
+        if (mDisplayName == null || subreddit == null || subreddit.mDisplayName == null)
+            return -1;
+        return mDisplayName.compareTo(subreddit.mDisplayName);
+    }
 }

@@ -20,6 +20,6 @@ public class BreaditApplication extends Application {
         AccountManager.init(this);
         GfycatApi.init(this);
         ImgurApi.init(this);
-        Crittercism.initialize(getApplicationContext(), Auth.CRITTERCISM_APP_ID);
+//        Crittercism.initialize(getApplicationContext(), Auth.CRITTERCISM_APP_ID);
     }
 }

@@ -9,7 +9,9 @@
     <color name="blackish">#ff101010</color>
     <color name="mid_gray">#A8A8A8</color>
     <color name="auburn_orange">#f68026</color>
-    <color name="auburn_blue">#ff386aff</color>
+    <color name="light_blue">#ff386aff</color>
+    <color name="dark_blue">#ff003c9c</color>
+    <color name="darker_blue">#ff001b9c</color>
     <color name="transparent_gray">#80000000</color>
     <color name="comment_metadata_gray">#ff686868</color>
 
