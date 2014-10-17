@@ -1,21 +1,21 @@
 package me.williamhester.ui.activities;
 
-import android.app.ActionBar;
-import android.app.Activity;
-import android.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import me.williamhester.reddit.R;
 import me.williamhester.ui.fragments.MessageDialogFragment;
 import me.williamhester.ui.fragments.MessagesFragment;
 import me.williamhester.ui.fragments.UserFragment;
-import me.williamhester.reddit.R;
 import me.williamhester.ui.views.TabView;
 
-public class AccountActivity extends Activity implements TabView.TabSwitcher {
+public class AccountActivity extends ActionBarActivity implements TabView.TabSwitcher {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -35,7 +35,7 @@ public class AccountActivity extends Activity implements TabView.TabSwitcher {
         tabView.addTab(MessagesFragment.class, null, TabView.TAB_TYPE_MAIN, inboxView, "inbox");
         tabView.addTab(UserFragment.class, null, TabView.TAB_TYPE_MAIN, profileView, "sent");
 
-        ActionBar actionBar = getActionBar();
+        ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setDisplayShowCustomEnabled(true);
@@ -62,7 +62,7 @@ public class AccountActivity extends Activity implements TabView.TabSwitcher {
                 return true;
             case R.id.action_compose_message:
                 MessageDialogFragment messageDialogFragment = MessageDialogFragment.newInstance(null);
-                messageDialogFragment.show(getFragmentManager(), "message_dialog");
+                messageDialogFragment.show(getSupportFragmentManager(), "message_dialog");
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -70,13 +70,13 @@ public class AccountActivity extends Activity implements TabView.TabSwitcher {
 
     @Override
     public void onTabSelected(String tag, Fragment fragment) {
-        Fragment f = getFragmentManager().findFragmentByTag(tag);
-        if (getFragmentManager().findFragmentByTag(tag) != null) {
-            getFragmentManager().beginTransaction()
+        Fragment f = getSupportFragmentManager().findFragmentByTag(tag);
+        if (getSupportFragmentManager().findFragmentByTag(tag) != null) {
+            getSupportFragmentManager().beginTransaction()
                     .attach(f)
                     .commit();
         } else {
-            getFragmentManager().beginTransaction()
+            getSupportFragmentManager().beginTransaction()
                     .add(R.id.container, fragment, tag)
                     .commit();
         }
@@ -87,9 +87,9 @@ public class AccountActivity extends Activity implements TabView.TabSwitcher {
 
     @Override
     public void onTabUnSelected(String tag) {
-        Fragment f = getFragmentManager().findFragmentByTag(tag);
+        Fragment f = getSupportFragmentManager().findFragmentByTag(tag);
         if (f != null) {
-            getFragmentManager().beginTransaction()
+            getSupportFragmentManager().beginTransaction()
                     .detach(f)
                     .commit();
         }

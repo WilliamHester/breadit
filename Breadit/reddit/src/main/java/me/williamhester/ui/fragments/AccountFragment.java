@@ -1,7 +1,7 @@
 package me.williamhester.ui.fragments;
 
-import android.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 
 import me.williamhester.models.Account;
 import me.williamhester.models.AccountManager;

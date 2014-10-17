@@ -1,15 +1,15 @@
 package me.williamhester.ui.activities;
 
-import android.app.Activity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import me.williamhester.ui.fragments.SettingsFragment;
 import me.williamhester.reddit.R;
+import me.williamhester.ui.fragments.SettingsFragment;
 
 
-public class SettingsActivity extends Activity {
+public class SettingsActivity extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,8 +20,8 @@ public class SettingsActivity extends Activity {
         getFragmentManager().beginTransaction()
                 .replace(R.id.container, fragment)
                 .commit();
-        if (getActionBar() != null)
-            getActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null)
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     @Override

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBarActivity;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -108,13 +109,13 @@ public class SubredditFragment extends AccountFragment implements SubmissionAdap
     public void onResume() {
         super.onResume();
         String title = "";
-        if (getActivity() != null && getActivity().getActionBar() != null) {
+        if (getActivity() != null && ((ActionBarActivity) getActivity()).getSupportActionBar() != null) {
             if (!TextUtils.isEmpty(mSubredditName)) {
                 title = "/r/" + mSubredditName;
             } else {
                 title = "Front Page";
             }
-            getActivity().getActionBar().setTitle(title);
+            ((ActionBarActivity) getActivity()).getSupportActionBar().setTitle(title);
         }
         loadPrefs();
     }

@@ -1,8 +1,8 @@
 package me.williamhester.ui.adapters;
 
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.support.v13.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.Fragment;
 
 import me.williamhester.tools.Url;
 import me.williamhester.ui.fragments.GifFragment;

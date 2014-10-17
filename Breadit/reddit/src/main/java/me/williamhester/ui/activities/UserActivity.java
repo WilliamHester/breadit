@@ -1,22 +1,21 @@
 package me.williamhester.ui.activities;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import me.williamhester.models.Account;
+import me.williamhester.reddit.R;
 import me.williamhester.ui.fragments.MessageDialogFragment;
 import me.williamhester.ui.fragments.UserFragment;
-import me.williamhester.reddit.R;
 
 /**
  * Created by William on 4/13/14.
  */
-public class UserActivity extends Activity {
+public class UserActivity extends ActionBarActivity {
 
-    private Account mAccount;
     private String mUsername;
 
     @Override
@@ -28,15 +27,14 @@ public class UserActivity extends Activity {
             mUsername = getIntent().getDataString();
             mUsername = mUsername.substring(mUsername.indexOf("/user/") + 6);
         } else if (getIntent().getExtras() != null) {
-            mAccount = getIntent().getExtras().getParcelable("account");
             mUsername = getIntent().getExtras().getString("username");
         }
-        getFragmentManager().beginTransaction()
+        getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, UserFragment.newInstance(mUsername))
                 .commit();
 
-        if (getActionBar() != null) {
-            getActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
     }
 
@@ -56,7 +54,7 @@ public class UserActivity extends Activity {
             case R.id.action_compose_message:
                 MessageDialogFragment messageDialogFragment = MessageDialogFragment
                         .newInstance(mUsername);
-                messageDialogFragment.show(getFragmentManager(), "message_dialog");
+                messageDialogFragment.show(getSupportFragmentManager(), "message_dialog");
                 return true;
         }
         return super.onOptionsItemSelected(item);

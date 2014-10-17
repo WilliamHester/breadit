@@ -10,7 +10,7 @@
     <!--Below this is stuff that was auto-generated-->
     <style name="AppTheme" parent="@style/_Breadit"/>
 
-    <style name="_Breadit" parent="android:Theme.Holo">
+    <style name="_Breadit" parent="Theme.AppCompat">
 
         <item name="android:editTextBackground">@drawable/breadit_edit_text_holo_light</item>
 

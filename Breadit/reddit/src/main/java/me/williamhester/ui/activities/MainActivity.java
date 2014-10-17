@@ -1,14 +1,13 @@
 package me.williamhester.ui.activities;
 
-import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentManager;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarActivity;
 import android.text.TextUtils;
 import android.view.Menu;
-import android.view.MenuItem;
 
 import me.williamhester.reddit.R;
 import me.williamhester.ui.fragments.ImageFragment;
@@ -17,7 +16,7 @@ import me.williamhester.ui.fragments.NavigationDrawerFragment;
 import me.williamhester.ui.fragments.SubredditFragment;
 import me.williamhester.ui.fragments.YouTubeFragment;
 
-public class MainActivity extends Activity
+public class MainActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks,
         ImagePagerFragment.ImagePagerCallbacks, ImageFragment.ImageTapCallbacks {
 
@@ -45,9 +44,9 @@ public class MainActivity extends Activity
             mSubreddit = "";
         }
 
-        if (getActionBar() != null) {
-            getActionBar().setDisplayHomeAsUpEnabled(true);
-            getActionBar().setHomeButtonEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
         }
 
         if (mNavigationDrawerFragment == null)
@@ -55,22 +54,22 @@ public class MainActivity extends Activity
 
         updateActionBar(null);
 
-        getFragmentManager().beginTransaction()
+        getSupportFragmentManager().beginTransaction()
                 .add(R.id.navigation_drawer_container, mNavigationDrawerFragment,
                         "NavigationDrawer")
                 .commit();
 
-        if (getFragmentManager().findFragmentByTag(mSubreddit) == null) {
+        if (getSupportFragmentManager().findFragmentByTag(mSubreddit) == null) {
             mSubredditFragment = SubredditFragment.newInstance(mSubreddit);
-            getFragmentManager().beginTransaction()
+            getSupportFragmentManager().beginTransaction()
                     .add(R.id.container, mSubredditFragment, mSubreddit)
                     .commit();
         }
 
-        getFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
+        getSupportFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
             @Override
             public void onBackStackChanged() {
-                Fragment fragment = getFragmentManager().findFragmentById(R.id.container);
+                Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.container);
                 if (fragment != null && fragment instanceof SubredditFragment) {
                     mSubredditFragment = (SubredditFragment) fragment;
                     mSubreddit = mSubredditFragment.getSubreddit();
@@ -83,7 +82,7 @@ public class MainActivity extends Activity
     @Override
     public void onResume() {
         super.onResume();
-        mSubredditFragment = (SubredditFragment) getFragmentManager().findFragmentByTag(mSubreddit);
+        mSubredditFragment = (SubredditFragment) getSupportFragmentManager().findFragmentByTag(mSubreddit);
         mSubreddit = mSubredditFragment.getSubreddit();
         mNavigationDrawerFragment.setSubreddit(mSubreddit);
         invalidateOptionsMenu();
@@ -96,12 +95,12 @@ public class MainActivity extends Activity
             mSubredditFragment.refreshData();
         } else {
             mSubreddit = subreddit;
-            if (getFragmentManager().findFragmentByTag(subreddit) != null) {
-                mSubredditFragment = (SubredditFragment) getFragmentManager().findFragmentByTag(subreddit);
+            if (getSupportFragmentManager().findFragmentByTag(subreddit) != null) {
+                mSubredditFragment = (SubredditFragment) getSupportFragmentManager().findFragmentByTag(subreddit);
             } else {
                 mSubredditFragment = SubredditFragment.newInstance(subreddit);
             }
-            getFragmentManager().beginTransaction()
+            getSupportFragmentManager().beginTransaction()
                     .addToBackStack(mSubreddit)
                     .replace(R.id.container, mSubredditFragment, mSubreddit)
                     .commit();
@@ -115,7 +114,7 @@ public class MainActivity extends Activity
 
     @Override
     public void onBackPressed()  {
-        Fragment fragment = getFragmentManager().findFragmentByTag("YouTubeFragment");
+        Fragment fragment = getSupportFragmentManager().findFragmentByTag("YouTubeFragment");
         if (fragment != null && fragment instanceof YouTubeFragment
                 && ((YouTubeFragment) fragment).onBackPressed()) {
             return;
@@ -128,10 +127,10 @@ public class MainActivity extends Activity
     }
 
     private void updateActionBar(String sub) {
-        if (TextUtils.isEmpty(sub) && getActionBar() != null)
-            getActionBar().setTitle("FrontPage");
-        else if (getActionBar() != null)
-            getActionBar().setTitle("/r/" + sub);
+        if (TextUtils.isEmpty(sub) && getSupportActionBar() != null)
+            getSupportActionBar().setTitle("FrontPage");
+        else if (getSupportActionBar() != null)
+            getSupportActionBar().setTitle("/r/" + sub);
     }
 
     @Override
@@ -146,7 +145,7 @@ public class MainActivity extends Activity
         if (drawerLayout != null) {
             drawerLayout.setEnabled(false);
             drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-            getActionBar().setHomeButtonEnabled(false);
+            getSupportActionBar().setHomeButtonEnabled(false);
         }
     }
 
@@ -155,11 +154,11 @@ public class MainActivity extends Activity
         DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawerLayout.setEnabled(true);
         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-        getActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
     }
 
     @Override
     public void onImageTapped() {
-        getFragmentManager().popBackStack();
+        getSupportFragmentManager().popBackStack();
     }
 }

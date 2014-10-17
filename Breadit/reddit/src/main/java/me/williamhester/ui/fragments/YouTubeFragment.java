@@ -1,6 +1,6 @@
 package me.williamhester.ui.fragments;
 
-import android.app.Fragment;
+import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayerFragment;
+import com.google.android.youtube.player.YouTubePlayerSupportFragment;
 
 import me.williamhester.Auth;
 import me.williamhester.reddit.R;
@@ -23,7 +24,7 @@ public class YouTubeFragment extends Fragment implements YouTubePlayer.OnInitial
     private static final String VIDEO_ID = "videoId";
 
     private ActionBarPaddedFrameLayout mLayout;
-    private YouTubePlayerFragment mPlayerFragment;
+    private YouTubePlayerSupportFragment mPlayerFragment;
     private YouTubePlayer mPlayer;
     private boolean mIsFullscreen;
 
@@ -42,12 +43,12 @@ public class YouTubeFragment extends Fragment implements YouTubePlayer.OnInitial
 
         Fragment f = getChildFragmentManager().findFragmentByTag("YouTubePlayerFragment");
         if (f == null) {
-            mPlayerFragment = YouTubePlayerFragment.newInstance();
+            mPlayerFragment = YouTubePlayerSupportFragment.newInstance();
             getChildFragmentManager().beginTransaction()
                     .add(R.id.video_container, mPlayerFragment, "YouTubePlayerFragment")
                     .commit();
         } else {
-            mPlayerFragment = (YouTubePlayerFragment) f;
+            mPlayerFragment = (YouTubePlayerSupportFragment) f;
         }
         mPlayerFragment.initialize(Auth.YOUTUBE_AUTH, this);
 

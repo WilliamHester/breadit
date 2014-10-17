@@ -1,10 +1,10 @@
 package me.williamhester.ui.text;
 
-import android.app.Activity;
-import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBarActivity;
 import android.text.TextPaint;
 import android.text.style.ClickableSpan;
 import android.view.View;
@@ -102,8 +102,8 @@ public class LinkSpan extends ClickableSpan {
             i.putExtras(args);
             view.getContext().startActivity(i);
         } else if (f != null) {
-            Activity activity = (Activity) view.getContext();
-            activity.getFragmentManager().beginTransaction()
+            ActionBarActivity activity = (ActionBarActivity) view.getContext();
+            activity.getSupportFragmentManager().beginTransaction()
                     .add(R.id.container, f, "Link")
                     .addToBackStack("Link")
                     .commit();
