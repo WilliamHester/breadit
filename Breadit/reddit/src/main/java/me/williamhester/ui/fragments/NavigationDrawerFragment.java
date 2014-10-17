@@ -44,12 +44,8 @@ import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.activities.SettingsActivity;
 
-;
-
 /**
- * Fragment used for managing interactions for and presentation of a navigation drawer.
- * See the <a href="https://developer.android.com/design/patterns/navigation-drawer.html#Interaction">
- * design guidelines</a> for a complete explanation of the behaviors implemented here.
+ * The fragment that contains the user's subreddits and info.
  */
 public class NavigationDrawerFragment extends AccountFragment {
 
@@ -299,6 +295,7 @@ public class NavigationDrawerFragment extends AccountFragment {
             mSubreddit = null;
             mCheckbox.setVisibility(View.GONE);
         } else {
+            mCheckbox.setVisibility(View.VISIBLE);
             RedditApi.getSubredditDetails(getActivity(), subreddit, new FutureCallback<Subreddit>() {
                 @Override
                 public void onCompleted(Exception e, Subreddit result) {
@@ -405,9 +402,7 @@ public class NavigationDrawerFragment extends AccountFragment {
                     }
                 }
                 return isNew;
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (NullPointerException e) {
+            } catch (IOException | NullPointerException e) {
                 e.printStackTrace();
             }
             return false;

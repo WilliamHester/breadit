@@ -82,7 +82,7 @@ public class SwipeView extends LinearLayout {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        if (!isEnabled()) {
+        if (!AccountManager.isLoggedIn() || !isEnabled()) {
             return super.onTouchEvent(ev);
         }
         switch (ev.getAction()) {

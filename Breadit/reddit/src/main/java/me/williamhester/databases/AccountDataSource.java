@@ -9,6 +9,8 @@ import android.database.sqlite.SQLiteDatabase;
 import java.util.ArrayList;
 
 import me.williamhester.models.Account;
+import me.williamhester.models.AccountManager;
+import me.williamhester.models.Subreddit;
 
 public class AccountDataSource {
 
@@ -44,10 +46,30 @@ public class AccountDataSource {
         account.setId(id);
     }
 
+    public void addSubreddit(Subreddit subreddit) {
+        ContentValues values = new ContentValues();
+
+        values.put(AccountSqlHelper.COLUMN_DISPLAY_NAME, subreddit.getDisplayName());
+        values.put(AccountSqlHelper.COLUMN_OVER_18, subreddit.isNsfw() ? 1 : 0);
+        values.put(AccountSqlHelper.COLUMN_PUBLIC, subreddit.isPublicTraffic() ? 1 : 0);
+        values.put(AccountSqlHelper.COLUMN_NAME, subreddit.getName());
+        values.put(AccountSqlHelper.COLUMN_CREATED, subreddit.getCreated());
+        values.put(AccountSqlHelper.COLUMN_SUBMISSION_TYPES, subreddit.getSubmissionType());
+
+        long id = mDatabase.insert(AccountSqlHelper.TABLE_SUBREDDITS, null, values);
+        subreddit.setTableId(id);
+    }
+
+    public void addSubscriptionToCurrentAccount(Subreddit subreddit) {
+
+    }
+
+    public void addSubscription()
+
     public Account getAccount(long id) {
         if (!mDatabase.isOpen())
             return null;
-        Cursor c = mDatabase.query(AccountSqlHelper.TABLE_ACCOUNTS, AccountSqlHelper.ALL_COLUMNS,
+        Cursor c = mDatabase.query(AccountSqlHelper.TABLE_ACCOUNTS, AccountSqlHelper.ALL_COLUMNS_ACCOUNT,
                 AccountSqlHelper.COLUMN_ID + " = " + id, null, null, null, null);
         c.moveToFirst();
         return new Account(c);
@@ -89,13 +111,30 @@ public class AccountDataSource {
         mDatabase.update(AccountSqlHelper.TABLE_ACCOUNTS, values, where, sId);
     }
 
+    public ArrayList<Subreddit> getCurrentAccountSubreddits() {
+        ArrayList<Subreddit> subreddits = new ArrayList<>();
+        Cursor cursor = mDatabase.query(AccountSqlHelper.TABLE_SUBREDDITS,
+                AccountSqlHelper.ALL_COLUMNS_SUBREDDITS,
+                AccountSqlHelper.COLUMN_USER_ID + " = " + AccountManager.getAccount().getId(),
+                null, null, null, null);
+
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            subreddits.add(new Subreddit(cursor));
+            cursor.moveToNext();
+        }
+        cursor.close();
+
+        return subreddits;
+    }
+
     public ArrayList<Account> getAllAccounts() {
-        ArrayList<Account> accounts = new ArrayList<Account>();
-        Cursor cursor = mDatabase.query(AccountSqlHelper.TABLE_ACCOUNTS, AccountSqlHelper.ALL_COLUMNS,
+        ArrayList<Account> accounts = new ArrayList<>();
+        Cursor cursor = mDatabase.query(AccountSqlHelper.TABLE_ACCOUNTS, AccountSqlHelper.ALL_COLUMNS_ACCOUNT,
                 null, null, null, null, null);
 
         cursor.moveToFirst();
-        while(!cursor.isAfterLast()) {
+        while (!cursor.isAfterLast()) {
             Account account = new Account(cursor);
             accounts.add(account);
             cursor.moveToNext();

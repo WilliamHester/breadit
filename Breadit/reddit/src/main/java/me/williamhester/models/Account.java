@@ -112,6 +112,7 @@ public class Account implements Parcelable {
         mUsername = c.getString(1);
         mCookie = c.getString(2);
         mModhash = c.getString(3);
+<<<<<<< Updated upstream
         String subs = c.getString(4);
         mSavedSubmissions = c.getString(5);
         mSavedComments = c.getString(6);
@@ -131,6 +132,8 @@ public class Account implements Parcelable {
             mHistory = "";
             mHistoryTree = new TreeSet<>();
         }
+=======
+>>>>>>> Stashed changes
     }
 
     public static final Parcelable.Creator<Account> CREATOR

@@ -1,5 +1,6 @@
 package me.williamhester.models;
 
+import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -59,6 +60,18 @@ public class Subreddit implements Parcelable {
     private boolean mUserIsModerator;
     @SerializedName("user_is_subscriber")
     private boolean mUserIsSubscriber;
+
+    private long mTableId;
+
+    public Subreddit(Cursor cursor) {
+        mTableId = cursor.getLong(0);
+        mDisplayName = cursor.getString(1);
+        mOver18 = cursor.getInt(2) == 1;
+        mPublicTraffic = cursor.getInt(3) == 1;
+        name = cursor.getString(4);
+        mCreated = cursor.getLong(5);
+        mSubmissionType = cursor.getString(6);
+    }
 
     public boolean userIsBanned() {
         return mUserIsBanned;
@@ -142,6 +155,14 @@ public class Subreddit implements Parcelable {
 
     public boolean userIsSubscriber() {
         return mUserIsSubscriber;
+    }
+
+    public long getTableId() {
+        return mTableId;
+    }
+
+    public void setTableId(long id) {
+        mTableId = id;
     }
 
     public String getName() {
