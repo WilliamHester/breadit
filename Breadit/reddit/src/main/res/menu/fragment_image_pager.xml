@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:breadit="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/action_toggle_description"
         android:title="@string/toggle_description"
         android:icon="@android:drawable/ic_menu_info_details"
         android:orderInCategory="1"
-        android:showAsAction="always" />
+        breadit:showAsAction="always" />
 </menu>

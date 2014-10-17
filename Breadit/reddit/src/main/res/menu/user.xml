@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:breadit="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/action_compose_message"
         android:title="@string/action_compose_message"
         android:icon="@drawable/ic_action_new_email"
         android:orderInCategory="1"
-        android:showAsAction="ifRoom"/>
+        breadit:showAsAction="ifRoom"/>
 </menu>
