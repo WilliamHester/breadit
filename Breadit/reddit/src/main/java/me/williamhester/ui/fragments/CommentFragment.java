@@ -8,12 +8,16 @@ import android.os.Bundle;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.koushikdutta.async.future.FutureCallback;
@@ -53,7 +57,7 @@ public class CommentFragment extends AccountFragment {
     private View mHeaderView;
     private OnSubmissionLoaded mCallback;
 
-    private int mSortType;
+    private String mSortType;
 
     public static CommentFragment newInstance(String permalink) {
         Bundle args = new Bundle();
@@ -80,21 +84,23 @@ public class CommentFragment extends AccountFragment {
             mCommentsList = savedInstanceState.getParcelableArrayList("comments");
             mSubmission = savedInstanceState.getParcelable("submission");
             mPermalink = savedInstanceState.getString("permalink");
-            mSortType = savedInstanceState.getInt("sortType");
+            mSortType = savedInstanceState.getString("sortType");
         } else if (args != null) {
+            mSortType = RedditApi.COMMENT_SORT_TOP; // TODO: Change this to the settings singleton
             mSubmission = args.getParcelable("submission");
             if (mSubmission != null) {
                 mPermalink = mSubmission.getPermalink();
-                RedditApi.getSubmissionData(getActivity(), mPermalink, mSubmissionCallback, mCommentCallback);
+                RedditApi.getSubmissionData(getActivity(), mPermalink, mSortType, mSubmissionCallback, mCommentCallback);
             } else {
                 mPermalink = args.getString(PERMALINK);
                 if (mPermalink.contains("reddit.com")) {
                     mPermalink = mPermalink.substring(mPermalink.indexOf("reddit.com") + 10);
                 }
-                RedditApi.getSubmissionData(mContext, mPermalink, mSubmissionCallback, mCommentCallback);
+                RedditApi.getSubmissionData(mContext, mPermalink, mSortType, mSubmissionCallback, mCommentCallback);
             }
             mCommentsList = new ArrayList<>();
         }
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -113,12 +119,31 @@ public class CommentFragment extends AccountFragment {
     }
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.submission_fragment, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_sort_comments) {
+            PopupMenu popupMenu = new PopupMenu(getActivity(),
+                    getActivity().findViewById(R.id.action_sort_comments));
+            popupMenu.setOnMenuItemClickListener(mSortClickListener);
+            popupMenu.inflate(R.menu.comment_sorts);
+            popupMenu.show();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelableArrayList("comments", mCommentsList);
         outState.putParcelable("submission", mSubmission);
         outState.putString("permalink", mPermalink);
-        outState.putInt("sortType", mSortType);
+        outState.putString("sortType", mSortType);
     }
 
     public void setOnSubmissionLoadedListener(OnSubmissionLoaded listener) {
@@ -313,10 +338,41 @@ public class CommentFragment extends AccountFragment {
         }
     }
 
+    private PopupMenu.OnMenuItemClickListener mSortClickListener = new PopupMenu.OnMenuItemClickListener() {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+            String tempSort;
+            switch (item.getItemId()) {
+                case R.id.comment_sort_best:
+                    tempSort = RedditApi.COMMENT_SORT_BEST;
+                    break;
+                case R.id.comment_sort_top:
+                    tempSort = RedditApi.COMMENT_SORT_TOP;
+                    break;
+                case R.id.comment_sort_new:
+                    tempSort = RedditApi.COMMENT_SORT_NEW;
+                    break;
+                case R.id.comment_sort_hot:
+                    tempSort = RedditApi.COMMENT_SORT_HOT;
+                    break;
+                case R.id.comment_sort_controversial:
+                    tempSort = RedditApi.COMMENT_SORT_CONTROVERSIAL;
+                    break;
+                case R.id.comment_sort_old:
+                    tempSort = RedditApi.COMMENT_SORT_OLD;
+                    break;
+                default:
+                    tempSort = mSortType;
+            }
+            if (!tempSort.equals(mSortType)) {
+                mSortType = tempSort;
+                RedditApi.getSubmissionData(getActivity(), mPermalink, mSortType, mSubmissionCallback, mCommentCallback);
+            }
+            return true;
+        }
+    };
+
     private CommentViewHolder.CommentClickCallbacks mCommentCallbacks = new CommentViewHolder.CommentClickCallbacks() {
-
-        ArrayList<String> loadingMore = new ArrayList<>();
-
         @Override
         public void onHideClick(Comment comment) {
             comment.setHidden(!comment.isHidden());
@@ -331,23 +387,24 @@ public class CommentFragment extends AccountFragment {
 
         @Override
         public void onMoreClick(CommentViewHolder commentView, final MoreComments comment) {
-            loadingMore.add(comment.getName());
-            RedditApi.getMoreChildren(getActivity(), mSubmission.getName(),
-                    "top", comment.getChildren(), comment.getLevel(),
-                    new RedditApi.MoreCommentsCallback() {
-                        @Override
-                        public void onComplete(ArrayList<Comment> comments, String beforeId) {
-                            int insert = mCommentsList.indexOf(comment);
-                            mCommentsList.remove(insert);
-                            mCommentsList.addAll(insert, comments);
-                            mCommentAdapter.notifyDataSetChanged();
-                        }
-
-                        @Override
-                        public void onFailure() {
-
-                        }
-                    });
+            if (!comment.isLoading()) {
+                comment.setIsLoading(true);
+                RedditApi.getMoreChildren(getActivity(), mSubmission.getName(),
+                        "top", comment.getChildren(), comment.getLevel(),
+                        new FutureCallback<ArrayList<AbsComment>>() {
+                            @Override
+                            public void onCompleted(Exception e, ArrayList<AbsComment> comments) {
+                                comment.setIsLoading(false);
+                                if (e != null) {
+                                    e.printStackTrace();
+                                }
+                                int insert = mCommentsList.indexOf(comment);
+                                mCommentsList.remove(insert);
+                                mCommentsList.addAll(insert, comments);
+                                mCommentAdapter.notifyDataSetChanged();
+                            }
+                        });
+            }
         }
 
     };
@@ -399,6 +456,7 @@ public class CommentFragment extends AccountFragment {
             if (e != null) {
                 return;
             }
+            mCommentsList.clear();
             mCommentsList.addAll(result);
             mCommentAdapter = new CommentArrayAdapter(mContext);
             mCommentsListView.setAdapter(mCommentAdapter);

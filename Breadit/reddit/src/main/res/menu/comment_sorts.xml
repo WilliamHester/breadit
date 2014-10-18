@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/comment_sort_best"
+        android:title="@string/best"
+        android:orderInCategory="0"/>
+    <item android:id="@+id/comment_sort_top"
+        android:title="@string/top"
+        android:orderInCategory="1"/>
+    <item android:id="@+id/comment_sort_new"
+        android:title="@string/new_string"
+        android:orderInCategory="2"/>
+    <item android:id="@+id/comment_sort_hot"
+        android:title="@string/hot"
+        android:orderInCategory="3"/>
+    <item android:id="@+id/comment_sort_controversial"
+        android:title="@string/controversial"
+        android:orderInCategory="4"/>
+    <item android:id="@+id/comment_sort_old"
+        android:title="@string/old"
+        android:orderInCategory="5"/>
+</menu>

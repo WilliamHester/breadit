@@ -21,6 +21,7 @@ public class MoreComments extends AbsComment implements Parcelable {
     private String mId;
     private List<String> mChildren;
     private String mName;
+    private boolean mIsLoading;
 
     public MoreComments(JsonObject object) {
         super(0);
@@ -45,6 +46,14 @@ public class MoreComments extends AbsComment implements Parcelable {
 
     public List<String> getChildren() {
         return mChildren;
+    }
+
+    public boolean isLoading() {
+        return mIsLoading;
+    }
+
+    public void setIsLoading(boolean isLoading) {
+        mIsLoading = isLoading;
     }
 
     @Override

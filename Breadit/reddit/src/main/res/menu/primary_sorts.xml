@@ -3,22 +3,17 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/sort_hot"
         android:title="@string/hot"
-        android:orderInCategory="0"
-        android:showAsAction="never"/>
+        android:orderInCategory="0"/>
     <item android:id="@+id/sort_new"
         android:title="@string/new_string"
-        android:orderInCategory="1"
-        android:showAsAction="never"/>
+        android:orderInCategory="1"/>
     <item android:id="@+id/sort_rising"
         android:title="@string/rising"
-        android:orderInCategory="2"
-        android:showAsAction="never"/>
+        android:orderInCategory="2"/>
     <item android:id="@+id/sort_controversial"
         android:title="@string/controversial"
-        android:orderInCategory="3"
-        android:showAsAction="never"/>
+        android:orderInCategory="3"/>
     <item android:id="@+id/sort_top"
         android:title="@string/top"
-        android:orderInCategory="4"
-        android:showAsAction="never"/>
+        android:orderInCategory="4"/>
 </menu>

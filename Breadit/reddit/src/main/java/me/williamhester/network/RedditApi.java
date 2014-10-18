@@ -59,6 +59,13 @@ public class RedditApi {
     public static String SECONDARY_SORT_YEAR = "year";
     public static String SECONDARY_SORT_ALL = "all";
 
+    public static String COMMENT_SORT_HOT = "hot";
+    public static String COMMENT_SORT_NEW = "new";
+    public static String COMMENT_SORT_CONTROVERSIAL = "controversial";
+    public static String COMMENT_SORT_OLD = "old";
+    public static String COMMENT_SORT_TOP = "top";
+    public static String COMMENT_SORT_BEST = "best";
+
     public static void vote(Context context, Votable v) {
         Ion.with(context)
                 .load(REDDIT_URL + "/api/vote")
@@ -175,11 +182,12 @@ public class RedditApi {
         return headers;
     }
 
-    public static void getSubmissionData(Context context, String permalink,
+    public static void getSubmissionData(Context context, String permalink, String sortType,
                                          final FutureCallback<Submission> submissionCallback,
                                          final FutureCallback<List<AbsComment>> commentCallback) {
         Ion.with(context)
                 .load(REDDIT_URL + permalink + ".json")
+                .addQuery("sort", sortType)
                 .addHeader("User-Agent", USER_AGENT)
                 .addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
                 .addHeaders(generateUserHeaders())
@@ -244,7 +252,7 @@ public class RedditApi {
      */
     public static void getMoreChildren(final Context context, String linkId, String sortType,
                                        List<String> children, final int baseLevel,
-                                       final MoreCommentsCallback callback) {
+                                       final FutureCallback<ArrayList<AbsComment>> callback) {
         // Build the list of children separated by commas
         StringBuilder stringBuilder = new StringBuilder();
         for (String s : children) {
@@ -255,26 +263,19 @@ public class RedditApi {
             stringBuilder.deleteCharAt(stringBuilder.length() - 1);
         }
 
-        AsyncHttpRequest request = new AsyncHttpPost(REDDIT_URL + "/api/morechildren");
         MultipartFormDataBody body = new MultipartFormDataBody();
         body.addStringPart("api_type", "json");
         body.addStringPart("link_id", linkId);
         body.addStringPart("children", stringBuilder.toString());
         body.addStringPart("sort", sortType);
 
-        // If the user is logged in, add those headers too
-        Account account = AccountManager.getAccount();
-        if (account != null) {
-            request.addHeader("Cookie", "reddit_session=" + account.getCookie());
-            request.addHeader("X-Modhash", account.getModhash().replace("\"", ""));
-        }
+        AsyncHttpRequest request = new AsyncHttpPost(REDDIT_URL + "/api/morechildren");
         request.setBody(body);
         AsyncHttpClient.getDefaultInstance().executeJSONObject(request, new AsyncHttpClient.JSONObjectCallback() {
             @Override
             public void onCompleted(Exception e, AsyncHttpResponse source, JSONObject result) {
                 if (e != null) {
-                    e.printStackTrace();
-                    callback.onFailure();
+                    callback.onCompleted(e, null);
                     return;
                 }
                 try {
@@ -303,19 +304,19 @@ public class RedditApi {
                     Ion.with(context)
                             .load(REDDIT_URL + "/api/info.json")
                             .addQuery("id", query.toString())
+                            .addHeaders(generateUserHeaders())
                             .asJsonObject()
                             .setCallback(new FutureCallback<JsonObject>() {
                                 @Override
                                 public void onCompleted(Exception e, JsonObject result) {
                                     if (e != null) {
-                                        e.printStackTrace();
-                                        callback.onFailure();
+                                        callback.onCompleted(e, null);
                                         return;
                                     }
 
                                     Gson gson = new Gson();
                                     ResponseRedditWrapper wrapper = new ResponseRedditWrapper(result, gson);
-                                    ArrayList<Comment> comments = new ArrayList<>();
+                                    ArrayList<AbsComment> comments = new ArrayList<>();
                                     if (wrapper.getData() instanceof Listing) {
                                         Listing listing = (Listing) wrapper.getData();
                                         for (int i = 0; i < levels.size(); i++) {
@@ -324,7 +325,7 @@ public class RedditApi {
                                             comments.add(comment);
                                         }
                                     }
-                                    callback.onComplete(comments, null);
+                                    callback.onCompleted(null, comments);
                                 }
                             });
                 } catch (Exception e2) {
@@ -355,15 +356,6 @@ public class RedditApi {
                         callback.onCompleted(null, thing);
                     }
                 });
-    }
-
-    public static interface MoreCommentsCallback {
-        /**
-         * @param comments the new subtree of comments
-         * @param beforeId the id of the morecomments comment
-         */
-        public void onComplete(ArrayList<Comment> comments, String beforeId);
-        public void onFailure();
     }
 
 }

@@ -143,4 +143,8 @@
     <string name="year">This year</string>
     <string name="all">All time</string>
 
+    <!-- Comment Sorts -->
+    <string name="best">Best</string>
+    <string name="old">Old</string>
+
 </resources>
