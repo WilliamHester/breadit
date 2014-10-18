@@ -1,5 +1,6 @@
 package me.williamhester.ui.views;
 
+import android.graphics.Typeface;
 import android.text.Html;
 import android.text.Layout;
 import android.text.Selection;
@@ -8,6 +9,8 @@ import android.text.SpannableStringBuilder;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
+import android.text.style.TypefaceSpan;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
@@ -68,12 +71,15 @@ public class CommentViewHolder extends VotableViewHolder {
         }
         if (mComment instanceof MoreComments) {
             mContent.setOnClickListener(mMoreClickListener);
+            mBody.setVisibility(View.VISIBLE);
             mMetadata.setVisibility(View.GONE);
             mAuthor.setVisibility(View.GONE);
             SpannableStringBuilder sb = new SpannableStringBuilder();
             sb.append("Load more comments...");
             sb.setSpan(new ForegroundColorSpan(itemView.getResources().getColor(R.color.light_blue)),
                     0, sb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            sb.setSpan(new StyleSpan(Typeface.BOLD_ITALIC), 0, sb.length(),
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             mBody.setText(sb);
             mGoldIndicator.setVisibility(View.GONE);
         } else {
