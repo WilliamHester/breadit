@@ -15,7 +15,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="6dp"
-            android:background="@drawable/breadit_list_selector_holo_light"
+            android:background="?android:attr/selectableItemBackground"
             tools:ignore="SmallSp">
 
             <TextView android:id="@+id/subreddit_title"
@@ -107,7 +107,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_action_expand"
-                android:background="?android:activatedBackgroundIndicator"/>
+                android:background="?android:attr/selectableItemBackground"/>
 
         </LinearLayout>
 
