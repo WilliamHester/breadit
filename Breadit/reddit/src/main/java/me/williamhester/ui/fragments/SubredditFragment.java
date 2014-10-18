@@ -1,8 +1,10 @@
 package me.williamhester.ui.fragments;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarActivity;
@@ -14,8 +16,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
+import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.PopupMenu;
+import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -38,7 +42,6 @@ public class SubredditFragment extends AccountFragment implements SubmissionAdap
 
     public static final int VOTE_REQUEST_CODE = 1;
 
-    private Context mContext;
     private ListView mListView;
     private String mSubredditName;
     private SubmissionAdapter mSubmissionsAdapter;
@@ -46,16 +49,31 @@ public class SubredditFragment extends AccountFragment implements SubmissionAdap
     private ArrayList<Submission> mSubmissionList;
     private HashSet<String> mNames;
 
-    private boolean mHideNsfw = true;
-    private boolean mHideViewed = false;
     private String mPrimarySortType = RedditApi.SORT_TYPE_HOT;
     private String mSecondarySortType = RedditApi.SECONDARY_SORT_ALL;
+
+    private View mFooter;
+
+    public static SubredditFragment newInstance(String subredditName) {
+        SubredditFragment sf = new SubredditFragment();
+        Bundle b = new Bundle();
+        b.putString("subreddit", subredditName);
+        sf.setArguments(b);
+        return sf;
+    }
+
+    public static SubredditFragment newInstance(int type) {
+        SubredditFragment sf = new SubredditFragment();
+        Bundle b = new Bundle();
+        b.putInt("type", type);
+        sf.setArguments(b);
+        return sf;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mContext = getActivity();
         if (savedInstanceState != null) {
             mSubredditName = savedInstanceState.getString("subreddit");
             mSubmissionList = savedInstanceState.getParcelableArrayList("submissions");
@@ -71,19 +89,23 @@ public class SubredditFragment extends AccountFragment implements SubmissionAdap
             mSubredditName = "";
         }
         mSubmissionsAdapter = new SubmissionAdapter(getActivity(), this, mSubmissionList);
-        loadPrefs();
         setHasOptionsMenu(true);
     }
 
+    @SuppressLint("ResourceAsColor")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle bundle) {
-        View v = inflater.inflate(R.layout.fragment_subreddit, null);
+        View v = inflater.inflate(R.layout.fragment_subreddit, root, false);
+
+        mFooter = createFooterView(inflater, root);
 
         mListView = (ListView) v.findViewById(R.id.submissions_list);
+        mListView.addFooterView(mFooter);
         mListView.setAdapter(mSubmissionsAdapter);
         mListView.setOnScrollListener(new InfiniteLoadingScrollListener());
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.swipe_refresh);
+        mSwipeRefreshLayout.setProgressBackgroundColor(R.color.darkest_gray);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -108,16 +130,15 @@ public class SubredditFragment extends AccountFragment implements SubmissionAdap
     @Override
     public void onResume() {
         super.onResume();
-        String title = "";
+        String title;
         if (getActivity() != null && ((ActionBarActivity) getActivity()).getSupportActionBar() != null) {
             if (!TextUtils.isEmpty(mSubredditName)) {
                 title = "/r/" + mSubredditName;
             } else {
-                title = "Front Page";
+                title = getResources().getString(R.string.front_page);
             }
             ((ActionBarActivity) getActivity()).getSupportActionBar().setTitle(title);
         }
-        loadPrefs();
     }
 
     @Override
@@ -181,71 +202,6 @@ public class SubredditFragment extends AccountFragment implements SubmissionAdap
         }
     }
 
-    public void setPrimarySort(int sortType) {
-        String tempSortType;
-        switch (sortType) {
-            case 0:
-                tempSortType = RedditApi.SORT_TYPE_HOT;
-                break;
-            case 1:
-                tempSortType = RedditApi.SORT_TYPE_NEW;
-                break;
-            case 2:
-                tempSortType = RedditApi.SORT_TYPE_RISING;
-                break;
-            case 3:
-                tempSortType = RedditApi.SORT_TYPE_CONTROVERSIAL;
-                break;
-            case 4:
-                tempSortType = RedditApi.SORT_TYPE_TOP;
-                break;
-            default:
-                tempSortType = RedditApi.SORT_TYPE_HOT;
-        }
-        if (!mPrimarySortType.equals(tempSortType)) {
-            mPrimarySortType = tempSortType;
-            refreshData();
-        }
-    }
-
-    public void setSecondarySort(int sortType) {
-        String tempSortType;
-        switch (sortType) {
-            case 0:
-                tempSortType = RedditApi.SECONDARY_SORT_HOUR;
-                break;
-            case 1:
-                tempSortType = RedditApi.SECONDARY_SORT_DAY;
-                break;
-            case 2:
-                tempSortType = RedditApi.SECONDARY_SORT_WEEK;
-                break;
-            case 3:
-                tempSortType = RedditApi.SECONDARY_SORT_MONTH;
-                break;
-            case 4:
-                tempSortType = RedditApi.SECONDARY_SORT_YEAR;
-                break;
-            case 5:
-                tempSortType = RedditApi.SECONDARY_SORT_ALL;
-                break;
-            default:
-                tempSortType = RedditApi.SECONDARY_SORT_ALL;
-        }
-        if (!mSecondarySortType.equals(tempSortType)) {
-            mSecondarySortType = tempSortType;
-            refreshData();
-        }
-    }
-
-    public String getPrimarySortType() {
-        return mPrimarySortType;
-    }
-
-    public String getSecondarySortType() {
-        return mSecondarySortType;
-    }
-
     public String getSubreddit() {
         return mSubredditName;
     }
@@ -285,38 +241,6 @@ public class SubredditFragment extends AccountFragment implements SubmissionAdap
         }
     }
 
-    public static SubredditFragment newInstance(String subredditName) {
-        SubredditFragment sf = new SubredditFragment();
-        Bundle b = new Bundle();
-        b.putString("subreddit", subredditName);
-        sf.setArguments(b);
-        return sf;
-    }
-
-    public static SubredditFragment newInstance(int type) {
-        SubredditFragment sf = new SubredditFragment();
-        Bundle b = new Bundle();
-        b.putInt("type", type);
-        sf.setArguments(b);
-        return sf;
-    }
-
-    private void loadPrefs() {
-        SharedPreferences prefs = mContext.getSharedPreferences("preferences", Context.MODE_PRIVATE);
-        boolean oldHideViewed = mHideViewed;
-        if (mSubredditName != null) {
-            mHideViewed = prefs.getBoolean("pref_remove_viewed_sub", false);
-        } else {
-            mHideViewed = prefs.getBoolean("pref_remove_viewed_front", false);
-        }
-        mHideNsfw = prefs.getBoolean("pref_hide_nsfw", true);
-        if (getActivity() != null)
-            getActivity().invalidateOptionsMenu();
-        if (oldHideViewed != mHideViewed) {
-            refreshData();
-        }
-    }
-
     /**
      * This method is called to begin the list of submissions. It is called during onCreate and
      *     when the SwipeRefreshLayout's onRefresh method is called.
@@ -325,9 +249,27 @@ public class SubredditFragment extends AccountFragment implements SubmissionAdap
         refreshData();
     }
 
-    private View createFooterView(LayoutInflater inflater) {
-        View v = inflater.inflate(R.layout.footer_subreddit_fragment, null);
-        return v;
+    private View createFooterView(LayoutInflater inflater, ViewGroup root) {
+        return inflater.inflate(R.layout.footer_subreddit_fragment, root, false);
+    }
+
+    private void setFooterFailedToLoad() {
+        TextView text = (TextView) mFooter.findViewById(R.id.footer_text);
+        text.setText(R.string.failed_to_load);
+        mFooter.findViewById(R.id.progress_bar).setVisibility(View.GONE);
+        mFooter.findViewById(R.id.inner).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                loadMoreSubmissions();
+            }
+        });
+    }
+
+    private void setFooterLoading() {
+        TextView text = (TextView) mFooter.findViewById(R.id.footer_text);
+        text.setText(R.string.loading_submissions);
+        mFooter.findViewById(R.id.progress_bar).setVisibility(View.VISIBLE);
+        mFooter.findViewById(R.id.inner).setOnClickListener(null);
     }
 
     @Override
@@ -469,39 +411,42 @@ public class SubredditFragment extends AccountFragment implements SubmissionAdap
             } else if (mSubmissionList.size() > 0
                     && (mSubmissionsAdapter.getCount() - mListView.getChildCount()) // 25 - 4 = 21
                     <= (mListView.getFirstVisiblePosition() + VISIBLE_THRESHOLD)) { // 20 + 5 = 25
-                String after;
-                if (mSubmissionList == null || mSubmissionList.size() == 0) {
-                    after = null;
-                } else {
-                    after = mSubmissionList.get(mSubmissionList.size() - 1).getName();
-                }
-                mSwipeRefreshLayout.setRefreshing(true);
-                RedditApi.getSubmissions(getActivity(), mSubredditName, mPrimarySortType,
-                        mSecondarySortType, null, after, new FutureCallback<JsonObject>() {
-                            @Override
-                            public void onCompleted(Exception e, JsonObject result) {
-                                if (e == null) {
-                                    ResponseRedditWrapper wrapper = new ResponseRedditWrapper(result, new Gson());
-                                    if (wrapper.getData() instanceof Listing) {
-                                        ArrayList<Submission> submissions = new ArrayList<>();
-                                        List<ResponseRedditWrapper> children = ((Listing) wrapper.getData()).getChildren();
-                                        for (ResponseRedditWrapper innerWrapper : children) {
-                                            if (innerWrapper.getData() instanceof Submission) {
-                                                submissions.add((Submission) innerWrapper.getData());
-                                            }
-                                        }
-                                        mSubmissionList.addAll(submissions);
-                                        mSubmissionsAdapter.notifyDataSetChanged();
-                                        mSwipeRefreshLayout.setRefreshing(false);
-                                    }
-                                } else {
-                                    e.printStackTrace();
-                                    mSwipeRefreshLayout.setRefreshing(false);
-                                }
-                            }
-                        });
+                loadMoreSubmissions();
                 loading = true;
             }
         }
+    }
+
+    private void loadMoreSubmissions() {
+        String after;
+        if (mSubmissionList == null || mSubmissionList.size() == 0) {
+            after = null;
+        } else {
+            after = mSubmissionList.get(mSubmissionList.size() - 1).getName();
+        }
+        setFooterLoading();
+        RedditApi.getSubmissions(getActivity(), mSubredditName, mPrimarySortType,
+                mSecondarySortType, null, after, new FutureCallback<JsonObject>() {
+                    @Override
+                    public void onCompleted(Exception e, JsonObject result) {
+                        if (e == null) {
+                            ResponseRedditWrapper wrapper = new ResponseRedditWrapper(result, new Gson());
+                            if (wrapper.getData() instanceof Listing) {
+                                ArrayList<Submission> submissions = new ArrayList<>();
+                                List<ResponseRedditWrapper> children = ((Listing) wrapper.getData()).getChildren();
+                                for (ResponseRedditWrapper innerWrapper : children) {
+                                    if (innerWrapper.getData() instanceof Submission) {
+                                        submissions.add((Submission) innerWrapper.getData());
+                                    }
+                                }
+                                mSubmissionList.addAll(submissions);
+                                mSubmissionsAdapter.notifyDataSetChanged();
+                            }
+                        } else {
+                            e.printStackTrace();
+                            setFooterFailedToLoad();
+                        }
+                    }
+                });
     }
 }
