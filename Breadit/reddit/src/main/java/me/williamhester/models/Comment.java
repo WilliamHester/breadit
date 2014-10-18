@@ -119,6 +119,10 @@ public class Comment extends AbsComment implements Votable, Parcelable {
         return mName;
     }
 
+//    public String getId() {
+//        return
+//    }
+
     public int getVoteStatus() {
         if (mVoteStatus == null) {
             return NEUTRAL;

@@ -100,7 +100,7 @@ public class SubredditFragment extends AccountFragment implements SubmissionAdap
         mFooter = createFooterView(inflater, root);
 
         mListView = (ListView) v.findViewById(R.id.submissions_list);
-        mListView.addFooterView(mFooter);
+//        mListView.addFooterView(mFooter);
         mListView.setAdapter(mSubmissionsAdapter);
         mListView.setOnScrollListener(new InfiniteLoadingScrollListener());
 

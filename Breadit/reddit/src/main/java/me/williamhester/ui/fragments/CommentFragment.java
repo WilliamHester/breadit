@@ -99,7 +99,7 @@ public class CommentFragment extends AccountFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_comment, null);
+        View v = inflater.inflate(R.layout.fragment_comment, root, false);
         mCommentsListView = (ListView) v.findViewById(R.id.comments);
         if (mHeaderView == null && mSubmission != null) {
             createHeaderView(inflater);
@@ -267,10 +267,6 @@ public class CommentFragment extends AccountFragment {
         }
     }
 
-    private void setVoteStatus() {
-
-    }
-
     private FutureCallback<Submission> mImgurCallback = new FutureCallback<Submission>() {
         @Override
         public void onCompleted(Exception e, Submission result) {
@@ -319,6 +315,8 @@ public class CommentFragment extends AccountFragment {
 
     private CommentViewHolder.CommentClickCallbacks mCommentCallbacks = new CommentViewHolder.CommentClickCallbacks() {
 
+        ArrayList<String> loadingMore = new ArrayList<>();
+
         @Override
         public void onHideClick(Comment comment) {
             comment.setHidden(!comment.isHidden());
@@ -332,8 +330,24 @@ public class CommentFragment extends AccountFragment {
         }
 
         @Override
-        public void onMoreClick(CommentViewHolder commentView, MoreComments comment) {
+        public void onMoreClick(CommentViewHolder commentView, final MoreComments comment) {
+            loadingMore.add(comment.getName());
+            RedditApi.getMoreChildren(getActivity(), mSubmission.getName(),
+                    "top", comment.getChildren(), comment.getLevel(),
+                    new RedditApi.MoreCommentsCallback() {
+                        @Override
+                        public void onComplete(ArrayList<Comment> comments, String beforeId) {
+                            int insert = mCommentsList.indexOf(comment);
+                            mCommentsList.remove(insert);
+                            mCommentsList.addAll(insert, comments);
+                            mCommentAdapter.notifyDataSetChanged();
+                        }
 
+                        @Override
+                        public void onFailure() {
+
+                        }
+                    });
         }
 
     };

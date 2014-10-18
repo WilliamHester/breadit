@@ -35,6 +35,23 @@ public class MoreComments extends AbsComment implements Parcelable {
         }
     }
 
+    public String getId() {
+        return mId;
+    }
+
+    public String getName() {
+        return mName;
+    }
+
+    public List<String> getChildren() {
+        return mChildren;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof MoreComments && ((MoreComments) o).mId.equals(mId);
+    }
+
     @Override
     public int describeContents() {
         return AbsComment.MORE_COMMENTS;
