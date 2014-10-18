@@ -11,8 +11,11 @@ import com.google.gson.reflect.TypeToken;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.async.http.AsyncHttpClient;
 import com.koushikdutta.async.http.AsyncHttpGet;
+import com.koushikdutta.async.http.AsyncHttpPost;
 import com.koushikdutta.async.http.AsyncHttpRequest;
 import com.koushikdutta.async.http.AsyncHttpResponse;
+import com.koushikdutta.async.http.body.AsyncHttpRequestBody;
+import com.koushikdutta.async.http.body.MultipartFormDataBody;
 import com.koushikdutta.ion.Ion;
 
 import org.json.JSONArray;
@@ -252,11 +255,12 @@ public class RedditApi {
             stringBuilder.deleteCharAt(stringBuilder.length() - 1);
         }
 
-        AsyncHttpRequest request = new AsyncHttpGet(REDDIT_URL + "/api/morechildren");
-        request.addHeader("api_type", "json");
-        request.addHeader("link_id", linkId);
-        request.addHeader("children", stringBuilder.toString());
-        request.addHeader("sort", sortType);
+        AsyncHttpRequest request = new AsyncHttpPost(REDDIT_URL + "/api/morechildren");
+        MultipartFormDataBody body = new MultipartFormDataBody();
+        body.addStringPart("api_type", "json");
+        body.addStringPart("link_id", linkId);
+        body.addStringPart("children", stringBuilder.toString());
+        body.addStringPart("sort", sortType);
 
         // If the user is logged in, add those headers too
         Account account = AccountManager.getAccount();
@@ -264,6 +268,7 @@ public class RedditApi {
             request.addHeader("Cookie", "reddit_session=" + account.getCookie());
             request.addHeader("X-Modhash", account.getModhash().replace("\"", ""));
         }
+        request.setBody(body);
         AsyncHttpClient.getDefaultInstance().executeJSONObject(request, new AsyncHttpClient.JSONObjectCallback() {
             @Override
             public void onCompleted(Exception e, AsyncHttpResponse source, JSONObject result) {
@@ -286,7 +291,7 @@ public class RedditApi {
                         if (parentIndex >= 0) { // The parent is contained within the other comments
                             levels.add(levels.get(parentIndex) + 1);
                         } else {
-                            levels.add(baseLevel + 1);
+                            levels.add(baseLevel);
                         }
                     }
 
