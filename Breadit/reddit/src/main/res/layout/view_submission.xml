@@ -145,6 +145,58 @@
                 android:visibility="gone"/>
 
         </RelativeLayout>
+
+        <LinearLayout android:id="@+id/options_row"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <TextView android:id="@+id/option_go_to_subreddit"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:textSize="20sp"
+                android:text="/r/"
+                android:background="?android:attr/selectableItemBackground"/>
+
+            <FrameLayout android:id="@+id/option_view_user"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:background="?android:attr/selectableItemBackground">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_action_person"/>
+
+            </FrameLayout>
+
+            <FrameLayout android:id="@+id/option_save"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:background="?android:attr/selectableItemBackground">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_action_save"/>
+
+            </FrameLayout>
+
+            <ImageView android:id="@+id/option_overflow"
+                style="?android:actionOverflowButtonStyle"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:background="?android:attr/selectableItemBackground"/>
+
+        </LinearLayout>
     </me.williamhester.ui.views.SwipeView>
 
     <View android:id="@+id/vote_background"

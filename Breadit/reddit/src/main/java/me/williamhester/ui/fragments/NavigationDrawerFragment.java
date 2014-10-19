@@ -296,7 +296,7 @@ public class NavigationDrawerFragment extends AccountFragment {
             mDrawerLayout.closeDrawers();
         }
         if (mCallbacks != null) {
-            mCallbacks.onNavigationDrawerItemSelected(subreddit);
+            mCallbacks.onSubredditSelected(subreddit);
         }
     }
 
@@ -385,7 +385,7 @@ public class NavigationDrawerFragment extends AccountFragment {
     }
 
     public static interface NavigationDrawerCallbacks {
-        public void onNavigationDrawerItemSelected(String subreddit);
+        public void onSubredditSelected(String subreddit);
         public void onAccountChanged();
     }
 

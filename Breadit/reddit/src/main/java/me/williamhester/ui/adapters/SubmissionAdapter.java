@@ -1,6 +1,7 @@
 package me.williamhester.ui.adapters;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
@@ -72,12 +73,13 @@ public class SubmissionAdapter extends ArrayAdapter<Submission> {
         private View mContainer;
         private View mNsfwWarning;
         private View mNsfwBlocker;
+        private View mOptionsRow;
         private View mExpandButton;
         private View mShowSelfText;
 
         private Submission mSubmission;
 
-        public SubmissionViewHolder(View itemView) {
+        public SubmissionViewHolder(final View itemView) {
             super(itemView);
 
             mContainer = itemView.findViewById(R.id.content_preview);
@@ -91,12 +93,33 @@ public class SubmissionAdapter extends ArrayAdapter<Submission> {
             mShowSelfText = itemView.findViewById(R.id.show_self_text);
             mImageView = (ImageView) itemView.findViewById(R.id.image);
             mImageButton = (ImageButton) itemView.findViewById(R.id.preview_button);
+            mOptionsRow = itemView.findViewById(R.id.options_row);
+            View optionSubreddit = itemView.findViewById(R.id.option_go_to_subreddit);
+            View optionUser = itemView.findViewById(R.id.option_view_user);
+            View optionSave = itemView.findViewById(R.id.option_save);
+            View optionOverflow = itemView.findViewById(R.id.option_overflow);
             View submissionData = itemView.findViewById(R.id.submission_data);
 
+            optionSubreddit.setOnClickListener(mOptionsOnClickListener);
+            optionUser.setOnClickListener(mOptionsOnClickListener);
+            optionSave.setOnClickListener(mOptionsOnClickListener);
+            optionOverflow.setOnClickListener(mOptionsOnClickListener);
             submissionData.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     mCallback.onCardClicked(mSubmission);
+                }
+            });
+            submissionData.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    if (mOptionsRow.getVisibility() == View.VISIBLE) {
+                        mCallback.onCardLongPressed(null);
+                    } else {
+                        mCallback.onCardLongPressed(SubmissionViewHolder.this);
+                        expand(mOptionsRow);
+                    }
+                    return true;
                 }
             });
             mNsfwBlocker.setOnClickListener(new View.OnClickListener() {
@@ -115,6 +138,7 @@ public class SubmissionAdapter extends ArrayAdapter<Submission> {
             super.setContent(object);
             mSubmission = (Submission) object;
 
+            mOptionsRow.setVisibility(View.GONE);
             mBody.setText(Html.fromHtml(mSubmission.getTitle()).toString());
             mDomain.setText(mSubmission.getDomain());
             mCommentData.setText(mSubmission.getNumberOfComments() + " comments");
@@ -245,6 +269,17 @@ public class SubmissionAdapter extends ArrayAdapter<Submission> {
             }
         };
 
+        private View.OnClickListener mOptionsOnClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCallback.onOptionsRowItemSelected(v, mSubmission);
+            }
+        };
+
+        public void collapseOptions() {
+            collapse(mOptionsRow);
+        }
+
         private View.OnClickListener mExpandListener = new View.OnClickListener() {
             @Override
             public void onClick(final View view) {
@@ -307,5 +342,7 @@ public class SubmissionAdapter extends ArrayAdapter<Submission> {
         public void onImageViewClicked(String imageUrl);
         public void onYouTubeVideoClicked(String videoId);
         public void onCardClicked(Submission submission);
+        public void onCardLongPressed(SubmissionViewHolder holder);
+        public void onOptionsRowItemSelected(View view, Submission submission);
     }
 }

@@ -1,10 +1,8 @@
 package me.williamhester.ui.fragments;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
+import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarActivity;
@@ -16,7 +14,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
-import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
@@ -30,12 +27,15 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
+import me.williamhester.models.AccountManager;
 import me.williamhester.models.Listing;
 import me.williamhester.models.ResponseRedditWrapper;
 import me.williamhester.models.Submission;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
+import me.williamhester.ui.activities.MainActivity;
 import me.williamhester.ui.activities.SubmissionActivity;
+import me.williamhester.ui.activities.UserActivity;
 import me.williamhester.ui.adapters.SubmissionAdapter;
 
 public class SubredditFragment extends AccountFragment implements SubmissionAdapter.AdapterCallbacks {
@@ -48,11 +48,13 @@ public class SubredditFragment extends AccountFragment implements SubmissionAdap
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private ArrayList<Submission> mSubmissionList;
     private HashSet<String> mNames;
+    private SubmissionAdapter.SubmissionViewHolder mFocusedSubmission;
 
     private String mPrimarySortType = RedditApi.SORT_TYPE_HOT;
     private String mSecondarySortType = RedditApi.SECONDARY_SORT_ALL;
 
     private View mFooter;
+    private OnSubredditSelectedListener mCallback;
 
     public static SubredditFragment newInstance(String subredditName) {
         SubredditFragment sf = new SubredditFragment();
@@ -68,6 +70,15 @@ public class SubredditFragment extends AccountFragment implements SubmissionAdap
         b.putInt("type", type);
         sf.setArguments(b);
         return sf;
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        if (activity instanceof OnSubredditSelectedListener) {
+            mCallback = (OnSubredditSelectedListener) activity;
+        }
     }
 
     @Override
@@ -307,6 +318,69 @@ public class SubredditFragment extends AccountFragment implements SubmissionAdap
         startActivityForResult(i, VOTE_REQUEST_CODE);
     }
 
+    @Override
+    public void onCardLongPressed(SubmissionAdapter.SubmissionViewHolder holder) {
+        if (mFocusedSubmission != null) {
+            mFocusedSubmission.collapseOptions();
+        }
+        mFocusedSubmission = holder;
+    }
+
+    @Override
+    public void onOptionsRowItemSelected(View view, Submission submission) {
+        switch (view.getId()) {
+            case R.id.option_go_to_subreddit:
+                mCallback.onSubredditSelected(submission.getSubredditName());
+                break;
+            case R.id.option_view_user:
+                Bundle b = new Bundle();
+                b.putString("username", submission.getAuthor());
+                Intent i = new Intent(getActivity(), UserActivity.class);
+                i.putExtras(b);
+                getActivity().startActivity(i);
+                break;
+            case R.id.option_save:
+                // TODO: actually save it
+                break;
+            case R.id.option_overflow:
+                inflateOverflowPopupMenu(view, submission);
+                break;
+        }
+    }
+
+    private void inflateOverflowPopupMenu(View view, Submission submission) {
+        PopupMenu popupMenu = new PopupMenu(getActivity(), view);
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.overflow_hide:
+                        break;
+                    case R.id.overflow_mark_nsfw:
+                        break;
+                    case R.id.overflow_report:
+                        break;
+                    case R.id.overflow_delete:
+                        break;
+                    case R.id.overflow_approve:
+                        break;
+                    case R.id.overflow_spam:
+                        break;
+                }
+                return true;
+            }
+        });
+        popupMenu.inflate(R.menu.submission_overflow);
+
+        Menu menu = popupMenu.getMenu();
+        if (submission.getAuthor().equalsIgnoreCase(AccountManager.getAccount().getUsername())) {
+            menu.findItem(R.id.overflow_mark_nsfw).setVisible(true);
+            menu.findItem(R.id.overflow_delete).setVisible(true);
+        }
+
+        popupMenu.show();
+    }
+
     private class PrimarySortClickListener implements PopupMenu.OnMenuItemClickListener {
 
         private View mAnchor;
@@ -448,5 +522,9 @@ public class SubredditFragment extends AccountFragment implements SubmissionAdap
                         }
                     }
                 });
+    }
+
+    public static interface OnSubredditSelectedListener {
+        public void onSubredditSelected(String subreddit);
     }
 }

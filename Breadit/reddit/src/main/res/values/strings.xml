@@ -147,4 +147,10 @@
     <string name="best">Best</string>
     <string name="old">Old</string>
 
+    <!-- Submission Overflow Menu -->
+    <string name="hide">Hide</string>
+    <string name="mark_nsfw">Mark NSFW</string>
+    <string name="approve">Approve</string>
+    <string name="spam">Spam</string>
+
 </resources>

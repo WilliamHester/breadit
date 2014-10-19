@@ -11,26 +11,11 @@ import java.io.Serializable;
 @SuppressWarnings("unused")
 public class Submission implements Votable, Parcelable {
 
-    public static final int HOT = 0;
-    public static final int NEW = 1;
-    public static final int RISING = 2;
-    public static final int CONTROVERSIAL = 3;
-    public static final int TOP = 4;
-
-    public static final int HOUR = 0;
-    public static final int DAY = 1;
-    public static final int WEEK = 2;
-    public static final int MONTH = 3;
-    public static final int YEAR = 4;
-    public static final int ALL = 5;
-
     private static final int NO_IMGUR_DATA = 0;
     private static final int IMGUR_ALBUM = 1;
     private static final int IMGUR_IMAGE = 2;
 
     public static final String LIVE_UPDATE = "liveupdate";
-
-    private static final long serialVersionUID = -112181006397201414L;
 
     private String author;
     private String author_flair_css_class;
@@ -50,8 +35,8 @@ public class Submission implements Votable, Parcelable {
     private String title;
     private String url;
     private String distinguished;
-    private boolean clicked;
     private String edited;
+    private boolean clicked;
     private boolean hidden;
     private boolean is_self;
     private boolean over_18;

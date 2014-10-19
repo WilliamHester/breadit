@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/overflow_hide"
+        android:title="@string/hide"
+        android:orderInCategory="0"/>
+    <item android:id="@+id/overflow_mark_nsfw"
+        android:title="@string/mark_nsfw"
+        android:orderInCategory="1"
+        android:visible="false"/>
+    <item android:id="@+id/overflow_report"
+        android:title="@string/report"
+        android:orderInCategory="2"
+        android:visible="false"/>
+    <item android:id="@+id/overflow_delete"
+        android:title="@string/delete"
+        android:orderInCategory="3"
+        android:visible="false"/>
+    <item android:id="@+id/overflow_approve"
+        android:title="@string/approve"
+        android:orderInCategory="4"
+        android:visible="false"/>
+    <item android:id="@+id/overflow_spam"
+        android:title="@string/spam"
+        android:orderInCategory="5"
+        android:visible="false"/>
+</menu>

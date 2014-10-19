@@ -18,7 +18,8 @@ import me.williamhester.ui.fragments.YouTubeFragment;
 
 public class MainActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks,
-        ImagePagerFragment.ImagePagerCallbacks, ImageFragment.ImageTapCallbacks {
+        ImagePagerFragment.ImagePagerCallbacks, ImageFragment.ImageTapCallbacks,
+        SubredditFragment.OnSubredditSelectedListener {
 
     public static final String SUBREDDIT = "subreddit";
 
@@ -89,7 +90,7 @@ public class MainActivity extends ActionBarActivity
     }
 
     @Override
-    public void onNavigationDrawerItemSelected(String subreddit) {
+    public void onSubredditSelected(String subreddit) {
         if ((mSubreddit == null && subreddit == null)
                 || (mSubreddit != null && mSubreddit.equals(subreddit))) {
             mSubredditFragment.refreshData();
