@@ -372,7 +372,10 @@ public class CommentFragment extends AccountFragment {
         }
     };
 
-    private CommentViewHolder.CommentClickCallbacks mCommentCallbacks = new CommentViewHolder.CommentClickCallbacks() {
+    private CommentViewHolder.CommentClickCallbacks mCommentCallbacks =  new CommentViewHolder.CommentClickCallbacks() {
+
+        private CommentViewHolder mFocusedViewHolder;
+
         @Override
         public void onHideClick(Comment comment) {
             comment.setHidden(!comment.isHidden());
@@ -385,7 +388,7 @@ public class CommentFragment extends AccountFragment {
             mCommentAdapter.notifyDataSetChanged();
         }
 
-        @Override
+                @Override
         public void onMoreClick(CommentViewHolder commentView, final MoreComments comment) {
             if (!comment.isLoading()) {
                 comment.setIsLoading(true);
@@ -407,6 +410,13 @@ public class CommentFragment extends AccountFragment {
             }
         }
 
+        @Override
+        public void onCommentLongPressed(CommentViewHolder holder) {
+            if (mFocusedViewHolder != null) {
+                mFocusedViewHolder.collapseOptions();
+            }
+            mFocusedViewHolder = holder;
+        }
     };
 
     private class CommentArrayAdapter extends ArrayAdapter<AbsComment> {

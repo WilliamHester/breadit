@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.animation.ScaleAnimation;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -287,20 +286,14 @@ public class SubmissionAdapter extends ArrayAdapter<Submission> {
             @Override
             public void onClick(final View view) {
                 Animation anim;
-                Animation textAnim;
                 if (mSubmission.isSelftextOpen()) {
                     anim = AnimationUtils.loadAnimation(view.getContext(), R.anim.rotate_left);
-                    mSelfText.setVisibility(View.GONE);
-                    mSubmission.setSelftextOpen(false);
+                    collapse(mSelfText);
                 } else {
                     anim = AnimationUtils.loadAnimation(view.getContext(), R.anim.rotate_right);
-                    textAnim = new ScaleAnimation(1, 1, 0, 1);
-                    textAnim.setFillAfter(true);
-                    textAnim.setDuration(300l);
-                    mSelfText.setVisibility(View.VISIBLE);
-                    mSelfText.startAnimation(textAnim);
-                    mSubmission.setSelftextOpen(true);
+                    expand(mSelfText);
                 }
+                mSubmission.setSelftextOpen(!mSubmission.isSelftextOpen());
                 anim.setFillBefore(true);
                 anim.setFillAfter(true);
                 view.startAnimation(anim);

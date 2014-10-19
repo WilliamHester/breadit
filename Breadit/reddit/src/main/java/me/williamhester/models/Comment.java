@@ -8,6 +8,9 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
+import java.util.List;
+
+import me.williamhester.tools.HtmlParser;
 
 public class Comment extends AbsComment implements Votable, Parcelable {
 
@@ -38,6 +41,7 @@ public class Comment extends AbsComment implements Votable, Parcelable {
     private int mGilded;
     private Spannable mSpannableBody;
     private ArrayList<AbsComment> mChildren;
+    private List<HtmlParser.Link> mLinks;
 
     private boolean mIsHidden = false;
     private boolean mIsBeingEdited = false;
@@ -224,6 +228,14 @@ public class Comment extends AbsComment implements Votable, Parcelable {
 
     public Spannable getSpannableBody() {
         return mSpannableBody;
+    }
+
+    public void setLinks(List<HtmlParser.Link> links) {
+        mLinks = links;
+    }
+
+    public List<HtmlParser.Link> getLinks() {
+        return mLinks;
     }
 
     public boolean isGilded() {

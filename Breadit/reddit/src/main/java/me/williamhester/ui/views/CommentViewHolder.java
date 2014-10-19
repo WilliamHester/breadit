@@ -1,6 +1,7 @@
 package me.williamhester.ui.views;
 
 import android.graphics.Typeface;
+import android.support.annotation.NonNull;
 import android.text.Html;
 import android.text.Layout;
 import android.text.Selection;
@@ -10,12 +11,14 @@ import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
-import android.text.style.TypefaceSpan;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 
+import java.util.List;
+
 import me.williamhester.models.AbsComment;
+import me.williamhester.models.AccountManager;
 import me.williamhester.models.Comment;
 import me.williamhester.models.MoreComments;
 import me.williamhester.reddit.R;
@@ -25,6 +28,7 @@ import me.williamhester.tools.HtmlParser;
  * Created by william on 8/1/14.
  */
 public class CommentViewHolder extends VotableViewHolder {
+
     private AbsComment mComment;
     private CommentClickCallbacks mCallback;
     private String mSubmissionAuthor;
@@ -32,6 +36,7 @@ public class CommentViewHolder extends VotableViewHolder {
     private TextView mAuthor;
     private View mLevelIndicator;
     private View mGoldIndicator;
+    private View mOptionsRow;
 
     public CommentViewHolder(View itemView, CommentClickCallbacks callbacks, String submissionAuthor) {
         super(itemView);
@@ -42,6 +47,31 @@ public class CommentViewHolder extends VotableViewHolder {
         mAuthor = (TextView) itemView.findViewById(R.id.author);
         mLevelIndicator = itemView.findViewById(R.id.level_indicator);
         mGoldIndicator = itemView.findViewById(R.id.gold_indicator);
+        mOptionsRow = itemView.findViewById(R.id.options_row);
+
+        View optionShare = itemView.findViewById(R.id.option_share);
+        final View optionLinks = itemView.findViewById(R.id.option_links);
+        final View optionReply = itemView.findViewById(R.id.option_reply);
+        final View optionSave = itemView.findViewById(R.id.option_save);
+        final View optionOverflow = itemView.findViewById(R.id.option_overflow);
+
+        mContent.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if (mOptionsRow.getVisibility() == View.VISIBLE) {
+                    mCallback.onCommentLongPressed(null);
+                } else if (!isHidden()) {
+                    optionLinks.setVisibility(
+                            ((Comment) mComment).getLinks().size() > 0 ? View.VISIBLE : View.GONE);
+                    optionReply.setVisibility(AccountManager.isLoggedIn() ? View.VISIBLE : View.GONE);
+                    optionSave.setVisibility(AccountManager.isLoggedIn() ? View.VISIBLE : View.GONE);
+                    optionOverflow.setVisibility(AccountManager.isLoggedIn() ? View.VISIBLE : View.GONE);
+                    mCallback.onCommentLongPressed(CommentViewHolder.this);
+                    expand(mOptionsRow);
+                }
+                return true;
+            }
+        });
     }
 
     @Override
@@ -50,6 +80,7 @@ public class CommentViewHolder extends VotableViewHolder {
         mComment = (AbsComment) comment;
         float dp = itemView.getResources().getDisplayMetrics().density;
         itemView.setPadding(Math.round(4 * dp * mComment.getLevel()), 0, 0, 0);
+        mOptionsRow.setVisibility(View.GONE);
         if (mComment.getLevel() > 0) {
             mLevelIndicator.setVisibility(View.VISIBLE);
             switch (mComment.getLevel() % 4) {
@@ -87,10 +118,10 @@ public class CommentViewHolder extends VotableViewHolder {
             mMetadata.setVisibility(View.VISIBLE);
             mAuthor.setVisibility(View.VISIBLE);
             mContent.setOnClickListener(mHideCommentsClickListener);
-
             if (comment1.getSpannableBody() == null && comment1.getBodyHtml() != null) {
                 HtmlParser parser = new HtmlParser(Html.fromHtml(comment1.getBodyHtml()).toString());
                 comment1.setSpannableBody(parser.getSpannableString());
+                comment1.setLinks(parser.getLinks());
             }
             mBody.setText(comment1.getSpannableBody());
             if (isHidden()) {
@@ -121,6 +152,10 @@ public class CommentViewHolder extends VotableViewHolder {
         return mComment instanceof Comment && ((Comment) mComment).isHidden();
     }
 
+    public void collapseOptions() {
+        collapse(mOptionsRow);
+    }
+
     private View.OnClickListener mMoreClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
@@ -138,7 +173,8 @@ public class CommentViewHolder extends VotableViewHolder {
 
     private static class CommentLinkMovementMethod extends LinkMovementMethod {
         @Override
-        public boolean onTouchEvent(TextView widget, Spannable buffer, MotionEvent event) {
+        public boolean onTouchEvent(@NonNull TextView widget, @NonNull Spannable buffer,
+                                    @NonNull MotionEvent event) {
             int action = event.getAction();
             if (action == MotionEvent.ACTION_UP ||
                     action == MotionEvent.ACTION_DOWN) {
@@ -176,5 +212,6 @@ public class CommentViewHolder extends VotableViewHolder {
     public interface CommentClickCallbacks {
         public void onMoreClick(CommentViewHolder viewHolder, MoreComments comment);
         public void onHideClick(Comment comment);
+        public void onCommentLongPressed(CommentViewHolder holder);
     }
 }
