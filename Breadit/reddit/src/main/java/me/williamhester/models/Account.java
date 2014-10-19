@@ -36,6 +36,7 @@ public class Account implements Parcelable {
 	private String mModhash;
     private String mCookie;
     private String mDataString;
+    private HashMap<String, Subreddit> mSubscriptions = new HashMap<>();
     private long mId;
 
     private JsonObject mData;
@@ -128,6 +129,14 @@ public class Account implements Parcelable {
 
     public long getId() {
         return mId;
+    }
+
+    public void setSubscriptions(HashMap<String, Subreddit> subs) {
+        mSubscriptions = subs;
+    }
+
+    public HashMap<String, Subreddit> getSubscriptions() {
+        return mSubscriptions;
     }
 
     @Override

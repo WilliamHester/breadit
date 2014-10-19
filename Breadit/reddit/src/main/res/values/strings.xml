@@ -149,8 +149,11 @@
 
     <!-- Submission Overflow Menu -->
     <string name="hide">Hide</string>
+    <string name="unhide">Unhide</string>
     <string name="mark_nsfw">Mark NSFW</string>
+    <string name="unmark_nsfw">Unmark NSFW</string>
     <string name="approve">Approve</string>
+    <string name="remove">Remove</string>
     <string name="spam">Spam</string>
 
 </resources>

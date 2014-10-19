@@ -20,8 +20,12 @@
         android:title="@string/approve"
         android:orderInCategory="4"
         android:visible="false"/>
+    <item android:id="@+id/overflow_remove"
+        android:title="@string/remove"
+        android:orderInCategory="5"
+        android:visible="false"/>
     <item android:id="@+id/overflow_spam"
         android:title="@string/spam"
-        android:orderInCategory="5"
+        android:orderInCategory="6"
         android:visible="false"/>
 </menu>

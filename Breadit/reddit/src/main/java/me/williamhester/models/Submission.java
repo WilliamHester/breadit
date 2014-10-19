@@ -162,6 +162,18 @@ public class Submission implements Votable, Parcelable {
         return over_18;
     }
 
+    public void setIsNsfw(boolean isNsfw) {
+        over_18 = isNsfw;
+    }
+
+    public boolean isStickied() {
+        return stickied;
+    }
+
+    public void setIsStickied(boolean stickied) {
+        this.stickied = stickied;
+    }
+
     public void setShowNsfwContent() {
         mIsNsfwShowing = true;
     }

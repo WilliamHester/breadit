@@ -1,7 +1,6 @@
 package me.williamhester.ui.adapters;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
@@ -19,6 +18,7 @@ import com.koushikdutta.async.future.FutureCallback;
 
 import java.util.List;
 
+import me.williamhester.models.AccountManager;
 import me.williamhester.models.ImgurAlbum;
 import me.williamhester.models.ImgurImage;
 import me.williamhester.models.Submission;
@@ -94,11 +94,11 @@ public class SubmissionAdapter extends ArrayAdapter<Submission> {
             mImageView = (ImageView) itemView.findViewById(R.id.image);
             mImageButton = (ImageButton) itemView.findViewById(R.id.preview_button);
             mOptionsRow = itemView.findViewById(R.id.options_row);
-            View optionSubreddit = itemView.findViewById(R.id.option_go_to_subreddit);
-            View optionUser = itemView.findViewById(R.id.option_view_user);
-            View optionSave = itemView.findViewById(R.id.option_save);
-            View optionOverflow = itemView.findViewById(R.id.option_overflow);
             View submissionData = itemView.findViewById(R.id.submission_data);
+            View optionUser = itemView.findViewById(R.id.option_view_user);
+            final View optionSubreddit = itemView.findViewById(R.id.option_go_to_subreddit);
+            final View optionSave = itemView.findViewById(R.id.option_save);
+            final View optionOverflow = itemView.findViewById(R.id.option_overflow);
 
             optionSubreddit.setOnClickListener(mOptionsOnClickListener);
             optionUser.setOnClickListener(mOptionsOnClickListener);
@@ -116,6 +116,9 @@ public class SubmissionAdapter extends ArrayAdapter<Submission> {
                     if (mOptionsRow.getVisibility() == View.VISIBLE) {
                         mCallback.onCardLongPressed(null);
                     } else {
+                        optionSubreddit.setVisibility(mCallback.isFrontPage() ? View.VISIBLE : View.GONE);
+                        optionSave.setVisibility(AccountManager.isLoggedIn() ? View.VISIBLE : View.GONE);
+                        optionOverflow.setVisibility(AccountManager.isLoggedIn() ? View.VISIBLE : View.GONE);
                         mCallback.onCardLongPressed(SubmissionViewHolder.this);
                         expand(mOptionsRow);
                     }
@@ -344,5 +347,6 @@ public class SubmissionAdapter extends ArrayAdapter<Submission> {
         public void onCardClicked(Submission submission);
         public void onCardLongPressed(SubmissionViewHolder holder);
         public void onOptionsRowItemSelected(View view, Submission submission);
+        public boolean isFrontPage();
     }
 }

@@ -35,6 +35,7 @@ import com.koushikdutta.async.future.FutureCallback;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import me.williamhester.databases.AccountDataSource;
@@ -278,6 +279,10 @@ public class NavigationDrawerFragment extends AccountFragment {
                 dataSource.open();
                 mSubredditList.addAll(dataSource.getCurrentAccountSubreddits());
                 dataSource.close();
+                HashMap<String, Subreddit> subscriptions = AccountManager.getAccount().getSubscriptions();
+                for (Subreddit s : mSubredditList) {
+                    subscriptions.put(s.getDisplayName().toLowerCase(), s);
+                }
                 Collections.sort(mSubredditList);
                 new GetUserSubreddits().execute();
                 if (listView.getAdapter() != mSubredditArrayAdapter) {

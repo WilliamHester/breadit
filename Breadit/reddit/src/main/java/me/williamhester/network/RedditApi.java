@@ -335,7 +335,102 @@ public class RedditApi {
         });
     }
 
-    public static void editThing(Context context, final Votable thing, final FutureCallback<Votable> callback) {
+    public static void hide(Context context, Submission submission,
+                            FutureCallback<String> callback) {
+        Ion.with(context)
+                .load(REDDIT_URL + "/api/hide")
+                .addHeaders(generateUserHeaders())
+                .setBodyParameter("id", submission.getName())
+                .asString()
+                .setCallback(callback);
+    }
+
+    public static void unhide(Context context, Submission submission,
+                              FutureCallback<String> callback) {
+        Ion.with(context)
+                .load(REDDIT_URL + "/api/unhide")
+                .addHeaders(generateUserHeaders())
+                .setBodyParameter("id", submission.getName())
+                .asString()
+                .setCallback(callback);
+    }
+
+    public static void delete(Context context, Votable votable, FutureCallback<String> callback) {
+        Ion.with(context)
+                .load(REDDIT_URL + "/api/del")
+                .addHeaders(generateUserHeaders())
+                .setBodyParameter("id", votable.getName())
+                .asString()
+                .setCallback(callback);
+    }
+
+    public static void markNsfw(Context context, Submission submission,
+                                FutureCallback<String> callback) {
+        Ion.with(context)
+                .load(REDDIT_URL + "/api/marknsfw")
+                .addHeaders(generateUserHeaders())
+                .setBodyParameter("id", submission.getName())
+                .asString()
+                .setCallback(callback);
+    }
+
+    public static void unmarkNsfw(Context context, Submission submission,
+                                  FutureCallback<String> callback) {
+        Ion.with(context)
+                .load(REDDIT_URL + "/api/unmarknsfw")
+                .addHeaders(generateUserHeaders())
+                .setBodyParameter("id", submission.getName())
+                .asString()
+                .setCallback(callback);
+    }
+
+    public static void approve(Context context, Submission submission,
+                                  FutureCallback<String> callback) {
+        Ion.with(context)
+                .load(REDDIT_URL + "/api/approve")
+                .addHeaders(generateUserHeaders())
+                .setBodyParameter("id", submission.getName())
+                .asString()
+                .setCallback(callback);
+    }
+
+    public static void remove(Context context, Submission submission, boolean spam,
+                              FutureCallback<String> callback) {
+        Ion.with(context)
+                .load(REDDIT_URL + "/api/remove")
+                .addHeaders(generateUserHeaders())
+                .setBodyParameter("id", submission.getName())
+                .setBodyParameter("spam", String.valueOf(spam))
+                .asString()
+                .setCallback(callback);
+    }
+
+    public static void setContestMode(Context context, boolean isContest, Submission submission,
+                                      FutureCallback<String> callback) {
+        Ion.with(context)
+                .load(REDDIT_URL + "/api/set_contest_mode")
+                .addHeaders(generateUserHeaders())
+                .setBodyParameter("api_type", "json")
+                .setBodyParameter("id", submission.getName())
+                .setBodyParameter("state", String.valueOf(isContest))
+                .asString()
+                .setCallback(callback);
+    }
+
+    public static void setSubredditSticky(Context context, boolean isSticky, Submission submission,
+                                          FutureCallback<String> callback) {
+        Ion.with(context)
+                .load(REDDIT_URL + "/api/set_subreddit_sticky")
+                .addHeaders(generateUserHeaders())
+                .setBodyParameter("api_type", "json")
+                .setBodyParameter("id", submission.getName())
+                .setBodyParameter("state", String.valueOf(isSticky))
+                .asString()
+                .setCallback(callback);
+    }
+
+    public static void editThing(Context context, final Votable thing,
+                                 final FutureCallback<Votable> callback) {
         Ion.with(context)
                 .load(REDDIT_URL + "/api/editusertext/")
                 .addHeaders(generateUserHeaders())
