@@ -111,10 +111,10 @@ public class SubredditFragment extends AccountFragment implements SubmissionAdap
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle bundle) {
         View v = inflater.inflate(R.layout.fragment_subreddit, root, false);
 
-        mFooter = createFooterView(inflater, root);
+        mFooter = createFooterView(inflater);
 
         mListView = (ListView) v.findViewById(R.id.submissions_list);
-//        mListView.addFooterView(mFooter);
+        mListView.addFooterView(mFooter);
         mListView.setAdapter(mSubmissionsAdapter);
         mListView.setOnScrollListener(new InfiniteLoadingScrollListener());
 
@@ -263,8 +263,8 @@ public class SubredditFragment extends AccountFragment implements SubmissionAdap
         refreshData();
     }
 
-    private View createFooterView(LayoutInflater inflater, ViewGroup root) {
-        return inflater.inflate(R.layout.footer_subreddit_fragment, root, false);
+    private View createFooterView(LayoutInflater inflater) {
+        return inflater.inflate(R.layout.footer_subreddit_fragment, null);
     }
 
     private void setFooterFailedToLoad() {
