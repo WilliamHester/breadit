@@ -451,8 +451,10 @@ public class NavigationDrawerFragment extends AccountFragment {
                         (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 convertView = inflater.inflate(R.layout.list_item_subreddit, parent, false);
             }
-            TextView text = (TextView) convertView;
+            TextView text = (TextView) convertView.findViewById(R.id.subreddit_list_item_title);
             text.setText(getItem(position) == null ? getResources().getString(R.string.front_page) : getItem(position).getDisplayName());
+            convertView.findViewById(R.id.mod_indicator).setVisibility(getItem(position) != null
+                    && getItem(position).userIsModerator() ? View.VISIBLE : View.GONE);
 
             return convertView;
         }
