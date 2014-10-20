@@ -2,6 +2,7 @@ package me.williamhester.network;
 
 import android.content.Context;
 import android.text.Html;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -10,11 +11,9 @@ import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.async.http.AsyncHttpClient;
-import com.koushikdutta.async.http.AsyncHttpGet;
 import com.koushikdutta.async.http.AsyncHttpPost;
 import com.koushikdutta.async.http.AsyncHttpRequest;
 import com.koushikdutta.async.http.AsyncHttpResponse;
-import com.koushikdutta.async.http.body.AsyncHttpRequestBody;
 import com.koushikdutta.async.http.body.MultipartFormDataBody;
 import com.koushikdutta.ion.Ion;
 
@@ -278,61 +277,66 @@ public class RedditApi {
                     callback.onCompleted(e, null);
                     return;
                 }
-                try {
-                    JSONArray array = result.getJSONObject("json").getJSONObject("data").getJSONArray("things");
-                    ArrayList<String> names = new ArrayList<>();
-                    final ArrayList<Integer> levels = new ArrayList<>();
-                    ArrayList<String> parents = new ArrayList<>();
-                    for (int i = 0; i < array.length(); i++) {
-                        JSONObject o = array.getJSONObject(i).getJSONObject("data");
-                        names.add(o.getString("id"));
-                        parents.add(o.getString("parent"));
-
-                        int parentIndex = names.indexOf(parents.get(i));
-                        if (parentIndex >= 0) { // The parent is contained within the other comments
-                            levels.add(levels.get(parentIndex) + 1);
-                        } else {
-                            levels.add(baseLevel);
-                        }
-                    }
-
-                    StringBuilder query = new StringBuilder();
-                    for (String name : names) {
-                        query.append(name);
-                        query.append(',');
-                    }
-                    Ion.with(context)
-                            .load(REDDIT_URL + "/api/info.json")
-                            .addQuery("id", query.toString())
-                            .addHeaders(generateUserHeaders())
-                            .asJsonObject()
-                            .setCallback(new FutureCallback<JsonObject>() {
-                                @Override
-                                public void onCompleted(Exception e, JsonObject result) {
-                                    if (e != null) {
-                                        callback.onCompleted(e, null);
-                                        return;
-                                    }
-
-                                    Gson gson = new Gson();
-                                    ResponseRedditWrapper wrapper = new ResponseRedditWrapper(result, gson);
-                                    ArrayList<AbsComment> comments = new ArrayList<>();
-                                    if (wrapper.getData() instanceof Listing) {
-                                        Listing listing = (Listing) wrapper.getData();
-                                        for (int i = 0; i < levels.size(); i++) {
-                                            Comment comment = (Comment) listing.getChildren().get(i).getData();
-                                            comment.setLevel(levels.get(i));
-                                            comments.add(comment);
-                                        }
-                                    }
-                                    callback.onCompleted(null, comments);
-                                }
-                            });
-                } catch (Exception e2) {
-                    e2.printStackTrace();
-                }
+                getCommentDataFromNames(result, baseLevel, context, callback);
             }
         });
+    }
+
+    private static void getCommentDataFromNames(JSONObject result, int baseLevel, Context context,
+                                                final FutureCallback<ArrayList<AbsComment>> callback) {
+        try {
+            JSONArray array = result.getJSONObject("json").getJSONObject("data").getJSONArray("things");
+            ArrayList<String> names = new ArrayList<>();
+            final ArrayList<Integer> levels = new ArrayList<>();
+            ArrayList<String> parents = new ArrayList<>();
+            for (int i = 0; i < array.length(); i++) {
+                JSONObject o = array.getJSONObject(i).getJSONObject("data");
+                names.add(o.getString("id"));
+                parents.add(o.getString("parent"));
+
+                int parentIndex = names.indexOf(parents.get(i));
+                if (parentIndex >= 0) { // The parent is contained within the other comments
+                    levels.add(levels.get(parentIndex) + 1);
+                } else {
+                    levels.add(baseLevel);
+                }
+            }
+
+            StringBuilder query = new StringBuilder();
+            for (String name : names) {
+                query.append(name);
+                query.append(',');
+            }
+            Ion.with(context)
+                    .load(REDDIT_URL + "/api/info.json")
+                    .addQuery("id", query.toString())
+                    .addHeaders(generateUserHeaders())
+                    .asJsonObject()
+                    .setCallback(new FutureCallback<JsonObject>() {
+                        @Override
+                        public void onCompleted(Exception e, JsonObject result) {
+                            if (e != null) {
+                                callback.onCompleted(e, null);
+                                return;
+                            }
+
+                            Gson gson = new Gson();
+                            ResponseRedditWrapper wrapper = new ResponseRedditWrapper(result, gson);
+                            ArrayList<AbsComment> comments = new ArrayList<>();
+                            if (wrapper.getData() instanceof Listing) {
+                                Listing listing = (Listing) wrapper.getData();
+                                for (int i = 0; i < levels.size(); i++) {
+                                    Comment comment = (Comment) listing.getChildren().get(i).getData();
+                                    comment.setLevel(levels.get(i));
+                                    comments.add(comment);
+                                }
+                            }
+                            callback.onCompleted(null, comments);
+                        }
+                    });
+        } catch (Exception e2) {
+            callback.onCompleted(e2, null);
+        }
     }
 
     public static void hide(Context context, Submission submission,
@@ -429,6 +433,30 @@ public class RedditApi {
                 .setCallback(callback);
     }
 
+    public static void replyToComment(final Context context, final Comment comment, String text,
+                             final FutureCallback<ArrayList<AbsComment>> callback) {
+        MultipartFormDataBody body = new MultipartFormDataBody();
+        body.addStringPart("api_type", "json");
+        body.addStringPart("parent", comment.getName());
+        body.addStringPart("text", text);
+
+        AsyncHttpRequest request = new AsyncHttpPost(REDDIT_URL + "/api/comment/");
+        Account account = AccountManager.getAccount();
+        request.addHeader("Cookie", "reddit_session=" + account.getCookie().replace("\"", ""));
+        request.addHeader("X-Modhash", account.getModhash().replace("\"", ""));
+        request.setBody(body);
+        AsyncHttpClient.getDefaultInstance().executeJSONObject(request, new AsyncHttpClient.JSONObjectCallback() {
+            @Override
+            public void onCompleted(Exception e, AsyncHttpResponse source, JSONObject result) {
+                if (e != null) {
+                    callback.onCompleted(e, null);
+                    return;
+                }
+                getCommentDataFromNames(result, comment.getLevel() + 1, context, callback);
+            }
+        });
+    }
+
     public static void editThing(Context context, final Votable thing,
                                  final FutureCallback<Votable> callback) {
         Ion.with(context)
@@ -451,6 +479,12 @@ public class RedditApi {
                         callback.onCompleted(null, thing);
                     }
                 });
+    }
+
+    public static void printOutLongString(String string) {
+        for (int i = 0; i < string.length(); i += 1000) {
+            Log.d("RedditApi", string.substring(i, Math.min(string.length(), i + 1000)));
+        }
     }
 
 }

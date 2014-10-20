@@ -1,6 +1,8 @@
 package me.williamhester.ui.text;
 
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -89,7 +91,12 @@ public class LinkSpan extends ClickableSpan {
                 f = ImagePagerFragment.newInstanceLazyLoaded(mUrl.getLinkId(), false);
                 break;
             case Url.YOUTUBE:
-                f = YouTubeFragment.newInstance(mUrl.getLinkId());
+                // TODO: fix this when YouTube updates their Android API
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                    f = YouTubeFragment.newInstance(mUrl.getLinkId());
+                } else {
+                    i = new Intent(Intent.ACTION_VIEW, Uri.parse(mLink));
+                }
                 break;
             case Url.DIRECT_GFY:
             case Url.GFYCAT_LINK:

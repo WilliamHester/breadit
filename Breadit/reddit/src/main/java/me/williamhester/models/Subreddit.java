@@ -256,6 +256,6 @@ public class Subreddit implements Parcelable, Comparable<Subreddit> {
     public int compareTo(Subreddit subreddit) {
         if (mDisplayName == null || subreddit == null || subreddit.mDisplayName == null)
             return -1;
-        return mDisplayName.compareTo(subreddit.mDisplayName);
+        return mDisplayName.toLowerCase().compareTo(subreddit.mDisplayName.toLowerCase());
     }
 }

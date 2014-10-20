@@ -36,7 +36,7 @@
         <activity
             android:name="me.williamhester.ui.activities.SubmissionActivity"
             android:parentActivityName="me.williamhester.ui.activities.MainActivity"
-            android:windowSoftInputMode="adjustPan" >
+            android:windowSoftInputMode="adjustResize" >
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
                 <action android:name="android.intent.action.VIEW" />

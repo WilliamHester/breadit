@@ -68,57 +68,6 @@ public class SubmissionActivity extends ActionBarActivity implements ImageFragme
             actionBar.setDisplayShowTitleEnabled(true);
         }
     }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.submission, menu);
-        if (mSubmission == null || mSubmission.isSelf()) {
-            menu.removeItem(R.id.action_view_link);
-        } else if (mParser.getType() == Url.IMGUR_ALBUM
-                || mParser.getType() == Url.IMGUR_IMAGE
-                || mParser.getType() == Url.NORMAL_IMAGE
-                || mParser.getType() == Url.GIF
-                || mParser.getType() == Url.GFYCAT_LINK) {
-            menu.findItem(R.id.action_view_link).setIcon(android.R.drawable.ic_menu_gallery);
-        } else if (mParser.getType() == Url.YOUTUBE) {
-            menu.findItem(R.id.action_view_link).setIcon(R.drawable.ic_youtube);
-        }
-        menu.removeItem(R.id.action_open_link_in_browser);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        switch (id) {
-            case R.id.action_share:
-                Intent sendIntent = new Intent();
-                sendIntent.setAction(Intent.ACTION_SEND);
-                sendIntent.putExtra(Intent.EXTRA_TEXT, mSubmission.getUrl());
-                sendIntent.setType("text/plain");
-                startActivity(Intent.createChooser(sendIntent, getResources().getText(R.string.share_with)));
-                return true;
-            case R.id.action_view_link:
-                Fragment f = getSupportFragmentManager().findFragmentByTag("content");
-                if (f != null) {
-                    getSupportFragmentManager().popBackStack();
-                } else {
-                    getSupportFragmentManager().beginTransaction()
-                            .add(R.id.container, getContentFragment(), "content")
-                            .addToBackStack("content")
-                            .commit();
-                }
-                return true;
-            case R.id.action_open_link_in_browser:
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(mSubmission.getUrl()));
-                startActivity(browserIntent);
-                return true;
-            case android.R.id.home:
-                finish();
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
     
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
@@ -152,7 +101,7 @@ public class SubmissionActivity extends ActionBarActivity implements ImageFragme
         }
     }
 
-    private Fragment getContentFragment() {
+    public Fragment getContentFragment() {
         if (!mSubmission.isSelf()) {
             switch (mParser.getType()) {
                 case Url.NOT_SPECIAL:

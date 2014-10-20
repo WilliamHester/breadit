@@ -15,8 +15,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 
-import java.util.List;
-
 import me.williamhester.models.AbsComment;
 import me.williamhester.models.AccountManager;
 import me.williamhester.models.Comment;
@@ -54,6 +52,19 @@ public class CommentViewHolder extends VotableViewHolder {
         final View optionReply = itemView.findViewById(R.id.option_reply);
         final View optionSave = itemView.findViewById(R.id.option_save);
         final View optionOverflow = itemView.findViewById(R.id.option_overflow);
+
+        View.OnClickListener optionsRowClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCallback.onOptionsRowItemSelected(v, mComment);
+            }
+        };
+
+        optionShare.setOnClickListener(optionsRowClickListener);
+        optionLinks.setOnClickListener(optionsRowClickListener);
+        optionReply.setOnClickListener(optionsRowClickListener);
+        optionSave.setOnClickListener(optionsRowClickListener);
+        optionOverflow.setOnClickListener(optionsRowClickListener);
 
         mContent.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -213,5 +224,6 @@ public class CommentViewHolder extends VotableViewHolder {
         public void onMoreClick(CommentViewHolder viewHolder, MoreComments comment);
         public void onHideClick(Comment comment);
         public void onCommentLongPressed(CommentViewHolder holder);
+        public void onOptionsRowItemSelected(View view, AbsComment submission);
     }
 }

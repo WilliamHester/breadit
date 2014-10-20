@@ -1,10 +1,12 @@
 package me.williamhester.ui.fragments;
 
-import android.support.v4.app.Fragment;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
@@ -41,14 +43,16 @@ import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 import me.williamhester.tools.HtmlParser;
 import me.williamhester.tools.Url;
+import me.williamhester.ui.activities.SubmissionActivity;
 import me.williamhester.ui.views.CommentViewHolder;
 import me.williamhester.ui.views.SwipeView;
 
 public class CommentFragment extends AccountFragment {
 
     private static final String PERMALINK = "permalink";
+    private static final int REPLY_REQUEST = 1;
 
-    private ArrayList<AbsComment> mCommentsList;
+    private final ArrayList<AbsComment> mCommentsList = new ArrayList<>();
     private CommentArrayAdapter mCommentAdapter;
     private Context mContext;
     private ListView mCommentsListView;
@@ -81,7 +85,8 @@ public class CommentFragment extends AccountFragment {
         Bundle args = getArguments();
         mContext = getActivity();
         if (savedInstanceState != null) {
-            mCommentsList = savedInstanceState.getParcelableArrayList("comments");
+            ArrayList<AbsComment> comments = savedInstanceState.getParcelableArrayList("comments");
+            mCommentsList.addAll(comments);
             mSubmission = savedInstanceState.getParcelable("submission");
             mPermalink = savedInstanceState.getString("permalink");
             mSortType = savedInstanceState.getString("sortType");
@@ -90,7 +95,7 @@ public class CommentFragment extends AccountFragment {
             mSubmission = args.getParcelable("submission");
             if (mSubmission != null) {
                 mPermalink = mSubmission.getPermalink();
-                RedditApi.getSubmissionData(getActivity(), mPermalink, mSortType, mSubmissionCallback, mCommentCallback);
+                RedditApi.getSubmissionData(mContext, mPermalink, mSortType, mSubmissionCallback, mCommentCallback);
             } else {
                 mPermalink = args.getString(PERMALINK);
                 if (mPermalink.contains("reddit.com")) {
@@ -98,7 +103,6 @@ public class CommentFragment extends AccountFragment {
                 }
                 RedditApi.getSubmissionData(mContext, mPermalink, mSortType, mSubmissionCallback, mCommentCallback);
             }
-            mCommentsList = new ArrayList<>();
         }
         setHasOptionsMenu(true);
     }
@@ -122,19 +126,75 @@ public class CommentFragment extends AccountFragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.submission_fragment, menu);
+
+        Url url = new Url(mSubmission.getUrl());
+
+        if (mSubmission == null || mSubmission.isSelf()) {
+            menu.removeItem(R.id.action_view_link);
+        } else if (url.getType() == Url.IMGUR_ALBUM
+                || url.getType() == Url.IMGUR_IMAGE
+                || url.getType() == Url.NORMAL_IMAGE
+                || url.getType() == Url.GIF
+                || url.getType() == Url.GFYCAT_LINK) {
+            menu.findItem(R.id.action_view_link).setIcon(android.R.drawable.ic_menu_gallery);
+        } else if (url.getType() == Url.YOUTUBE) {
+            menu.findItem(R.id.action_view_link).setIcon(R.drawable.ic_youtube);
+        }
+        menu.removeItem(R.id.action_open_link_in_browser);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_sort_comments) {
-            PopupMenu popupMenu = new PopupMenu(getActivity(),
-                    getActivity().findViewById(R.id.action_sort_comments));
-            popupMenu.setOnMenuItemClickListener(mSortClickListener);
-            popupMenu.inflate(R.menu.comment_sorts);
-            popupMenu.show();
-            return true;
+        switch (item.getItemId()) {
+            case R.id.action_sort_comments: {
+                PopupMenu popupMenu = new PopupMenu(mContext,
+                        getActivity().findViewById(R.id.action_sort_comments));
+                popupMenu.setOnMenuItemClickListener(mSortClickListener);
+                popupMenu.inflate(R.menu.comment_sorts);
+                popupMenu.show();
+                return true;
+            }
+            case R.id.action_share:
+                Intent sendIntent = new Intent();
+                sendIntent.setAction(Intent.ACTION_SEND);
+                sendIntent.putExtra(Intent.EXTRA_TEXT, mSubmission.getUrl());
+                sendIntent.setType("text/plain");
+                startActivity(Intent.createChooser(sendIntent, getResources().getText(R.string.share_with)));
+                break;
+            case R.id.action_view_link:
+                Fragment f = getFragmentManager().findFragmentByTag("content");
+                if (f != null) {
+                    getFragmentManager().popBackStack();
+                } else {
+                    getFragmentManager().beginTransaction()
+                            .add(R.id.container, ((SubmissionActivity) getActivity()).getContentFragment(), "content")
+                            .addToBackStack("content")
+                            .commit();
+                }
+                break;
+            case R.id.action_open_link_in_browser:
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(mSubmission.getUrl()));
+                startActivity(browserIntent);
+                break;
+            case android.R.id.home:
+                getActivity().onBackPressed();
+                break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REPLY_REQUEST) {
+            Bundle args = data.getExtras();
+            Comment parent = args.getParcelable("parentComment");
+            Comment newComment = args.getParcelable("newComment");
+            int index = mCommentsList.indexOf(parent);
+            mCommentsList.add(index + 1, newComment);
+            mCommentAdapter.notifyDataSetChanged();
+            return;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -155,6 +215,7 @@ public class CommentFragment extends AccountFragment {
                 mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE));
     }
 
+    @SuppressLint("InflateParams")
     private void createHeaderView(LayoutInflater inflater) {
         mHeaderView = inflater.inflate(R.layout.header_comments, null);
         TextView domain = (TextView) mHeaderView.findViewById(R.id.domain);
@@ -192,7 +253,7 @@ public class CommentFragment extends AccountFragment {
                     @Override
                     public void onRightToLeftSwipe() {
                         mSubmission.setVoteStatus(mSubmission.getVoteStatus() == Votable.DOWNVOTED ? Votable.NEUTRAL : Votable.DOWNVOTED);
-                        RedditApi.vote(getActivity(), mSubmission);
+                        RedditApi.vote(mContext, mSubmission);
                         Intent result = new Intent();
                         Bundle extras = new Bundle();
                         extras.putString("name", mSubmission.getName());
@@ -204,7 +265,7 @@ public class CommentFragment extends AccountFragment {
                     @Override
                     public void onLeftToRightSwipe() {
                         mSubmission.setVoteStatus(mSubmission.getVoteStatus() == Votable.UPVOTED ? Votable.NEUTRAL : Votable.UPVOTED);
-                        RedditApi.vote(getActivity(), mSubmission);
+                        RedditApi.vote(mContext, mSubmission);
                         Intent result = new Intent();
                         Bundle extras = new Bundle();
                         extras.putString("name", mSubmission.getName());
@@ -366,7 +427,7 @@ public class CommentFragment extends AccountFragment {
             }
             if (!tempSort.equals(mSortType)) {
                 mSortType = tempSort;
-                RedditApi.getSubmissionData(getActivity(), mPermalink, mSortType, mSubmissionCallback, mCommentCallback);
+                RedditApi.getSubmissionData(mContext, mPermalink, mSortType, mSubmissionCallback, mCommentCallback);
             }
             return true;
         }
@@ -388,12 +449,12 @@ public class CommentFragment extends AccountFragment {
             mCommentAdapter.notifyDataSetChanged();
         }
 
-                @Override
+        @Override
         public void onMoreClick(CommentViewHolder commentView, final MoreComments comment) {
             if (!comment.isLoading()) {
                 comment.setIsLoading(true);
-                RedditApi.getMoreChildren(getActivity(), mSubmission.getName(),
-                        "top", comment.getChildren(), comment.getLevel(),
+                RedditApi.getMoreChildren(mContext, mSubmission.getName(),
+                        mSortType, comment.getChildren(), comment.getLevel(),
                         new FutureCallback<ArrayList<AbsComment>>() {
                             @Override
                             public void onCompleted(Exception e, ArrayList<AbsComment> comments) {
@@ -416,6 +477,19 @@ public class CommentFragment extends AccountFragment {
                 mFocusedViewHolder.collapseOptions();
             }
             mFocusedViewHolder = holder;
+        }
+
+        @Override
+        public void onOptionsRowItemSelected(View view, AbsComment comment) {
+            switch (view.getId()) {
+                case R.id.option_reply:
+                    Fragment reply = ReplyFragment.newInstance((Comment) comment);
+                    reply.setTargetFragment(CommentFragment.this, REPLY_REQUEST);
+                    getFragmentManager().beginTransaction()
+                            .replace(R.id.container, reply, "ReplyFragment")
+                            .addToBackStack("ReplyFragment")
+                            .commit();
+            }
         }
     };
 
@@ -468,7 +542,6 @@ public class CommentFragment extends AccountFragment {
             }
             mCommentsList.clear();
             mCommentsList.addAll(result);
-            mCommentAdapter = new CommentArrayAdapter(mContext);
             mCommentsListView.setAdapter(mCommentAdapter);
             mCommentAdapter.notifyDataSetChanged();
         }
@@ -517,36 +590,6 @@ public class CommentFragment extends AccountFragment {
             //     name as the author name. Scroll to that one...
             // That, or parse the new structure until the new comment is found and add that one in.
             // pass new data for the comment and then notifydatasetchanged
-        }
-    }
-
-    private class DeleteAsyncTask extends AsyncTask<Void, Void, Void> {
-
-        private String mFullname;
-        private int mPosition;
-
-        public DeleteAsyncTask(String fullname, int position) {
-            mFullname = fullname;
-            mPosition = position;
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            List<NameValuePair> apiParams = new ArrayList<NameValuePair>();
-            apiParams.add(new BasicNameValuePair("id", mFullname));
-            Utilities.post(apiParams, "http://www.reddit.com/api/del", mAccount);
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            if (mPosition > 0) {
-                mCommentAdapter.remove(mCommentAdapter.getItem(mPosition));
-                mCommentAdapter.notifyDataSetChanged();
-            } else {
-                if (getActivity() != null)
-                    getActivity().finish();
-            }
         }
     }
 

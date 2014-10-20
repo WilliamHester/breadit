@@ -2,6 +2,20 @@
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:breadit="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/action_share"
+        android:title="@string/share"
+        android:icon="@android:drawable/ic_menu_share"
+        android:orderInCategory="1"
+        breadit:showAsAction="ifRoom"/>
+    <item android:id="@+id/action_view_link"
+        android:title="@string/view_link"
+        android:orderInCategory="3"
+        android:icon="@drawable/ic_action_web_site"
+        breadit:showAsAction="ifRoom"/>
+    <item android:id="@+id/action_open_link_in_browser"
+        android:title="@string/open_link_browser"
+        android:orderInCategory="2"
+        breadit:showAsAction="never" />
     <item android:id="@+id/action_sort_comments"
         android:title="@string/sort_by"
         android:orderInCategory="2"

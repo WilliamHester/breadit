@@ -3,11 +3,13 @@ package me.williamhester.ui.fragments;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -78,7 +80,6 @@ public class SubredditFragment extends AccountFragment implements SubmissionAdap
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-
         if (activity instanceof OnSubredditSelectedListener) {
             mCallback = (OnSubredditSelectedListener) activity;
         }
@@ -304,10 +305,17 @@ public class SubredditFragment extends AccountFragment implements SubmissionAdap
 
     @Override
     public void onYouTubeVideoClicked(String videoId) {
-        getFragmentManager().beginTransaction()
-                .add(R.id.container, YouTubeFragment.newInstance(videoId), "YouTubeFragment")
-                .addToBackStack("YouTubeFragment")
-                .commit();
+        // TODO: fix this when YouTube updates their Android API
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            getFragmentManager().beginTransaction()
+                    .add(R.id.container, YouTubeFragment.newInstance(videoId), "YouTubeFragment")
+                    .addToBackStack("YouTubeFragment")
+                    .commit();
+        } else {
+            Intent i = new Intent(Intent.ACTION_VIEW,
+                    Uri.parse("http://www.youtube.com/watch?v=" + videoId));
+            getActivity().startActivity(i);
+        }
     }
 
     @Override

@@ -161,6 +161,21 @@
                 android:text="/r/"
                 android:background="?android:attr/selectableItemBackground"/>
 
+            <FrameLayout android:id="@+id/option_reply"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:visibility="gone"
+                android:background="?android:attr/selectableItemBackground">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_action_reply"/>
+
+            </FrameLayout>
+
             <FrameLayout android:id="@+id/option_view_user"
                 android:layout_width="0dp"
                 android:layout_weight="1"

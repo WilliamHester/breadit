@@ -28,7 +28,7 @@
     <!-- SubmissionFragment -->
     <string name="share">Share</string>
     <string name="open_link_browser">Open in browser</string>
-    <string name="reply_hint">Enter reply</string>
+    <string name="reply_hint">Reply to</string>
     <string name="cancel">Cancel</string>
     <string name="reply">Reply</string>
     <string name="view_link">View link</string>
@@ -155,5 +155,11 @@
     <string name="approve">Approve</string>
     <string name="remove">Remove</string>
     <string name="spam">Spam</string>
+
+    <!-- Reply Fragment -->
+    <string name="send_reply">Send Reply</string>
+    <string name="sending_reply">Sending reply. Please wait.</string>
+    <string name="failed_to_post_reply">Failed to post reply. Please check your network connection
+        and try again.</string>
 
 </resources>
