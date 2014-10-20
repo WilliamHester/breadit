@@ -37,41 +37,35 @@
             android:orientation="vertical"
             android:background="?android:attr/selectableItemBackground">
 
-            <LinearLayout android:id="@+id/metadata_row"
-                android:layout_width="match_parent"
+            <TextView android:id="@+id/author"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:singleLine="true"
+                android:layout_marginEnd="4dp"/>
 
-                <TextView android:id="@+id/author"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textStyle="bold"
-                    android:textSize="13sp"
-                    android:singleLine="true"
-                    android:layout_marginEnd="4dp"/>
+            <TextView android:id="@+id/flair"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@id/author"
+                android:maxWidth="120dp"
+                android:fontFamily="sans-serif-light"
+                android:textSize="13sp"
+                android:layout_marginEnd="4dp"
+                android:background="@drawable/flair_background"
+                android:singleLine="true"
+                android:ellipsize="end"/>
 
-                <TextView android:id="@+id/flair"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-light"
-                    android:textSize="13sp"
-                    android:layout_marginEnd="4dp"
-                    android:background="@drawable/flair_background"
-                    android:singleLine="true"
-                    android:ellipsize="end"
-                    android:text="this is some text that is just going to be way too long to fit"/>
-
-                <TextView android:id="@+id/metadata"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="13sp"
-                    android:textColor="@color/comment_metadata_gray"
-                    android:singleLine="true"
-                    android:ellipsize="none"
-                    android:text="This is some metadata"/>
-
-            </LinearLayout>
+            <TextView android:id="@+id/metadata"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@id/flair"
+                android:layout_marginEnd="4dp"
+                android:textSize="13sp"
+                android:textColor="@color/comment_metadata_gray"
+                android:singleLine="true"
+                android:ellipsize="none"/>
 
             <TextView android:id="@+id/body"
                 android:layout_width="match_parent"
@@ -79,7 +73,7 @@
                 android:textSize="14sp"
                 android:paddingTop="1dp"
                 android:textColor="@color/ghostwhite"
-                android:layout_below="@id/metadata_row"/>
+                android:layout_below="@id/metadata"/>
 
             <View android:id="@+id/gold_indicator"
                 android:layout_width="4dp"

@@ -1,5 +1,8 @@
 package me.williamhester.ui.views;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Typeface;
 import android.support.annotation.NonNull;
 import android.text.Html;
@@ -68,6 +71,20 @@ public class CommentViewHolder extends VotableViewHolder {
         optionSave.setOnClickListener(optionsRowClickListener);
         optionOverflow.setOnClickListener(optionsRowClickListener);
 
+        mFlairText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+                builder.setMessage(Html.fromHtml(((Comment) mComment).getFlairText()).toString());
+                builder.setNegativeButton(R.string.close, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                });
+                builder.show();
+            }
+        });
         mContent.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
@@ -128,7 +145,7 @@ public class CommentViewHolder extends VotableViewHolder {
             mBody.setText(sb);
             mGoldIndicator.setVisibility(View.GONE);
         } else {
-            Comment comment1 = (Comment) mComment;
+            final Comment comment1 = (Comment) mComment;
             mMetadata.setVisibility(View.VISIBLE);
             mAuthor.setVisibility(View.VISIBLE);
             mContent.setOnClickListener(mHideCommentsClickListener);
@@ -136,13 +153,6 @@ public class CommentViewHolder extends VotableViewHolder {
                 HtmlParser parser = new HtmlParser(Html.fromHtml(comment1.getBodyHtml()).toString());
                 comment1.setSpannableBody(parser.getSpannableString());
                 comment1.setLinks(parser.getLinks());
-            }
-            if (comment1.getFlairText() != null) {
-                mFlairText.setVisibility(View.VISIBLE);
-                mFlairText.setBackgroundResource(R.drawable.flair_background);
-                mFlairText.setText(comment1.getFlairText());
-            } else {
-                mFlairText.setVisibility(View.GONE);
             }
             mBody.setText(comment1.getSpannableBody());
             if (isHidden()) {
@@ -166,6 +176,13 @@ public class CommentViewHolder extends VotableViewHolder {
                     .append(" ")
                     .append(itemView.getResources().getQuantityString(R.plurals.points, comment1.getScore()));
             mMetadata.setText(sb);
+            if (comment1.getFlairText() != null) {
+                mFlairText.setVisibility(View.VISIBLE);
+                mFlairText.setBackgroundResource(R.drawable.flair_background);
+                mFlairText.setText(comment1.getFlairText());
+            } else {
+                mFlairText.setVisibility(View.GONE);
+            }
         }
     }
 

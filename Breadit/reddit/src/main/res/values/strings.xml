@@ -44,6 +44,7 @@
         <item quantity="one">point</item>
         <item quantity="other">points</item>
     </plurals>
+    <string name="close">Close</string>
 
     <!-- Sharing -->
     <string name="share_with">Share link with…</string>
