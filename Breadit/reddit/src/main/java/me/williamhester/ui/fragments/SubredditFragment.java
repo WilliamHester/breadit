@@ -42,8 +42,9 @@ import me.williamhester.reddit.R;
 import me.williamhester.ui.activities.SubmissionActivity;
 import me.williamhester.ui.activities.UserActivity;
 import me.williamhester.ui.adapters.SubmissionAdapter;
+import me.williamhester.ui.views.SubmissionViewHolder;
 
-public class SubredditFragment extends AccountFragment implements SubmissionAdapter.AdapterCallbacks {
+public class SubredditFragment extends AccountFragment implements SubmissionViewHolder.SubmissionCallbacks {
 
     public static final int VOTE_REQUEST_CODE = 1;
 
@@ -53,7 +54,7 @@ public class SubredditFragment extends AccountFragment implements SubmissionAdap
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private ArrayList<Submission> mSubmissionList;
     private HashSet<String> mNames;
-    private SubmissionAdapter.SubmissionViewHolder mFocusedSubmission;
+    private SubmissionViewHolder mFocusedSubmission;
 
     private String mPrimarySortType = RedditApi.SORT_TYPE_HOT;
     private String mSecondarySortType = RedditApi.SECONDARY_SORT_ALL;
@@ -330,7 +331,7 @@ public class SubredditFragment extends AccountFragment implements SubmissionAdap
     }
 
     @Override
-    public void onCardLongPressed(SubmissionAdapter.SubmissionViewHolder holder) {
+    public void onCardLongPressed(SubmissionViewHolder holder) {
         if (mFocusedSubmission != null) {
             mFocusedSubmission.collapseOptions();
         }
@@ -338,7 +339,7 @@ public class SubredditFragment extends AccountFragment implements SubmissionAdap
     }
 
     @Override
-    public void onOptionsRowItemSelected(View view, Submission submission) {
+    public void onOptionsRowItemSelected(View view, final Submission submission) {
         switch (view.getId()) {
             case R.id.option_go_to_subreddit:
                 mCallback.onSubredditSelected(submission.getSubredditName());
@@ -349,6 +350,28 @@ public class SubredditFragment extends AccountFragment implements SubmissionAdap
                 Intent i = new Intent(getActivity(), UserActivity.class);
                 i.putExtras(b);
                 getActivity().startActivity(i);
+                break;
+            case R.id.option_share:
+                PopupMenu menu = new PopupMenu(getActivity(), view);
+                menu.inflate(R.menu.share);
+                menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        Intent sendIntent = new Intent();
+                        sendIntent.setAction(Intent.ACTION_SEND);
+                        if (item.getItemId() == R.id.share_link) {
+                            sendIntent.putExtra(Intent.EXTRA_TEXT, submission.getUrl());
+                        } else {
+                            String link = RedditApi.REDDIT_URL + submission.getPermalink();
+                            sendIntent.putExtra(Intent.EXTRA_TEXT, link);
+                        }
+                        sendIntent.setType("text/plain");
+                        startActivity(Intent.createChooser(sendIntent,
+                                getResources().getText(R.string.share_with)));
+                        return false;
+                    }
+                });
+                menu.show();
                 break;
             case R.id.option_save:
                 // TODO: actually save it

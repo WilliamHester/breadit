@@ -33,6 +33,7 @@ import me.williamhester.models.Listing;
 import me.williamhester.models.ResponseRedditWrapper;
 import me.williamhester.models.Submission;
 import me.williamhester.models.Subreddit;
+import me.williamhester.models.ThingInterface;
 import me.williamhester.models.Votable;
 import me.williamhester.tools.HtmlParser;
 
@@ -43,7 +44,7 @@ public class RedditApi {
 
     private static final String USER_AGENT = "Breadit_Android_App";
 
-    private static final String REDDIT_URL = "https://www.reddit.com";
+    public static final String REDDIT_URL = "https://www.reddit.com";
 
     public static String SORT_TYPE_HOT = "";
     public static String SORT_TYPE_NEW = "new";
@@ -433,11 +434,11 @@ public class RedditApi {
                 .setCallback(callback);
     }
 
-    public static void replyToComment(final Context context, final Comment comment, String text,
+    public static void replyToComment(final Context context, final ThingInterface thing, String text,
                              final FutureCallback<ArrayList<AbsComment>> callback) {
         MultipartFormDataBody body = new MultipartFormDataBody();
         body.addStringPart("api_type", "json");
-        body.addStringPart("parent", comment.getName());
+        body.addStringPart("parent", thing.getName());
         body.addStringPart("text", text);
 
         AsyncHttpRequest request = new AsyncHttpPost(REDDIT_URL + "/api/comment/");
@@ -452,7 +453,8 @@ public class RedditApi {
                     callback.onCompleted(e, null);
                     return;
                 }
-                getCommentDataFromNames(result, comment.getLevel() + 1, context, callback);
+                int level = thing instanceof Comment ? ((Comment) thing).getLevel() + 1 : 0;
+                getCommentDataFromNames(result, level, context, callback);
             }
         });
     }

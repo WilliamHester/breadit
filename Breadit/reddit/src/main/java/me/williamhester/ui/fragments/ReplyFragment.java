@@ -47,9 +47,9 @@ public class ReplyFragment extends Fragment {
     private boolean mKillOnStart; // Fragments don't like to be killed asynchronously
     private int mListMode;
 
-    public static ReplyFragment newInstance(Comment comment) {
+    public static ReplyFragment newInstance(ThingInterface thing) {
         Bundle b = new Bundle();
-        b.putParcelable("comment", comment);
+        b.putParcelable("thing", thing);
         ReplyFragment fragment = new ReplyFragment();
         fragment.setArguments(b);
         return fragment;
@@ -123,7 +123,7 @@ public class ReplyFragment extends Fragment {
             }
         });
 
-        ThingInterface parent = getArguments().getParcelable("comment");
+        ThingInterface parent = getArguments().getParcelable("thing");
         mBody.setHint(getResources().getString(R.string.reply_hint) + " /u/" + parent.getAuthor());
         return v;
     }
@@ -141,7 +141,7 @@ public class ReplyFragment extends Fragment {
                 dialog.setMessage(getResources().getString(R.string.sending_reply));
                 dialog.setCancelable(false);
                 dialog.show();
-                final Comment parent = getArguments().getParcelable("comment");
+                final ThingInterface parent = getArguments().getParcelable("thing");
                 RedditApi.replyToComment(getActivity(), parent,
                         mBody.getText().toString(), new FutureCallback<ArrayList<AbsComment>>() {
                             @Override
@@ -161,7 +161,7 @@ public class ReplyFragment extends Fragment {
                                         Intent i = new Intent();
                                         Bundle resultBundle = new Bundle();
                                         resultBundle.putParcelable("newComment", result.get(0));
-                                        resultBundle.putParcelable("parentComment", parent);
+                                        resultBundle.putParcelable("parentThing", parent);
                                         i.putExtras(resultBundle);
                                         getTargetFragment().onActivityResult(getTargetRequestCode(),
                                                 Activity.RESULT_OK, i);

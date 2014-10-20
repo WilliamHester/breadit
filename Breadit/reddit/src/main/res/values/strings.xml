@@ -162,4 +162,8 @@
     <string name="failed_to_post_reply">Failed to post reply. Please check your network connection
         and try again.</string>
 
+    <!-- Share -->
+    <string name="share_link">Share link</string>
+    <string name="share_comments">Share comments</string>
+
 </resources>

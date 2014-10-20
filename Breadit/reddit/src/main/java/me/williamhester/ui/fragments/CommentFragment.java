@@ -5,10 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.text.Html;
-import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -16,11 +15,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.PopupMenu;
-import android.widget.TextView;
 
 import com.koushikdutta.async.future.FutureCallback;
 
@@ -29,23 +25,25 @@ import org.apache.http.message.BasicNameValuePair;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import me.williamhester.models.AbsComment;
+import me.williamhester.models.Account;
+import me.williamhester.models.AccountManager;
 import me.williamhester.models.Comment;
-import me.williamhester.models.ImgurAlbum;
-import me.williamhester.models.ImgurImage;
 import me.williamhester.models.MoreComments;
 import me.williamhester.models.Submission;
+import me.williamhester.models.Subreddit;
+import me.williamhester.models.ThingInterface;
 import me.williamhester.models.Votable;
 import me.williamhester.models.utils.Utilities;
-import me.williamhester.network.ImgurApi;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
-import me.williamhester.tools.HtmlParser;
 import me.williamhester.tools.Url;
 import me.williamhester.ui.activities.SubmissionActivity;
+import me.williamhester.ui.activities.UserActivity;
 import me.williamhester.ui.views.CommentViewHolder;
-import me.williamhester.ui.views.SwipeView;
+import me.williamhester.ui.views.SubmissionViewHolder;
 
 public class CommentFragment extends AccountFragment {
 
@@ -154,13 +152,6 @@ public class CommentFragment extends AccountFragment {
                 popupMenu.show();
                 return true;
             }
-            case R.id.action_share:
-                Intent sendIntent = new Intent();
-                sendIntent.setAction(Intent.ACTION_SEND);
-                sendIntent.putExtra(Intent.EXTRA_TEXT, mSubmission.getUrl());
-                sendIntent.setType("text/plain");
-                startActivity(Intent.createChooser(sendIntent, getResources().getText(R.string.share_with)));
-                break;
             case R.id.action_view_link:
                 Fragment f = getFragmentManager().findFragmentByTag("content");
                 if (f != null) {
@@ -187,11 +178,16 @@ public class CommentFragment extends AccountFragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REPLY_REQUEST) {
             Bundle args = data.getExtras();
-            Comment parent = args.getParcelable("parentComment");
+            ThingInterface parent = args.getParcelable("parentThing");
             Comment newComment = args.getParcelable("newComment");
-            int index = mCommentsList.indexOf(parent);
-            mCommentsList.add(index + 1, newComment);
-            mCommentAdapter.notifyDataSetChanged();
+            int index = 0;
+            if (parent instanceof Comment) {
+                index = mCommentsList.indexOf(parent) + 1;
+            }
+            mCommentsList.add(index, newComment);
+            if (mCommentAdapter != null) {
+                mCommentAdapter.notifyDataSetChanged();
+            }
             return;
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -218,185 +214,212 @@ public class CommentFragment extends AccountFragment {
     @SuppressLint("InflateParams")
     private void createHeaderView(LayoutInflater inflater) {
         mHeaderView = inflater.inflate(R.layout.header_comments, null);
-        TextView domain = (TextView) mHeaderView.findViewById(R.id.domain);
-        TextView commentData = (TextView) mHeaderView.findViewById(R.id.num_comments);
-        TextView metadata = (TextView) mHeaderView.findViewById(R.id.metadata);
-        TextView subreddit = (TextView) mHeaderView.findViewById(R.id.subreddit_title);
-        TextView body = (TextView) mHeaderView.findViewById(R.id.body);
-        TextView selfText = (TextView) mHeaderView.findViewById(R.id.self_text);
-        SwipeView swipeView = (SwipeView) mHeaderView.findViewById(R.id.swipe_view);
-        View foregroundVote = mHeaderView.findViewById(R.id.vote_foreground);
-        View backgroundVote = mHeaderView.findViewById(R.id.vote_background);
+        mHeaderView.findViewById(R.id.option_reply).setVisibility(View.VISIBLE);
+        mHeaderView.setTag(new SubmissionViewHolder(mHeaderView, new SubmissionViewHolder.SubmissionCallbacks() {
+            @Override
+            public void onImageViewClicked(Object imgurData) {
+                getFragmentManager().beginTransaction()
+                        .add(R.id.container, ImagePagerFragment.newInstance(imgurData), "ImagePagerFragment")
+                        .addToBackStack("ImagePagerFragment")
+                        .commit();
+            }
 
-        switch (mSubmission.getVoteStatus()) {
-            case Votable.DOWNVOTED:
-                foregroundVote.setScaleY(0f);
-                backgroundVote.setVisibility(View.VISIBLE);
-                backgroundVote.setBackgroundColor(
-                        backgroundVote.getResources().getColor(R.color.periwinkle));
-                break;
-            case Votable.UPVOTED:
-                foregroundVote.setScaleY(0f);
-                backgroundVote.setVisibility(View.VISIBLE);
-                backgroundVote.setBackgroundColor(
-                        backgroundVote.getResources().getColor(R.color.orangered));
-                break;
-            default:
-                backgroundVote.setVisibility(View.GONE);
-                foregroundVote.setScaleY(0f);
-                break;
-        }
+            @Override
+            public void onImageViewClicked(String imageUrl) {
+                getFragmentManager().beginTransaction()
+                        .add(R.id.container, ImagePagerFragment.newInstance(imageUrl), "ImagePagerFragment")
+                        .addToBackStack("ImagePagerFragment")
+                        .commit();
+            }
 
-        swipeView.recycle(mSubmission);
-        swipeView.setUp(mHeaderView.findViewById(R.id.vote_background),
-                mHeaderView.findViewById(R.id.vote_foreground), new SwipeView.SwipeListener() {
+            @Override
+            public void onYouTubeVideoClicked(String videoId) {
+                // TODO: fix this when YouTube updates their Android API
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                    getFragmentManager().beginTransaction()
+                            .add(R.id.container, YouTubeFragment.newInstance(videoId), "YouTubeFragment")
+                            .addToBackStack("YouTubeFragment")
+                            .commit();
+                } else {
+                    Intent i = new Intent(Intent.ACTION_VIEW,
+                            Uri.parse("http://www.youtube.com/watch?v=" + videoId));
+                    getActivity().startActivity(i);
+                }
+            }
+
+            @Override
+            public void onCardClicked(Submission submission) { }
+
+            @Override
+            public void onCardLongPressed(SubmissionViewHolder holder) { }
+
+            @Override
+            public void onOptionsRowItemSelected(View view, Submission submission) {
+                switch (view.getId()) {
+                    case R.id.option_reply:
+                        ReplyFragment fragment = ReplyFragment.newInstance(submission);
+                        fragment.setTargetFragment(CommentFragment.this, REPLY_REQUEST);
+                        getFragmentManager().beginTransaction()
+                                .replace(R.id.container, fragment, "Reply")
+                                .addToBackStack("Reply")
+                                .commit();
+                        break;
+                    case R.id.option_view_user:
+                        Bundle b = new Bundle();
+                        b.putString("username", submission.getAuthor());
+                        Intent i = new Intent(getActivity(), UserActivity.class);
+                        i.putExtras(b);
+                        getActivity().startActivity(i);
+                        break;
+                    case R.id.option_save:
+                        // TODO: actually save it
+                        break;
+                    case R.id.option_share:
+                        PopupMenu menu = new PopupMenu(mContext, view);
+                        menu.inflate(R.menu.share);
+                        menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                            @Override
+                            public boolean onMenuItemClick(MenuItem item) {
+                                Intent sendIntent = new Intent();
+                                sendIntent.setAction(Intent.ACTION_SEND);
+                                if (item.getItemId() == R.id.share_link) {
+                                    sendIntent.putExtra(Intent.EXTRA_TEXT, mSubmission.getUrl());
+                                } else {
+                                    String link = "http://www.reddit.com" + mSubmission.getPermalink();
+                                    sendIntent.putExtra(Intent.EXTRA_TEXT, link);
+                                }
+                                sendIntent.setType("text/plain");
+                                startActivity(Intent.createChooser(sendIntent,
+                                        getResources().getText(R.string.share_with)));
+                                return false;
+                            }
+                        });
+                        menu.show();
+                        break;
+                    case R.id.option_overflow:
+                        inflateOverflowPopupMenu(view, submission);
+                        break;
+                }
+            }
+
+            @Override
+            public boolean isFrontPage() {
+                return false;
+            }
+
+            private void inflateOverflowPopupMenu(View view, final Submission submission) {
+                PopupMenu popupMenu = new PopupMenu(getActivity(), view);
+
+                Account account = AccountManager.getAccount();
+                Map<String, Subreddit> subscriptions = account.getSubscriptions();
+                boolean isMod = subscriptions.containsKey(submission.getSubredditName().toLowerCase())
+                        && subscriptions.get(submission.getSubredditName().toLowerCase()).userIsModerator();
+                boolean isOp = submission.getAuthor().equalsIgnoreCase(account.getUsername());
+
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
-                    public void onRightToLeftSwipe() {
-                        mSubmission.setVoteStatus(mSubmission.getVoteStatus() == Votable.DOWNVOTED ? Votable.NEUTRAL : Votable.DOWNVOTED);
-                        RedditApi.vote(mContext, mSubmission);
-                        Intent result = new Intent();
-                        Bundle extras = new Bundle();
-                        extras.putString("name", mSubmission.getName());
-                        extras.putInt("status", mSubmission.getVoteStatus());
-                        result.putExtras(extras);
-                        getActivity().setResult(SubredditFragment.VOTE_REQUEST_CODE, result);
-                    }
-
-                    @Override
-                    public void onLeftToRightSwipe() {
-                        mSubmission.setVoteStatus(mSubmission.getVoteStatus() == Votable.UPVOTED ? Votable.NEUTRAL : Votable.UPVOTED);
-                        RedditApi.vote(mContext, mSubmission);
-                        Intent result = new Intent();
-                        Bundle extras = new Bundle();
-                        extras.putString("name", mSubmission.getName());
-                        extras.putInt("status", mSubmission.getVoteStatus());
-                        result.putExtras(extras);
-                        getActivity().setResult(SubredditFragment.VOTE_REQUEST_CODE, result);
+                    public boolean onMenuItemClick(MenuItem item) {
+                        FutureCallback<String> removeCallback = new FutureCallback<String>() {
+                            @Override
+                            public void onCompleted(Exception e, String result) {
+                                if (e != null) {
+                                    e.printStackTrace();
+                                    return;
+                                }
+//                                mSubmissionList.remove(submission);
+//                                mSubmissionsAdapter.notifyDataSetChanged();
+                            }
+                        };
+                        switch (item.getItemId()) {
+                            case R.id.overflow_hide: {
+                                FutureCallback<String> callback = new FutureCallback<String>() {
+                                    @Override
+                                    public void onCompleted(Exception e, String result) {
+                                        if (e != null) {
+                                            e.printStackTrace();
+                                            return;
+                                        }
+                                        if (!submission.isHidden()) {
+//                                            mSubmissionList.remove(submission);
+//                                            mSubmissionsAdapter.notifyDataSetChanged();
+                                        }
+                                    }
+                                };
+                                if (submission.isHidden()) {
+                                    RedditApi.unhide(getActivity(), submission, callback);
+                                } else {
+                                    RedditApi.hide(getActivity(), submission, callback);
+                                }
+                                break;
+                            }
+                            case R.id.overflow_mark_nsfw: {
+                                FutureCallback<String> callback = new FutureCallback<String>() {
+                                    @Override
+                                    public void onCompleted(Exception e, String result) {
+                                        if (e != null) {
+                                            e.printStackTrace();
+                                        }
+                                        submission.setIsNsfw(!submission.isNsfw());
+//                                        mSubmissionsAdapter.notifyDataSetChanged();
+                                    }
+                                };
+                                if (submission.isNsfw()) {
+                                    RedditApi.unmarkNsfw(getActivity(), submission, callback);
+                                } else {
+                                    RedditApi.markNsfw(getActivity(), submission, callback);
+                                }
+                                break;
+                            }
+                            case R.id.overflow_report: break; // TODO: Make a form for this
+                            case R.id.overflow_delete: {
+                                RedditApi.delete(getActivity(), submission, removeCallback);
+                                break;
+                            }
+                            case R.id.overflow_approve: {
+                                FutureCallback<String> callback = new FutureCallback<String>() {
+                                    @Override
+                                    public void onCompleted(Exception e, String result) {
+                                        if (e != null) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                };
+                                RedditApi.approve(getActivity(), submission, callback);
+                                break;
+                            }
+                            case R.id.overflow_remove: {
+                                RedditApi.remove(getActivity(), submission, false, removeCallback);
+                                break;
+                            }
+                            case R.id.overflow_spam: {
+                                RedditApi.remove(getActivity(), submission, true, removeCallback);
+                                break;
+                            }
+                        }
+                        return true;
                     }
                 });
-        swipeView.invalidate();
-        View nsfwWarning = mHeaderView.findViewById(R.id.nsfw_warning);
-        final ImageButton button = (ImageButton) mHeaderView.findViewById(R.id.preview_button);
+                popupMenu.inflate(R.menu.submission_overflow);
 
-        body.setText(Html.fromHtml(mSubmission.getTitle()).toString());
-        domain.setText(mSubmission.getDomain());
-        commentData.setText(mSubmission.getNumberOfComments() + " comments");
-        subreddit.setText("/r/" + mSubmission.getSubredditName());
-        metadata.setText(mSubmission.getAuthor() + " " + mSubmission.getScore() + " "
-                + getResources().getQuantityString(R.plurals.points,
-                mSubmission.getScore()));
-
-        if (mSubmission.isNsfw()) {
-            nsfwWarning.setVisibility(View.VISIBLE);
-        } else {
-            nsfwWarning.setVisibility(View.GONE);
-        }
-
-        View container = mHeaderView.findViewById(R.id.content_preview);
-        ImageView imageView = (ImageView) mHeaderView.findViewById(R.id.image);
-
-        if (mSubmission.isSelf()) {
-            if (mSubmission.getBodyHtml() != null) {
-                HtmlParser parser = new HtmlParser(Html.fromHtml(mSubmission.getBodyHtml()).toString());
-                selfText.setText(parser.getSpannableString());
-                selfText.setVisibility(View.VISIBLE);
-                selfText.setMovementMethod(new LinkMovementMethod());
-            }
-        } else {
-            final Url linkDetails = new Url(mSubmission.getUrl());
-            if (linkDetails.getType() != Url.NOT_SPECIAL) {
-                String id = linkDetails.getLinkId();
-                if (linkDetails.getType() == Url.IMGUR_IMAGE) {
-                    if (mSubmission.getImgurData() == null) {
-                        imageView.setImageDrawable(null);
-                        ImgurApi.getImageDetails(id, mHeaderView.getContext(), mSubmission, mImgurCallback);
-                    } else {
-                        setImagePreview(mHeaderView);
-                    }
-                } else if (linkDetails.getType() == Url.IMGUR_ALBUM) {
-                    if (mSubmission.getImgurData() == null) {
-                        imageView.setImageDrawable(null);
-                        ImgurApi.getAlbumDetails(id, mHeaderView.getContext(), mSubmission, mImgurCallback);
-                    } else {
-                        setImagePreview(mHeaderView);
-                    }
-                } else if (linkDetails.getType() == Url.YOUTUBE) {
-                    imageView.setVisibility(View.VISIBLE);
-                    ImgurApi.loadImage(linkDetails.getUrl(), imageView, null);
-                    button.setImageResource(R.drawable.ic_youtube);
-                    button.setVisibility(View.VISIBLE);
-                    button.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            getFragmentManager().beginTransaction()
-                                    .add(R.id.container, YouTubeFragment.newInstance(linkDetails.getLinkId()), "youtube")
-                                    .addToBackStack("youtube")
-                                    .commit();
-                        }
-                    });
-                } else if (linkDetails.getType() == Url.NORMAL_IMAGE) {
-                    imageView.setVisibility(View.VISIBLE);
-                    ImgurApi.loadImage(linkDetails.getUrl(), imageView, null);
-                    imageView.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            getFragmentManager().beginTransaction()
-                                    .add(R.id.container, ImagePagerFragment.newInstance(linkDetails), "picture")
-                                    .addToBackStack("picture")
-                                    .commit();
-                        }
-                    });
+                Menu menu = popupMenu.getMenu();
+                if ((isOp || isMod) && submission.isNsfw()) {
+                    menu.findItem(R.id.overflow_mark_nsfw).setTitle(R.string.unmark_nsfw);
                 }
-            } else {
-                container.setVisibility(View.GONE);
-            }
-        }
-    }
-
-    private FutureCallback<Submission> mImgurCallback = new FutureCallback<Submission>() {
-        @Override
-        public void onCompleted(Exception e, Submission result) {
-            if (e != null) {
-                e.printStackTrace();
-            } else if (mSubmission == result) {
-                setImagePreview(mHeaderView);
-            }
-        }
-    };
-
-    /**
-     * Attempts to set the image preview
-     */
-    private void setImagePreview(View v) {
-        final ImgurImage image;
-        if (mSubmission.getImgurData() instanceof ImgurAlbum) {
-            image = ((ImgurAlbum) mSubmission.getImgurData()).getImages().get(0);
-        } else if (mSubmission.getImgurData() instanceof ImgurImage) {
-            image = (ImgurImage) mSubmission.getImgurData();
-        } else {
-            image = null;
-        }
-        ImageView imageView = (ImageView) v.findViewById(R.id.image);
-        if (image != null && !image.isAnimated()) {
-            imageView.setVisibility(View.VISIBLE);
-            ImgurApi.loadImage(image.getUrl(), imageView, null);
-            ImageButton button = (ImageButton) v.findViewById(R.id.preview_button);
-            button.setVisibility(View.INVISIBLE);
-            imageView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Fragment f = ImagePagerFragment.newInstance(mSubmission.getImgurData());
-                    if (f != null) {
-                        getFragmentManager().beginTransaction()
-                                .add(R.id.container, f, "imgur")
-                                .addToBackStack("imgur")
-                                .commit();
-                    }
+                if (submission.isHidden()) {
+                    menu.findItem(R.id.overflow_hide).setTitle(R.string.unhide);
                 }
-            });
-        } else {
-            v.findViewById(R.id.content_preview).setVisibility(View.GONE);
-        }
+                menu.findItem(R.id.overflow_report).setVisible(!isMod);
+                menu.findItem(R.id.overflow_mark_nsfw).setVisible(isOp || isMod);
+                menu.findItem(R.id.overflow_delete).setVisible(isOp);
+                menu.findItem(R.id.overflow_approve).setVisible(isMod);
+                menu.findItem(R.id.overflow_remove).setVisible(isMod);
+                menu.findItem(R.id.overflow_spam).setVisible(isMod);
+
+                popupMenu.show();
+            }
+        }));
+        ((SubmissionViewHolder) mHeaderView.getTag()).setContent(mSubmission);
+        ((SubmissionViewHolder) mHeaderView.getTag()).expandOptions();
     }
 
     private PopupMenu.OnMenuItemClickListener mSortClickListener = new PopupMenu.OnMenuItemClickListener() {
@@ -489,6 +512,17 @@ public class CommentFragment extends AccountFragment {
                             .replace(R.id.container, reply, "ReplyFragment")
                             .addToBackStack("ReplyFragment")
                             .commit();
+                    break;
+                case R.id.option_share:
+                    Intent sendIntent = new Intent();
+                    sendIntent.setAction(Intent.ACTION_SEND);
+                    String link = RedditApi.REDDIT_URL + mSubmission.getPermalink()
+                            + ((Comment) comment).getName();
+                    sendIntent.putExtra(Intent.EXTRA_TEXT, link);
+                    sendIntent.setType("text/plain");
+                    startActivity(Intent.createChooser(sendIntent,
+                            getResources().getText(R.string.share_with)));
+                    break;
             }
         }
     };
@@ -528,8 +562,8 @@ public class CommentFragment extends AccountFragment {
                 mCommentsListView.addHeaderView(mHeaderView);
                 mCallback.onSubmissionLoaded(mSubmission);
             } else { // need to replace the submission object inside the SwipeView header
-                SwipeView swipeView = (SwipeView) mHeaderView.findViewById(R.id.swipe_view);
-                swipeView.recycle(mSubmission);
+                ((SubmissionViewHolder) mHeaderView.getTag()).setContent(mSubmission);
+                ((SubmissionViewHolder) mHeaderView.getTag()).expandOptions();
             }
         }
     };
