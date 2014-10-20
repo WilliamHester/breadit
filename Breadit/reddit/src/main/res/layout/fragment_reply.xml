@@ -15,6 +15,13 @@
         android:gravity="top|start"
         android:background="@null"/>
 
+    <TextView android:id="@+id/char_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-thin"
+        android:padding="8dp"
+        android:layout_gravity="end" />
+
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
