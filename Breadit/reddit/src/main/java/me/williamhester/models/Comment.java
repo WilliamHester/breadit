@@ -197,6 +197,10 @@ public class Comment extends AbsComment implements Votable, Parcelable {
         return mCreatedUtc;
     }
 
+    public String getFlairText() {
+        return mAuthorFlairText;
+    }
+
     public void setHidden(boolean hidden) {
         mIsHidden = hidden;
     }

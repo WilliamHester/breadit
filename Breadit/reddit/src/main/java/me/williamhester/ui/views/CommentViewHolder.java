@@ -32,6 +32,7 @@ public class CommentViewHolder extends VotableViewHolder {
     private String mSubmissionAuthor;
     private View mContent;
     private TextView mAuthor;
+    private TextView mFlairText;
     private View mLevelIndicator;
     private View mGoldIndicator;
     private View mOptionsRow;
@@ -43,6 +44,7 @@ public class CommentViewHolder extends VotableViewHolder {
         mSubmissionAuthor = submissionAuthor;
         mContent = itemView.findViewById(R.id.comment_content);
         mAuthor = (TextView) itemView.findViewById(R.id.author);
+        mFlairText = (TextView) itemView.findViewById(R.id.flair);
         mLevelIndicator = itemView.findViewById(R.id.level_indicator);
         mGoldIndicator = itemView.findViewById(R.id.gold_indicator);
         mOptionsRow = itemView.findViewById(R.id.options_row);
@@ -116,6 +118,7 @@ public class CommentViewHolder extends VotableViewHolder {
             mBody.setVisibility(View.VISIBLE);
             mMetadata.setVisibility(View.GONE);
             mAuthor.setVisibility(View.GONE);
+            mFlairText.setVisibility(View.GONE);
             SpannableStringBuilder sb = new SpannableStringBuilder();
             sb.append("Load more comments...");
             sb.setSpan(new ForegroundColorSpan(itemView.getResources().getColor(R.color.light_blue)),
@@ -133,6 +136,13 @@ public class CommentViewHolder extends VotableViewHolder {
                 HtmlParser parser = new HtmlParser(Html.fromHtml(comment1.getBodyHtml()).toString());
                 comment1.setSpannableBody(parser.getSpannableString());
                 comment1.setLinks(parser.getLinks());
+            }
+            if (comment1.getFlairText() != null) {
+                mFlairText.setVisibility(View.VISIBLE);
+                mFlairText.setBackgroundResource(R.drawable.flair_background);
+                mFlairText.setText(comment1.getFlairText());
+            } else {
+                mFlairText.setVisibility(View.GONE);
             }
             mBody.setText(comment1.getSpannableBody());
             if (isHidden()) {
