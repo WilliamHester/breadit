@@ -9,6 +9,7 @@ import android.text.Layout;
 import android.text.Selection;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.ForegroundColorSpan;
@@ -180,10 +181,10 @@ public class CommentViewHolder extends VotableViewHolder {
                     .append(" ")
                     .append(itemView.getResources().getQuantityString(R.plurals.points, comment1.getScore()));
             mMetadata.setText(sb);
-            if (comment1.getFlairText() != null) {
+            if (!TextUtils.isEmpty(comment1.getFlairText())) {
                 mFlairText.setVisibility(View.VISIBLE);
                 mFlairText.setBackgroundResource(R.drawable.flair_background);
-                mFlairText.setText(comment1.getFlairText());
+                mFlairText.setText(Html.fromHtml(comment1.getFlairText()).toString());
             } else {
                 mFlairText.setVisibility(View.GONE);
             }
