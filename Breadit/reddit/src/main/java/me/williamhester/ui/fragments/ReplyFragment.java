@@ -7,14 +7,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.ActionBarActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -28,9 +26,7 @@ import com.koushikdutta.async.future.FutureCallback;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
-import me.williamhester.models.AbsComment;
-import me.williamhester.models.Comment;
-import me.williamhester.models.ThingInterface;
+import me.williamhester.models.Thing;
 import me.williamhester.models.Votable;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
@@ -49,7 +45,7 @@ public class ReplyFragment extends Fragment {
     private boolean mIsEditing;
     private int mListMode;
 
-    public static ReplyFragment newInstance(ThingInterface thing) {
+    public static ReplyFragment newInstance(Thing thing) {
         Bundle b = new Bundle();
         b.putParcelable("thing", thing);
         ReplyFragment fragment = new ReplyFragment();
@@ -57,7 +53,7 @@ public class ReplyFragment extends Fragment {
         return fragment;
     }
 
-    public static ReplyFragment newInstance(ThingInterface parent, Votable votable) {
+    public static ReplyFragment newInstance(Thing parent, Votable votable) {
         Bundle b = new Bundle();
         b.putParcelable("thing", parent);
         b.putParcelable("votable", votable);
@@ -140,7 +136,7 @@ public class ReplyFragment extends Fragment {
             mBody.setText(votable.getRawMarkdown());
         }
 
-        ThingInterface parent = getArguments().getParcelable("thing");
+        Thing parent = getArguments().getParcelable("thing");
         if (parent != null) {
             mBody.setHint(getResources().getString(R.string.reply_hint) + " /u/" + parent.getAuthor());
         } else {
@@ -162,12 +158,12 @@ public class ReplyFragment extends Fragment {
                 dialog.setMessage(getResources().getString(R.string.sending_reply));
                 dialog.setCancelable(false);
                 dialog.show();
-                final ThingInterface parent = getArguments().getParcelable("thing");
+                final Thing parent = getArguments().getParcelable("thing");
                 final Votable votable = getArguments().getParcelable("votable");
-                FutureCallback<ArrayList<ThingInterface>> callback = new FutureCallback<ArrayList<ThingInterface>>() {
+                FutureCallback<ArrayList<Thing>> callback = new FutureCallback<ArrayList<Thing>>() {
                     @Override
                     public void onCompleted(final Exception e,
-                                            final ArrayList<ThingInterface> result) {
+                                            final ArrayList<Thing> result) {
                         mBody.post(new Runnable() {
                             @Override
                             public void run() {

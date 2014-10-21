@@ -25,6 +25,7 @@ public class Comment extends AbsComment implements Votable, Parcelable {
     private String mBannedBy;
     private String mBodyMarkdown;
     private String mBodyHtml;
+    private String mId;
     private String mSubreddit;
     private String mSubredditId;
     private String mLinkAuthor;
@@ -91,6 +92,7 @@ public class Comment extends AbsComment implements Votable, Parcelable {
         if (!object.get("distinguished").isJsonNull()) {
             mDistinguished = object.get("distinguished").getAsString();
         }
+        mId = object.get("id").getAsString();
         mName = object.get("name").getAsString();
         mScore = object.get("score").getAsInt();
         mCreated = object.get("created").getAsLong();
@@ -125,6 +127,11 @@ public class Comment extends AbsComment implements Votable, Parcelable {
     @Override
     public String getName() {
         return mName;
+    }
+
+    @Override
+    public String getId() {
+        return mId;
     }
 
     public int getVoteStatus() {

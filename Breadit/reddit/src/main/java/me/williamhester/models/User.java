@@ -14,7 +14,7 @@ import me.williamhester.models.utils.Utilities;
 /**
  * Created by William on 4/13/14.
  */
-public class User extends Thing implements Parcelable {
+public class User implements Parcelable {
 
     private int mCommentKarma;
     private int mLinkKarma;
@@ -150,9 +150,6 @@ public class User extends Thing implements Parcelable {
         dest.writeByte(mIsMod ? (byte) 1 : (byte) 0);
         dest.writeByte(mHasVerifiedEmail ? (byte) 1 : (byte) 0);
         dest.writeString(this.mUsername);
-        dest.writeString(this.id);
-        dest.writeString(this.name);
-        dest.writeString(this.kind);
     }
 
     private User(Parcel in) {
@@ -164,9 +161,6 @@ public class User extends Thing implements Parcelable {
         this.mIsMod = in.readByte() != 0;
         this.mHasVerifiedEmail = in.readByte() != 0;
         this.mUsername = in.readString();
-        this.id = in.readString();
-        this.name = in.readString();
-        this.kind = in.readString();
     }
 
     public static Parcelable.Creator<User> CREATOR = new Parcelable.Creator<User>() {

@@ -1,35 +1,14 @@
 package me.williamhester.models;
 
-import com.google.gson.JsonObject;
+import android.os.Parcelable;
 
-public class Thing {
+/**
+ * Created by william on 10/19/14.
+ */
+public interface Thing extends Parcelable {
 
-    protected String id;
-    protected String name;
-    protected String kind;
-    protected Object data;
+    public String getAuthor();
+    public String getName();
+    public String getId();
 
-    public Thing() { }
-
-    protected Thing(JsonObject data) {
-        if (data != null) {
-            id = data.getAsJsonObject("data").get("id").getAsString();
-            name = data.getAsJsonObject("data").get("name").getAsString();
-            kind = data.get("kind").getAsString();
-        }
-    }
-
-    protected JsonObject mData;
-
-    public String getId() {
-        return id;
-    }
-
-    public String getName() { 
-        return name;
-    }
-
-    public String getKind() {
-        return kind;
-    }
 }

@@ -129,6 +129,11 @@ public class Submission implements Votable, Parcelable {
         return mName;
     }
 
+    @Override
+    public String getId() {
+        return id;
+    }
+
     public int getVoteStatus() {
         if (likes == null) {
             return NEUTRAL;

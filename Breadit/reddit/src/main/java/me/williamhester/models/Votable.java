@@ -3,7 +3,7 @@ package me.williamhester.models;
 /**
  * Created by William on 4/6/14.
  */
-public interface Votable extends ThingInterface {
+public interface Votable extends Thing {
 
     public static final int UPVOTED = 1;
     public static final int NEUTRAL = 0;

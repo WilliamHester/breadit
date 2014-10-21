@@ -32,7 +32,7 @@ import me.williamhester.models.Listing;
 import me.williamhester.models.ResponseRedditWrapper;
 import me.williamhester.models.Submission;
 import me.williamhester.models.Subreddit;
-import me.williamhester.models.ThingInterface;
+import me.williamhester.models.Thing;
 import me.williamhester.models.Votable;
 
 /**
@@ -250,7 +250,7 @@ public class RedditApi {
      */
     public static void getMoreChildren(final Context context, String linkId, String sortType,
                                        List<String> children, final int baseLevel,
-                                       final FutureCallback<ArrayList<ThingInterface>> callback) {
+                                       final FutureCallback<ArrayList<Thing>> callback) {
         // Build the list of children separated by commas
         StringBuilder stringBuilder = new StringBuilder();
         for (String s : children) {
@@ -282,7 +282,7 @@ public class RedditApi {
     }
 
     private static void getVotableDataFromNames(JSONObject result, int baseLevel, Context context,
-                                                final FutureCallback<ArrayList<ThingInterface>> callback) {
+                                                final FutureCallback<ArrayList<Thing>> callback) {
         try {
             JSONArray array = result.getJSONObject("json").getJSONObject("data").getJSONArray("things");
             final ArrayList<String> names = new ArrayList<>();
@@ -324,11 +324,11 @@ public class RedditApi {
 
                             Gson gson = new Gson();
                             ResponseRedditWrapper wrapper = new ResponseRedditWrapper(result, gson);
-                            ArrayList<ThingInterface> comments = new ArrayList<>();
+                            ArrayList<Thing> comments = new ArrayList<>();
                             if (wrapper.getData() instanceof Listing) {
                                 Listing listing = (Listing) wrapper.getData();
                                 for (int i = 0; i < names.size(); i++) {
-                                    ThingInterface comment = (ThingInterface) listing.getChildren().get(i).getData();
+                                    Thing comment = (Thing) listing.getChildren().get(i).getData();
                                     if (comment instanceof Comment) {
                                         ((Comment) comment).setLevel(levels.get(i));
                                     }
@@ -437,8 +437,8 @@ public class RedditApi {
                 .setCallback(callback);
     }
 
-    public static void replyToComment(final Context context, final ThingInterface thing, String text,
-                             final FutureCallback<ArrayList<ThingInterface>> callback) {
+    public static void replyToComment(final Context context, final Thing thing, String text,
+                             final FutureCallback<ArrayList<Thing>> callback) {
         MultipartFormDataBody body = new MultipartFormDataBody();
         body.addStringPart("api_type", "json");
         body.addStringPart("parent", thing.getName());
@@ -463,7 +463,7 @@ public class RedditApi {
     }
 
     public static void editThing(final Context context, final Votable votable,
-                                 final FutureCallback<ArrayList<ThingInterface>> callback) {
+                                 final FutureCallback<ArrayList<Thing>> callback) {
         MultipartFormDataBody body = new MultipartFormDataBody();
         body.addStringPart("api_type", "json");
         body.addStringPart("thing_id", votable.getName());
@@ -485,6 +485,16 @@ public class RedditApi {
                 getVotableDataFromNames(result, level, context, callback);
             }
         });
+    }
+
+    public static void getUserDetails(Context context, String username, String after,
+                                      FutureCallback<JsonObject> callback) {
+        Ion.with(context)
+                .load(REDDIT_URL + "/user/" + username + "/.json")
+                .addHeaders(generateUserHeaders())
+                .addQuery("after", after)
+                .asJsonObject()
+                .setCallback(callback);
     }
 
     public static void printOutLongString(String string) {

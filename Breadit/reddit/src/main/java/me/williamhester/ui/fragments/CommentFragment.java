@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -20,9 +19,6 @@ import android.widget.PopupMenu;
 
 import com.koushikdutta.async.future.FutureCallback;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -34,9 +30,8 @@ import me.williamhester.models.Comment;
 import me.williamhester.models.MoreComments;
 import me.williamhester.models.Submission;
 import me.williamhester.models.Subreddit;
-import me.williamhester.models.ThingInterface;
+import me.williamhester.models.Thing;
 import me.williamhester.models.Votable;
-import me.williamhester.models.utils.Utilities;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 import me.williamhester.tools.Url;
@@ -179,7 +174,7 @@ public class CommentFragment extends AccountFragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REPLY_REQUEST) {
             Bundle args = data.getExtras();
-            ThingInterface parent = args.getParcelable("parentThing");
+            Thing parent = args.getParcelable("parentThing");
             Comment newComment = args.getParcelable("newComment");
             int index = 0;
             if (parent instanceof Comment) {
@@ -192,7 +187,7 @@ public class CommentFragment extends AccountFragment {
             return;
         } else if (requestCode == EDIT_REQUEST) {
             Bundle args = data.getExtras();
-            ThingInterface parent = args.getParcelable("parentThing");
+            Thing parent = args.getParcelable("parentThing");
             Votable newThing = args.getParcelable("newComment");
             Votable oldThing = args.getParcelable("oldThing");
             if (parent == null) {
@@ -487,7 +482,7 @@ public class CommentFragment extends AccountFragment {
         private CommentViewHolder mFocusedViewHolder;
 
         @Override
-        public void onHideClick(Comment comment) {
+        public void onBodyClick(Comment comment) {
             comment.setHidden(!comment.isHidden());
             int position = mCommentAdapter.getPosition(comment);
             if (comment.isHidden()) {
@@ -504,16 +499,16 @@ public class CommentFragment extends AccountFragment {
                 comment.setIsLoading(true);
                 RedditApi.getMoreChildren(mContext, mSubmission.getName(),
                         mSortType, comment.getChildren(), comment.getLevel(),
-                        new FutureCallback<ArrayList<ThingInterface>>() {
+                        new FutureCallback<ArrayList<Thing>>() {
                             @Override
-                            public void onCompleted(Exception e, ArrayList<ThingInterface> comments) {
+                            public void onCompleted(Exception e, ArrayList<Thing> comments) {
                                 comment.setIsLoading(false);
                                 if (e != null) {
                                     e.printStackTrace();
                                 }
                                 int insert = mCommentsList.indexOf(comment);
                                 mCommentsList.remove(insert);
-                                for (ThingInterface thing : comments) {
+                                for (Thing thing : comments) {
                                     if (thing instanceof AbsComment) {
                                         mCommentsList.add(insert++, (AbsComment) thing);
                                     }
@@ -544,7 +539,7 @@ public class CommentFragment extends AccountFragment {
                             .commit();
                     break;
                 case R.id.option_edit: {
-                    ThingInterface parent;
+                    Thing parent;
                     if (comment.getLevel() == 0) {
                         parent = mSubmission;
                     } else {
@@ -552,7 +547,7 @@ public class CommentFragment extends AccountFragment {
                         while (mCommentsList.get(commentIndex).getLevel() >= comment.getLevel()) {
                             commentIndex--;
                         }
-                        parent = (ThingInterface) mCommentsList.get(commentIndex);
+                        parent = (Thing) mCommentsList.get(commentIndex);
                     }
                     ReplyFragment fragment = ReplyFragment.newInstance(parent, (Comment) comment);
                     fragment.setTargetFragment(CommentFragment.this, EDIT_REQUEST);

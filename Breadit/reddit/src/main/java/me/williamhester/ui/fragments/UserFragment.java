@@ -1,38 +1,38 @@
 package me.williamhester.ui.fragments;
 
 import android.content.Context;
-import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.LinearLayout;
+import android.widget.AbsListView;
+import android.widget.BaseAdapter;
 import android.widget.ListView;
-import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.koushikdutta.async.future.FutureCallback;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.List;
 
+import me.williamhester.models.AbsComment;
 import me.williamhester.models.AccountManager;
+import me.williamhester.models.Comment;
+import me.williamhester.models.Listing;
+import me.williamhester.models.MoreComments;
+import me.williamhester.models.ResponseRedditWrapper;
 import me.williamhester.models.Submission;
-import me.williamhester.models.Thing;
 import me.williamhester.models.User;
 import me.williamhester.models.Votable;
-import me.williamhester.models.utils.Utilities;
+import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
+import me.williamhester.ui.views.CommentViewHolder;
+import me.williamhester.ui.views.SubmissionViewHolder;
+import me.williamhester.ui.views.VotableViewHolder;
 
 public class UserFragment extends AccountFragment {
 
@@ -40,12 +40,19 @@ public class UserFragment extends AccountFragment {
     private User mUser;
 
     private Context mContext;
-    private ListView mSubmittedListView;
-    private ArrayList<Thing> mSubmittedThings;
-    private SubmittedArrayAdapter mSubmittedAdapter;
+    private final ArrayList<Votable> mSubmittedThings = new ArrayList<>();
+    private VotableArrayAdapter mSubmittedAdapter;
     private TextView mCommentKarma;
     private TextView mLinkKarma;
     private TextView mCakeDay;
+
+    public static UserFragment newInstance(String username) {
+        Bundle b = new Bundle();
+        b.putString("username", username);
+        UserFragment fragment = new UserFragment();
+        fragment.setArguments(b);
+        return fragment;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -63,22 +70,14 @@ public class UserFragment extends AccountFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_user, root, false);
-        mSubmittedThings = new ArrayList<Thing>();
-        mSubmittedListView = (ListView) v.findViewById(R.id.submitted);
-        mSubmittedAdapter = new SubmittedArrayAdapter(mContext);
-        mSubmittedListView.addHeaderView(createHeaderView(inflater));
-        mSubmittedListView.setAdapter(mSubmittedAdapter);
+        ListView listView = (ListView) v.findViewById(R.id.submitted);
+        mSubmittedAdapter = new VotableArrayAdapter();
+        listView.addHeaderView(createHeaderView(inflater));
+        listView.setAdapter(mSubmittedAdapter);
+        listView.setOnScrollListener(new InfiniteLoadingScrollListener());
+        RedditApi.getUserDetails(getActivity(), mUsername, null, mSubmittedThingsCallback);
         new LoadUserDataTask().execute();
-        new SubmittedLoaderTask().execute();
         return v;
-    }
-
-    public static UserFragment newInstance(String username) {
-        Bundle b = new Bundle();
-        b.putString("username", username);
-        UserFragment fragment = new UserFragment();
-        fragment.setArguments(b);
-        return fragment;
     }
 
     private View createHeaderView(LayoutInflater inflater) {
@@ -87,160 +86,160 @@ public class UserFragment extends AccountFragment {
         mCommentKarma = (TextView) v.findViewById(R.id.comment_karma);
         mLinkKarma = (TextView) v.findViewById(R.id.link_karma);
         mCakeDay = (TextView) v.findViewById(R.id.cakeday);
-
         username.setText("/u/" + mUsername);
-
-        new LoadUserDataTask().execute();
-
-        Spinner filter = (Spinner) v.findViewById(R.id.filter);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(mContext,
-                R.layout.spinner_item, R.id.orange_spinner_text,
-                getResources().getStringArray(R.array.filter_types));
-        filter.setAdapter(adapter);
-        filter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                switch (i) {
-                    case 0:
-//                        mFilterType = Message.ALL;
-//                        break;
-//                    case 1:
-//                        mFilterType = Message.UNREAD;
-//                        break;
-//                    case 2:
-//                        mFilterType = Message.MESSAGES;
-//                        break;
-//                    case 3:
-//                        mFilterType = Message.COMMENT_REPLIES;
-//                        break;
-//                    case 4:
-//                        mFilterType = Message.POST_REPLIES;
-//                        break;
-//                    case 5:
-//                        mFilterType = Comment.OLD;
-                        break;
-                }
-                mSubmittedThings.clear();
-                new SubmittedLoaderTask().execute();
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-                // Do nothing
-            }
-        });
         return v;
     }
 
-    private class SubmittedArrayAdapter extends ArrayAdapter<Thing> {
-        Context mContext;
+    private FutureCallback<JsonObject> mSubmittedThingsCallback = new FutureCallback<JsonObject>() {
+        @Override
+        public void onCompleted(Exception e, JsonObject result) {
+            if (e != null) {
+                e.printStackTrace();
+                return;
+            }
+            Gson gson = new Gson();
+            ResponseRedditWrapper wrapper = new ResponseRedditWrapper(result, gson);
+            Listing listing = null;
+            if (wrapper.getData() instanceof Listing) {
+                listing = (Listing) wrapper.getData();
+                for (ResponseRedditWrapper wrap : listing.getChildren()) {
+                    mSubmittedThings.add((Votable) wrap.getData());
+                }
+                mSubmittedAdapter.notifyDataSetChanged();
+            }
+        }
+    };
 
-        public SubmittedArrayAdapter(Context context) {
-            super(context, R.layout.list_item_post, mSubmittedThings);
-            mContext = context;
+    private class VotableArrayAdapter extends BaseAdapter implements
+            CommentViewHolder.CommentClickCallbacks, SubmissionViewHolder.SubmissionCallbacks {
+
+        @Override
+        public int getCount() {
+            return mSubmittedThings.size();
+        }
+
+        @Override
+        public Votable getItem(int position) {
+            return mSubmittedThings.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return Long.parseLong(mSubmittedThings.get(position).getId(), 36);
         }
 
         public View getView(final int position, View convertView, ViewGroup parent) {
-            Thing t = getItem(position);
-            String tag = null;
-            if (convertView != null)
-                tag = convertView.getTag() == null ? null : (String) convertView.getTag();
-
-//            if (t instanceof Comment) {
-                if (tag == null || !tag.equals("t1")) {
+            Votable v = getItem(position);
+            if (v instanceof Comment) {
+                if (convertView == null || convertView.getTag() instanceof SubmissionViewHolder) {
                     LayoutInflater inflater = (LayoutInflater) mContext
                             .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    convertView = inflater.inflate(R.layout.list_item_comment, null);
-                    convertView.setTag("t1");
+                    convertView = inflater.inflate(R.layout.list_item_comment_card, parent, false);
+                    convertView.setTag(new CommentViewHolder(convertView, this, mUsername));
                 }
-                LinearLayout root = (LinearLayout) convertView.findViewById(R.id.root);
-                TextView author = (TextView) convertView.findViewById(R.id.author);
-                TextView score = (TextView) convertView.findViewById(R.id.metadata);
-                TextView time = (TextView) convertView.findViewById(R.id.time);
-                TextView body = (TextView) convertView.findViewById(R.id.body);
-                View voteStatus = convertView.findViewById(R.id.vote_status);
-                LinearLayout replyLayout = (LinearLayout) convertView.findViewById(R.id.edited_text);
-                replyLayout.setVisibility(View.GONE);
-                body.setVisibility(View.VISIBLE);
-
-//                author.setText(Utilities.removeEndQuotes(((Comment) getItem(position))
-//                        .getAuthor()));
-//                score.setText(((Comment)getItem(position)).getScore() + " points by ");
-//                time.setText(" " + Utilities.calculateTimeShort(((Comment)getItem(position))
-//                        .getCreatedUtc()));
-//                body.setText(Html.fromHtml(StringEscapeUtils
-//                        .unescapeHtml4(((Comment)getItem(position)).getBodyHtml())));
-//
-//                switch (((Comment)getItem(position)).getVoteStatus()) {
-//                    case Votable.DOWNVOTED:
-//                        voteStatus.setVisibility(View.VISIBLE);
-//                        voteStatus.setBackgroundColor(getResources().getColor(R.color.periwinkle));
-//                        break;
-//                    case Votable.UPVOTED:
-//                        voteStatus.setVisibility(View.VISIBLE);
-//                        voteStatus.setBackgroundColor(getResources().getColor(R.color.orangered));
-//                        break;
-//                    default:
-//                        voteStatus.setVisibility(View.GONE);
-//                        break;
-//                }
-//                if (((Comment)getItem(position)).isHidden())
-                    body.setVisibility(View.GONE);
-//                else
-//                    body.setVisibility(View.VISIBLE);
-//
-//            } else if (t instanceof Submission) {
-                if (tag == null || !tag.equals("t3")) {
+            } else {
+                if (convertView == null || convertView.getTag() instanceof CommentViewHolder) {
                     LayoutInflater inflater = (LayoutInflater) mContext
                             .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    convertView = inflater.inflate(R.layout.list_item_post, null);
-                    convertView.setTag("t3");
+                    convertView = inflater.inflate(R.layout.list_item_post, parent, false);
+                    convertView.setTag(new SubmissionViewHolder(convertView, this));
                 }
-//                Submission s = (Submission) getItem(position);
-            Submission s = null;
-
-                convertView.invalidate();
-
-//                final View voteStatus = convertView.findViewById(R.id.vote_status);
-//                TextView nameAndTime
-//                        = (TextView) convertView.findViewById(R.id.subreddit_name_and_time);
-//                TextView author = (TextView) convertView.findViewById(R.id.author);
-//                ImageView thumbnail = (ImageView) convertView.findViewById(R.id.thumbnail);
-                TextView title = (TextView) convertView.findViewById(R.id.body);
-                TextView domain = (TextView) convertView.findViewById(R.id.domain);
-                final TextView points = (TextView) convertView.findViewById(R.id.metadata);
-
-//                nameAndTime.setText(" in " + s.getSubredditName() + " "
-//                        + Utilities.calculateTimeShort(s.getCreatedUtc()));
-                switch (s.getVoteStatus()) {
-                    case Votable.DOWNVOTED:
-                        voteStatus.setVisibility(View.VISIBLE);
-                        voteStatus.setBackgroundColor(getResources().getColor(R.color.periwinkle));
-                        break;
-                    case Votable.UPVOTED:
-                        voteStatus.setVisibility(View.VISIBLE);
-                        voteStatus.setBackgroundColor(getResources().getColor(R.color.orangered));
-                        break;
-                    default:
-                        voteStatus.setVisibility(View.GONE);
-                        break;
-                }
-
-                title.setText(Html.fromHtml(s.getTitle()).toString());
-//                author.setText(s.getAuthor());
-                domain.setText("(" + s.getDomain() + ")");
-                points.setText(s.getScore() + " points by ");
-
-//                if (mAccount != null && mAccount.hasVisited(getItem(position).getName())) {
-//                    title.setTypeface(title.getTypeface(), Typeface.ITALIC);
-//                } else {
-//                    title.setTypeface(Typeface.create("sans-serif-light", Typeface.NORMAL));
-//                }
-//            } else {
-//                Log.i("UserFragment", "Something bad happened");
-//            }
-            return null;
+            }
+            ((VotableViewHolder) convertView.getTag()).setContent(v);
+            return convertView;
         }
+
+        @Override
+        public void onMoreClick(CommentViewHolder viewHolder, MoreComments comment) {
+            // Will never happen
+        }
+
+        @Override
+        public void onBodyClick(Comment comment) {
+
+        }
+
+        @Override
+        public void onCommentLongPressed(CommentViewHolder holder) {
+
+        }
+
+        @Override
+        public void onOptionsRowItemSelected(View view, AbsComment submission) {
+
+        }
+
+        @Override
+        public void onImageViewClicked(Object imgurData) {
+
+        }
+
+        @Override
+        public void onImageViewClicked(String imageUrl) {
+
+        }
+
+        @Override
+        public void onYouTubeVideoClicked(String videoId) {
+
+        }
+
+        @Override
+        public void onCardClicked(Submission submission) {
+
+        }
+
+        @Override
+        public void onCardLongPressed(SubmissionViewHolder holder) {
+
+        }
+
+        @Override
+        public void onOptionsRowItemSelected(View view, Submission submission) {
+
+        }
+
+        @Override
+        public boolean isFrontPage() {
+            return false;
+        }
+    }
+
+    public class InfiniteLoadingScrollListener implements AbsListView.OnScrollListener {
+
+        private final int VISIBLE_THRESHOLD = 5;
+        private int previousTotal = 0;
+        private boolean loading = true;
+
+        @Override
+        public void onScrollStateChanged(AbsListView absListView, int i) {
+
+        }
+
+        @Override
+        public void onScroll(AbsListView absListView, int i, int i2, int i3) {
+            if (loading) {
+                if (mSubmittedAdapter.getCount() > previousTotal) {
+                    previousTotal = mSubmittedAdapter.getCount();
+                    loading = false;
+                }
+            } else if (mSubmittedThings.size() > 0
+                    && (mSubmittedThings.size() - absListView.getChildCount()) // 25 - 4 = 21
+                    <= (absListView.getFirstVisiblePosition() + VISIBLE_THRESHOLD)) { // 20 + 5 = 25
+                loadMoreVotables();
+                loading = true;
+            }
+        }
+    }
+
+    private void loadMoreVotables() {
+        String after;
+        if (mSubmittedThings.size() == 0) {
+            after = null;
+        } else {
+            after = mSubmittedThings.get(mSubmittedThings.size() - 1).getName();
+        }
+        RedditApi.getUserDetails(getActivity(), mUsername, after, mSubmittedThingsCallback);
     }
 
     private class LoadUserDataTask extends AsyncTask<Void, Void, User> {
@@ -267,53 +266,6 @@ public class UserFragment extends AccountFragment {
                 mCakeDay.setText(mUser.calculateCakeDay());
             }
             mSubmittedAdapter.notifyDataSetChanged();
-        }
-    }
-
-    private class SubmittedLoaderTask extends AsyncTask<Void, Void, List<Thing>> {
-
-        @Override
-        protected List<Thing> doInBackground(Void... params) {
-            try {
-                List<Thing> things = new ArrayList<Thing>();
-                String dataString = Utilities.get("", "http://www.reddit.com/user/" + mUsername
-                        + "/.json", mAccount);
-                JsonParser jsonParser = new JsonParser();
-                JsonElement element = jsonParser.parse(dataString);
-                if (!element.isJsonNull()) {
-                    JsonArray children = element.getAsJsonObject()
-                            .getAsJsonObject("data").getAsJsonArray("children");
-                    for (JsonElement e : children) {
-                        JsonObject data = e.getAsJsonObject();
-                        if (data.get("kind").getAsString().contains("t1")) {
-//                            things.add(Comment.fromJsonString(data));
-//                        } else if (data.get("kind").getAsString().contains("t3")) {
-//                            things.add(Submission.fromJsonString(data));
-                        }
-                    }
-                } else {
-                    return null;
-                }
-                return things;
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-                return null;
-            } catch (IOException e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(List<Thing> result) {
-            if (result != null) {
-                for (Thing thing : result) {
-                    if (thing != null) {
-                        mSubmittedThings.add(thing);
-                    }
-                }
-                mSubmittedAdapter.notifyDataSetChanged();
-            }
         }
     }
 

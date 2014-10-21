@@ -8,7 +8,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.stream.MalformedJsonException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,7 +18,7 @@ import me.williamhester.models.utils.Utilities;
 /**
  * Created by William on 4/12/14.
  */
-public class Message implements ThingInterface, Parcelable {
+public class Message implements Thing, Parcelable {
 
     public static final int ALL = 0;
     public static final int UNREAD = 1;
@@ -36,6 +35,7 @@ public class Message implements ThingInterface, Parcelable {
     private String mBodyHtml;
     private String mContext;
     private String mDestination;
+    private String mId;
     private String mLinkTitle;
     private String mName;
     private String mParentId;
@@ -62,6 +62,7 @@ public class Message implements ThingInterface, Parcelable {
             mParentId = dataObj.get("parent_id").getAsString();
 //        if (!dataObj.get("replies").isJsonNull())
 //            mReplies = dataObj.get("replies").getAsString();
+        mId = dataObj.get("id").getAsString();
         mSubject = dataObj.get("subject").getAsString();
         mWasComment = dataObj.get("was_comment").getAsBoolean();
         if (mWasComment) {
@@ -138,6 +139,11 @@ public class Message implements ThingInterface, Parcelable {
     @Override
     public String getName() {
         return mName;
+    }
+
+    @Override
+    public String getId() {
+        return mId;
     }
 
 

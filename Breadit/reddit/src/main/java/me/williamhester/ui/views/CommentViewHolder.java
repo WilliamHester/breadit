@@ -209,7 +209,7 @@ public class CommentViewHolder extends VotableViewHolder {
     private View.OnClickListener mHideCommentsClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            mCallback.onHideClick((Comment) mComment);
+            mCallback.onBodyClick((Comment) mComment);
             mBody.setVisibility(View.GONE);
         }
     };
@@ -254,7 +254,7 @@ public class CommentViewHolder extends VotableViewHolder {
 
     public interface CommentClickCallbacks {
         public void onMoreClick(CommentViewHolder viewHolder, MoreComments comment);
-        public void onHideClick(Comment comment);
+        public void onBodyClick(Comment comment);
         public void onCommentLongPressed(CommentViewHolder holder);
         public void onOptionsRowItemSelected(View view, AbsComment submission);
     }
