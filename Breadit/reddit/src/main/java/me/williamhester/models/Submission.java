@@ -99,13 +99,13 @@ public class Submission implements Votable, Parcelable {
         return selftext_html;
     }
 
-    public String getBody() {
+    @Override
+    public String getRawMarkdown() {
         return selftext;
     }
 
-    @Override
-    public void setSpannableBody(Spannable body) {
-
+    public void setRawMarkdown(String markdown) {
+        selftext = markdown;
     }
 
     public void setSelftextOpen(boolean open) {

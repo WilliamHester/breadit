@@ -63,12 +63,14 @@ public class SubmissionViewHolder extends VotableViewHolder {
         View optionReply = itemView.findViewById(R.id.option_reply);
         View optionUser = itemView.findViewById(R.id.option_view_user);
         View optionShare = itemView.findViewById(R.id.option_share);
+        final View optionEdit = itemView.findViewById(R.id.option_edit);
         final View optionSubreddit = itemView.findViewById(R.id.option_go_to_subreddit);
         final View optionSave = itemView.findViewById(R.id.option_save);
         final View optionOverflow = itemView.findViewById(R.id.option_overflow);
 
         optionShare.setOnClickListener(mOptionsOnClickListener);
         optionReply.setOnClickListener(mOptionsOnClickListener);
+        optionEdit.setOnClickListener(mOptionsOnClickListener);
         optionSubreddit.setOnClickListener(mOptionsOnClickListener);
         optionUser.setOnClickListener(mOptionsOnClickListener);
         optionSave.setOnClickListener(mOptionsOnClickListener);
@@ -254,6 +256,9 @@ public class SubmissionViewHolder extends VotableViewHolder {
 
     public void expandOptions() {
         mOptionsRow.setVisibility(View.VISIBLE);
+        itemView.findViewById(R.id.option_edit).setVisibility(AccountManager.isLoggedIn()
+                && AccountManager.getAccount().getUsername()
+                .equalsIgnoreCase(mSubmission.getAuthor()) ? View.VISIBLE : View.GONE);
     }
 
     private View.OnClickListener mExpandListener = new View.OnClickListener() {

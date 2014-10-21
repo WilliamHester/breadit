@@ -23,6 +23,7 @@ public class Comment extends AbsComment implements Votable, Parcelable {
     private String mAuthorFlairCss;
     private String mAuthorFlairText;
     private String mBannedBy;
+    private String mBodyMarkdown;
     private String mBodyHtml;
     private String mSubreddit;
     private String mSubredditId;
@@ -71,6 +72,9 @@ public class Comment extends AbsComment implements Votable, Parcelable {
         }
         if (!object.get("banned_by").isJsonNull()) {
             mBannedBy = object.get("banned_by").getAsString();
+        }
+        if (!object.get("body").isJsonNull()) {
+            mBodyMarkdown = object.get("body").getAsString();
         }
         if (!object.get("body_html").isJsonNull()) {
             mBodyHtml = object.get("body_html").getAsString();
@@ -122,10 +126,6 @@ public class Comment extends AbsComment implements Votable, Parcelable {
     public String getName() {
         return mName;
     }
-
-//    public String getId() {
-//        return
-//    }
 
     public int getVoteStatus() {
         if (mVoteStatus == null) {
@@ -197,6 +197,16 @@ public class Comment extends AbsComment implements Votable, Parcelable {
         return mCreatedUtc;
     }
 
+    @Override
+    public String getRawMarkdown() {
+        return mBodyMarkdown;
+    }
+
+    @Override
+    public void setRawMarkdown(String markdown) {
+        mBodyMarkdown = markdown;
+    }
+
     public String getFlairText() {
         return mAuthorFlairText;
     }
@@ -219,11 +229,6 @@ public class Comment extends AbsComment implements Votable, Parcelable {
 
     public void setReplies(ResponseRedditWrapper replies) {
         mReplies = replies;
-    }
-
-    @Override
-    public void setBodyHtml(String body) {
-        mBodyHtml = body;
     }
 
     public void setSpannableBody(Spannable body) {
@@ -256,6 +261,11 @@ public class Comment extends AbsComment implements Votable, Parcelable {
         ArrayList<AbsComment> children = mChildren;
         mChildren = null;
         return children;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof Comment && ((Comment) o).getName().equals(mName);
     }
 
     @Override

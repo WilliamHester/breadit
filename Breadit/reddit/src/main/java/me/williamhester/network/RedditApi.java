@@ -1,7 +1,6 @@
 package me.williamhester.network;
 
 import android.content.Context;
-import android.text.Html;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -35,7 +34,6 @@ import me.williamhester.models.Submission;
 import me.williamhester.models.Subreddit;
 import me.williamhester.models.ThingInterface;
 import me.williamhester.models.Votable;
-import me.williamhester.tools.HtmlParser;
 
 /**
  * Created by William on 6/14/14.
@@ -252,7 +250,7 @@ public class RedditApi {
      */
     public static void getMoreChildren(final Context context, String linkId, String sortType,
                                        List<String> children, final int baseLevel,
-                                       final FutureCallback<ArrayList<AbsComment>> callback) {
+                                       final FutureCallback<ArrayList<ThingInterface>> callback) {
         // Build the list of children separated by commas
         StringBuilder stringBuilder = new StringBuilder();
         for (String s : children) {
@@ -278,28 +276,32 @@ public class RedditApi {
                     callback.onCompleted(e, null);
                     return;
                 }
-                getCommentDataFromNames(result, baseLevel, context, callback);
+                getVotableDataFromNames(result, baseLevel, context, callback);
             }
         });
     }
 
-    private static void getCommentDataFromNames(JSONObject result, int baseLevel, Context context,
-                                                final FutureCallback<ArrayList<AbsComment>> callback) {
+    private static void getVotableDataFromNames(JSONObject result, int baseLevel, Context context,
+                                                final FutureCallback<ArrayList<ThingInterface>> callback) {
         try {
             JSONArray array = result.getJSONObject("json").getJSONObject("data").getJSONArray("things");
-            ArrayList<String> names = new ArrayList<>();
+            printOutLongString(result.toString());
+            final ArrayList<String> names = new ArrayList<>();
             final ArrayList<Integer> levels = new ArrayList<>();
             ArrayList<String> parents = new ArrayList<>();
             for (int i = 0; i < array.length(); i++) {
-                JSONObject o = array.getJSONObject(i).getJSONObject("data");
-                names.add(o.getString("id"));
-                parents.add(o.getString("parent"));
+                JSONObject o = array.getJSONObject(i);
+                JSONObject data = o.getJSONObject("data");
+                names.add(data.getString("id"));
+                if (!o.getString("kind").equals("t3")) {
+                    parents.add(data.getString("parent"));
 
-                int parentIndex = names.indexOf(parents.get(i));
-                if (parentIndex >= 0) { // The parent is contained within the other comments
-                    levels.add(levels.get(parentIndex) + 1);
-                } else {
-                    levels.add(baseLevel);
+                    int parentIndex = names.indexOf(parents.get(i));
+                    if (parentIndex >= 0) { // The parent is contained within the other comments
+                        levels.add(levels.get(parentIndex) + 1);
+                    } else {
+                        levels.add(baseLevel);
+                    }
                 }
             }
 
@@ -323,12 +325,14 @@ public class RedditApi {
 
                             Gson gson = new Gson();
                             ResponseRedditWrapper wrapper = new ResponseRedditWrapper(result, gson);
-                            ArrayList<AbsComment> comments = new ArrayList<>();
+                            ArrayList<ThingInterface> comments = new ArrayList<>();
                             if (wrapper.getData() instanceof Listing) {
                                 Listing listing = (Listing) wrapper.getData();
-                                for (int i = 0; i < levels.size(); i++) {
-                                    Comment comment = (Comment) listing.getChildren().get(i).getData();
-                                    comment.setLevel(levels.get(i));
+                                for (int i = 0; i < names.size(); i++) {
+                                    ThingInterface comment = (ThingInterface) listing.getChildren().get(i).getData();
+                                    if (comment instanceof Comment) {
+                                        ((Comment) comment).setLevel(levels.get(i));
+                                    }
                                     comments.add(comment);
                                 }
                             }
@@ -435,7 +439,7 @@ public class RedditApi {
     }
 
     public static void replyToComment(final Context context, final ThingInterface thing, String text,
-                             final FutureCallback<ArrayList<AbsComment>> callback) {
+                             final FutureCallback<ArrayList<ThingInterface>> callback) {
         MultipartFormDataBody body = new MultipartFormDataBody();
         body.addStringPart("api_type", "json");
         body.addStringPart("parent", thing.getName());
@@ -454,33 +458,34 @@ public class RedditApi {
                     return;
                 }
                 int level = thing instanceof Comment ? ((Comment) thing).getLevel() + 1 : 0;
-                getCommentDataFromNames(result, level, context, callback);
+                getVotableDataFromNames(result, level, context, callback);
             }
         });
     }
 
-    public static void editThing(Context context, final Votable thing,
-                                 final FutureCallback<Votable> callback) {
-        Ion.with(context)
-                .load(REDDIT_URL + "/api/editusertext/")
-                .addHeaders(generateUserHeaders())
-                .addHeader("api_type", "json")
-//                .setBodyParameter("text", thing.getRawMarkdown())
-                .setBodyParameter("thing_id", thing.getName())
-                .asString()
-                .setCallback(new FutureCallback<String>() {
-                    @Override
-                    public void onCompleted(Exception e, String result) {
-                        if (e != null) {
-                            callback.onCompleted(e, null);
-                            return;
-                        }
-                        String escapedHtml = result.substring(result.indexOf("\"contentHTML\": ") + 16, result.indexOf(";\",") + 2);
-                        HtmlParser parser = new HtmlParser(Html.fromHtml(escapedHtml).toString());
-                        thing.setSpannableBody(parser.getSpannableString());
-                        callback.onCompleted(null, thing);
-                    }
-                });
+    public static void editThing(final Context context, final Votable votable,
+                                 final FutureCallback<ArrayList<ThingInterface>> callback) {
+        MultipartFormDataBody body = new MultipartFormDataBody();
+        body.addStringPart("api_type", "json");
+        body.addStringPart("thing_id", votable.getName());
+        body.addStringPart("text", votable.getRawMarkdown());
+
+        AsyncHttpRequest request = new AsyncHttpPost(REDDIT_URL + "/api/editusertext/");
+        Account account = AccountManager.getAccount();
+        request.addHeader("Cookie", "reddit_session=" + account.getCookie().replace("\"", ""));
+        request.addHeader("X-Modhash", account.getModhash().replace("\"", ""));
+        request.setBody(body);
+        AsyncHttpClient.getDefaultInstance().executeJSONObject(request, new AsyncHttpClient.JSONObjectCallback() {
+            @Override
+            public void onCompleted(Exception e, AsyncHttpResponse source, JSONObject result) {
+                if (e != null) {
+                    callback.onCompleted(e, null);
+                    return;
+                }
+                int level = votable instanceof Comment ? ((Comment) votable).getLevel() : 0;
+                getVotableDataFromNames(result, level, context, callback);
+            }
+        });
     }
 
     public static void printOutLongString(String string) {

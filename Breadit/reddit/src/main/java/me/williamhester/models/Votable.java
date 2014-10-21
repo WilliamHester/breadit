@@ -1,7 +1,5 @@
 package me.williamhester.models;
 
-import android.text.Spannable;
-
 /**
  * Created by William on 4/6/14.
  */
@@ -13,11 +11,8 @@ public interface Votable extends ThingInterface {
 
     public int getVoteStatus();
     public void setVoteStatus(int status);
-    public int getScore();
-    public void setSpannableBody(Spannable body);
-    public void setBeingEdited(boolean b);
-    public boolean isBeingEdited();
-    public void setBodyHtml(String body);
     public long getCreatedUtc();
+    public String getRawMarkdown();
+    public void setRawMarkdown(String string);
 
 }

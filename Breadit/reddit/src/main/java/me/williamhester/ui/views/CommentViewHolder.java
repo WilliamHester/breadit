@@ -1,7 +1,6 @@
 package me.williamhester.ui.views;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Typeface;
 import android.support.annotation.NonNull;
@@ -55,6 +54,7 @@ public class CommentViewHolder extends VotableViewHolder {
         View optionShare = itemView.findViewById(R.id.option_share);
         final View optionLinks = itemView.findViewById(R.id.option_links);
         final View optionReply = itemView.findViewById(R.id.option_reply);
+        final View optionEdit = itemView.findViewById(R.id.option_edit);
         final View optionSave = itemView.findViewById(R.id.option_save);
         final View optionOverflow = itemView.findViewById(R.id.option_overflow);
 
@@ -67,6 +67,7 @@ public class CommentViewHolder extends VotableViewHolder {
 
         optionShare.setOnClickListener(optionsRowClickListener);
         optionLinks.setOnClickListener(optionsRowClickListener);
+        optionEdit.setOnClickListener(optionsRowClickListener);
         optionReply.setOnClickListener(optionsRowClickListener);
         optionSave.setOnClickListener(optionsRowClickListener);
         optionOverflow.setOnClickListener(optionsRowClickListener);
@@ -96,6 +97,9 @@ public class CommentViewHolder extends VotableViewHolder {
                     optionReply.setVisibility(AccountManager.isLoggedIn() ? View.VISIBLE : View.GONE);
                     optionSave.setVisibility(AccountManager.isLoggedIn() ? View.VISIBLE : View.GONE);
                     optionOverflow.setVisibility(AccountManager.isLoggedIn() ? View.VISIBLE : View.GONE);
+                    optionEdit.setVisibility(AccountManager.isLoggedIn()
+                            && AccountManager.getAccount().getUsername()
+                            .equalsIgnoreCase(((Comment) mComment).getAuthor()) ? View.VISIBLE : View.GONE);
                     mCallback.onCommentLongPressed(CommentViewHolder.this);
                     expand(mOptionsRow);
                 }

@@ -49,6 +49,7 @@ public class CommentFragment extends AccountFragment {
 
     private static final String PERMALINK = "permalink";
     private static final int REPLY_REQUEST = 1;
+    private static final int EDIT_REQUEST = 2;
 
     private final ArrayList<AbsComment> mCommentsList = new ArrayList<>();
     private CommentArrayAdapter mCommentAdapter;
@@ -189,6 +190,21 @@ public class CommentFragment extends AccountFragment {
                 mCommentAdapter.notifyDataSetChanged();
             }
             return;
+        } else if (requestCode == EDIT_REQUEST) {
+            Bundle args = data.getExtras();
+            ThingInterface parent = args.getParcelable("parentThing");
+            Votable newThing = args.getParcelable("newComment");
+            Votable oldThing = args.getParcelable("oldThing");
+            if (parent == null) {
+                mSubmissionCallback.onCompleted(null, (Submission) newThing);
+            } else {
+                int index = mCommentsList.indexOf(oldThing);
+                mCommentsList.remove(index);
+                mCommentsList.add(index, (Comment) newThing);
+                if (mCommentAdapter != null) {
+                    mCommentAdapter.notifyDataSetChanged();
+                }
+            }
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -256,7 +272,7 @@ public class CommentFragment extends AccountFragment {
             @Override
             public void onOptionsRowItemSelected(View view, Submission submission) {
                 switch (view.getId()) {
-                    case R.id.option_reply:
+                    case R.id.option_reply: {
                         ReplyFragment fragment = ReplyFragment.newInstance(submission);
                         fragment.setTargetFragment(CommentFragment.this, REPLY_REQUEST);
                         getFragmentManager().beginTransaction()
@@ -264,6 +280,16 @@ public class CommentFragment extends AccountFragment {
                                 .addToBackStack("Reply")
                                 .commit();
                         break;
+                    }
+                    case R.id.option_edit: {
+                        ReplyFragment fragment = ReplyFragment.newInstance(null, submission);
+                        fragment.setTargetFragment(CommentFragment.this, EDIT_REQUEST);
+                        getFragmentManager().beginTransaction()
+                                .replace(R.id.container, fragment, "Reply")
+                                .addToBackStack("Reply")
+                                .commit();
+                        break;
+                    }
                     case R.id.option_view_user:
                         Bundle b = new Bundle();
                         b.putString("username", submission.getAuthor());
@@ -478,16 +504,20 @@ public class CommentFragment extends AccountFragment {
                 comment.setIsLoading(true);
                 RedditApi.getMoreChildren(mContext, mSubmission.getName(),
                         mSortType, comment.getChildren(), comment.getLevel(),
-                        new FutureCallback<ArrayList<AbsComment>>() {
+                        new FutureCallback<ArrayList<ThingInterface>>() {
                             @Override
-                            public void onCompleted(Exception e, ArrayList<AbsComment> comments) {
+                            public void onCompleted(Exception e, ArrayList<ThingInterface> comments) {
                                 comment.setIsLoading(false);
                                 if (e != null) {
                                     e.printStackTrace();
                                 }
                                 int insert = mCommentsList.indexOf(comment);
                                 mCommentsList.remove(insert);
-                                mCommentsList.addAll(insert, comments);
+                                for (ThingInterface thing : comments) {
+                                    if (thing instanceof AbsComment) {
+                                        mCommentsList.add(insert++, (AbsComment) thing);
+                                    }
+                                }
                                 mCommentAdapter.notifyDataSetChanged();
                             }
                         });
@@ -513,6 +543,25 @@ public class CommentFragment extends AccountFragment {
                             .addToBackStack("ReplyFragment")
                             .commit();
                     break;
+                case R.id.option_edit: {
+                    ThingInterface parent;
+                    if (comment.getLevel() == 0) {
+                        parent = mSubmission;
+                    } else {
+                        int commentIndex = mCommentsList.indexOf(comment) - 1;
+                        while (mCommentsList.get(commentIndex).getLevel() >= comment.getLevel()) {
+                            commentIndex--;
+                        }
+                        parent = (ThingInterface) mCommentsList.get(commentIndex);
+                    }
+                    ReplyFragment fragment = ReplyFragment.newInstance(parent, (Comment) comment);
+                    fragment.setTargetFragment(CommentFragment.this, EDIT_REQUEST);
+                    getFragmentManager().beginTransaction()
+                            .replace(R.id.container, fragment, "Edit")
+                            .addToBackStack("Edit")
+                            .commit();
+                    break;
+                }
                 case R.id.option_share:
                     Intent sendIntent = new Intent();
                     sendIntent.setAction(Intent.ACTION_SEND);
@@ -595,37 +644,6 @@ public class CommentFragment extends AccountFragment {
             }
         }
     };
-
-    private class ReplyAsyncTask extends AsyncTask<Void, Void, Void> {
-
-        private String mReplyText;
-        private String mName;
-
-        public ReplyAsyncTask(String replyText, String fullname){
-            mReplyText = replyText;
-            mName = fullname;
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            if (mAccount != null && mReplyText != null && mReplyText.length() != 0) {
-                List<NameValuePair> apiParams = new ArrayList<NameValuePair>();
-                apiParams.add(new BasicNameValuePair("api-type", "json"));
-                apiParams.add(new BasicNameValuePair("text", mReplyText));
-                apiParams.add(new BasicNameValuePair("thing_id", mName));
-                Utilities.post(apiParams, "http://www.reddit.com/api/comment", mAccount);
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void v) {
-            // re-parse the comment tree and find the one that didn't exist before with the user's
-            //     name as the author name. Scroll to that one...
-            // That, or parse the new structure until the new comment is found and add that one in.
-            // pass new data for the comment and then notifydatasetchanged
-        }
-    }
 
     private void hideComment(int position) {
         AbsComment comment = mCommentsList.get(position);

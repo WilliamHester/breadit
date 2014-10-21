@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import me.williamhester.models.AbsComment;
 import me.williamhester.models.Comment;
 import me.williamhester.models.ThingInterface;
+import me.williamhester.models.Votable;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 
@@ -45,11 +46,21 @@ public class ReplyFragment extends Fragment {
 
     private EditText mBody;
     private boolean mKillOnStart; // Fragments don't like to be killed asynchronously
+    private boolean mIsEditing;
     private int mListMode;
 
     public static ReplyFragment newInstance(ThingInterface thing) {
         Bundle b = new Bundle();
         b.putParcelable("thing", thing);
+        ReplyFragment fragment = new ReplyFragment();
+        fragment.setArguments(b);
+        return fragment;
+    }
+
+    public static ReplyFragment newInstance(ThingInterface parent, Votable votable) {
+        Bundle b = new Bundle();
+        b.putParcelable("thing", parent);
+        b.putParcelable("votable", votable);
         ReplyFragment fragment = new ReplyFragment();
         fragment.setArguments(b);
         return fragment;
@@ -64,6 +75,7 @@ public class ReplyFragment extends Fragment {
             mKillOnStart = savedInstanceState.getBoolean("killOnStart");
             mListMode = savedInstanceState.getInt("listMode");
         }
+        mIsEditing = getArguments().containsKey("votable");
     }
 
     @Override
@@ -123,8 +135,17 @@ public class ReplyFragment extends Fragment {
             }
         });
 
+        if (mIsEditing && savedInstanceState == null) {
+            Votable votable = getArguments().getParcelable("votable");
+            mBody.setText(votable.getRawMarkdown());
+        }
+
         ThingInterface parent = getArguments().getParcelable("thing");
-        mBody.setHint(getResources().getString(R.string.reply_hint) + " /u/" + parent.getAuthor());
+        if (parent != null) {
+            mBody.setHint(getResources().getString(R.string.reply_hint) + " /u/" + parent.getAuthor());
+        } else {
+            mBody.setHint(R.string.enter_self_text);
+        }
         return v;
     }
 
@@ -142,38 +163,47 @@ public class ReplyFragment extends Fragment {
                 dialog.setCancelable(false);
                 dialog.show();
                 final ThingInterface parent = getArguments().getParcelable("thing");
-                RedditApi.replyToComment(getActivity(), parent,
-                        mBody.getText().toString(), new FutureCallback<ArrayList<AbsComment>>() {
+                final Votable votable = getArguments().getParcelable("votable");
+                FutureCallback<ArrayList<ThingInterface>> callback = new FutureCallback<ArrayList<ThingInterface>>() {
+                    @Override
+                    public void onCompleted(final Exception e,
+                                            final ArrayList<ThingInterface> result) {
+                        mBody.post(new Runnable() {
                             @Override
-                            public void onCompleted(final Exception e,
-                                                    final ArrayList<AbsComment> result) {
-                                mBody.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        dialog.dismiss();
-                                        if (e != null) {
-                                            e.printStackTrace();
-                                            Toast.makeText(getActivity(),
-                                                    R.string.failed_to_post_reply,
-                                                    Toast.LENGTH_SHORT).show();
-                                            return;
-                                        }
-                                        Intent i = new Intent();
-                                        Bundle resultBundle = new Bundle();
-                                        resultBundle.putParcelable("newComment", result.get(0));
-                                        resultBundle.putParcelable("parentThing", parent);
-                                        i.putExtras(resultBundle);
-                                        getTargetFragment().onActivityResult(getTargetRequestCode(),
-                                                Activity.RESULT_OK, i);
-                                        if (isResumed()) {
-                                            getFragmentManager().popBackStack();
-                                        } else {
-                                            mKillOnStart = true;
-                                        }
-                                    }
-                                });
+                            public void run() {
+                                dialog.dismiss();
+                                if (e != null) {
+                                    e.printStackTrace();
+                                    Toast.makeText(getActivity(),
+                                            R.string.failed_to_post_reply,
+                                            Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+                                Intent i = new Intent();
+                                Bundle resultBundle = new Bundle();
+                                resultBundle.putParcelable("oldThing", votable);
+                                resultBundle.putParcelable("newComment", result.get(0));
+                                resultBundle.putParcelable("parentThing", parent);
+                                i.putExtras(resultBundle);
+                                getTargetFragment().onActivityResult(getTargetRequestCode(),
+                                        Activity.RESULT_OK, i);
+                                if (isResumed()) {
+                                    getFragmentManager().popBackStack();
+                                } else {
+                                    mKillOnStart = true;
+                                }
                             }
                         });
+                    }
+                };
+                if (mIsEditing) {
+                    votable.setRawMarkdown(mBody.getText().toString());
+                    RedditApi.editThing(getActivity(), votable, callback);
+                } else {
+                    RedditApi.replyToComment(getActivity(), parent, mBody.getText().toString(),
+                            callback);
+                }
+
             }
         });
     }

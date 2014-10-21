@@ -19,7 +19,7 @@ import me.williamhester.models.utils.Utilities;
 /**
  * Created by William on 4/12/14.
  */
-public class Message implements Votable, Parcelable {
+public class Message implements ThingInterface, Parcelable {
 
     public static final int ALL = 0;
     public static final int UNREAD = 1;
@@ -68,11 +68,11 @@ public class Message implements Votable, Parcelable {
             mSubreddit = dataObj.get("subreddit").getAsString();
             JsonElement je = dataObj.getAsJsonObject().get("likes");
             if (je.isJsonNull()) {
-                mVoteStatus = NEUTRAL;
+                mVoteStatus = Votable.NEUTRAL;
             } else if (je.getAsBoolean()) {
-                mVoteStatus = UPVOTED;
+                mVoteStatus = Votable.UPVOTED;
             } else {
-                mVoteStatus = DOWNVOTED;
+                mVoteStatus = Votable.DOWNVOTED;
             }
         }
         mUnread = dataObj.get("new").getAsBoolean();
@@ -89,21 +89,6 @@ public class Message implements Votable, Parcelable {
 
     public String getBody() {
         return mBody;
-    }
-
-    @Override
-    public void setBeingEdited(boolean b) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean isBeingEdited() {
-        return false;
-    }
-
-    @Override
-    public void setBodyHtml(String body) {
-        throw new UnsupportedOperationException();
     }
 
     public String getBodyHtml() {
@@ -155,17 +140,17 @@ public class Message implements Votable, Parcelable {
         return mName;
     }
 
-    @Override
+
     public int getVoteStatus() {
         return mVoteStatus;
     }
 
-    @Override
+
     public void setVoteStatus(int status) {
         mVoteStatus = status;
     }
 
-    @Override
+
     public int getScore() {
         return -1;
     }
@@ -175,7 +160,7 @@ public class Message implements Votable, Parcelable {
         return mAuthor;
     }
 
-    @Override
+
     public void setSpannableBody(Spannable body) {
 
     }
