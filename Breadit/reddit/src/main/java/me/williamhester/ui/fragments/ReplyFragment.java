@@ -185,6 +185,9 @@ public class ReplyFragment extends Fragment {
                                 resultBundle.putParcelable("newComment", result.get(0));
                                 resultBundle.putParcelable("parentThing", parent);
                                 i.putExtras(resultBundle);
+                                InputMethodManager imm =  (InputMethodManager) getActivity()
+                                        .getSystemService(Context.INPUT_METHOD_SERVICE);
+                                imm.hideSoftInputFromWindow(mBody.getWindowToken(), 0);
                                 getTargetFragment().onActivityResult(getTargetRequestCode(),
                                         Activity.RESULT_OK, i);
                                 if (isResumed()) {
