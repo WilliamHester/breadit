@@ -285,7 +285,6 @@ public class RedditApi {
                                                 final FutureCallback<ArrayList<ThingInterface>> callback) {
         try {
             JSONArray array = result.getJSONObject("json").getJSONObject("data").getJSONArray("things");
-            printOutLongString(result.toString());
             final ArrayList<String> names = new ArrayList<>();
             final ArrayList<Integer> levels = new ArrayList<>();
             ArrayList<String> parents = new ArrayList<>();
