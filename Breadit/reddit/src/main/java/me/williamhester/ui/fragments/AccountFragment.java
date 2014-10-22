@@ -9,7 +9,7 @@ import me.williamhester.models.AccountManager;
 /**
  * Created by william on 9/5/14.
  */
-public class AccountFragment extends Fragment {
+public abstract class AccountFragment extends Fragment {
 
     protected Account mAccount;
 

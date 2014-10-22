@@ -16,6 +16,7 @@ import com.koushikdutta.async.http.AsyncHttpResponse;
 import com.koushikdutta.async.http.body.MultipartFormDataBody;
 import com.koushikdutta.ion.Ion;
 
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -63,6 +64,18 @@ public class RedditApi {
     public static String COMMENT_SORT_OLD = "old";
     public static String COMMENT_SORT_TOP = "top";
     public static String COMMENT_SORT_BEST = "best";
+
+    public static void logIn(Context context, String username, String password,
+                             FutureCallback<JsonObject> callback) {
+        Ion.with(context)
+                .load(REDDIT_URL + "/api/login/" + username)
+                .setBodyParameter("api_type", "json")
+                .setBodyParameter("user", username)
+                .setBodyParameter("passwd", password)
+                .setBodyParameter("rem", "true")
+                .asJsonObject()
+                .setCallback(callback);
+    }
 
     public static void vote(Context context, Votable v) {
         Ion.with(context)

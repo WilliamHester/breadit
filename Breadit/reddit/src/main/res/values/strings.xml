@@ -177,4 +177,9 @@
     <string name="share_link">Share link</string>
     <string name="share_comments">Share comments</string>
 
+    <!-- LoginDialogFragment -->
+    <string name="please_enter_a_username">Please enter a username</string>
+    <string name="please_enter_a_password">Please enter a password</string>
+    <string name="logging_in">Logging in. Please wait.</string>
+
 </resources>
