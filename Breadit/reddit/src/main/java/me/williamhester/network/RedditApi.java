@@ -43,7 +43,7 @@ public class RedditApi {
 
     private static final String USER_AGENT = "Breadit_Android_App";
 
-    public static final String REDDIT_URL = "https://www.reddit.com";
+    public static final String REDDIT_URL = "https://api.reddit.com";
 
     public static String SORT_TYPE_HOT = "";
     public static String SORT_TYPE_NEW = "new";
@@ -68,7 +68,7 @@ public class RedditApi {
     public static void logIn(Context context, String username, String password,
                              FutureCallback<JsonObject> callback) {
         Ion.with(context)
-                .load(REDDIT_URL + "/api/login/" + username)
+                .load("http://www.reddit.com" + "/api/login/" + username)
                 .setBodyParameter("api_type", "json")
                 .setBodyParameter("user", username)
                 .setBodyParameter("passwd", password)
@@ -83,7 +83,13 @@ public class RedditApi {
                 .addHeaders(generateUserHeaders())
                 .setBodyParameter("dir", String.valueOf(v.getVoteStatus()))
                 .setBodyParameter("id", v.getName())
-                .asString();
+                .asString()
+                .setCallback(new FutureCallback<String>() {
+                    @Override
+                    public void onCompleted(Exception e, String result) {
+                        Log.d("RedditApi", result);
+                    }
+                });
     }
 
     public static void getRedditLiveData(Context context, Submission submission,
@@ -184,10 +190,10 @@ public class RedditApi {
         Map<String, List<String>> headers = new HashMap<>();
         if (account != null) {
             ArrayList<String> list1 = new ArrayList<>();
-            list1.add("reddit_session=" + account.getCookie());
+            list1.add("reddit_session=\"" + account.getCookie() + "\"");
             headers.put("Cookie", list1);
             ArrayList<String> list2 = new ArrayList<>();
-            list2.add(account.getModhash().replace("\"", ""));
+            list2.add(account.getModhash());
             headers.put("X-Modhash", list2);
         }
         return headers;
