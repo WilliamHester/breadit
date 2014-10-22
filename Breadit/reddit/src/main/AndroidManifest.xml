@@ -43,9 +43,11 @@
                 <data android:scheme="me.williamhester.breadit" android:host="r" />
             </intent-filter>
         </activity>
-        <activity android:name="me.williamhester.ui.activities.AccountActivity" >
+        <activity android:name="me.williamhester.ui.activities.AccountActivity"
+            android:windowSoftInputMode="adjustResize" >
         </activity>
-        <activity android:name="me.williamhester.ui.activities.UserActivity" >
+        <activity android:name="me.williamhester.ui.activities.UserActivity"
+            android:windowSoftInputMode="adjustResize" >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />

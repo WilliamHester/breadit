@@ -9,9 +9,10 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:padding="16dp"
+        android:layout_margin="20dp"
         android:hint="@string/reply_hint"
         android:fontFamily="sans-serif-thin"
+        android:inputType="textCapSentences"
         android:gravity="top|start"
         android:background="@null"/>
 

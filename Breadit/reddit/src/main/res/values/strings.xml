@@ -157,11 +157,21 @@
     <string name="remove">Remove</string>
     <string name="spam">Spam</string>
 
-    <!-- Reply Fragment -->
+    <!-- ReplyFragment -->
     <string name="send_reply">Send Reply</string>
     <string name="sending_reply">Sending reply. Please wait.</string>
     <string name="failed_to_post_reply">Failed to post reply. Please check your network connection
         and try again.</string>
+    
+    <!-- MessageFragment -->
+    <string name="compose_to_hint">Username or Subreddit</string>
+    <string name="sending_message">Sending message…</string>
+    <string name="message_sent">Message sent</string>
+
+    <!-- CaptchaDialogFragment -->
+    <string name="reload_captcha">New Captcha</string>
+    <string name="continue_string">Continue</string>
+    <string name="failed_captcha">Failed captcha. Please try again.</string>
 
     <!-- Share -->
     <string name="share_link">Share link</string>

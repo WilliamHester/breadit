@@ -497,6 +497,42 @@ public class RedditApi {
                 .setCallback(callback);
     }
 
+    public static void needsCaptcha(Context context, FutureCallback<String> callback) {
+        Ion.with(context)
+                .load(REDDIT_URL + "/api/needs_captcha/.json")
+                .addHeaders(generateUserHeaders())
+                .asString()
+                .setCallback(callback);
+    }
+
+    public static void getCaptcha(Context context, FutureCallback<JsonObject> callback) {
+        Ion.with(context)
+                .load(REDDIT_URL + "/api/new_captcha")
+                .setBodyParameter("api_type", "json")
+                .asJsonObject()
+                .setCallback(callback);
+    }
+
+    public static void compose(Context context, String to, String subject, String body,
+                               FutureCallback<JsonObject> callback) {
+        compose(context, "", "", to, subject, body, callback);
+    }
+
+    public static void compose(Context context, String iden, String captchaRespnse, String to,
+                               String subject, String body, FutureCallback<JsonObject> callback) {
+        Ion.with(context)
+                .load(REDDIT_URL + "/api/compose")
+                .addHeaders(generateUserHeaders())
+                .setBodyParameter("api_type", "json")
+                .setBodyParameter("iden", iden)
+                .setBodyParameter("captcha", captchaRespnse)
+                .setBodyParameter("subject", subject)
+                .setBodyParameter("text", body)
+                .setBodyParameter("to", to)
+                .asJsonObject()
+                .setCallback(callback);
+    }
+
     public static void printOutLongString(String string) {
         for (int i = 0; i < string.length(); i += 1000) {
             Log.d("RedditApi", string.substring(i, Math.min(string.length(), i + 1000)));

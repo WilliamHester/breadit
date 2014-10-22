@@ -8,6 +8,7 @@ import android.view.MenuItem;
 
 import me.williamhester.models.Account;
 import me.williamhester.reddit.R;
+import me.williamhester.ui.fragments.ComposeMessageFragment;
 import me.williamhester.ui.fragments.MessageDialogFragment;
 import me.williamhester.ui.fragments.UserFragment;
 
@@ -52,9 +53,11 @@ public class UserActivity extends ActionBarActivity {
                 finish();
                 return true;
             case R.id.action_compose_message:
-                MessageDialogFragment messageDialogFragment = MessageDialogFragment
-                        .newInstance(mUsername);
-                messageDialogFragment.show(getSupportFragmentManager(), "message_dialog");
+                ComposeMessageFragment fragment = ComposeMessageFragment.newInstance(mUsername);
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.container, fragment, "compose")
+                        .addToBackStack("compose")
+                        .commit();
                 return true;
         }
         return super.onOptionsItemSelected(item);

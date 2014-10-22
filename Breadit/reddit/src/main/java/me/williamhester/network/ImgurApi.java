@@ -11,6 +11,7 @@ import com.koushikdutta.ion.Ion;
 
 import java.util.ArrayList;
 
+import me.williamhester.Auth;
 import me.williamhester.models.ImgurAlbum;
 import me.williamhester.models.ImgurImage;
 import me.williamhester.models.ResponseImgurWrapper;
@@ -24,7 +25,7 @@ import me.williamhester.models.Submission;
 public class ImgurApi {
 
     private static final String AUTHORIZATION = "Authorization";
-    private static final String CLIENT_ID = "Client-ID 2bdd3ec7a3fa918";
+    private static final String CLIENT_ID = "Client-ID " + Auth.IMGUR_CLIENT_ID;
 
     private static Ion mImgurClient;
 

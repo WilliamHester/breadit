@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="320dp"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:padding="16dp">
+
+    <ImageView android:id="@+id/captcha"
+        android:scaleType="fitCenter"
+        android:layout_width="240dp"
+        android:layout_height="100dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"/>
+
+    <EditText android:id="@+id/captcha_response"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/captcha_response"
+        android:fontFamily="sans-serif-thin"
+        android:inputType="textCapCharacters"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="end">
+
+        <Button android:id="@+id/cancel"
+            style="?android:attr/buttonBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/cancel"/>
+
+        <Button android:id="@+id/reload_captcha"
+            style="?android:attr/buttonBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/reload_captcha"/>
+
+        <Button android:id="@+id/continue_button"
+            style="?android:attr/buttonBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/continue_string"/>
+
+    </LinearLayout>
+
+</LinearLayout>
