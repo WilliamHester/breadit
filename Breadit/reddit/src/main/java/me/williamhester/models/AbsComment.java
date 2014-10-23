@@ -28,6 +28,10 @@ public class AbsComment implements Parcelable {
         mLevel = level;
     }
 
+    public String getParentName() {
+        return null;
+    }
+
     public static class CommentIterator implements Iterator<AbsComment> {
 
         private Stack<ResponseRedditWrapper> mStack;

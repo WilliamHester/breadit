@@ -136,7 +136,7 @@ public class ReplyFragment extends MarkdownBodyFragment {
         };
         if (mIsEditing) {
             votable.setRawMarkdown(mBody.getText().toString());
-            RedditApi.editThing(getActivity(), votable, callback);
+            RedditApi.editThing(votable, callback);
         } else {
             RedditApi.replyToComment(getActivity(), parent, mBody.getText().toString(),
                     callback);

@@ -253,14 +253,13 @@ public class RedditApi {
      * that must be returned to the CommentFragment so that it can be put in place.
      * tl;dr: sorry
      *
-     * @param context the context of the method call
      * @param linkId the id of the link
      * @param sortType the sort type of the comments
      * @param children the Strings that contain the names of the morechildren
      * @param baseLevel the level at which the morechildren comment is
      * @param callback the callback that returns the new piece of comments
      */
-    public static void getMoreChildren(final Context context, String linkId, String sortType,
+    public static void getMoreChildren(String linkId, String sortType,
                                        List<String> children, final int baseLevel,
                                        final FutureCallback<ArrayList<Thing>> callback) {
         // Build the list of children separated by commas
@@ -281,76 +280,56 @@ public class RedditApi {
 
         AsyncHttpRequest request = new AsyncHttpPost(REDDIT_URL + "/api/morechildren");
         request.setBody(body);
-        AsyncHttpClient.getDefaultInstance().executeJSONObject(request, new AsyncHttpClient.JSONObjectCallback() {
+        AsyncHttpClient.getDefaultInstance().executeString(request, new AsyncHttpClient.StringCallback() {
             @Override
-            public void onCompleted(Exception e, AsyncHttpResponse source, JSONObject result) {
+            public void onCompleted(Exception e, AsyncHttpResponse source, String result) {
                 if (e != null) {
                     callback.onCompleted(e, null);
                     return;
                 }
-                getVotableDataFromNames(result, baseLevel, context, callback);
+                getVotableDataFromNames(result, baseLevel, callback);
             }
         });
     }
 
-    private static void getVotableDataFromNames(JSONObject result, int baseLevel, Context context,
+    private static void getVotableDataFromNames(String result, int baseLevel,
                                                 final FutureCallback<ArrayList<Thing>> callback) {
+        // Just in case Reddit gives us a weird response, this will be wrapped in a try-catch
         try {
-            JSONArray array = result.getJSONObject("json").getJSONObject("data").getJSONArray("things");
-            final ArrayList<String> names = new ArrayList<>();
-            final ArrayList<Integer> levels = new ArrayList<>();
-            ArrayList<String> parents = new ArrayList<>();
-            for (int i = 0; i < array.length(); i++) {
-                JSONObject o = array.getJSONObject(i);
-                JSONObject data = o.getJSONObject("data");
-                names.add(data.getString("id"));
-                if (!o.getString("kind").equals("t3")) {
-                    parents.add(data.getString("parent"));
+            JsonObject object = new JsonParser().parse(result).getAsJsonObject();
+            JsonArray array = object.get("json").getAsJsonObject()
+                    .get("data").getAsJsonObject()
+                    .get("things").getAsJsonArray();
+            ArrayList<Thing> things = new ArrayList<>();
+            Gson gson = new Gson();
+            for (int i = 0; i < array.size(); i++) {
+                ResponseRedditWrapper wrapper =
+                        new ResponseRedditWrapper(array.get(i).getAsJsonObject(), gson);
+                Thing data = (Thing) wrapper.getData();
 
-                    int parentIndex = names.indexOf(parents.get(i));
-                    if (parentIndex >= 0) { // The parent is contained within the other comments
-                        levels.add(levels.get(parentIndex) + 1);
-                    } else {
-                        levels.add(baseLevel);
+                // if it's a comment, we need to get its relative depth in the tree
+                if (data instanceof AbsComment) {
+                    boolean foundParent = false;
+                    for (Thing thing : things) {
+                        if (!(thing instanceof Comment)) {
+                            continue;
+                        }
+                        Comment c = (Comment) thing;
+                        if (c.getName().equals(((AbsComment) data).getParentName())) {
+                            ((AbsComment) data).setLevel(c.getLevel() + 1);
+                            foundParent = true;
+                        }
+                    }
+                    if (!foundParent) {
+                        ((AbsComment) data).setLevel(baseLevel);
                     }
                 }
+                things.add(data);
             }
 
-            StringBuilder query = new StringBuilder();
-            for (String name : names) {
-                query.append(name);
-                query.append(',');
-            }
-            Ion.with(context)
-                    .load(REDDIT_URL + "/api/info.json")
-                    .addQuery("id", query.toString())
-                    .addHeaders(getStandardHeaders())
-                    .asJsonObject()
-                    .setCallback(new FutureCallback<JsonObject>() {
-                        @Override
-                        public void onCompleted(Exception e, JsonObject result) {
-                            if (e != null) {
-                                callback.onCompleted(e, null);
-                                return;
-                            }
-
-                            Gson gson = new Gson();
-                            ResponseRedditWrapper wrapper = new ResponseRedditWrapper(result, gson);
-                            ArrayList<Thing> comments = new ArrayList<>();
-                            if (wrapper.getData() instanceof Listing) {
-                                Listing listing = (Listing) wrapper.getData();
-                                for (int i = 0; i < names.size(); i++) {
-                                    Thing comment = (Thing) listing.getChildren().get(i).getData();
-                                    if (comment instanceof Comment) {
-                                        ((Comment) comment).setLevel(levels.get(i));
-                                    }
-                                    comments.add(comment);
-                                }
-                            }
-                            callback.onCompleted(null, comments);
-                        }
-                    });
+            callback.onCompleted(null, things);
         } catch (Exception e2) {
+            printOutLongString(result.toString());
             callback.onCompleted(e2, null);
         }
     }
@@ -461,20 +440,20 @@ public class RedditApi {
         request.addHeader("Cookie", "reddit_session=\"" + account.getCookie() + "\"");
         request.addHeader("X-Modhash", account.getModhash());
         request.setBody(body);
-        AsyncHttpClient.getDefaultInstance().executeJSONObject(request, new AsyncHttpClient.JSONObjectCallback() {
+        AsyncHttpClient.getDefaultInstance().executeString(request, new AsyncHttpClient.StringCallback() {
             @Override
-            public void onCompleted(Exception e, AsyncHttpResponse source, JSONObject result) {
+            public void onCompleted(Exception e, AsyncHttpResponse source, String result) {
                 if (e != null) {
                     callback.onCompleted(e, null);
                     return;
                 }
                 int level = thing instanceof Comment ? ((Comment) thing).getLevel() + 1 : 0;
-                getVotableDataFromNames(result, level, context, callback);
+                getVotableDataFromNames(result, level, callback);
             }
         });
     }
 
-    public static void editThing(final Context context, final Votable votable,
+    public static void editThing(final Votable votable,
                                  final FutureCallback<ArrayList<Thing>> callback) {
         MultipartFormDataBody body = new MultipartFormDataBody();
         body.addStringPart("api_type", "json");
@@ -486,15 +465,15 @@ public class RedditApi {
         request.addHeader("Cookie", "reddit_session=\"" + account.getCookie() + "\"");
         request.addHeader("X-Modhash", account.getModhash());
         request.setBody(body);
-        AsyncHttpClient.getDefaultInstance().executeJSONObject(request, new AsyncHttpClient.JSONObjectCallback() {
+        AsyncHttpClient.getDefaultInstance().executeString(request, new AsyncHttpClient.StringCallback() {
             @Override
-            public void onCompleted(Exception e, AsyncHttpResponse source, JSONObject result) {
+            public void onCompleted(Exception e, AsyncHttpResponse source, String result) {
                 if (e != null) {
                     callback.onCompleted(e, null);
                     return;
                 }
                 int level = votable instanceof Comment ? ((Comment) votable).getLevel() : 0;
-                getVotableDataFromNames(result, level, context, callback);
+                getVotableDataFromNames(result, level, callback);
             }
         });
     }

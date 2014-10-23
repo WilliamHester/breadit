@@ -7,17 +7,16 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by william on 8/15/14.
  */
-public class MoreComments extends AbsComment implements Parcelable {
+public class MoreComments extends AbsComment implements Thing {
 
     private int mCount;
-    private String mParentId;
+    private String mParentName;
     private String mId;
     private List<String> mChildren;
     private String mName;
@@ -26,7 +25,7 @@ public class MoreComments extends AbsComment implements Parcelable {
     public MoreComments(JsonObject object) {
         super(0);
         mCount = object.get("count").getAsInt();
-        mParentId = object.get("parent_id").getAsString();
+        mParentName = object.get("parent_id").getAsString();
         mId = object.get("id").getAsString();
         mName = object.get("name").getAsString();
         JsonArray array = object.get("children").getAsJsonArray();
@@ -40,8 +39,17 @@ public class MoreComments extends AbsComment implements Parcelable {
         return mId;
     }
 
+    @Override
+    public String getAuthor() {
+        return "";
+    }
+
     public String getName() {
         return mName;
+    }
+
+    public String getParentName() {
+        return mParentName;
     }
 
     public List<String> getChildren() {
@@ -70,7 +78,7 @@ public class MoreComments extends AbsComment implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeInt(this.mCount);
-        dest.writeString(this.mParentId);
+        dest.writeString(this.mParentName);
         dest.writeString(this.mId);
         dest.writeList(this.mChildren);
         dest.writeString(this.mName);
@@ -79,7 +87,7 @@ public class MoreComments extends AbsComment implements Parcelable {
     private MoreComments(Parcel in) {
         super(in);
         this.mCount = in.readInt();
-        this.mParentId = in.readString();
+        this.mParentName = in.readString();
         this.mId = in.readString();
         this.mChildren = new ArrayList<>();
         in.readList(this.mChildren, String.class.getClassLoader());

@@ -497,7 +497,7 @@ public class CommentFragment extends AccountFragment {
         public void onMoreClick(CommentViewHolder commentView, final MoreComments comment) {
             if (!comment.isLoading()) {
                 comment.setIsLoading(true);
-                RedditApi.getMoreChildren(mContext, mSubmission.getName(),
+                RedditApi.getMoreChildren(mSubmission.getName(),
                         mSortType, comment.getChildren(), comment.getLevel(),
                         new FutureCallback<ArrayList<Thing>>() {
                             @Override
@@ -505,6 +505,7 @@ public class CommentFragment extends AccountFragment {
                                 comment.setIsLoading(false);
                                 if (e != null) {
                                     e.printStackTrace();
+                                    return;
                                 }
                                 int insert = mCommentsList.indexOf(comment);
                                 mCommentsList.remove(insert);
@@ -513,7 +514,14 @@ public class CommentFragment extends AccountFragment {
                                         mCommentsList.add(insert++, (AbsComment) thing);
                                     }
                                 }
-                                mCommentAdapter.notifyDataSetChanged();
+                                if (getView() != null) {
+                                    getView().post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            mCommentAdapter.notifyDataSetChanged();
+                                        }
+                                    });
+                                }
                             }
                         });
             }
