@@ -16,7 +16,6 @@ import com.koushikdutta.async.http.AsyncHttpResponse;
 import com.koushikdutta.async.http.body.MultipartFormDataBody;
 import com.koushikdutta.ion.Ion;
 
-import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -80,24 +79,17 @@ public class RedditApi {
     public static void vote(Context context, Votable v) {
         Ion.with(context)
                 .load(REDDIT_URL + "/api/vote")
-                .addHeaders(generateUserHeaders())
+                .addHeaders(getStandardHeaders())
                 .setBodyParameter("dir", String.valueOf(v.getVoteStatus()))
                 .setBodyParameter("id", v.getName())
-                .asString()
-                .setCallback(new FutureCallback<String>() {
-                    @Override
-                    public void onCompleted(Exception e, String result) {
-                        Log.d("RedditApi", result);
-                    }
-                });
+                .asString();
     }
 
     public static void getRedditLiveData(Context context, Submission submission,
                                          final FutureCallback<ResponseRedditWrapper> callback) {
         Ion.with(context)
                 .load(submission.getUrl() + "/about.json")
-                .addHeader("User-Agent", USER_AGENT)
-                .addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+                .addHeaders(getStandardHeaders())
                 .asJsonObject()
                 .setCallback(new FutureCallback<JsonObject>() {
                     @Override
@@ -123,8 +115,7 @@ public class RedditApi {
         Ion.with(context)
                 .load(REDDIT_URL + subredditName + "/" + sortType + "/.json")
                 .addQueries(generateSubmissionQueries(secondarySort, before, after))
-                .addHeaders(generateUserHeaders())
-                .addHeader("User-Agent", USER_AGENT)
+                .addHeaders(getStandardHeaders())
                 .asJsonObject()
                 .setCallback(callback);
     }
@@ -136,8 +127,7 @@ public class RedditApi {
         }
         Ion.with(context)
                 .load(REDDIT_URL + subredditName + "/about.json")
-                .addHeaders(generateUserHeaders())
-                .addHeader("User-Agent", USER_AGENT)
+                .addHeaders(getStandardHeaders())
                 .asJsonObject()
                 .setCallback(new FutureCallback<JsonObject>() {
                     @Override
@@ -156,8 +146,7 @@ public class RedditApi {
                                           FutureCallback<String> callback) {
         Ion.with(context)
                 .load(REDDIT_URL + "/api/subscribe/")
-                .addHeaders(generateUserHeaders())
-                .addHeader("User-Agent", USER_AGENT)
+                .addHeaders(getStandardHeaders())
                 .setBodyParameter("action", sub ? "sub" : "unsub")
                 .setBodyParameter("sr", subreddit.getName())
                 .asString()
@@ -185,14 +174,20 @@ public class RedditApi {
         return queries;
     }
 
-    private static Map<String, List<String>> generateUserHeaders() {
+    private static Map<String, List<String>> getStandardHeaders() {
         Account account = AccountManager.getAccount();
         Map<String, List<String>> headers = new HashMap<>();
+        ArrayList<String> userAgent = new ArrayList<>(1);
+        userAgent.add(USER_AGENT);
+        headers.put("User-Agent", userAgent);
+        ArrayList<String> contentType = new ArrayList<>(1);
+        userAgent.add("application/x-www-form-urlencoded; charset=UTF-8");
+        headers.put("Content-Type", contentType);
         if (account != null) {
-            ArrayList<String> list1 = new ArrayList<>();
+            ArrayList<String> list1 = new ArrayList<>(1);
             list1.add("reddit_session=\"" + account.getCookie() + "\"");
             headers.put("Cookie", list1);
-            ArrayList<String> list2 = new ArrayList<>();
+            ArrayList<String> list2 = new ArrayList<>(1);
             list2.add(account.getModhash());
             headers.put("X-Modhash", list2);
         }
@@ -205,9 +200,7 @@ public class RedditApi {
         Ion.with(context)
                 .load(REDDIT_URL + permalink + ".json")
                 .addQuery("sort", sortType)
-                .addHeader("User-Agent", USER_AGENT)
-                .addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
-                .addHeaders(generateUserHeaders())
+                .addHeaders(getStandardHeaders())
                 .asString()
                 .setCallback(new FutureCallback<String>() {
                     @Override
@@ -331,7 +324,7 @@ public class RedditApi {
             Ion.with(context)
                     .load(REDDIT_URL + "/api/info.json")
                     .addQuery("id", query.toString())
-                    .addHeaders(generateUserHeaders())
+                    .addHeaders(getStandardHeaders())
                     .asJsonObject()
                     .setCallback(new FutureCallback<JsonObject>() {
                         @Override
@@ -366,7 +359,7 @@ public class RedditApi {
                             FutureCallback<String> callback) {
         Ion.with(context)
                 .load(REDDIT_URL + "/api/hide")
-                .addHeaders(generateUserHeaders())
+                .addHeaders(getStandardHeaders())
                 .setBodyParameter("id", submission.getName())
                 .asString()
                 .setCallback(callback);
@@ -376,7 +369,7 @@ public class RedditApi {
                               FutureCallback<String> callback) {
         Ion.with(context)
                 .load(REDDIT_URL + "/api/unhide")
-                .addHeaders(generateUserHeaders())
+                .addHeaders(getStandardHeaders())
                 .setBodyParameter("id", submission.getName())
                 .asString()
                 .setCallback(callback);
@@ -385,7 +378,7 @@ public class RedditApi {
     public static void delete(Context context, Votable votable, FutureCallback<String> callback) {
         Ion.with(context)
                 .load(REDDIT_URL + "/api/del")
-                .addHeaders(generateUserHeaders())
+                .addHeaders(getStandardHeaders())
                 .setBodyParameter("id", votable.getName())
                 .asString()
                 .setCallback(callback);
@@ -395,7 +388,7 @@ public class RedditApi {
                                 FutureCallback<String> callback) {
         Ion.with(context)
                 .load(REDDIT_URL + "/api/marknsfw")
-                .addHeaders(generateUserHeaders())
+                .addHeaders(getStandardHeaders())
                 .setBodyParameter("id", submission.getName())
                 .asString()
                 .setCallback(callback);
@@ -405,7 +398,7 @@ public class RedditApi {
                                   FutureCallback<String> callback) {
         Ion.with(context)
                 .load(REDDIT_URL + "/api/unmarknsfw")
-                .addHeaders(generateUserHeaders())
+                .addHeaders(getStandardHeaders())
                 .setBodyParameter("id", submission.getName())
                 .asString()
                 .setCallback(callback);
@@ -415,7 +408,7 @@ public class RedditApi {
                                   FutureCallback<String> callback) {
         Ion.with(context)
                 .load(REDDIT_URL + "/api/approve")
-                .addHeaders(generateUserHeaders())
+                .addHeaders(getStandardHeaders())
                 .setBodyParameter("id", submission.getName())
                 .asString()
                 .setCallback(callback);
@@ -425,7 +418,7 @@ public class RedditApi {
                               FutureCallback<String> callback) {
         Ion.with(context)
                 .load(REDDIT_URL + "/api/remove")
-                .addHeaders(generateUserHeaders())
+                .addHeaders(getStandardHeaders())
                 .setBodyParameter("id", submission.getName())
                 .setBodyParameter("spam", String.valueOf(spam))
                 .asString()
@@ -436,7 +429,7 @@ public class RedditApi {
                                       FutureCallback<String> callback) {
         Ion.with(context)
                 .load(REDDIT_URL + "/api/set_contest_mode")
-                .addHeaders(generateUserHeaders())
+                .addHeaders(getStandardHeaders())
                 .setBodyParameter("api_type", "json")
                 .setBodyParameter("id", submission.getName())
                 .setBodyParameter("state", String.valueOf(isContest))
@@ -448,7 +441,7 @@ public class RedditApi {
                                           FutureCallback<String> callback) {
         Ion.with(context)
                 .load(REDDIT_URL + "/api/set_subreddit_sticky")
-                .addHeaders(generateUserHeaders())
+                .addHeaders(getStandardHeaders())
                 .setBodyParameter("api_type", "json")
                 .setBodyParameter("id", submission.getName())
                 .setBodyParameter("state", String.valueOf(isSticky))
@@ -465,8 +458,8 @@ public class RedditApi {
 
         AsyncHttpRequest request = new AsyncHttpPost(REDDIT_URL + "/api/comment/");
         Account account = AccountManager.getAccount();
-        request.addHeader("Cookie", "reddit_session=" + account.getCookie().replace("\"", ""));
-        request.addHeader("X-Modhash", account.getModhash().replace("\"", ""));
+        request.addHeader("Cookie", "reddit_session=\"" + account.getCookie() + "\"");
+        request.addHeader("X-Modhash", account.getModhash());
         request.setBody(body);
         AsyncHttpClient.getDefaultInstance().executeJSONObject(request, new AsyncHttpClient.JSONObjectCallback() {
             @Override
@@ -490,8 +483,8 @@ public class RedditApi {
 
         AsyncHttpRequest request = new AsyncHttpPost(REDDIT_URL + "/api/editusertext/");
         Account account = AccountManager.getAccount();
-        request.addHeader("Cookie", "reddit_session=" + account.getCookie().replace("\"", ""));
-        request.addHeader("X-Modhash", account.getModhash().replace("\"", ""));
+        request.addHeader("Cookie", "reddit_session=\"" + account.getCookie() + "\"");
+        request.addHeader("X-Modhash", account.getModhash());
         request.setBody(body);
         AsyncHttpClient.getDefaultInstance().executeJSONObject(request, new AsyncHttpClient.JSONObjectCallback() {
             @Override
@@ -510,7 +503,7 @@ public class RedditApi {
                                       FutureCallback<JsonObject> callback) {
         Ion.with(context)
                 .load(REDDIT_URL + "/user/" + username + "/.json")
-                .addHeaders(generateUserHeaders())
+                .addHeaders(getStandardHeaders())
                 .addQuery("after", after)
                 .asJsonObject()
                 .setCallback(callback);
@@ -519,7 +512,7 @@ public class RedditApi {
     public static void needsCaptcha(Context context, FutureCallback<String> callback) {
         Ion.with(context)
                 .load(REDDIT_URL + "/api/needs_captcha/.json")
-                .addHeaders(generateUserHeaders())
+                .addHeaders(getStandardHeaders())
                 .asString()
                 .setCallback(callback);
     }
@@ -541,7 +534,7 @@ public class RedditApi {
                                String subject, String body, FutureCallback<JsonObject> callback) {
         Ion.with(context)
                 .load(REDDIT_URL + "/api/compose")
-                .addHeaders(generateUserHeaders())
+                .addHeaders(getStandardHeaders())
                 .setBodyParameter("api_type", "json")
                 .setBodyParameter("iden", iden)
                 .setBodyParameter("captcha", captchaRespnse)
