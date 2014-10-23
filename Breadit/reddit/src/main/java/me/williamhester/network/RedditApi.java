@@ -5,19 +5,19 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.async.http.AsyncHttpClient;
+import com.koushikdutta.async.http.AsyncHttpGet;
 import com.koushikdutta.async.http.AsyncHttpPost;
 import com.koushikdutta.async.http.AsyncHttpRequest;
 import com.koushikdutta.async.http.AsyncHttpResponse;
 import com.koushikdutta.async.http.body.MultipartFormDataBody;
 import com.koushikdutta.ion.Ion;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,6 +34,7 @@ import me.williamhester.models.Submission;
 import me.williamhester.models.Subreddit;
 import me.williamhester.models.Thing;
 import me.williamhester.models.Votable;
+import me.williamhester.models.utils.Utilities;
 
 /**
  * Created by William on 6/14/14.
@@ -140,6 +141,52 @@ public class RedditApi {
                         callback.onCompleted(null, (Subreddit) wrapper.getData());
                     }
                 });
+    }
+
+    public static void getSubscribedSubreddits(FutureCallback<ArrayList<Subreddit>> callback) {
+        getSubscribedSubreddits(callback, "", new ArrayList<Subreddit>(), new Gson());
+    }
+
+    private static void getSubscribedSubreddits(final FutureCallback<ArrayList<Subreddit>> callback,
+                                               String after, final ArrayList<Subreddit> subreddits,
+                                               final Gson gson) {
+        AsyncHttpRequest request = new AsyncHttpGet(REDDIT_URL
+                        + "/subreddits/mine/.json?after=" + after);
+        Log.d("RedditApi", request.getUri().toString());
+        Account account = AccountManager.getAccount();
+        request.addHeader("Cookie", "reddit_session=\"" + account.getCookie() + "\"");
+        request.addHeader("X-Modhash", account.getModhash());
+        request.addHeader("User-Agent", USER_AGENT);
+        request.addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+
+        AsyncHttpClient.getDefaultInstance().executeString(request, new AsyncHttpClient.StringCallback() {
+            @Override
+            public void onCompleted(Exception e, AsyncHttpResponse source, String result) {
+                if (e != null) {
+                    callback.onCompleted(e, null);
+                    return;
+                }
+                try {
+                    JsonObject object = new JsonParser().parse(result).getAsJsonObject();
+                    ResponseRedditWrapper wrapper = new ResponseRedditWrapper(object, gson);
+                    if (wrapper.getData() instanceof Listing) {
+                        Listing listing = (Listing) wrapper.getData();
+                        for (ResponseRedditWrapper wrapper1 : listing.getChildren()) {
+                            if (wrapper1.getData() instanceof Subreddit) {
+                                subreddits.add((Subreddit) wrapper1.getData());
+                            }
+                        }
+                        if (listing.getAfter() != null) {
+                            getSubscribedSubreddits(callback, listing.getAfter(), subreddits, gson);
+                        } else {
+                            callback.onCompleted(null, subreddits);
+                        }
+                    }
+                } catch (Exception e2) {
+                    callback.onCompleted(e2, null);
+                }
+            }
+        });
     }
 
     public static void subscribeSubreddit(Context context, boolean sub, Subreddit subreddit,

@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -32,7 +31,6 @@ import android.widget.TextView;
 
 import com.koushikdutta.async.future.FutureCallback;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -284,7 +282,50 @@ public class NavigationDrawerFragment extends AccountFragment {
                     subscriptions.put(s.getDisplayName().toLowerCase(), s);
                 }
                 Collections.sort(mSubredditList);
-                new GetUserSubreddits().execute();
+                RedditApi.getSubscribedSubreddits(new FutureCallback<ArrayList<Subreddit>>() {
+                    @Override
+                    public void onCompleted(Exception e, ArrayList<Subreddit> result) {
+                        if (e != null) {
+                            e.printStackTrace();
+                            return;
+                        }
+                        AccountDataSource dataSource = new AccountDataSource(mContext);
+                        dataSource.open();
+                        ArrayList<Subreddit> allSubs = dataSource.getAllSubreddits();
+                        ArrayList<Subreddit> savedSubscriptions = dataSource.getCurrentAccountSubreddits();
+
+                        for (Subreddit s : result) {
+                            int index = allSubs.indexOf(s); // Get the subreddit WITH the table id
+                            if (index < 0) { // if it doesn't exist, create one with a table id
+                                dataSource.addSubreddit(s);
+                                dataSource.addSubscriptionToCurrentAccount(s);
+                            } else if (!savedSubscriptions.contains(s)) {
+                                dataSource.addSubscriptionToCurrentAccount(allSubs.get(index));
+                            }
+                        }
+
+                        dataSource.close();
+
+                        final boolean isNew = result.equals(savedSubscriptions);
+
+                        if (isNew) {
+                            mSubredditList.clear();
+                            mSubredditList.addAll(result);
+                        }
+
+                        if (getView() != null) {
+                            getView().post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (isNew) {
+                                        Collections.sort(mSubredditList);
+                                        mSubredditArrayAdapter.notifyDataSetChanged();
+                                    }
+                                }
+                            });
+                        }
+                    }
+                });
                 if (listView.getAdapter() != mSubredditArrayAdapter) {
                     listView.setAdapter(mSubredditArrayAdapter);
                 }
@@ -392,51 +433,6 @@ public class NavigationDrawerFragment extends AccountFragment {
     public static interface NavigationDrawerCallbacks {
         public void onSubredditSelected(String subreddit);
         public void onAccountChanged();
-    }
-
-    private class GetUserSubreddits extends AsyncTask<Void, Void, Boolean> {
-
-        @Override
-        protected Boolean doInBackground(Void... voids) {
-            try {
-                AccountDataSource dataSource = new AccountDataSource(mContext);
-                dataSource.open();
-                ArrayList<Subreddit> allSubs = dataSource.getAllSubreddits();
-                ArrayList<Subreddit> savedSubscriptions = dataSource.getCurrentAccountSubreddits();
-                ArrayList<Subreddit> subreddits = mAccount.getSubscribedSubreddits();
-
-                for (Subreddit s : subreddits) {
-                    int index = allSubs.indexOf(s); // Get the subreddit WITH the table id
-                    if (index < 0) { // if it doesn't exist, create one with a table id
-                        dataSource.addSubreddit(s);
-                        dataSource.addSubscriptionToCurrentAccount(s);
-                    } else if (!savedSubscriptions.contains(s)) {
-                        dataSource.addSubscriptionToCurrentAccount(allSubs.get(index));
-                    }
-                }
-
-                dataSource.close();
-
-                boolean isNew = subreddits.equals(savedSubscriptions);
-
-                if (isNew) {
-                    mSubredditList.clear();
-                    mSubredditList.addAll(subreddits);
-                }
-                return isNew;
-            } catch (IOException | NullPointerException e) {
-                e.printStackTrace();
-            }
-            return false;
-        }
-
-        @Override
-        protected void onPostExecute(Boolean isNew) {
-            if (isNew) {
-                Collections.sort(mSubredditList);
-                mSubredditArrayAdapter.notifyDataSetChanged();
-            }
-        }
     }
 
     private class SubredditAdapter extends ArrayAdapter<Subreddit> {

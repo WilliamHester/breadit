@@ -72,67 +72,6 @@ public class Account implements Parcelable {
         return o instanceof Account && ((Account) o).getUsername().equals(mUsername);
     }
 
-    /**
-     * This loads in all of the subreddits for a user, but due to the fact that Reddit limits the number that can be
-     * loaded at one time to 25, it must be iterative.
-     *
-     * @return returns a List of type Subreddit
-     *
-     * @throws java.io.IOException if connection fails
-     */
-
-    public ArrayList<Subreddit> getSubscribedSubreddits() throws IOException {
-
-        ArrayList<Subreddit> subreddits = new ArrayList<Subreddit>();
-
-        JsonObject object = new JsonParser().parse(Utilities.get(null,
-                "http://www.reddit.com/subreddits/mine/subscriber.json",
-                this)).getAsJsonObject();
-        JsonObject data = object.get("data").getAsJsonObject();
-        JsonArray array = data.get("children").getAsJsonArray();
-
-        Gson gson = new Gson();
-        for (int i = 0; i < array.size(); i++) {
-            JsonObject jsonData = array.get(i).getAsJsonObject();
-            subreddits.add((Subreddit) new ResponseRedditWrapper(jsonData, gson).getData());
-        }
-
-        String after = null;
-        JsonElement je = data.get("after");
-        if (!je.isJsonNull())
-            after = je.getAsString();
-
-        while (after != null) {
-            try {
-                String json = Utilities.get(null,
-                        "http://www.reddit.com/subreddits/mine/subscriber.json?after=" + after,
-                        this);
-                object = new JsonParser().parse(json).getAsJsonObject();
-            } catch (IllegalStateException e) {
-                break;
-            } catch (JsonSyntaxException e) {
-                break;
-            }
-            data = object.get("data").getAsJsonObject();
-            array = data.get("children").getAsJsonArray();
-
-            for (int i = 0; i < array.size(); i++) {
-                JsonObject jsonData = array.get(i).getAsJsonObject();
-                subreddits.add((Subreddit) new ResponseRedditWrapper(jsonData, gson).getData());
-            }
-
-            je = data.get("after");
-            if (!je.isJsonNull())
-                after = je.getAsString();
-            else
-                after = null;
-        }
-        if (subreddits.size() > 0)
-            return subreddits;
-        else
-            return null;
-    }
-
     @Override
     public int describeContents() {
         return 0;
