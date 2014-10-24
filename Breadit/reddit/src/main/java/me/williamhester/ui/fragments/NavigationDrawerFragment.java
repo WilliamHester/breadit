@@ -243,12 +243,6 @@ public class NavigationDrawerFragment extends AccountFragment {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        loadSubreddits();
-    }
-
-    @Override
     public void onAccountChanged() {
         super.onAccountChanged();
         selectCurrentAccount(getView());
