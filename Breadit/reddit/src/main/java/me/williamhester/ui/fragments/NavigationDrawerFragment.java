@@ -100,7 +100,7 @@ public class NavigationDrawerFragment extends AccountFragment {
         ListView drawerListView = (ListView) v.findViewById(R.id.list);
         drawerListView.addHeaderView(createHeaderView(inflater));
         drawerListView.setAdapter(mSubredditArrayAdapter);
-        loadSubreddits();
+        loadSubreddits(v);
 
         drawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -246,7 +246,7 @@ public class NavigationDrawerFragment extends AccountFragment {
     public void onAccountChanged() {
         super.onAccountChanged();
         selectCurrentAccount(getView());
-        loadSubreddits();
+        loadSubreddits(getView());
         mCheckbox.setVisibility(mAccount == null || mSubreddit == null ? View.GONE : View.VISIBLE);
     }
 
@@ -261,10 +261,10 @@ public class NavigationDrawerFragment extends AccountFragment {
         }
     }
 
-    private void loadSubreddits() {
+    private void loadSubreddits(View view) {
         mSubredditList.clear();
-        if (getView() != null) {
-            ListView listView = (ListView) getView().findViewById(R.id.list);
+        if (view != null) {
+            ListView listView = (ListView) view.findViewById(R.id.list);
             if (mAccount != null) {
                 mSubredditList.clear();
                 AccountDataSource dataSource = new AccountDataSource(mContext);
@@ -442,7 +442,7 @@ public class NavigationDrawerFragment extends AccountFragment {
                 convertView = inflater.inflate(R.layout.list_item_subreddit, parent, false);
             }
             TextView text = (TextView) convertView.findViewById(R.id.subreddit_list_item_title);
-            text.setText(getItem(position) == null ? getResources().getString(R.string.front_page) : getItem(position).getDisplayName());
+            text.setText(getItem(position) == null ? getResources().getString(R.string.front_page).toLowerCase() : getItem(position).getDisplayName().toLowerCase());
             convertView.findViewById(R.id.mod_indicator).setVisibility(getItem(position) != null
                     && getItem(position).userIsModerator() ? View.VISIBLE : View.GONE);
 
@@ -473,9 +473,9 @@ public class NavigationDrawerFragment extends AccountFragment {
         @Override
         public String getItem(int position) {
             if (position == 0) {
-                return getResources().getString(R.string.front_page);
+                return getResources().getString(R.string.front_page).toLowerCase();
             } else {
-                return super.getItem(position - 1);
+                return super.getItem(position - 1).toLowerCase();
             }
         }
 

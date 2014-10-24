@@ -10,7 +10,6 @@
         android:textColor="@color/gainsboro"
         android:padding="12dp"
         android:textSize="14sp"
-        android:textAllCaps="true"
         android:fontFamily="sans-serif-thin"/>
 
     <View android:id="@+id/mod_indicator"
