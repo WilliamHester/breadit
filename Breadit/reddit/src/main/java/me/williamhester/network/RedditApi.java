@@ -5,10 +5,8 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.async.http.AsyncHttpClient;
@@ -34,7 +32,6 @@ import me.williamhester.models.Submission;
 import me.williamhester.models.Subreddit;
 import me.williamhester.models.Thing;
 import me.williamhester.models.Votable;
-import me.williamhester.models.utils.Utilities;
 
 /**
  * Created by William on 6/14/14.
@@ -152,7 +149,6 @@ public class RedditApi {
                                                final Gson gson) {
         AsyncHttpRequest request = new AsyncHttpGet(REDDIT_URL
                         + "/subreddits/mine/.json?after=" + after);
-        Log.d("RedditApi", request.getUri().toString());
         Account account = AccountManager.getAccount();
         request.addHeader("Cookie", "reddit_session=\"" + account.getCookie() + "\"");
         request.addHeader("X-Modhash", account.getModhash());

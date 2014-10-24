@@ -10,7 +10,6 @@ import android.view.MenuItem;
 import android.view.View;
 
 import me.williamhester.reddit.R;
-import me.williamhester.ui.fragments.MessageDialogFragment;
 import me.williamhester.ui.fragments.MessagesFragment;
 import me.williamhester.ui.fragments.UserFragment;
 import me.williamhester.ui.views.TabView;
@@ -61,8 +60,8 @@ public class AccountActivity extends ActionBarActivity implements TabView.TabSwi
                 finish();
                 return true;
             case R.id.action_compose_message:
-                MessageDialogFragment messageDialogFragment = MessageDialogFragment.newInstance(null);
-                messageDialogFragment.show(getSupportFragmentManager(), "message_dialog");
+//                MessageDialogFragment messageDialogFragment = MessageDialogFragment.newInstance(null);
+//                messageDialogFragment.show(getSupportFragmentManager(), "message_dialog");
                 return true;
         }
         return super.onOptionsItemSelected(item);

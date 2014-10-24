@@ -103,9 +103,9 @@ public class MessagesFragment extends AccountFragment {
                                 switch (position) {
                                     case 0:
                                         // Reply
-                                        MessageDialogFragment mf = MessageDialogFragment
-                                                .newInstance(m.getName());
-                                        mf.show(getFragmentManager(), "reply_fragment");
+//                                        MessageDialogFragment mf = MessageDialogFragment
+//                                                .newInstance(m.getName());
+//                                        mf.show(getFragmentManager(), "reply_fragment");
                                         break;
                                     case 1:
                                         // Mark unread

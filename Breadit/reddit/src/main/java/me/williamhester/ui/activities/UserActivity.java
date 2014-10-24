@@ -6,10 +6,8 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import me.williamhester.models.Account;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.fragments.ComposeMessageFragment;
-import me.williamhester.ui.fragments.MessageDialogFragment;
 import me.williamhester.ui.fragments.UserFragment;
 
 /**
