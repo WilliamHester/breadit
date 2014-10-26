@@ -30,7 +30,8 @@ public class SingleImageAdapter extends FragmentPagerAdapter {
 
     @Override
     public Fragment getItem(int position) {
-        if (mUrl.contains(".gif") || mParser.getType() == Url.GFYCAT_LINK) {
+        if (mUrl.contains(".gif") || mParser.getType() == Url.DIRECT_GFY
+                || mParser.getType() == Url.GFYCAT_LINK) {
             return GifFragment.newInstance(mUrl);
         }
         return ImageFragment.newInstance(mUrl);

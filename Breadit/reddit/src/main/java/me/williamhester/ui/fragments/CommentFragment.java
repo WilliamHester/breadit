@@ -481,8 +481,15 @@ public class CommentFragment extends AccountFragment {
 
         private CommentViewHolder mFocusedViewHolder;
 
+        /*
+         Bug notes - when a certain type of gif is opened, the comment adapter fails
+         This causes the comment adapter to not be updated properly and means that the underlying
+         vies do not get updated properly and can cause an ArrayIndexOutOfBoundsException if this is
+         not fixed, although somewhat rare.
+         */
+
         @Override
-        public void onBodyClick(Comment comment) {
+        public void onBodyClick(final Comment comment) {
             comment.setHidden(!comment.isHidden());
             int position = mCommentAdapter.getPosition(comment);
             if (comment.isHidden()) {
@@ -630,21 +637,6 @@ public class CommentFragment extends AccountFragment {
             mCommentsList.addAll(result);
             mCommentsListView.setAdapter(mCommentAdapter);
             mCommentAdapter.notifyDataSetChanged();
-        }
-    };
-
-    private FutureCallback<Votable> mEditVotableCallback = new FutureCallback<Votable>() {
-        @Override
-        public void onCompleted(Exception e, Votable result) {
-            if (e != null) {
-                e.printStackTrace();
-                return;
-            }
-            if (result instanceof Submission) {
-                // update Submission view
-            } else if (result instanceof Comment) {
-                mCommentAdapter.notifyDataSetChanged();
-            }
         }
     };
 

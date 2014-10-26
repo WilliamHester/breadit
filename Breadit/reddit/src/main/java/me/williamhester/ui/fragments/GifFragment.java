@@ -1,7 +1,8 @@
 package me.williamhester.ui.fragments;
 
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -61,10 +62,15 @@ public class GifFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_gfycat, root, false);
+        return inflater.inflate(R.layout.fragment_gfycat, root, false);
+    }
 
-        final VideoView gif = (VideoView) v.findViewById(R.id.gif_view);
-        final ProgressBar progressBar = (ProgressBar) v.findViewById(R.id.progress_bar);
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        final VideoView gif = (VideoView) view.findViewById(R.id.gif_view);
+        final ProgressBar progressBar = (ProgressBar) view.findViewById(R.id.progress_bar);
 
         if (mImage != null) {
             GfycatApi.downloadImgurGif(mImage, progressBar, gif);
@@ -99,8 +105,14 @@ public class GifFragment extends Fragment {
                 }
             });
         }
+    }
 
-        return v;
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        VideoView gif = (VideoView) getView().findViewById(R.id.gif_view);
+        gif.stopPlayback();
     }
 
     @Override
