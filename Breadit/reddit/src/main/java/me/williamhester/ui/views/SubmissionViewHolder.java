@@ -23,7 +23,12 @@ import me.williamhester.tools.HtmlParser;
 import me.williamhester.tools.Url;
 
 /**
- * Created by william on 10/19/14.
+ * This class is intended to be used with the RecyclerView class; however, it can be used nearly
+ * just as easily with ListView to provide the View Holder pattern for optimization.
+ *
+ * TODO: break this up into a few different ViewHolders and use different item types.
+ *
+ * Created by William on 10/19/14.
  */
 public class SubmissionViewHolder extends VotableViewHolder {
 
@@ -68,6 +73,12 @@ public class SubmissionViewHolder extends VotableViewHolder {
         final View optionSave = itemView.findViewById(R.id.option_save);
         final View optionOverflow = itemView.findViewById(R.id.option_overflow);
 
+        View.OnClickListener mOptionsOnClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCallback.onOptionsRowItemSelected(v, mSubmission);
+            }
+        };
         optionShare.setOnClickListener(mOptionsOnClickListener);
         optionReply.setOnClickListener(mOptionsOnClickListener);
         optionEdit.setOnClickListener(mOptionsOnClickListener);
@@ -104,6 +115,23 @@ public class SubmissionViewHolder extends VotableViewHolder {
             }
         });
 
+        View.OnClickListener mExpandListener = new View.OnClickListener() {
+            @Override
+            public void onClick(final View view) {
+                Animation anim;
+                if (mSubmission.isSelftextOpen()) {
+                    anim = AnimationUtils.loadAnimation(view.getContext(), R.anim.rotate_left);
+                    collapse(mSelfText);
+                } else {
+                    anim = AnimationUtils.loadAnimation(view.getContext(), R.anim.rotate_right);
+                    expand(mSelfText);
+                }
+                mSubmission.setSelftextOpen(!mSubmission.isSelftextOpen());
+                anim.setFillBefore(true);
+                anim.setFillAfter(true);
+                view.startAnimation(anim);
+            }
+        };
         mExpandButton.setOnClickListener(mExpandListener);
     }
 
@@ -250,13 +278,6 @@ public class SubmissionViewHolder extends VotableViewHolder {
         }
     };
 
-    private View.OnClickListener mOptionsOnClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            mCallback.onOptionsRowItemSelected(v, mSubmission);
-        }
-    };
-
     public void collapseOptions() {
         collapse(mOptionsRow);
     }
@@ -268,28 +289,8 @@ public class SubmissionViewHolder extends VotableViewHolder {
                 .equalsIgnoreCase(mSubmission.getAuthor()) ? View.VISIBLE : View.GONE);
     }
 
-    private View.OnClickListener mExpandListener = new View.OnClickListener() {
-        @Override
-        public void onClick(final View view) {
-            Animation anim;
-            if (mSubmission.isSelftextOpen()) {
-                anim = AnimationUtils.loadAnimation(view.getContext(), R.anim.rotate_left);
-                collapse(mSelfText);
-            } else {
-                anim = AnimationUtils.loadAnimation(view.getContext(), R.anim.rotate_right);
-                expand(mSelfText);
-            }
-            mSubmission.setSelftextOpen(!mSubmission.isSelftextOpen());
-            anim.setFillBefore(true);
-            anim.setFillAfter(true);
-            view.startAnimation(anim);
-        }
-    };
-
     /**
      * Attempts to set the image preview
-     *
-     * @return returns whether or not the data has been set.
      */
     private void setImagePreview() {
         final ImgurImage image;

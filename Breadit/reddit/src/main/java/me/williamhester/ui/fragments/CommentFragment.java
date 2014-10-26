@@ -1,5 +1,6 @@
 package me.williamhester.ui.fragments;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -49,7 +50,6 @@ public class CommentFragment extends AccountFragment {
     private final ArrayList<AbsComment> mCommentsList = new ArrayList<>();
     private CommentArrayAdapter mCommentAdapter;
     private Context mContext;
-    private RecyclerView mCommentsListView;
     private String mPermalink;
     private Submission mSubmission;
     private OnSubmissionLoaded mCallback;
@@ -103,10 +103,10 @@ public class CommentFragment extends AccountFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_comment, root, false);
-        mCommentsListView = (RecyclerView) v.findViewById(R.id.comments);
+        RecyclerView commentsView = (RecyclerView) v.findViewById(R.id.comments);
         mCommentAdapter = new CommentArrayAdapter();
-        mCommentsListView.setAdapter(mCommentAdapter);
-        mCommentsListView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        commentsView.setAdapter(mCommentAdapter);
+        commentsView.setLayoutManager(new LinearLayoutManager(getActivity()));
         return v;
     }
 
@@ -165,6 +165,7 @@ public class CommentFragment extends AccountFragment {
         return super.onOptionsItemSelected(item);
     }
 
+    @SuppressWarnings("SuspiciousMethodCalls")
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REPLY_REQUEST) {
@@ -308,7 +309,7 @@ public class CommentFragment extends AccountFragment {
         public void onOptionsRowItemSelected(View view, AbsComment comment) {
             switch (view.getId()) {
                 case R.id.option_reply:
-                    Fragment reply = ReplyFragment.newInstance((Comment) comment);
+                    Fragment reply = ReplyFragment.newInstance(comment);
                     reply.setTargetFragment(CommentFragment.this, REPLY_REQUEST);
                     getFragmentManager().beginTransaction()
                             .replace(R.id.container, reply, "ReplyFragment")
@@ -356,6 +357,7 @@ public class CommentFragment extends AccountFragment {
 
         private static final int HEADER_VIEW_COUNT = 1;
 
+        @SuppressLint("InflateParams")
         @Override
         public VotableViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             LayoutInflater inflater = LayoutInflater.from(parent.getContext());
@@ -531,7 +533,6 @@ public class CommentFragment extends AccountFragment {
                         public void onCompleted(Exception e, String result) {
                             if (e != null) {
                                 e.printStackTrace();
-                                return;
                             }
                         }
                     };
@@ -542,7 +543,6 @@ public class CommentFragment extends AccountFragment {
                                 public void onCompleted(Exception e, String result) {
                                     if (e != null) {
                                         e.printStackTrace();
-                                        return;
                                     }
                                 }
                             };
