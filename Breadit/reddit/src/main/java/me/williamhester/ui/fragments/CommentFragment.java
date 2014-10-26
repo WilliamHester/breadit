@@ -1,6 +1,5 @@
 package me.williamhester.ui.fragments;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -116,18 +115,19 @@ public class CommentFragment extends AccountFragment {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.submission_fragment, menu);
 
-        Url url = new Url(mSubmission.getUrl());
-
-        if (mSubmission == null || mSubmission.isSelf()) {
-            menu.removeItem(R.id.action_view_link);
-        } else if (url.getType() == Url.IMGUR_ALBUM
-                || url.getType() == Url.IMGUR_IMAGE
-                || url.getType() == Url.NORMAL_IMAGE
-                || url.getType() == Url.GIF
-                || url.getType() == Url.GFYCAT_LINK) {
-            menu.findItem(R.id.action_view_link).setIcon(android.R.drawable.ic_menu_gallery);
-        } else if (url.getType() == Url.YOUTUBE) {
-            menu.findItem(R.id.action_view_link).setIcon(R.drawable.ic_youtube);
+        if (mSubmission != null) {
+            Url url = new Url(mSubmission.getUrl());
+            if (mSubmission.isSelf()) {
+                menu.removeItem(R.id.action_view_link);
+            } else if (url.getType() == Url.IMGUR_ALBUM
+                    || url.getType() == Url.IMGUR_IMAGE
+                    || url.getType() == Url.NORMAL_IMAGE
+                    || url.getType() == Url.GIF
+                    || url.getType() == Url.GFYCAT_LINK) {
+                menu.findItem(R.id.action_view_link).setIcon(android.R.drawable.ic_menu_gallery);
+            } else if (url.getType() == Url.YOUTUBE) {
+                menu.findItem(R.id.action_view_link).setIcon(R.drawable.ic_youtube);
+            }
         }
         menu.removeItem(R.id.action_open_link_in_browser);
     }
@@ -324,7 +324,7 @@ public class CommentFragment extends AccountFragment {
                         while (mCommentsList.get(commentIndex).getLevel() >= comment.getLevel()) {
                             commentIndex--;
                         }
-                        parent = (Thing) mCommentsList.get(commentIndex);
+                        parent = mCommentsList.get(commentIndex);
                     }
                     ReplyFragment fragment = ReplyFragment.newInstance(parent, (Comment) comment);
                     fragment.setTargetFragment(CommentFragment.this, EDIT_REQUEST);
@@ -377,6 +377,7 @@ public class CommentFragment extends AccountFragment {
                 case SUBMISSION:
                     votableViewHolder.setContent(mSubmission);
                     ((SubmissionViewHolder) votableViewHolder).expandOptions();
+                    ((SubmissionViewHolder) votableViewHolder).disableClicks();
                     break;
                 case COMMENT:
                 case MORE_COMMENTS:
@@ -403,7 +404,7 @@ public class CommentFragment extends AccountFragment {
 
         @Override
         public int getItemCount() {
-            return mCommentsList.size() + HEADER_VIEW_COUNT;
+            return mCommentsList.size() + (mSubmission != null ? 1 : 0);
         }
     }
 
@@ -627,14 +628,16 @@ public class CommentFragment extends AccountFragment {
                 return;
             }
             Object imgurData = null;
-            if (mSubmission != null)
+            if (mSubmission != null) {
+                // Don't want to fetch more Imgur data.
                 imgurData = mSubmission.getImgurData();
+            }
             mSubmission = result;
+            getActivity().invalidateOptionsMenu();
             mSubmission.setImgurData(imgurData);
+            mCommentAdapter.notifyDataSetChanged();
             if (mCallback != null) {
                 mCallback.onSubmissionLoaded(mSubmission);
-            } else { // need to replace the submission object inside the SwipeView header
-                mCommentAdapter.notifyDataSetChanged();
             }
         }
     };
@@ -647,7 +650,6 @@ public class CommentFragment extends AccountFragment {
             }
             mCommentsList.clear();
             mCommentsList.addAll(result);
-            mCommentsListView.setAdapter(mCommentAdapter);
             mCommentAdapter.notifyDataSetChanged();
         }
     };

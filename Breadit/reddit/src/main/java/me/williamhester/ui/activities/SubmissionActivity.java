@@ -1,14 +1,10 @@
 package me.williamhester.ui.activities;
 
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.view.Menu;
-import android.view.MenuItem;
 
 import me.williamhester.models.ImgurAlbum;
 import me.williamhester.models.ImgurImage;
@@ -26,7 +22,6 @@ import me.williamhester.ui.fragments.YouTubeFragment;
 public class SubmissionActivity extends ActionBarActivity implements ImageFragment.ImageTapCallbacks {
 
     public static final String COMMENT_TAB = "comments";
-    public static final String CONTENT_TAB = "content";
     public static final String SUBMISSION = "submission";
     public static final String PERMALINK = "permalink";
     public static final String TAB = "tab";
@@ -34,7 +29,6 @@ public class SubmissionActivity extends ActionBarActivity implements ImageFragme
     private Submission mSubmission;
     private Submission.Media mMedia;
     private String mPermalink;
-    private String mCurrentTag;
     private Url mParser;
 
     @Override
@@ -43,7 +37,6 @@ public class SubmissionActivity extends ActionBarActivity implements ImageFragme
         setContentView(R.layout.activity_content);
 
         if (savedInstanceState != null) {
-            mCurrentTag = savedInstanceState.getString("currentTag");
             mParser = savedInstanceState.getParcelable("urlParser");
         }
         Bundle extras = getIntent().getExtras();
@@ -52,11 +45,10 @@ public class SubmissionActivity extends ActionBarActivity implements ImageFragme
                 mPermalink = extras.getString(PERMALINK);
             } else {
                 mSubmission = extras.getParcelable(SUBMISSION);
-                setTitle("/r/" + mSubmission.getSubredditName());
-                mMedia = (Submission.Media) extras.getSerializable("media");
-                if (mCurrentTag == null) {
-                    mCurrentTag = getIntent().getExtras().getString(TAB);
+                if (mSubmission != null) {
+                    setTitle("/r/" + mSubmission.getSubredditName());
                 }
+                mMedia = (Submission.Media) extras.getSerializable("media");
             }
         }
 
@@ -72,7 +64,6 @@ public class SubmissionActivity extends ActionBarActivity implements ImageFragme
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString("currentTag", mCurrentTag);
         outState.putParcelable("urlParser", mParser);
     }
 
@@ -85,8 +76,8 @@ public class SubmissionActivity extends ActionBarActivity implements ImageFragme
                 comments.setOnSubmissionLoadedListener(new CommentFragment.OnSubmissionLoaded() {
                     @Override
                     public void onSubmissionLoaded(Submission submission) {
-                        setTitle("/r/" + mSubmission.getSubredditName());
                         mSubmission = submission;
+                        setTitle("/r/" + mSubmission.getSubredditName());
                         mParser = new Url(mSubmission.getUrl());
                         invalidateOptionsMenu();
                     }

@@ -190,6 +190,13 @@ public class SubmissionViewHolder extends VotableViewHolder {
         }
     }
 
+    public void disableClicks() {
+        View subData = itemView.findViewById(R.id.submission_data);
+        subData.setOnClickListener(null);
+        subData.setOnLongClickListener(null);
+        subData.setClickable(false);
+    }
+
     private void setUpNsfw() {
         if (!mSubmission.isNsfw()) {
             mNsfwWarning.setVisibility(View.GONE);
