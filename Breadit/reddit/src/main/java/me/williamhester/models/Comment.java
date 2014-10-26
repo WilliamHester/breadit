@@ -288,7 +288,6 @@ public class Comment extends AbsComment implements Votable, Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
         dest.writeSerializable(this.mReplies);
         dest.writeString(this.mApprovedBy);
         dest.writeString(this.mAuthor);

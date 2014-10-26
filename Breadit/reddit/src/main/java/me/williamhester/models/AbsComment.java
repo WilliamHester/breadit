@@ -9,7 +9,7 @@ import java.util.Stack;
 /**
  * Created by william on 9/26/14.
  */
-public class AbsComment implements Parcelable {
+public abstract class AbsComment implements Thing {
 
     protected static final int COMMENT = 1;
     protected static final int MORE_COMMENTS = 2;
@@ -93,14 +93,4 @@ public class AbsComment implements Parcelable {
     protected AbsComment(Parcel in) {
         this.mLevel = in.readInt();
     }
-
-    public static final Creator<AbsComment> CREATOR = new Creator<AbsComment>() {
-        public AbsComment createFromParcel(Parcel source) {
-            return new AbsComment(source);
-        }
-
-        public AbsComment[] newArray(int size) {
-            return new AbsComment[size];
-        }
-    };
 }
