@@ -17,7 +17,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="@dimen/tab_host_default_height"
     android:orientation="horizontal"
-    style="@style/TabBreadit"
+    android:layout_width="wrap_content"
     android:gravity="center">
 
     <ImageView
@@ -32,7 +32,6 @@
         android:id="@android:id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        style="@style/TabTextBreadit" />
+        android:layout_gravity="center_vertical" />
 
 </LinearLayout>

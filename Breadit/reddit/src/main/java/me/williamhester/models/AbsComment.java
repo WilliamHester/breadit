@@ -7,7 +7,10 @@ import java.util.Iterator;
 import java.util.Stack;
 
 /**
- * Created by william on 9/26/14.
+ * This class provides an abstraction of a Reddit comment, allowing for a MoreComments class and a
+ * standard Comment class.
+ *
+ * Created by William on 9/26/14.
  */
 public abstract class AbsComment implements Thing {
 
@@ -28,9 +31,7 @@ public abstract class AbsComment implements Thing {
         mLevel = level;
     }
 
-    public String getParentName() {
-        return null;
-    }
+    public abstract String getParentName();
 
     public static class CommentIterator implements Iterator<AbsComment> {
 

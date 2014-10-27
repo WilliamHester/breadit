@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -60,26 +61,20 @@ public class SettingsFragment extends PreferenceFragment {
     @Override
     public void onResume() {
         super.onResume();
-        SharedPreferences prefs = getActivity().getSharedPreferences("preferences",
-                Context.MODE_PRIVATE);
-        if (prefs.getLong("accountId", -1) != -1) {
-            mClearHistory.setEnabled(true);
-        } else {
-            mClearHistory.setEnabled(false);
-        }
+        mClearHistory.setEnabled(AccountManager.isLoggedIn());
     }
 
     @Override
-    public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen, Preference preference) {
-
+    public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen,
+                                         @NonNull Preference preference) {
         if (preference == mClearHistory) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(),android.R.style.Theme_Holo_Dialog);
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             builder.setMessage(R.string.are_you_sure);
             builder.setTitle(R.string.clear_history);
             builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
-                    Log.i("SettingsFragment", mAccount.getUsername());
+                    // TODO: Actually clear the history
                 }
             });
             builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -88,16 +83,11 @@ public class SettingsFragment extends PreferenceFragment {
 
                 }
             });
-            Dialog d = builder.create();
-            d.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-            d.show();
-        }
-        else if(preference == mLogIn) {
+            builder.show();
+        } else if (preference == mLogIn) {
             LogInDialogFragment fragment = new LogInDialogFragment();
             fragment.show(getFragmentManager(), "login");
-        }
-        else if(preference == mLogOut) {
-            Log.i("SettingsFragment", "logout");
+        } else if (preference == mLogOut) {
             final List<Account> accounts;
             AccountDataSource dataSource = new AccountDataSource(getActivity());
             dataSource.open();
@@ -151,8 +141,7 @@ public class SettingsFragment extends PreferenceFragment {
             Dialog d = builder.create();
             d.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
             d.show();
-        }
-        else if(preference == mSwitchUsers) {
+        } else if (preference == mSwitchUsers) {
             final List<Account> accounts;
             AccountDataSource dataSource = new AccountDataSource(getActivity());
             dataSource.open();
