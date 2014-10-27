@@ -2,6 +2,20 @@
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory
+        android:title="@string/sorting_settings"
+        android:key="pref_sort_settings">
+
+        <ListPreference
+            android:title="@string/default_comment_sort_title"
+            android:summary="@string/default_comment_sort"
+            android:defaultValue="@string/best"
+            android:key="pref_default_comment_sort"
+            android:entries="@array/comment_sort_types"
+            android:entryValues="@array/comment_sort_values"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:title="@string/history_settings"
         android:key="pref_submission_settings">
 

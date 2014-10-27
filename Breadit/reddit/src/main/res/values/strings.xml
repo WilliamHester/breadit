@@ -97,6 +97,9 @@
     <string name="confirm">Confirm</string>
     <string name="select_an_account">Select an account</string>
     <string name="select_to_remove">Select an account to remove</string>
+    <string name="sorting_settings">Sorting</string>
+    <string name="default_comment_sort_title">Default comment sort</string>
+    <string name="default_comment_sort">Default sort type when viewing comments</string>
 
     <!-- Drawer -->
     <string name="search_sub_hint">Go to a Subreddit</string>

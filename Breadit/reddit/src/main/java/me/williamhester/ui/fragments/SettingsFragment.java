@@ -17,9 +17,11 @@ import android.view.ViewGroup;
 
 import java.util.List;
 
+import me.williamhester.SettingsManager;
 import me.williamhester.databases.AccountDataSource;
 import me.williamhester.models.Account;
 import me.williamhester.models.AccountManager;
+import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 
 public class SettingsFragment extends PreferenceFragment {
@@ -28,8 +30,6 @@ public class SettingsFragment extends PreferenceFragment {
     private Preference mLogIn;
     private Preference mLogOut;
     private Preference mSwitchUsers;
-    private Account mAccount;
-
 
     public static SettingsFragment newInstance() {
         SettingsFragment fragment = new SettingsFragment();
@@ -49,13 +49,22 @@ public class SettingsFragment extends PreferenceFragment {
         mLogIn = findPreference("pref_login");
         mLogOut = findPreference("pref_logout");
         mSwitchUsers = findPreference("pref_switch_users");
-        mAccount = AccountManager.getAccount();
+        SharedPreferences prefs = getActivity().getSharedPreferences("preferences", Context.MODE_PRIVATE);
+        prefs.registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+                if (key.equals("pref_default_comment_sort")) {
+                    SettingsManager.setDefaultCommentSort(prefs
+                            .getString("pref_default_comment_sort", RedditApi.COMMENT_SORT_BEST));
+                }
+            }
+        });
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_settings, null, false);
+        return inflater.inflate(R.layout.fragment_settings, container, false);
     }
 
     @Override

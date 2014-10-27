@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import me.williamhester.SettingsManager;
 import me.williamhester.models.AbsComment;
 import me.williamhester.models.Account;
 import me.williamhester.models.AccountManager;
@@ -84,7 +85,7 @@ public class CommentFragment extends AccountFragment {
             mPermalink = savedInstanceState.getString("permalink");
             mSortType = savedInstanceState.getString("sortType");
         } else if (args != null) {
-            mSortType = RedditApi.COMMENT_SORT_TOP; // TODO: Change this to the settings singleton
+            mSortType = SettingsManager.getDefaultCommentSort();
             mSubmission = args.getParcelable("submission");
             if (mSubmission != null) {
                 mPermalink = mSubmission.getPermalink();

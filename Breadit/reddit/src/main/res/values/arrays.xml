@@ -25,6 +25,24 @@
         <item>WorldNews</item>
     </string-array>
 
+    <string-array name="comment_sort_types">
+        <item>Best</item>
+        <item>Top</item>
+        <item>New</item>
+        <item>Hot</item>
+        <item>Controversial</item>
+        <item>Old</item>
+    </string-array>
+
+    <string-array name="comment_sort_values">
+        <item>confidence</item>
+        <item>top</item>
+        <item>new</item>
+        <item>hot</item>
+        <item>controversial</item>
+        <item>old</item>
+    </string-array>
+
     <string-array name="sort_types">
         <item>Top</item>
         <item>Best</item>
