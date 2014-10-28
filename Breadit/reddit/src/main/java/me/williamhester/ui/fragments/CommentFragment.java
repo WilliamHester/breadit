@@ -52,10 +52,9 @@ public class CommentFragment extends AccountFragment {
     private CommentArrayAdapter mCommentAdapter;
     private Context mContext;
     private String mPermalink;
+    private String mSortType;
     private Submission mSubmission;
     private OnSubmissionLoaded mCallback;
-
-    private String mSortType;
 
     public static CommentFragment newInstance(String permalink) {
         Bundle args = new Bundle();
@@ -210,8 +209,46 @@ public class CommentFragment extends AccountFragment {
         outState.putString("sortType", mSortType);
     }
 
+    /**
+     * Sets a listener that calls back when the Submission is loaded.
+     *
+     * @param listener the listener to call back to
+     */
     public void setOnSubmissionLoadedListener(OnSubmissionLoaded listener) {
         mCallback = listener;
+    }
+
+    /**
+     * Hides the comment at the specified position.
+     *
+     * @param position the position of the clicked comment
+     * @return the number of comments that were hidden
+     */
+    private int hideComment(int position) {
+        AbsComment comment = mCommentsList.get(position);
+        int level = comment.getLevel();
+        position++;
+        ArrayList<AbsComment> children = new ArrayList<>();
+        while (position < mCommentsList.size() && mCommentsList.get(position).getLevel() > level) {
+            children.add(mCommentsList.remove(position));
+        }
+        ((Comment) comment).hide(children);
+        return children.size();
+    }
+
+    /**
+     * Shows the comment at the specified position.
+     *
+     * @param position the position of the clicked comment
+     * @return the number of comments that were shown
+     */
+    private int showComment(int position) {
+        AbsComment comment = mCommentsList.get(position);
+        ArrayList<AbsComment> children = ((Comment) comment).unhideComment();
+        for (AbsComment c : children) {
+            mCommentsList.add(++position, c);
+        }
+        return children.size();
     }
 
     private PopupMenu.OnMenuItemClickListener mSortClickListener = new PopupMenu.OnMenuItemClickListener() {
@@ -248,53 +285,20 @@ public class CommentFragment extends AccountFragment {
         }
     };
 
-    private CommentViewHolder.CommentClickCallbacks mCommentCallbacks =  new CommentViewHolder.CommentClickCallbacks() {
+    private CommentViewHolder.CommentClickCallbacks mCommentCallbacks = new CommentViewHolder.CommentClickCallbacks() {
 
         private CommentViewHolder mFocusedViewHolder;
 
         @Override
-        public void onBodyClick(final Comment comment) {
+        public void onBodyClick(CommentViewHolder viewHolder, Comment comment) {
             comment.setHidden(!comment.isHidden());
-            int position = mCommentsList.indexOf(comment);
+            final int position = mCommentsList.indexOf(comment);
+            mCommentAdapter.notifyItemChanged(position + 1);
             if (comment.isHidden()) {
-                hideComment(position);
+                mCommentAdapter.notifyItemRangeRemoved(position + 2,
+                        hideComment(position));
             } else {
-                showComment(position);
-            }
-            mCommentAdapter.notifyDataSetChanged();
-        }
-
-        @Override
-        public void onMoreClick(CommentViewHolder commentView, final MoreComments comment) {
-            if (!comment.isLoading()) {
-                comment.setIsLoading(true);
-                RedditApi.getMoreChildren(mSubmission.getName(),
-                        mSortType, comment.getChildren(), comment.getLevel(),
-                        new FutureCallback<ArrayList<Thing>>() {
-                            @Override
-                            public void onCompleted(Exception e, ArrayList<Thing> comments) {
-                                comment.setIsLoading(false);
-                                if (e != null) {
-                                    e.printStackTrace();
-                                    return;
-                                }
-                                int insert = mCommentsList.indexOf(comment);
-                                mCommentsList.remove(insert);
-                                for (Thing thing : comments) {
-                                    if (thing instanceof AbsComment) {
-                                        mCommentsList.add(insert++, (AbsComment) thing);
-                                    }
-                                }
-                                if (getView() != null) {
-                                    getView().post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            mCommentAdapter.notifyDataSetChanged();
-                                        }
-                                    });
-                                }
-                            }
-                        });
+                mCommentAdapter.notifyItemRangeInserted(position + 2, showComment(position));
             }
         }
 
@@ -350,7 +354,7 @@ public class CommentFragment extends AccountFragment {
         }
     };
 
-    private class CommentArrayAdapter extends RecyclerView.Adapter<VotableViewHolder> {
+    private class CommentArrayAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         private static final int SUBMISSION = 1;
         private static final int COMMENT = 2;
@@ -360,31 +364,37 @@ public class CommentFragment extends AccountFragment {
 
         @SuppressLint("InflateParams")
         @Override
-        public VotableViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             LayoutInflater inflater = LayoutInflater.from(parent.getContext());
             switch (viewType) {
                 case SUBMISSION:
                     return new SubmissionViewHolder(inflater.inflate(R.layout.header_comments,
-                            null), mSubmissionCallbacks);
+                            parent, false), mSubmissionCallbacks);
                 case COMMENT:
-                case MORE_COMMENTS: // For now, fall through
-                    return new CommentViewHolder(inflater.inflate(R.layout.list_item_comment, null),
-                            mCommentCallbacks, mSubmission.getAuthor());
+                    return new CommentViewHolder(inflater.inflate(R.layout.list_item_comment,
+                            parent, false), mCommentCallbacks, mSubmission.getAuthor());
+                case MORE_COMMENTS:
+                    return new MoreCommentsViewHolder(
+                            inflater.inflate(R.layout.list_item_more_comments, parent, false));
             }
             return null; // Should never hit this case
         }
 
         @Override
-        public void onBindViewHolder(VotableViewHolder votableViewHolder, int position) {
+        public void onBindViewHolder(RecyclerView.ViewHolder vh, int position) {
             switch (getItemViewType(position)) {
                 case SUBMISSION:
-                    votableViewHolder.setContent(mSubmission);
-                    ((SubmissionViewHolder) votableViewHolder).expandOptions();
-                    ((SubmissionViewHolder) votableViewHolder).disableClicks();
+                    ((SubmissionViewHolder) vh).setContent(mSubmission);
+                    ((SubmissionViewHolder) vh).expandOptions();
+                    ((SubmissionViewHolder) vh).disableClicks();
                     break;
                 case COMMENT:
+                    ((CommentViewHolder) vh).setContent(
+                            (Comment) mCommentsList.get(position - HEADER_VIEW_COUNT));
+                    break;
                 case MORE_COMMENTS:
-                    votableViewHolder.setContent(mCommentsList.get(position - HEADER_VIEW_COUNT));
+                    ((MoreCommentsViewHolder) vh).setContent(
+                            (MoreComments) mCommentsList.get(position - HEADER_VIEW_COUNT));
                     break;
             }
         }
@@ -655,22 +665,80 @@ public class CommentFragment extends AccountFragment {
         }
     };
 
-    private void hideComment(int position) {
-        AbsComment comment = mCommentsList.get(position);
-        int level = comment.getLevel();
-        position++;
-        ArrayList<AbsComment> children = new ArrayList<>();
-        while (position < mCommentsList.size() && mCommentsList.get(position).getLevel() > level) {
-            children.add(mCommentsList.remove(position));
-        }
-        ((Comment) comment).hide(children);
-    }
+    private class MoreCommentsViewHolder extends RecyclerView.ViewHolder {
 
-    private void showComment(int position) {
-        AbsComment comment = mCommentsList.get(position);
-        ArrayList<AbsComment> children = ((Comment) comment).unhideComment();
-        for (AbsComment c : children) {
-            mCommentsList.add(++position, c);
+        private MoreComments mComment;
+        private View mLevelIndicator;
+
+        public MoreCommentsViewHolder(View itemView) {
+            super(itemView);
+
+            mLevelIndicator = itemView.findViewById(R.id.level_indicator);
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (!mComment.isLoading()) {
+                        mComment.setIsLoading(true);
+                        RedditApi.getMoreChildren(mSubmission.getName(),
+                                mSortType, mComment.getChildren(), mComment.getLevel(),
+                                new FutureCallback<ArrayList<Thing>>() {
+                                    @Override
+                                    public void onCompleted(Exception e,
+                                                            final ArrayList<Thing> comments) {
+                                        mComment.setIsLoading(false);
+                                        if (e != null) {
+                                            e.printStackTrace();
+                                            return;
+                                        }
+                                        int insert = mCommentsList.indexOf(mComment);
+                                        final int pos = insert + 1;
+                                        mCommentsList.remove(insert);
+                                        for (Thing thing : comments) {
+                                            if (thing instanceof AbsComment) {
+                                                mCommentsList.add(insert++, (AbsComment) thing);
+                                            }
+                                        }
+                                        if (getView() != null) {
+                                            getView().post(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    mCommentAdapter.notifyItemChanged(pos);
+                                                    mCommentAdapter.notifyItemRangeInserted(pos + 1,
+                                                            comments.size() - 1);
+                                                }
+                                            });
+                                        }
+                                    }
+                                });
+                    }
+                }
+            });
+        }
+
+        public void setContent(MoreComments comment) {
+            mComment = comment;
+
+            float dp = itemView.getResources().getDisplayMetrics().density;
+            itemView.setPadding(Math.round(4 * dp * mComment.getLevel()), 0, 0, 0);
+            if (mComment.getLevel() > 0) {
+                mLevelIndicator.setVisibility(View.VISIBLE);
+                switch (mComment.getLevel() % 4) {
+                    case 1:
+                        mLevelIndicator.setBackgroundColor(mLevelIndicator.getResources().getColor(R.color.green));
+                        break;
+                    case 2:
+                        mLevelIndicator.setBackgroundColor(mLevelIndicator.getResources().getColor(R.color.cyan));
+                        break;
+                    case 3:
+                        mLevelIndicator.setBackgroundColor(mLevelIndicator.getResources().getColor(R.color.blue));
+                        break;
+                    case 0:
+                        mLevelIndicator.setBackgroundColor(mLevelIndicator.getResources().getColor(R.color.pink));
+                        break;
+                }
+            } else {
+                mLevelIndicator.setBackgroundColor(mLevelIndicator.getResources().getColor(R.color.card_view_gray));
+            }
         }
     }
 

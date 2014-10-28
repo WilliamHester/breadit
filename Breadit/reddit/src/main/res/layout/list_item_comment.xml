@@ -86,7 +86,8 @@
         <LinearLayout android:id="@+id/options_row"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:visibility="gone">
 
             <TextView android:id="@+id/option_links"
                 android:layout_width="0dp"

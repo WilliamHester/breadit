@@ -2,18 +2,14 @@ package me.williamhester.ui.views;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.graphics.Typeface;
 import android.support.annotation.NonNull;
 import android.text.Html;
 import android.text.Layout;
 import android.text.Selection;
 import android.text.Spannable;
-import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.StyleSpan;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
@@ -21,7 +17,6 @@ import android.widget.TextView;
 import me.williamhester.models.AbsComment;
 import me.williamhester.models.AccountManager;
 import me.williamhester.models.Comment;
-import me.williamhester.models.MoreComments;
 import me.williamhester.reddit.R;
 import me.williamhester.tools.HtmlParser;
 
@@ -30,12 +25,12 @@ import me.williamhester.tools.HtmlParser;
  */
 public class CommentViewHolder extends VotableViewHolder {
 
-    private AbsComment mComment;
+    private Comment mComment;
     private CommentClickCallbacks mCallback;
     private String mSubmissionAuthor;
-    private View mContent;
     private TextView mAuthor;
     private TextView mFlairText;
+    private View mContent;
     private View mLevelIndicator;
     private View mGoldIndicator;
     private View mOptionsRow;
@@ -77,7 +72,7 @@ public class CommentViewHolder extends VotableViewHolder {
             @Override
             public void onClick(View v) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
-                builder.setMessage(Html.fromHtml(((Comment) mComment).getFlairText()).toString());
+                builder.setMessage(Html.fromHtml((mComment).getFlairText()).toString());
                 builder.setNegativeButton(R.string.close, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -94,13 +89,13 @@ public class CommentViewHolder extends VotableViewHolder {
                     mCallback.onCommentLongPressed(null);
                 } else if (!isHidden()) {
                     optionLinks.setVisibility(
-                            ((Comment) mComment).getLinks().size() > 0 ? View.VISIBLE : View.GONE);
+                            mComment.getLinks().size() > 0 ? View.VISIBLE : View.GONE);
                     optionReply.setVisibility(AccountManager.isLoggedIn() ? View.VISIBLE : View.GONE);
                     optionSave.setVisibility(AccountManager.isLoggedIn() ? View.VISIBLE : View.GONE);
                     optionOverflow.setVisibility(AccountManager.isLoggedIn() ? View.VISIBLE : View.GONE);
                     optionEdit.setVisibility(AccountManager.isLoggedIn()
                             && AccountManager.getAccount().getUsername()
-                            .equalsIgnoreCase(((Comment) mComment).getAuthor()) ? View.VISIBLE : View.GONE);
+                            .equalsIgnoreCase(mComment.getAuthor()) ? View.VISIBLE : View.GONE);
                     mCallback.onCommentLongPressed(CommentViewHolder.this);
                     expand(mOptionsRow);
                 }
@@ -109,10 +104,9 @@ public class CommentViewHolder extends VotableViewHolder {
         });
     }
 
-    @Override
-    public void setContent(Object comment) {
+    public void setContent(Comment comment) {
         super.setContent(comment);
-        mComment = (AbsComment) comment;
+        mComment = comment;
         float dp = itemView.getResources().getDisplayMetrics().density;
         itemView.setPadding(Math.round(4 * dp * mComment.getLevel()), 0, 0, 0);
         mOptionsRow.setVisibility(View.GONE);
@@ -135,82 +129,55 @@ public class CommentViewHolder extends VotableViewHolder {
         } else {
             mLevelIndicator.setBackgroundColor(mLevelIndicator.getResources().getColor(R.color.card_view_gray));
         }
-        if (mComment instanceof MoreComments) {
-            mContent.setOnClickListener(mMoreClickListener);
-            mBody.setVisibility(View.VISIBLE);
-            mMetadata.setVisibility(View.GONE);
-            mAuthor.setVisibility(View.GONE);
-            mFlairText.setVisibility(View.GONE);
-            SpannableStringBuilder sb = new SpannableStringBuilder();
-            sb.append("Load more comments...");
-            sb.setSpan(new ForegroundColorSpan(itemView.getResources().getColor(R.color.light_blue)),
-                    0, sb.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            sb.setSpan(new StyleSpan(Typeface.BOLD_ITALIC), 0, sb.length(),
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-            mBody.setText(sb);
-            mGoldIndicator.setVisibility(View.GONE);
+        mContent.setOnClickListener(mHideCommentsClickListener);
+        if (mComment.getSpannableBody() == null && mComment.getBodyHtml() != null) {
+            HtmlParser parser = new HtmlParser(Html.fromHtml(mComment.getBodyHtml()).toString());
+            mComment.setSpannableBody(parser.getSpannableString());
+            mComment.setLinks(parser.getLinks());
+        }
+        mBody.setText(mComment.getSpannableBody());
+        if (mComment.isHidden()) {
+            mBody.setVisibility(View.GONE);
         } else {
-            final Comment comment1 = (Comment) mComment;
-            mMetadata.setVisibility(View.VISIBLE);
-            mAuthor.setVisibility(View.VISIBLE);
-            mContent.setOnClickListener(mHideCommentsClickListener);
-            if (comment1.getSpannableBody() == null && comment1.getBodyHtml() != null) {
-                HtmlParser parser = new HtmlParser(Html.fromHtml(comment1.getBodyHtml()).toString());
-                comment1.setSpannableBody(parser.getSpannableString());
-                comment1.setLinks(parser.getLinks());
-            }
-            mBody.setText(comment1.getSpannableBody());
-            if (isHidden()) {
-                mBody.setVisibility(View.GONE);
-            } else {
-                mBody.setVisibility(View.VISIBLE);
-            }
+            mBody.setVisibility(View.VISIBLE);
+        }
 
-            mGoldIndicator.setVisibility(comment1.isGilded() ? View.VISIBLE : View.INVISIBLE);
+        mGoldIndicator.setVisibility(mComment.isGilded() ? View.VISIBLE : View.INVISIBLE);
 
-            if (comment1.getAuthor().equals(mSubmissionAuthor)) {
-                mAuthor.setBackgroundResource(R.drawable.author_background);
-                mAuthor.setTextColor(itemView.getResources().getColor(R.color.ghostwhite));
-            } else {
-                mAuthor.setBackground(null);
-                mAuthor.setTextColor(itemView.getResources().getColor(R.color.comment_metadata_gray));
-            }
-            mAuthor.setText(comment1.getAuthor());
-            StringBuilder sb = new StringBuilder();
-            sb.append(String.valueOf(comment1.getScore()))
-                    .append(" ")
-                    .append(itemView.getResources().getQuantityString(R.plurals.points, comment1.getScore()));
-            mMetadata.setText(sb);
-            if (!TextUtils.isEmpty(comment1.getFlairText())) {
-                mFlairText.setVisibility(View.VISIBLE);
-                mFlairText.setBackgroundResource(R.drawable.flair_background);
-                mFlairText.setText(Html.fromHtml(comment1.getFlairText()).toString());
-            } else {
-                mFlairText.setVisibility(View.GONE);
-            }
+        if (mComment.getAuthor().equals(mSubmissionAuthor)) {
+            mAuthor.setBackgroundResource(R.drawable.author_background);
+            mAuthor.setTextColor(itemView.getResources().getColor(R.color.ghostwhite));
+        } else {
+            mAuthor.setBackground(null);
+            mAuthor.setTextColor(itemView.getResources().getColor(R.color.comment_metadata_gray));
+        }
+        mAuthor.setText(mComment.getAuthor());
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.valueOf(mComment.getScore()))
+                .append(" ")
+                .append(itemView.getResources().getQuantityString(R.plurals.points, mComment.getScore()));
+        mMetadata.setText(sb);
+        if (!TextUtils.isEmpty(mComment.getFlairText())) {
+            mFlairText.setVisibility(View.VISIBLE);
+            mFlairText.setBackgroundResource(R.drawable.flair_background);
+            mFlairText.setText(Html.fromHtml(mComment.getFlairText()).toString());
+        } else {
+            mFlairText.setVisibility(View.GONE);
         }
     }
 
     public boolean isHidden() {
-        return mComment instanceof Comment && ((Comment) mComment).isHidden();
+        return mComment.isHidden();
     }
 
     public void collapseOptions() {
         collapse(mOptionsRow);
     }
 
-    private View.OnClickListener mMoreClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            mCallback.onMoreClick(CommentViewHolder.this, (MoreComments) mComment);
-        }
-    };
-
     private View.OnClickListener mHideCommentsClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            mCallback.onBodyClick((Comment) mComment);
-            mBody.setVisibility(View.GONE);
+            mCallback.onBodyClick(CommentViewHolder.this, (Comment) mComment);
         }
     };
 
@@ -253,8 +220,7 @@ public class CommentViewHolder extends VotableViewHolder {
     }
 
     public interface CommentClickCallbacks {
-        public void onMoreClick(CommentViewHolder viewHolder, MoreComments comment);
-        public void onBodyClick(Comment comment);
+        public void onBodyClick(CommentViewHolder viewHolder, Comment comment);
         public void onCommentLongPressed(CommentViewHolder holder);
         public void onOptionsRowItemSelected(View view, AbsComment submission);
     }

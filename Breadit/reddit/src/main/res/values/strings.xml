@@ -45,6 +45,7 @@
         <item quantity="other">points</item>
     </plurals>
     <string name="close">Close</string>
+    <string name="load_more_comments">Load more comments…</string>
 
     <!-- Sharing -->
     <string name="share_with">Share link with…</string>

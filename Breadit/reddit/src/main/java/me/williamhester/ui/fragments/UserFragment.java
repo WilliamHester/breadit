@@ -150,12 +150,7 @@ public class UserFragment extends AccountFragment {
         }
 
         @Override
-        public void onMoreClick(CommentViewHolder viewHolder, MoreComments comment) {
-            // Will never happen
-        }
-
-        @Override
-        public void onBodyClick(Comment comment) {
+        public void onBodyClick(CommentViewHolder viewHolder, Comment comment) {
 
         }
 
