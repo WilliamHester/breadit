@@ -178,7 +178,7 @@ public class CommentFragment extends AccountFragment {
             }
             mCommentsList.add(index, newComment);
             if (mCommentAdapter != null) {
-                mCommentAdapter.notifyDataSetChanged();
+                mCommentAdapter.notifyItemInserted(index + CommentArrayAdapter.HEADER_VIEW_COUNT);
             }
             return;
         } else if (requestCode == EDIT_REQUEST) {
@@ -190,10 +190,10 @@ public class CommentFragment extends AccountFragment {
                 mSubmissionCallback.onCompleted(null, (Submission) newThing);
             } else {
                 int index = mCommentsList.indexOf(oldThing);
-                mCommentsList.remove(index);
-                mCommentsList.add(index, (Comment) newThing);
+                mCommentsList.set(index, (Comment) newThing);
                 if (mCommentAdapter != null) {
-                    mCommentAdapter.notifyDataSetChanged();
+                    mCommentAdapter.notifyItemChanged(index
+                            + CommentArrayAdapter.HEADER_VIEW_COUNT);
                 }
             }
         }
@@ -572,7 +572,7 @@ public class CommentFragment extends AccountFragment {
                                         e.printStackTrace();
                                     }
                                     submission.setIsNsfw(!submission.isNsfw());
-                                    mCommentAdapter.notifyDataSetChanged();
+                                    mCommentAdapter.notifyItemChanged(0);
                                 }
                             };
                             if (submission.isNsfw()) {
@@ -661,7 +661,7 @@ public class CommentFragment extends AccountFragment {
             }
             mCommentsList.clear();
             mCommentsList.addAll(result);
-            mCommentAdapter.notifyDataSetChanged();
+            mCommentAdapter.notifyItemRangeInserted(1, mCommentsList.size());
         }
     };
 
