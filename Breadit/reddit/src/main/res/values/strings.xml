@@ -186,4 +186,12 @@
     <string name="please_enter_a_password">Please enter a password</string>
     <string name="logging_in">Logging in. Please wait.</string>
 
+    <!-- RegisterFragment -->
+    <string name="recovery_email">Recovery Email (Optional)</string>
+    <string name="register">Register</string>
+    <string name="username_available">Username is available</string>
+    <string name="username_not_available">Username taken</string>
+    <string name="checking_availability">Checking availability</string>
+    <string name="attempting_to_create">Attempting to create account. Please wait.</string>
+
 </resources>

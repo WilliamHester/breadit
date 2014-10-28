@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center">
+
+    <TextView android:id="@+id/username_availability"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"/>
+
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <EditText android:id="@+id/username"
+            android:layout_width="360dp"
+            android:layout_height="wrap_content"
+            android:hint="@string/username"
+            android:imeOptions="actionNext"
+            android:inputType="textNoSuggestions"
+            android:gravity="center"
+            android:layout_marginBottom="16dp"/>
+
+        <ProgressBar android:id="@+id/progress_bar"
+            style="@style/Widget.AppCompat.ProgressBar"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:indeterminate="true"
+            android:layout_gravity="end"/>
+
+        <ImageView android:id="@+id/availability_icon"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="end"
+            tools:ignore="ContentDescription" />
+
+    </FrameLayout>
+
+    <EditText android:id="@+id/password"
+        android:layout_width="360dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/password"
+        android:imeOptions="actionNext"
+        android:inputType="textPassword"
+        android:gravity="center"
+        android:layout_marginBottom="16dp"/>
+
+    <EditText android:id="@+id/email"
+        android:layout_width="360dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/recovery_email"
+        android:imeOptions="actionNext"
+        android:inputType="textEmailAddress"
+        android:gravity="center"
+        android:layout_marginBottom="16dp"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <ImageView android:id="@+id/captcha"
+            android:scaleType="fitCenter"
+            android:layout_width="144dp"
+            android:layout_height="60dp"/>
+
+        <ImageButton android:id="@+id/new_captcha"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent" />
+
+        <EditText android:id="@+id/captcha_response"
+            android:layout_width="160dp"
+            android:layout_height="match_parent"
+            android:inputType="textNoSuggestions"
+            android:hint="@string/captcha_response"/>
+
+    </LinearLayout>
+
+    <Button android:id="@+id/register"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/register"/>
+
+</LinearLayout>

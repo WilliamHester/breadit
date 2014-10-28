@@ -1,8 +1,11 @@
 package me.williamhester.ui.fragments;
 
-import android.app.DialogFragment;
 import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBarActivity;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,37 +24,30 @@ import me.williamhester.models.Account;
 import me.williamhester.models.AccountManager;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
+import me.williamhester.ui.activities.LogInActivity;
 
 /**
- * Created by William on 10/21/2014
+ * Created by william on 10/28/14.
  */
-public class LogInDialogFragment extends DialogFragment {
+public class LogInFragment extends Fragment {
+
     private EditText mUsername;
     private EditText mPassword;
     private ProgressDialog mProgressDialog;
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setStyle(STYLE_NORMAL, R.style.Theme_AppCompat_Dialog);
+    public static LogInFragment newInstance() {
+        return new LogInFragment();
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup root,
+                             @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_login, root, false);
         mUsername = (EditText) v.findViewById(R.id.username);
         mPassword = (EditText) v.findViewById(R.id.password);
-//        Button cancel = (Button) v.findViewById(R.id.login_cancel);
         Button confirm = (Button) v.findViewById(R.id.login_confirm);
-
-//        cancel.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                dismiss();
-//            }
-//        });
         confirm.setOnClickListener(new View.OnClickListener() {
-           @Override
+            @Override
             public void onClick(View view) {
                 List<Account> accounts = AccountManager.getAccounts();
                 String username = mUsername.getText().toString();
@@ -69,7 +65,6 @@ public class LogInDialogFragment extends DialogFragment {
                 for (Account account : accounts) {
                     if (account.getUsername().equalsIgnoreCase(username)) {
                         AccountManager.setAccount(account);
-                        dismiss();
                         return;
                     }
                 }
@@ -80,7 +75,6 @@ public class LogInDialogFragment extends DialogFragment {
                 logIn();
             }
         });
-        getDialog().setTitle(R.string.login);
         return v;
     }
 
@@ -108,8 +102,9 @@ public class LogInDialogFragment extends DialogFragment {
                         dataSource.addAccount(account);
                         dataSource.close();
                         AccountManager.setAccount(account);
-                        dismiss();
+                        ((LogInActivity) getActivity()).onLoggedIn();
                     }
                 });
     }
+
 }

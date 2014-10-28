@@ -21,23 +21,9 @@
         android:inputType="textPassword"
         android:gravity="center"/>
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <Button android:id="@+id/login_confirm"
+        android:text="@string/confirm"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="end">
+        android:layout_width="wrap_content"/>
 
-        <Button android:id="@+id/login_cancel"
-            android:text="@string/cancel"
-            style="?android:buttonBarButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-
-        <Button android:id="@+id/login_confirm"
-            android:text="@string/confirm"
-            style="?android:buttonBarButtonStyle"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"/>
-
-    </LinearLayout>
 </LinearLayout>

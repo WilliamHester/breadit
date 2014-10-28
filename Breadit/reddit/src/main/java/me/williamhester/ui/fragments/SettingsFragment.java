@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
@@ -22,8 +23,11 @@ import me.williamhester.models.Account;
 import me.williamhester.models.AccountManager;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
+import me.williamhester.ui.activities.LogInActivity;
 
 public class SettingsFragment extends PreferenceFragment {
+
+    public static final int LOG_IN_REQUEST = 1;
 
     private Preference mClearHistory;
     private Preference mLogIn;
@@ -73,6 +77,14 @@ public class SettingsFragment extends PreferenceFragment {
     }
 
     @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == LOG_IN_REQUEST) {
+            //
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
     public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen,
                                          @NonNull Preference preference) {
         if (preference == mClearHistory) {
@@ -93,8 +105,8 @@ public class SettingsFragment extends PreferenceFragment {
             });
             builder.show();
         } else if (preference == mLogIn) {
-            LogInDialogFragment fragment = new LogInDialogFragment();
-            fragment.show(getFragmentManager(), "login");
+            Intent i = new Intent(getActivity(), LogInActivity.class);
+            startActivityForResult(i, LOG_IN_REQUEST);
         } else if (preference == mLogOut) {
             final List<Account> accounts;
             AccountDataSource dataSource = new AccountDataSource(getActivity());
