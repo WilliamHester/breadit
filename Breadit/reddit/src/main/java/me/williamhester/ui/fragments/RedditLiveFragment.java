@@ -12,6 +12,9 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.koushikdutta.async.ByteBufferList;
+import com.koushikdutta.async.DataEmitter;
+import com.koushikdutta.async.callback.DataCallback;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.async.http.AsyncHttpClient;
 import com.koushikdutta.async.http.WebSocket;
@@ -75,6 +78,13 @@ public class RedditLiveFragment extends Fragment {
                     ex.printStackTrace();
                     return;
                 }
+                Log.d("RedditLiveFragment", "Connected!");
+                webSocket.setDataCallback(new DataCallback() {
+                    @Override
+                    public void onDataAvailable(DataEmitter emitter, ByteBufferList bb) {
+                        Log.d("RedditLiveFragment", "Got some data");
+                    }
+                });
                 webSocket.setStringCallback(new WebSocket.StringCallback() {
                     @Override
                     public void onStringAvailable(String s) {
@@ -82,7 +92,14 @@ public class RedditLiveFragment extends Fragment {
                             Gson gson = new Gson();
                             LiveResponse liveResponse = gson.fromJson(s, LiveResponse.class);
                             mLiveResponses.add(liveResponse);
-                            mAdapter.notifyDataSetChanged();
+                            if (getView() != null) {
+                                getView().post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        mAdapter.notifyDataSetChanged();
+                                    }
+                                });
+                            }
                         }
                     }
                 });
