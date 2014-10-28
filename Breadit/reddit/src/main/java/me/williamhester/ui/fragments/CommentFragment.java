@@ -40,7 +40,6 @@ import me.williamhester.ui.activities.SubmissionActivity;
 import me.williamhester.ui.activities.UserActivity;
 import me.williamhester.ui.views.CommentViewHolder;
 import me.williamhester.ui.views.SubmissionViewHolder;
-import me.williamhester.ui.views.VotableViewHolder;
 
 public class CommentFragment extends AccountFragment {
 
@@ -668,16 +667,19 @@ public class CommentFragment extends AccountFragment {
     private class MoreCommentsViewHolder extends RecyclerView.ViewHolder {
 
         private MoreComments mComment;
+        private View mProgressBar;
         private View mLevelIndicator;
 
         public MoreCommentsViewHolder(View itemView) {
             super(itemView);
 
+            mProgressBar = itemView.findViewById(R.id.progress_bar);
             mLevelIndicator = itemView.findViewById(R.id.level_indicator);
-            itemView.setOnClickListener(new View.OnClickListener() {
+            itemView.findViewById(R.id.more).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     if (!mComment.isLoading()) {
+                        mProgressBar.setVisibility(View.VISIBLE);
                         mComment.setIsLoading(true);
                         RedditApi.getMoreChildren(mSubmission.getName(),
                                 mSortType, mComment.getChildren(), mComment.getLevel(),
@@ -718,6 +720,7 @@ public class CommentFragment extends AccountFragment {
         public void setContent(MoreComments comment) {
             mComment = comment;
 
+            mProgressBar.setVisibility(mComment.isLoading() ? View.VISIBLE : View.GONE);
             float dp = itemView.getResources().getDisplayMetrics().density;
             itemView.setPadding(Math.round(4 * dp * mComment.getLevel()), 0, 0, 0);
             if (mComment.getLevel() > 0) {

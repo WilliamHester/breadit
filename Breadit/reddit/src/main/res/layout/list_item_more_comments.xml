@@ -9,14 +9,17 @@
         android:layout_width="4dp"
         android:layout_height="match_parent"/>
 
-    <FrameLayout
+    <LinearLayout android:id="@+id/more"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/card_view_gray">
+        android:background="@drawable/dark_background"
+        android:gravity="center_vertical"
+        android:paddingEnd="4dp">
 
         <TextView
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:textSize="14sp"
             android:paddingLeft="8dp"
             android:paddingRight="8dp"
@@ -26,6 +29,12 @@
             android:textStyle="bold|italic"
             android:text="@string/load_more_comments"/>
 
-    </FrameLayout>
+        <ProgressBar android:id="@+id/progress_bar"
+            style="@style/Widget.AppCompat.ProgressBar"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:indeterminate="true"/>
+
+    </LinearLayout>
 
 </LinearLayout>

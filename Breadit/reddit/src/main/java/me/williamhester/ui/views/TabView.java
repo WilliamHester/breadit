@@ -116,7 +116,7 @@ public class TabView extends FrameLayout {
         FrameLayout tabFrame = new FrameLayout(mContext);
         tabFrame.setId(R.id.tab_frame);
         mTabLayouts.add(tabFrame);
-        tabFrame.setBackgroundResource(R.drawable.actionbar_item_background);
+//        tabFrame.setBackgroundResource(R.drawable.actionbar_item_background);
 
         final String finalTag = tag;
         // Specify the parameters
