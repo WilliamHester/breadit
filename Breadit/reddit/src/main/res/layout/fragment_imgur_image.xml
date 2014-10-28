@@ -27,4 +27,20 @@
         android:layout_marginBottom="16dp"
         android:visibility="gone"/>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageButton android:id="@+id/show_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_action_about"/>
+
+        <ImageButton android:id="@+id/high_quality"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_action_about"/>
+
+    </LinearLayout>
+
 </FrameLayout>
