@@ -203,5 +203,6 @@
             have an email on record.</string>
     <string name="user_doesnt_exist">Specified user doesn\'t exist.</string>
     <string name="email_sent">Recovery email sent.</string>
+    <string name="send_recovery_email">Send Recovery Email</string>
 
 </resources>

@@ -3,6 +3,7 @@ package me.williamhester.ui.activities;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
+import android.view.MenuItem;
 
 import me.williamhester.reddit.R;
 import me.williamhester.ui.fragments.ForgotPasswordFragment;
@@ -25,6 +26,21 @@ public class LogInActivity extends ActionBarActivity {
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, fragment, "LogIn")
                 .commit();
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+                getSupportFragmentManager().popBackStack();
+            } else {
+                finish();
+            }
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     public void onLoggedIn() {
