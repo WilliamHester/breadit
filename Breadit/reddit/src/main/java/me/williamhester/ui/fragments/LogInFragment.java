@@ -45,7 +45,14 @@ public class LogInFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_login, root, false);
         mUsername = (EditText) v.findViewById(R.id.username);
         mPassword = (EditText) v.findViewById(R.id.password);
+        View forgot = v.findViewById(R.id.forgot_password);
         Button confirm = (Button) v.findViewById(R.id.login_confirm);
+        forgot.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((LogInActivity) getActivity()).openForgotPassword(mUsername.getText().toString());
+            }
+        });
         confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

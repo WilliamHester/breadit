@@ -1,9 +1,11 @@
 package me.williamhester.ui.activities;
 
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
 
 import me.williamhester.reddit.R;
+import me.williamhester.ui.fragments.ForgotPasswordFragment;
 import me.williamhester.ui.fragments.LogInPagerFragment;
 
 /**
@@ -28,5 +30,13 @@ public class LogInActivity extends ActionBarActivity {
     public void onLoggedIn() {
         setResult(RESULT_OK);
         finish();
+    }
+
+    public void openForgotPassword(String username) {
+        Fragment forgotFragment = ForgotPasswordFragment.newInstance(username);
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.container, forgotFragment, "forgot")
+                .addToBackStack("forgot")
+                .commit();
     }
 }

@@ -81,11 +81,11 @@ public class RegisterFragment extends Fragment {
                 String captcha = mCaptchaText.getText().toString();
 
                 boolean valid = true;
-                if (TextUtils.isEmpty(username)) {
+                if (TextUtils.isEmpty(username) && username.length() > 3) {
                     // username invalid
                     valid = false;
                 }
-                if (TextUtils.isEmpty(password)) {
+                if (password.length() > 2) {
                     // password invalid
                     valid = false;
                 }
@@ -125,7 +125,7 @@ public class RegisterFragment extends Fragment {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (!TextUtils.isEmpty(s)) {
+                if (!TextUtils.isEmpty(s) && s.length() > 3) {
                     mHandler.postDelayed(mCheckUsernameRunnable, 1500);
                 }
             }

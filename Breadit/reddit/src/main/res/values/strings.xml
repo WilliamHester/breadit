@@ -193,5 +193,15 @@
     <string name="username_not_available">Username taken</string>
     <string name="checking_availability">Checking availability</string>
     <string name="attempting_to_create">Attempting to create account. Please wait.</string>
+    <string name="email_me">Email me</string>
+    <string name="forgot_password">Forgot your password?</string>
+
+    <!-- ForgotPasswordFragment -->
+    <string name="ratelimited">Ratelimited. Please try again in</string>
+    <string name="minutes">minutes</string>
+    <string name="no_email_for_user">The user you\'re trying to recover the password for does not
+            have an email on record.</string>
+    <string name="user_doesnt_exist">Specified user doesn\'t exist.</string>
+    <string name="email_sent">Recovery email sent.</string>
 
 </resources>

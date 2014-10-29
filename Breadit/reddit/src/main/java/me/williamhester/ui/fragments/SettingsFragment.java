@@ -77,14 +77,6 @@ public class SettingsFragment extends PreferenceFragment {
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == LOG_IN_REQUEST) {
-            //
-        }
-        super.onActivityResult(requestCode, resultCode, data);
-    }
-
-    @Override
     public boolean onPreferenceTreeClick(PreferenceScreen preferenceScreen,
                                          @NonNull Preference preference) {
         if (preference == mClearHistory) {
