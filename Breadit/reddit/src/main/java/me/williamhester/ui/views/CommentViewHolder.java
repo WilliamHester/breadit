@@ -104,9 +104,9 @@ public class CommentViewHolder extends VotableViewHolder {
         });
     }
 
-    public void setContent(Comment comment) {
+    public void setContent(Object comment) {
         super.setContent(comment);
-        mComment = comment;
+        mComment = (Comment) comment;
         float dp = itemView.getResources().getDisplayMetrics().density;
         itemView.setPadding(Math.round(4 * dp * mComment.getLevel()), 0, 0, 0);
         mOptionsRow.setVisibility(View.GONE);
