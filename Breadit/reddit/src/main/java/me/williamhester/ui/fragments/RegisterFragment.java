@@ -56,7 +56,7 @@ public class RegisterFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_register, container, false);
+        final View v = inflater.inflate(R.layout.fragment_register, container, false);
 
         mProgressDialog = new ProgressDialog(getActivity());
         mProgressDialog.setMessage(getResources().getString(R.string.attempting_to_create));
@@ -70,7 +70,15 @@ public class RegisterFragment extends Fragment {
         mAvailabilityIcon = (ImageView) v.findViewById(R.id.availability_icon);
         mAvailabilityProgress = (ProgressBar) v.findViewById(R.id.progress_bar);
         mAvailabilityProgress.setVisibility(View.GONE);
+
         loadCaptcha(v);
+        View imageButton = v.findViewById(R.id.reload_captcha);
+        imageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                loadCaptcha(v);
+            }
+        });
         View register = v.findViewById(R.id.register);
         register.setOnClickListener(new View.OnClickListener() {
             @Override
