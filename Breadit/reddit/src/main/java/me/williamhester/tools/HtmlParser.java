@@ -3,36 +3,32 @@ package me.williamhester.tools;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.support.annotation.NonNull;
-import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.BulletSpan;
-import android.text.style.ClickableSpan;
 import android.text.style.QuoteSpan;
 import android.text.style.StrikethroughSpan;
 import android.text.style.StyleSpan;
 import android.text.style.SuperscriptSpan;
 import android.text.style.TypefaceSpan;
 import android.text.style.UnderlineSpan;
-import android.util.Log;
-import android.view.View;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
-import org.jsoup.select.Elements;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
 
-import me.williamhester.reddit.R;
 import me.williamhester.ui.text.LinkSpan;
 import me.williamhester.ui.text.SpoilerSpan;
 
 /**
+ * This class parses unescaped HTML into a Spannable String. It also produces a list of links that
+ * were found during the creation of the Spannable String.
+ *
  * Created by William on 6/15/14.
  */
 public class HtmlParser {

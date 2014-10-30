@@ -340,7 +340,7 @@ public class CommentFragment extends AccountFragment {
                         }
                         parent = mCommentsList.get(commentIndex);
                     }
-                    ReplyFragment fragment = ReplyFragment.newInstance(parent, (Comment) comment);
+                    ReplyFragment fragment = ReplyFragment.newInstance(parent, comment);
                     fragment.setTargetFragment(CommentFragment.this, EDIT_REQUEST);
                     getFragmentManager().beginTransaction()
                             .replace(R.id.container, fragment, "Edit")
@@ -398,7 +398,7 @@ public class CommentFragment extends AccountFragment {
                     break;
                 case COMMENT:
                     ((CommentViewHolder) vh).setContent(
-                            (Comment) mCommentsList.get(position - HEADER_VIEW_COUNT));
+                            mCommentsList.get(position - HEADER_VIEW_COUNT));
                     break;
                 case MORE_COMMENTS:
                     ((MoreCommentsViewHolder) vh).setContent(

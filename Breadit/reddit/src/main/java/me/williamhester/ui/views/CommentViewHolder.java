@@ -21,6 +21,9 @@ import me.williamhester.reddit.R;
 import me.williamhester.tools.HtmlParser;
 
 /**
+ * CommentViewHolder is an extension of the VotableViewHolder and contains all of the necessary
+ * information to display a Comment and call back to its parent upon an event.
+ *
  * Created by william on 8/1/14.
  */
 public class CommentViewHolder extends VotableViewHolder {

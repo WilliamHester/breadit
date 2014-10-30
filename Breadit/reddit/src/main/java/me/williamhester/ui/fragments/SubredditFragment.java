@@ -263,6 +263,7 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
         refreshData();
     }
 
+    @SuppressLint("InflateParams")
     private View createFooterView(LayoutInflater inflater) {
         return inflater.inflate(R.layout.footer_subreddit_fragment, null);
     }
