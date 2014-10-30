@@ -89,11 +89,11 @@ public class RegisterFragment extends Fragment {
                 String captcha = mCaptchaText.getText().toString();
 
                 boolean valid = true;
-                if (TextUtils.isEmpty(username) && username.length() > 3) {
+                if (TextUtils.isEmpty(username) || username.length() < 3) {
                     // username invalid
                     valid = false;
                 }
-                if (password.length() > 2) {
+                if (password.length() < 2) {
                     // password invalid
                     valid = false;
                 }

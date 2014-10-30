@@ -147,7 +147,7 @@ public class SubmissionViewHolder extends VotableViewHolder {
         mBody.setText(Html.fromHtml(mSubmission.getTitle()).toString());
         mDomain.setText(mSubmission.getDomain());
         mCommentData.setText(mSubmission.getNumberOfComments() + " comments");
-        mSubreddit.setText("/r/" + mSubmission.getSubredditName());
+        mSubreddit.setText(mSubmission.getSubredditName().toLowerCase());
         mMetadata.setText(mSubmission.getAuthor() + " " + mSubmission.getScore() + " "
                 + itemView.getResources().getQuantityString(R.plurals.points,
                 mSubmission.getScore()));

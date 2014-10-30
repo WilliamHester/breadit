@@ -55,24 +55,29 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
     private HashSet<String> mNames;
     private SubmissionViewHolder mFocusedSubmission;
 
+    /**
+     * The primary sort type is set, by default to hot, Reddit's default sort for subreddits.
+     */
     private String mPrimarySortType = RedditApi.SORT_TYPE_HOT;
-    private String mSecondarySortType = RedditApi.SECONDARY_SORT_ALL;
+    /**
+     * The secondary sort type does not need to be set, as hot has no secondary type.
+     */
+    private String mSecondarySortType;
 
     private View mFooter;
     private OnSubredditSelectedListener mCallback;
 
+    /**
+     * Creates a new instance of SubredditFragment using the specified subreddit name.
+     *
+     * @param subredditName the name of the subreddit to visit or the empty string if visiting the
+     *                      front page.
+     * @return a new instance of SubredditFragment.
+     */
     public static SubredditFragment newInstance(String subredditName) {
         SubredditFragment sf = new SubredditFragment();
         Bundle b = new Bundle();
         b.putString("subreddit", subredditName);
-        sf.setArguments(b);
-        return sf;
-    }
-
-    public static SubredditFragment newInstance(int type) {
-        SubredditFragment sf = new SubredditFragment();
-        Bundle b = new Bundle();
-        b.putInt("type", type);
         sf.setArguments(b);
         return sf;
     }
@@ -130,7 +135,7 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
 
         mSwipeRefreshLayout.setColorSchemeResources(R.color.orangered);
         if (mSubmissionList.size() == 0) {
-            populateSubmissions();
+            refreshData();
         }
         return v;
     }
@@ -205,6 +210,12 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
         super.onSaveInstanceState(outState);
     }
 
+    /**
+     * Sets the sort type of the fragment to the specified sort type(s)
+     *
+     * @param primary the primary sort type defined in the RedditApi class
+     * @param secondary the secondary sort type defined in the RedditApi class
+     */
     private void setSort(String primary, String secondary) {
         if (!primary.equals(mPrimarySortType)
                 || secondary == null && mSecondarySortType != null
@@ -216,10 +227,18 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
         }
     }
 
+    /**
+     * Gets the current subreddit that the fragment is showing
+     *
+     * @return the display name of the subreddit that the fragment is showing
+     */
     public String getSubreddit() {
         return mSubredditName;
     }
 
+    /**
+     * Reloads the data for the fragment. This should be called after the account has changed.
+     */
     public void refreshData() {
         if (mSwipeRefreshLayout != null) {
             mSwipeRefreshLayout.setRefreshing(true);
@@ -253,14 +272,6 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
                         });
             }
         }
-    }
-
-    /**
-     * This method is called to begin the list of submissions. It is called during onCreate and
-     *     when the SwipeRefreshLayout's onRefresh method is called.
-     */
-    private void populateSubmissions() {
-        refreshData();
     }
 
     @SuppressLint("InflateParams")
