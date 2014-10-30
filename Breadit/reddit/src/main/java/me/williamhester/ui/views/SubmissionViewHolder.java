@@ -98,9 +98,7 @@ public class SubmissionViewHolder extends VotableViewHolder {
                 if (mOptionsRow.getVisibility() == View.VISIBLE) {
                     mCallback.onCardLongPressed(null);
                 } else {
-                    optionSubreddit.setVisibility(mCallback.isFrontPage() ? View.VISIBLE : View.GONE);
-                    optionSave.setVisibility(AccountManager.isLoggedIn() ? View.VISIBLE : View.GONE);
-                    optionOverflow.setVisibility(AccountManager.isLoggedIn() ? View.VISIBLE : View.GONE);
+                    expandOptions(optionSubreddit, optionSave, optionOverflow);
                     mCallback.onCardLongPressed(SubmissionViewHolder.this);
                     expand(mOptionsRow);
                 }
@@ -284,9 +282,19 @@ public class SubmissionViewHolder extends VotableViewHolder {
 
     public void expandOptions() {
         mOptionsRow.setVisibility(View.VISIBLE);
+        expandOptions(itemView.findViewById(R.id.option_go_to_subreddit),
+                itemView.findViewById(R.id.option_save),
+                itemView.findViewById(R.id.option_overflow));
         itemView.findViewById(R.id.option_edit).setVisibility(AccountManager.isLoggedIn()
                 && AccountManager.getAccount().getUsername()
                 .equalsIgnoreCase(mSubmission.getAuthor()) ? View.VISIBLE : View.GONE);
+    }
+
+    protected void expandOptions(View optionSubreddit, View optionSave, View optionOverflow) {
+        optionSubreddit.setVisibility(mCallback.isFrontPage() ? View.VISIBLE : View.GONE);
+        optionOverflow.setVisibility(AccountManager.isLoggedIn() ? View.VISIBLE : View.GONE);
+        optionSave.setVisibility(View.GONE); // TODO: actually allow the user to save.
+//        optionSave.setVisibility(AccountManager.isLoggedIn() ? View.VISIBLE : View.GONE);
     }
 
     /**

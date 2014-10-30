@@ -41,6 +41,7 @@ public class RedditApi {
     private static final String USER_AGENT = "Breadit_Android_App";
 
     public static final String REDDIT_URL = "https://api.reddit.com";
+    public static final String PUBLIC_REDDIT_URL = "https:www.reddit.com";
 
     public static String SORT_TYPE_HOT = "";
     public static String SORT_TYPE_NEW = "new";

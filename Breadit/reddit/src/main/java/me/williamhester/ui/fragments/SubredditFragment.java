@@ -362,7 +362,7 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
                         if (item.getItemId() == R.id.share_link) {
                             sendIntent.putExtra(Intent.EXTRA_TEXT, submission.getUrl());
                         } else {
-                            String link = RedditApi.REDDIT_URL + submission.getPermalink();
+                            String link = RedditApi.PUBLIC_REDDIT_URL + submission.getPermalink();
                             sendIntent.putExtra(Intent.EXTRA_TEXT, link);
                         }
                         sendIntent.setType("text/plain");

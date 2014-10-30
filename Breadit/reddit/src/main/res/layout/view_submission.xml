@@ -166,6 +166,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:visibility="gone"
+                android:padding="8dp"
                 android:background="?android:attr/selectableItemBackground">
 
                 <ImageView
@@ -181,6 +182,7 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:visibility="gone"
+                android:padding="8dp"
                 android:background="?android:attr/selectableItemBackground">
 
                 <ImageView
@@ -195,6 +197,7 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="match_parent"
+                android:padding="8dp"
                 android:background="?android:attr/selectableItemBackground">
 
                 <ImageView
@@ -209,6 +212,7 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="match_parent"
+                android:padding="8dp"
                 android:background="?android:attr/selectableItemBackground">
 
                 <ImageView
@@ -223,6 +227,7 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="match_parent"
+                android:padding="8dp"
                 android:background="?android:attr/selectableItemBackground">
 
                 <ImageView

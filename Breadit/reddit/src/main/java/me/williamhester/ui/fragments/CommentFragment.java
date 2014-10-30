@@ -36,6 +36,7 @@ import me.williamhester.models.Votable;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 import me.williamhester.tools.Url;
+import me.williamhester.ui.activities.MainActivity;
 import me.williamhester.ui.activities.SubmissionActivity;
 import me.williamhester.ui.activities.UserActivity;
 import me.williamhester.ui.views.CommentViewHolder;
@@ -310,8 +311,15 @@ public class CommentFragment extends AccountFragment {
         }
 
         @Override
-        public void onOptionsRowItemSelected(View view, AbsComment comment) {
+        public void onOptionsRowItemSelected(View view, Comment comment) {
             switch (view.getId()) {
+                case R.id.option_view_user:
+                    Bundle b = new Bundle();
+                    b.putString("username", comment.getAuthor());
+                    Intent i = new Intent(getActivity(), UserActivity.class);
+                    i.putExtras(b);
+                    getActivity().startActivity(i);
+                    break;
                 case R.id.option_reply:
                     Fragment reply = ReplyFragment.newInstance(comment);
                     reply.setTargetFragment(CommentFragment.this, REPLY_REQUEST);
@@ -342,7 +350,7 @@ public class CommentFragment extends AccountFragment {
                 case R.id.option_share:
                     Intent sendIntent = new Intent();
                     sendIntent.setAction(Intent.ACTION_SEND);
-                    String link = RedditApi.REDDIT_URL + mSubmission.getPermalink()
+                    String link = RedditApi.PUBLIC_REDDIT_URL + mSubmission.getPermalink()
                             + comment.getName();
                     sendIntent.putExtra(Intent.EXTRA_TEXT, link);
                     sendIntent.setType("text/plain");
@@ -465,6 +473,15 @@ public class CommentFragment extends AccountFragment {
         @Override
         public void onOptionsRowItemSelected(View view, Submission submission) {
             switch (view.getId()) {
+                case R.id.option_go_to_subreddit: {
+                    Intent i = new Intent(view.getContext(), MainActivity.class);
+                    i.setAction(Intent.ACTION_VIEW);
+                    Bundle args = new Bundle();
+                    args.putString(MainActivity.SUBREDDIT, submission.getSubredditName());
+                    i.putExtras(args);
+                    startActivity(i);
+                    break;
+                }
                 case R.id.option_reply: {
                     ReplyFragment fragment = ReplyFragment.newInstance(submission);
                     fragment.setTargetFragment(CommentFragment.this, REPLY_REQUEST);

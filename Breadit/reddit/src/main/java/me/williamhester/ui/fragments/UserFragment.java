@@ -160,7 +160,7 @@ public class UserFragment extends AccountFragment {
         }
 
         @Override
-        public void onOptionsRowItemSelected(View view, AbsComment submission) {
+        public void onOptionsRowItemSelected(View view, Comment comment) {
 
         }
 

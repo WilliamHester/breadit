@@ -203,16 +203,17 @@ public class Url implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeParcelable(this.mUri, 0);
         dest.writeString(this.mUrl);
         dest.writeString(this.mId);
         dest.writeInt(this.mType);
     }
 
     private Url(Parcel in) {
+        this.mUri = in.readParcelable(Uri.class.getClassLoader());
         this.mUrl = in.readString();
         this.mId = in.readString();
         this.mType = in.readInt();
-        mUri = Uri.parse(mUrl);
     }
 
     public static final Creator<Url> CREATOR = new Creator<Url>() {

@@ -48,6 +48,7 @@ public class CommentViewHolder extends VotableViewHolder {
         mOptionsRow = itemView.findViewById(R.id.options_row);
 
         View optionShare = itemView.findViewById(R.id.option_share);
+        View optionViewUser = itemView.findViewById(R.id.option_view_user);
         final View optionLinks = itemView.findViewById(R.id.option_links);
         final View optionReply = itemView.findViewById(R.id.option_reply);
         final View optionEdit = itemView.findViewById(R.id.option_edit);
@@ -62,6 +63,7 @@ public class CommentViewHolder extends VotableViewHolder {
         };
 
         optionShare.setOnClickListener(optionsRowClickListener);
+        optionViewUser.setOnClickListener(optionsRowClickListener);
         optionLinks.setOnClickListener(optionsRowClickListener);
         optionEdit.setOnClickListener(optionsRowClickListener);
         optionReply.setOnClickListener(optionsRowClickListener);
@@ -91,7 +93,9 @@ public class CommentViewHolder extends VotableViewHolder {
                     optionLinks.setVisibility(
                             mComment.getLinks().size() > 0 ? View.VISIBLE : View.GONE);
                     optionReply.setVisibility(AccountManager.isLoggedIn() ? View.VISIBLE : View.GONE);
-                    optionSave.setVisibility(AccountManager.isLoggedIn() ? View.VISIBLE : View.GONE);
+//                    optionSave.setVisibility(AccountManager.isLoggedIn() ? View.VISIBLE : View.GONE);
+                    // TODO: Fix this so that it actually saves
+                    optionSave.setVisibility(View.GONE);
                     optionOverflow.setVisibility(AccountManager.isLoggedIn() ? View.VISIBLE : View.GONE);
                     optionEdit.setVisibility(AccountManager.isLoggedIn()
                             && AccountManager.getAccount().getUsername()
@@ -177,7 +181,7 @@ public class CommentViewHolder extends VotableViewHolder {
     private View.OnClickListener mHideCommentsClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            mCallback.onBodyClick(CommentViewHolder.this, (Comment) mComment);
+            mCallback.onBodyClick(CommentViewHolder.this, mComment);
         }
     };
 
@@ -222,6 +226,6 @@ public class CommentViewHolder extends VotableViewHolder {
     public interface CommentClickCallbacks {
         public void onBodyClick(CommentViewHolder viewHolder, Comment comment);
         public void onCommentLongPressed(CommentViewHolder holder);
-        public void onOptionsRowItemSelected(View view, AbsComment submission);
+        public void onOptionsRowItemSelected(View view, Comment comment);
     }
 }

@@ -100,6 +100,7 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="match_parent"
+                android:padding="8dp"
                 android:background="?android:attr/selectableItemBackground">
 
                 <ImageView
@@ -114,6 +115,7 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="match_parent"
+                android:padding="8dp"
                 android:background="?android:attr/selectableItemBackground">
 
                 <ImageView
@@ -124,10 +126,26 @@
 
             </FrameLayout>
 
+            <FrameLayout android:id="@+id/option_view_user"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:padding="8dp"
+                android:background="?android:attr/selectableItemBackground">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_action_person"/>
+
+            </FrameLayout>
+
             <FrameLayout android:id="@+id/option_save"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="match_parent"
+                android:padding="8dp"
                 android:background="?android:attr/selectableItemBackground">
 
                 <ImageView
@@ -142,6 +160,7 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="match_parent"
+                android:padding="8dp"
                 android:background="?android:attr/selectableItemBackground">
 
                 <ImageView
