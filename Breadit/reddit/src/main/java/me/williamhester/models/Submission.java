@@ -51,7 +51,6 @@ public class Submission implements Votable, Parcelable {
     private Boolean likes;
     private Media media;
     private int mVoteStatus;
-    private boolean mIsBeingEdited;
     private boolean mSelftextIsOpen;
     private boolean mIsNsfwShowing = false;
     private Object mImgurData;
@@ -227,14 +226,6 @@ public class Submission implements Votable, Parcelable {
         return url.contains("reddit.com") && url.contains("comments");
     }
 
-    public void setBeingEdited(boolean b) {
-        mIsBeingEdited = b;
-    }
-
-    public boolean isBeingEdited() {
-        return mIsBeingEdited;
-    }
-
     public void setImgurData(Object data) {
         mImgurData = data;
     }
@@ -245,6 +236,13 @@ public class Submission implements Votable, Parcelable {
 
     public Object getImgurData() {
         return mImgurData;
+    }
+
+    private void update(Submission submission) {
+        num_comments = submission.num_comments;
+        created = submission.created;
+        created_utc = submission.created_utc;
+        score = submission.score;
     }
 
     public static class Media implements Serializable {
@@ -302,7 +300,6 @@ public class Submission implements Votable, Parcelable {
         dest.writeValue(this.likes);
         dest.writeSerializable(this.media);
         dest.writeInt(this.mVoteStatus);
-        dest.writeByte(mIsBeingEdited ? (byte) 1 : (byte) 0);
         dest.writeByte(mSelftextIsOpen ? (byte) 1 : (byte) 0);
         dest.writeByte(mIsNsfwShowing ? (byte) 1 : (byte) 0);
         dest.writeString(this.id);
@@ -352,7 +349,6 @@ public class Submission implements Votable, Parcelable {
         this.likes = (Boolean) in.readValue(Boolean.class.getClassLoader());
         this.media = (Media) in.readSerializable();
         this.mVoteStatus = in.readInt();
-        this.mIsBeingEdited = in.readByte() != 0;
         this.mSelftextIsOpen = in.readByte() != 0;
         this.mIsNsfwShowing = in.readByte() != 0;
         this.id = in.readString();

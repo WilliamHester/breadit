@@ -134,6 +134,11 @@ public class SubmissionViewHolder extends VotableViewHolder {
     }
 
     @Override
+    protected void onVoted() {
+        mCallback.onVoted(mSubmission);
+    }
+
+    @Override
     public void setContent(Object object) {
         super.setContent(object);
         mSubmission = (Submission) object;
@@ -334,6 +339,7 @@ public class SubmissionViewHolder extends VotableViewHolder {
         public void onCardClicked(Submission submission);
         public void onCardLongPressed(SubmissionViewHolder holder);
         public void onOptionsRowItemSelected(View view, Submission submission);
+        public void onVoted(Submission submission);
         public boolean isFrontPage();
     }
 }

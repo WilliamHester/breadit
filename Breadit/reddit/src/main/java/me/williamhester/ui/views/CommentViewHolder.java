@@ -108,6 +108,11 @@ public class CommentViewHolder extends VotableViewHolder {
         });
     }
 
+    @Override
+    protected void onVoted() {
+        // Don't do anything
+    }
+
     public void setContent(Object comment) {
         super.setContent(comment);
         mComment = (Comment) comment;

@@ -114,7 +114,7 @@ public class HtmlParser {
                 mLinks.add(new Link(ssb.toString(), url));
                 return new LinkSpan(url);
             } else if (tag.equalsIgnoreCase("li")) {
-                return new BulletSpan(BulletSpan.STANDARD_GAP_WIDTH, Color.CYAN);
+                return new BulletSpan(BulletSpan.STANDARD_GAP_WIDTH, 0xfff68026);
             }
         }
         return null;

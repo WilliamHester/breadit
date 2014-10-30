@@ -41,15 +41,22 @@ public abstract class VotableViewHolder extends RecyclerView.ViewHolder {
             public void onRightToLeftSwipe() {
                 mVotable.setVoteStatus(mVotable.getVoteStatus() == Votable.DOWNVOTED ? Votable.NEUTRAL : Votable.DOWNVOTED);
                 RedditApi.vote(itemView.getContext(), mVotable);
+                onVoted();
             }
 
             @Override
             public void onLeftToRightSwipe() {
                 mVotable.setVoteStatus(mVotable.getVoteStatus() == Votable.UPVOTED ? Votable.NEUTRAL : Votable.UPVOTED);
                 RedditApi.vote(itemView.getContext(), mVotable);
+                onVoted();
             }
         });
     }
+
+    /**
+     * Called by the SwipeListener to communicate to the subclass that the votable was just voted on
+     */
+    protected abstract void onVoted();
 
     public void setContent(Object object) {
         if (object instanceof Votable) {

@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.text.TextUtils;
@@ -129,8 +128,7 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
             }
         });
 
-        mSwipeRefreshLayout.setColorSchemeResources(R.color.orangered, R.color.periwinkle,
-                R.color.orangered, R.color.periwinkle);
+        mSwipeRefreshLayout.setColorSchemeResources(R.color.orangered);
         if (mSubmissionList.size() == 0) {
             populateSubmissions();
         }
@@ -380,6 +378,11 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
                 inflateOverflowPopupMenu(view, submission);
                 break;
         }
+    }
+
+    @Override
+    public void onVoted(Submission submission) {
+        // Don't do anything
     }
 
     @Override

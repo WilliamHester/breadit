@@ -1,6 +1,7 @@
 package me.williamhester.ui.fragments;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -536,6 +537,16 @@ public class CommentFragment extends AccountFragment {
                     inflateOverflowPopupMenu(view, submission);
                     break;
             }
+        }
+
+        @Override
+        public void onVoted(Submission submission) {
+            Bundle data = new Bundle();
+            Intent i = new Intent();
+            data.putString("name", submission.getName());
+            data.putInt("status", submission.getVoteStatus());
+            i.putExtras(data);
+            getActivity().setResult(Activity.RESULT_OK, i);
         }
 
         @Override

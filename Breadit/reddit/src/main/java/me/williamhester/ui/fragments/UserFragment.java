@@ -195,6 +195,11 @@ public class UserFragment extends AccountFragment {
         }
 
         @Override
+        public void onVoted(Submission submission) {
+
+        }
+
+        @Override
         public boolean isFrontPage() {
             return false;
         }
