@@ -27,7 +27,6 @@ public class SubmissionActivity extends ActionBarActivity implements ImageFragme
     public static final String TAB = "tab";
 
     private Submission mSubmission;
-    private Submission.Media mMedia;
     private String mPermalink;
     private Url mParser;
 
@@ -48,7 +47,6 @@ public class SubmissionActivity extends ActionBarActivity implements ImageFragme
                 if (mSubmission != null) {
                     setTitle("/r/" + mSubmission.getSubredditName());
                 }
-                mMedia = (Submission.Media) extras.getSerializable("media");
             }
         }
 
