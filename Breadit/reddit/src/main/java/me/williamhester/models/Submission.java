@@ -238,7 +238,7 @@ public class Submission implements Votable, Parcelable {
         return mImgurData;
     }
 
-    private void update(Submission submission) {
+    public void update(Submission submission) {
         num_comments = submission.num_comments;
         created = submission.created;
         created_utc = submission.created_utc;

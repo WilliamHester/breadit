@@ -665,14 +665,12 @@ public class CommentFragment extends AccountFragment {
             if (e != null) {
                 return;
             }
-            Object imgurData = null;
             if (mSubmission != null) {
-                // Don't want to fetch more Imgur data.
-                imgurData = mSubmission.getImgurData();
+                mSubmission.update(result);
+            } else {
+                mSubmission = result;
             }
-            mSubmission = result;
             getActivity().invalidateOptionsMenu();
-            mSubmission.setImgurData(imgurData);
             mCommentAdapter.notifyDataSetChanged();
             if (mCallback != null) {
                 mCallback.onSubmissionLoaded(mSubmission);
