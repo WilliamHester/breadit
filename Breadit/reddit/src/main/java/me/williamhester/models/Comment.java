@@ -36,7 +36,7 @@ public class Comment extends AbsComment implements Votable, Parcelable {
     private String mParentName;
     private String mDistinguished;
     private boolean mSaved;
-    private Boolean mVoteStatus;
+    private int mVoteStatus;
     private long mCreated;
     private long mCreatedUtc;
     private String mUps;
@@ -104,9 +104,9 @@ public class Comment extends AbsComment implements Votable, Parcelable {
             mUps = object.get("ups").getAsString();
         }
         try {
-            mVoteStatus = object.get("likes").getAsBoolean();
+            mVoteStatus = object.get("likes").getAsBoolean() ? UPVOTED : DOWNVOTED;
         } catch (UnsupportedOperationException e) {
-            mVoteStatus = null;
+            mVoteStatus = 0;
         }
         try {
             JsonObject replies = object.get("replies").getAsJsonObject();
@@ -137,21 +137,11 @@ public class Comment extends AbsComment implements Votable, Parcelable {
     }
 
     public int getVoteStatus() {
-        if (mVoteStatus == null) {
-            return NEUTRAL;
-        } else if (mVoteStatus) {
-            return UPVOTED;
-        } else {
-            return DOWNVOTED;
-        }
+        return mVoteStatus;
     }
 
     public void setVoteStatus(int status) {
-        if (status == NEUTRAL) {
-            mVoteStatus = null;
-        } else {
-            mVoteStatus = status == UPVOTED;
-        }
+        mVoteStatus = status;
     }
 
     public ResponseRedditWrapper getReplies() {
@@ -288,6 +278,7 @@ public class Comment extends AbsComment implements Votable, Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
         dest.writeSerializable(this.mReplies);
         dest.writeString(this.mApprovedBy);
         dest.writeString(this.mAuthor);
@@ -303,7 +294,7 @@ public class Comment extends AbsComment implements Votable, Parcelable {
         dest.writeString(this.mLinkUrl);
         dest.writeString(this.mDistinguished);
         dest.writeByte(mSaved ? (byte) 1 : (byte) 0);
-        dest.writeValue(this.mVoteStatus);
+        dest.writeInt(this.mVoteStatus);
         dest.writeLong(this.mCreated);
         dest.writeLong(this.mCreatedUtc);
         dest.writeString(this.mUps);
@@ -345,7 +336,7 @@ public class Comment extends AbsComment implements Votable, Parcelable {
         this.mLinkUrl = in.readString();
         this.mDistinguished = in.readString();
         this.mSaved = in.readByte() != 0;
-        this.mVoteStatus = (Boolean) in.readValue(Boolean.class.getClassLoader());
+        this.mVoteStatus = in.readInt();
         this.mCreated = in.readLong();
         this.mCreatedUtc = in.readLong();
         this.mUps = in.readString();
