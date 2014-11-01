@@ -21,13 +21,21 @@ public class SubmitActivity extends ActionBarActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.fragment_submit);
+        setContentView(R.layout.activity_submit);
         ViewPager viewPager = (ViewPager) findViewById(R.id.view_pager);
         ReplyFragmentPagerAdapter adapter =
                 new ReplyFragmentPagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(adapter);
 
         SlidingTabLayout tabs = (SlidingTabLayout) findViewById(R.id.sliding_tabs);
+        tabs.setCustomTabView(R.layout.tab_indicator, android.R.id.text1);
+        tabs.setDistributeEvenly(true);
+        tabs.setCustomTabColorizer(new SlidingTabLayout.TabColorizer() {
+            @Override
+            public int getIndicatorColor(int position) {
+                return getResources().getColor(R.color.auburn_orange);
+            }
+        });
         tabs.setViewPager(viewPager);
     }
 
