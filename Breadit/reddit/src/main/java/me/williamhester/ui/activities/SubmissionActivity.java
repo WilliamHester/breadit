@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 
 import me.williamhester.models.ImgurAlbum;
 import me.williamhester.models.ImgurImage;
@@ -28,12 +29,17 @@ public class SubmissionActivity extends ActionBarActivity implements ImageFragme
 
     private Submission mSubmission;
     private String mPermalink;
+    private Toolbar mToolbar;
     private Url mParser;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_content);
+
+        mToolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
+        mToolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
+        setSupportActionBar(mToolbar);
 
         if (savedInstanceState != null) {
             mParser = savedInstanceState.getParcelable("urlParser");
@@ -45,18 +51,12 @@ public class SubmissionActivity extends ActionBarActivity implements ImageFragme
             } else {
                 mSubmission = extras.getParcelable(SUBMISSION);
                 if (mSubmission != null) {
-                    setTitle("/r/" + mSubmission.getSubredditName());
+                    mToolbar.setTitle("/r/" + mSubmission.getSubredditName());
                 }
             }
         }
 
         setUpContent();
-
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setDisplayShowTitleEnabled(true);
-        }
     }
     
     @Override
@@ -75,7 +75,7 @@ public class SubmissionActivity extends ActionBarActivity implements ImageFragme
                     @Override
                     public void onSubmissionLoaded(Submission submission) {
                         mSubmission = submission;
-                        setTitle("/r/" + mSubmission.getSubredditName());
+                        mToolbar.setTitle("/r/" + mSubmission.getSubredditName());
                         mParser = new Url(mSubmission.getUrl());
                         invalidateOptionsMenu();
                     }

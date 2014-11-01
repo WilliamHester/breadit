@@ -1,9 +1,12 @@
 <resources>
-    <style name="_Breadit" parent="Theme.AppCompat">
-        <item name="android:colorPrimary">@color/darkest_gray</item>
-        <item name="android:colorPrimaryDark">@color/card_view_gray</item>
-        <item name="colorAccent">@color/auburn_orange</item>
-
-        <item name="android:windowBackground">@color/blackish</item>
+    <style name="AppTheme.21" parent="AppTheme">
+        <item name="windowActionBar">false</item>
     </style>
+
+
+    <style name="HeaderBar">
+        <item name="android:background">?colorPrimary</item>
+        <item name="android:elevation">@dimen/headerbar_elevation</item>
+    </style>
+
 </resources>

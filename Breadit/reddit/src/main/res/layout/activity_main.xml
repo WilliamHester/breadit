@@ -1,22 +1,38 @@
 <!-- A DrawerLayout is intended to be used as the top-level content view using match_parent for both width and height to consume the full space available. -->
-<me.williamhester.ui.views.HackyDrawerLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    style="@style/AppTheme"
-    tools:context="me.williamhester.ui.activities.MainActivity">
+    android:orientation="vertical">
 
     <FrameLayout
-        android:id="@+id/container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="wrap_content"
+        android:background="?colorPrimaryDark">
 
-    <FrameLayout android:id="@+id/navigation_drawer_container"
-        android:layout_width="@dimen/navigation_drawer_width"
+        <include layout="@layout/toolbar_actionbar" />
+
+    </FrameLayout>
+
+    <me.williamhester.ui.views.HackyDrawerLayout
+        android:id="@+id/drawer_layout"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="start"
-        android:background="@color/blackish"/>
+        style="@style/AppTheme"
+        tools:context="me.williamhester.ui.activities.MainActivity">
 
-</me.williamhester.ui.views.HackyDrawerLayout>
+        <FrameLayout
+            android:id="@+id/container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <FrameLayout android:id="@+id/navigation_drawer_container"
+            android:layout_width="@dimen/navigation_drawer_width"
+            android:layout_height="match_parent"
+            android:layout_gravity="start"
+            android:background="@color/blackish"/>
+
+    </me.williamhester.ui.views.HackyDrawerLayout>
+
+</LinearLayout>

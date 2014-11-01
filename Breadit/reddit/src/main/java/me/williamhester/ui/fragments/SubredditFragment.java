@@ -8,7 +8,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.PopupMenu;
 import android.text.TextUtils;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,7 +19,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.ListView;
-import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
@@ -185,7 +186,8 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_sort) {
             View anchor = getActivity().findViewById(R.id.action_sort);
-            PopupMenu popupMenu = new PopupMenu(getActivity(), getActivity().findViewById(R.id.action_sort));
+            PopupMenu popupMenu = new PopupMenu(getActivity(), anchor, Gravity.TOP);
+            anchor.setOnTouchListener(popupMenu.getDragToOpenListener());
             popupMenu.setOnMenuItemClickListener(new PrimarySortClickListener(anchor));
             popupMenu.inflate(R.menu.primary_sorts);
             popupMenu.show();

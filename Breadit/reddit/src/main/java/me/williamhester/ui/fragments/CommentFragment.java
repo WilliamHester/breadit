@@ -9,6 +9,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -16,7 +17,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.PopupMenu;
 
 import com.koushikdutta.async.future.FutureCallback;
 
@@ -137,8 +137,9 @@ public class CommentFragment extends AccountFragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_sort_comments: {
-                PopupMenu popupMenu = new PopupMenu(mContext,
-                        getActivity().findViewById(R.id.action_sort_comments));
+                View anchor = getActivity().findViewById(R.id.action_sort_comments);
+                PopupMenu popupMenu = new PopupMenu(mContext, anchor);
+                anchor.setOnTouchListener(popupMenu.getDragToOpenListener());
                 popupMenu.setOnMenuItemClickListener(mSortClickListener);
                 popupMenu.inflate(R.menu.comment_sorts);
                 popupMenu.show();

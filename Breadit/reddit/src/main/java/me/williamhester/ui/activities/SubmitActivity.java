@@ -6,6 +6,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 
 import me.williamhester.reddit.R;
 import me.williamhester.ui.fragments.SubmitLinkFragment;
@@ -22,6 +23,11 @@ public class SubmitActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_submit);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
+        toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
+        setSupportActionBar(toolbar);
+        toolbar.setTitle(R.string.submit);
         ViewPager viewPager = (ViewPager) findViewById(R.id.view_pager);
         ReplyFragmentPagerAdapter adapter =
                 new ReplyFragmentPagerAdapter(getSupportFragmentManager());
