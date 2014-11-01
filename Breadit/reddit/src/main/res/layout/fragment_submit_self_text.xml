@@ -4,25 +4,14 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <EditText android:id="@+id/compose_to"
+    <EditText android:id="@+id/title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
-        android:layout_marginTop="16dp"
-        android:inputType="textNoSuggestions"
-        android:singleLine="true"
-        android:fontFamily="sans-serif-thin"
-        android:gravity="top|start"/>
-
-    <EditText android:id="@+id/subject"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginTop="16dp"
         android:inputType="textCapSentences"
-        android:hint="@string/subject"
+        android:hint="@string/post_title"
         android:fontFamily="sans-serif-thin"
         android:gravity="top|start"
         android:maxLines="3"/>

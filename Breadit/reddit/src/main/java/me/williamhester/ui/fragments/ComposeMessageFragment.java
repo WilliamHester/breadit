@@ -5,8 +5,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -19,7 +22,7 @@ import me.williamhester.reddit.R;
 /**
  * Created by william on 10/21/14.
  */
-public class ComposeMessageFragment extends MarkdownBodyFragment {
+public class ComposeMessageFragment extends AsyncSendFragment {
 
     public static final int COMPLETE_CAPTCHA = 1;
 
@@ -41,17 +44,17 @@ public class ComposeMessageFragment extends MarkdownBodyFragment {
     }
 
     @Override
-    protected int getLayoutId() {
-        return R.layout.fragment_message;
+    protected int getContainerId() {
+        return R.id.body_container;
     }
 
     @Override
-    protected CharSequence getBodyHint() {
+    protected String getBodyHint() {
         return getResources().getString(R.string.compose_message);
     }
 
     @Override
-    protected CharSequence getButtonText() {
+    protected String getButtonText() {
         return getResources().getString(R.string.send);
     }
 
@@ -67,7 +70,7 @@ public class ComposeMessageFragment extends MarkdownBodyFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View v = super.onCreateView(inflater, container, savedInstanceState);
+        View v = inflater.inflate(R.layout.fragment_message, container, false);
 
         mComposeTo = (EditText) v.findViewById(R.id.compose_to);
         mSubject = (EditText) v.findViewById(R.id.subject);
@@ -146,7 +149,8 @@ public class ComposeMessageFragment extends MarkdownBodyFragment {
                     }
                 } else {
                     RedditApi.compose(getActivity(), mComposeTo.getText().toString(),
-                            mSubject.getText().toString(), mBody.getText().toString(), sentMessage);
+                            mSubject.getText().toString(), mBodyFragment.getMarkdownBody(),
+                            sentMessage);
                 }
             }
         };
@@ -161,7 +165,7 @@ public class ComposeMessageFragment extends MarkdownBodyFragment {
     private void showCaptchaDialog() {
         CaptchaDialogFragment fragment = CaptchaDialogFragment
                 .newInstance(mComposeTo.getText().toString(),
-                        mSubject.getText().toString(), mBody.getText().toString());
+                        mSubject.getText().toString(), mBodyFragment.getMarkdownBody());
         fragment.setTargetFragment(this, COMPLETE_CAPTCHA);
         fragment.show(getFragmentManager(), "captcha");
     }

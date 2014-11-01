@@ -71,6 +71,9 @@
         <activity android:name="me.williamhester.ui.activities.LogInActivity"
             android:label="@string/login">
         </activity>
+        <activity android:name="me.williamhester.ui.activities.SubmitActivity"
+            android:label="@string/submit">
+        </activity>
     </application>
 
 </manifest>

@@ -568,6 +568,23 @@ public class RedditApi {
                 .setCallback(callback);
     }
 
+    public static void getSuggestedTitle(Context context, String url,
+                                         FutureCallback<JsonObject> callback) {
+        Ion.with(context)
+                .load(REDDIT_URL + "/api/fetch_title")
+                .addHeaders(getStandardHeaders())
+                .setBodyParameter("url", url)
+                .asJsonObject()
+                .setCallback(callback);
+    }
+
+    public static void submit(Context context, Map<String, List<String>> params) {
+//        Ion.with(context)
+//                .load(REDDIT_URL + "/api/submit")
+//                .addHeaders(getStandardHeaders())
+//                .setBodyParameters()
+    }
+
     public static void printOutLongString(String string) {
         for (int i = 0; i < string.length(); i += 1000) {
             Log.d("RedditApi", string.substring(i, Math.min(string.length(), i + 1000)));

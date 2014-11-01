@@ -5,15 +5,11 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -24,35 +20,39 @@ import me.williamhester.reddit.R;
 /**
  * Created by william on 10/21/14.
  */
-public abstract class MarkdownBodyFragment extends Fragment {
+public class MarkdownBodyFragment extends Fragment {
 
     private static final int MODE_NONE = 0;
     private static final int MODE_BULLETS = 1;
     private static final int MODE_NUMBERED = 2;
 
-    protected EditText mBody;
-    protected boolean mKillOnStart; // Fragments don't like to be killed asynchronously
+    private EditText mBody;
+    private String mBodyHint;
+    private String mBodyText;
     private int mListMode;
+
+    public static MarkdownBodyFragment newInstance(String bodyHint) {
+        Bundle args = new Bundle();
+        args.putString("bodyHint", bodyHint);
+        MarkdownBodyFragment bodyFragment = new MarkdownBodyFragment();
+        bodyFragment.setArguments(args);
+        return bodyFragment;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setHasOptionsMenu(true);
+        mBodyHint = getArguments().getString("bodyHint");
         if (savedInstanceState != null) {
-            mKillOnStart = savedInstanceState.getBoolean("killOnStart");
             mListMode = savedInstanceState.getInt("listMode");
+            mBodyText = savedInstanceState.getString("body");
         }
     }
 
-    protected abstract CharSequence getBodyHint();
-    protected abstract CharSequence getButtonText();
-    protected abstract int getLayoutId();
-    protected abstract void onSaveClick();
-
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View v = inflater.inflate(getLayoutId(), container, false);
+        View v = inflater.inflate(R.layout.fragment_markdown, container, false);
 
         final DecimalFormat format = new DecimalFormat("##,##0");
         final TextView charCount = (TextView) v.findViewById(R.id.char_count);
@@ -74,21 +74,6 @@ public abstract class MarkdownBodyFragment extends Fragment {
         actionNumberedList.setOnClickListener(mTextFormattingClickListener);
 
         charCount.setText(format.format(mBody.length()) + "/10,000");
-        mBody.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) { }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                if (s.length() > 10000) {
-                    s.delete(10000, s.length()); // Remove the 10,000th character.
-                }
-                charCount.setText(format.format(s.length()) + "/10,000");
-            }
-        });
         mBody.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -106,23 +91,11 @@ public abstract class MarkdownBodyFragment extends Fragment {
                 return false;
             }
         });
-        mBody.setHint(getBodyHint());
+        mBody.setHint(mBodyHint);
+        if (mBodyText != null) {
+            mBody.setText(mBodyText);
+        }
         return v;
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.fragment_reply, menu);
-
-        Button button = (Button) menu.findItem(R.id.action_reply).getActionView();
-        button.setText(getButtonText());
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onSaveClick();
-            }
-        });
     }
 
     @Override
@@ -133,18 +106,14 @@ public abstract class MarkdownBodyFragment extends Fragment {
         InputMethodManager imm =  (InputMethodManager) getActivity()
                 .getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.showSoftInput(mBody, InputMethodManager.SHOW_IMPLICIT);
-
-        if (mKillOnStart) {
-            getFragmentManager().popBackStack();
-        }
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        outState.putBoolean("killOnStart", mKillOnStart);
         outState.putInt("listMode", mListMode);
+        outState.putString("body", mBody.getText().toString());
     }
 
     private View.OnClickListener mTextFormattingClickListener = new View.OnClickListener() {
@@ -191,6 +160,29 @@ public abstract class MarkdownBodyFragment extends Fragment {
             }
         }
     };
+
+    /**
+     * Gets the body of the Fragment
+     *
+     * @return the string that the EditText in the body contains
+     */
+    public String getMarkdownBody() {
+        return mBody.getText().toString();
+    }
+
+    /**
+     * Sets the text of the Markdown body in the Fragment. If the fragment's view is not yet
+     * created, the markdown body will be set during onCreateView.
+     *
+     * @param text the text to set in the Markdown body
+     */
+    public void setMarkdownBody(String text) {
+        if (mBody == null) {
+            mBodyText = text;
+        } else {
+            mBody.setText(text);
+        }
+    }
 
     private void wrapSelection(String wrapper) {
         wrapSelection(wrapper, wrapper);

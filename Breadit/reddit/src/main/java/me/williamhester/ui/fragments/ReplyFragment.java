@@ -6,24 +6,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.koushikdutta.async.future.FutureCallback;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import me.williamhester.models.Thing;
@@ -34,7 +24,7 @@ import me.williamhester.reddit.R;
 /**
  * Created by william on 10/19/14.
  */
-public class ReplyFragment extends MarkdownBodyFragment {
+public class ReplyFragment extends AsyncSendFragment {
 
     private boolean mIsEditing;
 
@@ -56,11 +46,6 @@ public class ReplyFragment extends MarkdownBodyFragment {
     }
 
     @Override
-    protected int getLayoutId() {
-        return R.layout.fragment_reply;
-    }
-
-    @Override
     protected String getBodyHint() {
         Thing parent = getArguments().getParcelable("thing");
         if (parent != null) {
@@ -76,6 +61,11 @@ public class ReplyFragment extends MarkdownBodyFragment {
     }
 
     @Override
+    protected int getContainerId() {
+        return R.id.body_container;
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -83,15 +73,22 @@ public class ReplyFragment extends MarkdownBodyFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = super.onCreateView(inflater, container, savedInstanceState);
-        if (mIsEditing && savedInstanceState == null) {
-            Votable votable = getArguments().getParcelable("votable");
-            mBody.setText(votable.getRawMarkdown());
-        }
-        return view;
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_reply, container, false);
     }
 
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        if (mIsEditing && savedInstanceState == null) {
+            Votable votable = getArguments().getParcelable("votable");
+            mBodyFragment.setMarkdownBody(votable.getRawMarkdown());
+        }
+    }
+
+    @Override
     protected void onSaveClick() {
         final ProgressDialog dialog = new ProgressDialog(getActivity());
         dialog.setMessage(getResources().getString(R.string.sending_reply));
@@ -103,7 +100,8 @@ public class ReplyFragment extends MarkdownBodyFragment {
             @Override
             public void onCompleted(final Exception e,
                                     final ArrayList<Thing> result) {
-                mBody.post(new Runnable() {
+                if (getView() != null)
+                getView().post(new Runnable() {
                     @Override
                     public void run() {
                         dialog.dismiss();
@@ -122,7 +120,7 @@ public class ReplyFragment extends MarkdownBodyFragment {
                         i.putExtras(resultBundle);
                         InputMethodManager imm =  (InputMethodManager) getActivity()
                                 .getSystemService(Context.INPUT_METHOD_SERVICE);
-                        imm.hideSoftInputFromWindow(mBody.getWindowToken(), 0);
+                        imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);
                         getTargetFragment().onActivityResult(getTargetRequestCode(),
                                 Activity.RESULT_OK, i);
                         if (isResumed()) {
@@ -135,10 +133,10 @@ public class ReplyFragment extends MarkdownBodyFragment {
             }
         };
         if (mIsEditing) {
-            votable.setRawMarkdown(mBody.getText().toString());
+            votable.setRawMarkdown(mBodyFragment.getMarkdownBody());
             RedditApi.editThing(votable, callback);
         } else {
-            RedditApi.replyToComment(getActivity(), parent, mBody.getText().toString(),
+            RedditApi.replyToComment(getActivity(), parent, mBodyFragment.getMarkdownBody(),
                     callback);
         }
     }

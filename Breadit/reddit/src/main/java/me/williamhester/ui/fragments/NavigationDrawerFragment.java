@@ -43,6 +43,7 @@ import me.williamhester.models.Subreddit;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.activities.SettingsActivity;
+import me.williamhester.ui.activities.SubmitActivity;
 
 /**
  * The fragment that contains the user's subreddits and info.
@@ -226,6 +227,15 @@ public class NavigationDrawerFragment extends AccountFragment {
         });
         TextView unreadMessages = (TextView) v.findViewById(R.id.unread_count);
         unreadMessages.setText("0 Unread Messages");
+
+        View submit = v.findViewById(R.id.submit);
+        submit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(getActivity(), SubmitActivity.class);
+                startActivity(i);
+            }
+        });
 
         View settings = v.findViewById(R.id.preferences);
         settings.setOnClickListener(new View.OnClickListener() {

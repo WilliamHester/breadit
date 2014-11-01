@@ -1,115 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:layout_width="match_parent"
+    android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <EditText android:id="@+id/reply_body"
+    <FrameLayout android:id="@+id/body_container"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_margin="20dp"
-        android:hint="@string/reply_hint"
-        android:fontFamily="sans-serif-thin"
-        android:inputType="textCapSentences|textMultiLine"
-        android:gravity="top|start"
-        android:background="@null"/>
-
-    <TextView android:id="@+id/char_count"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="sans-serif-thin"
-        android:padding="8dp"
-        android:layout_gravity="end" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:background="@color/darker_gray"/>
-
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:scrollbars="none">
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <ImageView android:id="@+id/action_link"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
-                android:padding="8dp"
-                android:src="@drawable/ic_link"/>
-
-            <ImageView android:id="@+id/action_bold"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
-                android:padding="8dp"
-                android:src="@drawable/action_bold" />
-
-            <ImageView android:id="@+id/action_italics"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
-                android:padding="8dp"
-                android:src="@drawable/action_italics" />
-
-            <ImageView android:id="@+id/action_strikethrough"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
-                android:padding="8dp"
-                android:src="@drawable/action_strikethrough" />
-
-            <ImageView android:id="@+id/action_superscript"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
-                android:padding="8dp"
-                android:src="@drawable/action_superscript" />
-
-            <FrameLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-
-                <ImageView android:id="@+id/action_bullets"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    android:padding="8dp"
-                    android:src="@drawable/action_bullets" />
-
-                <View android:id="@+id/bullet_selector"
-                    android:layout_width="44dp"
-                    android:layout_height="4dp"
-                    android:visibility="gone"
-                    android:layout_gravity="bottom"
-                    android:background="@color/auburn_orange"/>
-
-            </FrameLayout>
-
-            <FrameLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-
-                <ImageView android:id="@+id/action_numbered_list"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    android:padding="8dp"
-                    android:src="@drawable/action_numbered_list" />
-
-                <View android:id="@+id/numbered_list_selector"
-                    android:layout_width="44dp"
-                    android:layout_height="4dp"
-                    android:visibility="gone"
-                    android:layout_gravity="bottom"
-                    android:background="@color/auburn_orange"/>
-
-            </FrameLayout>
-
-        </LinearLayout>
-
-    </ScrollView>
+        android:layout_height="match_parent"/>
 
 </LinearLayout>

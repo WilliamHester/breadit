@@ -209,4 +209,13 @@
     <string name="email_sent">Recovery email sent.</string>
     <string name="send_recovery_email">Send Recovery Email</string>
 
+    <!-- SubmitLinkFragment -->
+    <string name="link">Link</string>
+    <string name="imgur">Imgur Upload</string>
+    <string name="url">URL</string>
+    <string name="suggest_title">Suggest title</string>
+
+    <!-- SubmitSelfTextFragment -->
+    <string name="self_text">Self text</string>
+
 </resources>
