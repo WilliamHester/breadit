@@ -44,6 +44,10 @@
         <item quantity="one">point</item>
         <item quantity="other">points</item>
     </plurals>
+    <plurals name="comments">
+        <item quantity="one">comment</item>
+        <item quantity="other">comments</item>
+    </plurals>
     <string name="close">Close</string>
     <string name="load_more_comments">Load more comments…</string>
 

@@ -146,7 +146,9 @@ public class SubmissionViewHolder extends VotableViewHolder {
         mOptionsRow.setVisibility(View.GONE);
         mBody.setText(Html.fromHtml(mSubmission.getTitle()).toString());
         mDomain.setText(mSubmission.getDomain());
-        mCommentData.setText(mSubmission.getNumberOfComments() + " comments");
+        mCommentData.setText(mSubmission.getNumberOfComments() + " "
+                + itemView.getResources().getQuantityString(R.plurals.comments,
+                mSubmission.getNumberOfComments()));
         mSubreddit.setText(mSubmission.getSubredditName().toLowerCase());
         mMetadata.setText(mSubmission.getAuthor() + " " + mSubmission.getScore() + " "
                 + itemView.getResources().getQuantityString(R.plurals.points,
@@ -290,6 +292,8 @@ public class SubmissionViewHolder extends VotableViewHolder {
         expandOptions(itemView.findViewById(R.id.option_go_to_subreddit),
                 itemView.findViewById(R.id.option_save),
                 itemView.findViewById(R.id.option_overflow));
+        itemView.findViewById(R.id.option_reply).setVisibility(AccountManager.isLoggedIn()
+                ? View.VISIBLE : View.GONE);
         itemView.findViewById(R.id.option_edit).setVisibility(AccountManager.isLoggedIn()
                 && AccountManager.getAccount().getUsername()
                 .equalsIgnoreCase(mSubmission.getAuthor()) ? View.VISIBLE : View.GONE);
