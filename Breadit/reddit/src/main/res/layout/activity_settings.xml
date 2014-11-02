@@ -5,10 +5,9 @@
     android:orientation="vertical"
     tools:context="me.williamhester.ui.activities.SettingsActivity">
 
-    <FrameLayout
+    <FrameLayout style="@style/HeaderBar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?colorPrimaryDark">
+        android:layout_height="wrap_content">
 
         <include layout="@layout/toolbar_actionbar" />
 

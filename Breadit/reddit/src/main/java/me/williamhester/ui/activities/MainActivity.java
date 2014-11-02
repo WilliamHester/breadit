@@ -7,7 +7,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
 import android.view.Menu;
 
 import me.williamhester.reddit.R;
@@ -27,13 +26,12 @@ public class MainActivity extends ActionBarActivity
     private NavigationDrawerFragment mNavigationDrawerFragment;
     private SubredditFragment mSubredditFragment;
     private String mSubreddit;
-    private Toolbar mToolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mToolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
 
         if (Intent.ACTION_VIEW.equals(getIntent().getAction())) {
             if (getIntent().getExtras() != null) {
@@ -48,13 +46,11 @@ public class MainActivity extends ActionBarActivity
             mSubreddit = "";
         }
 
-        setSupportActionBar(mToolbar);
+        setSupportActionBar(toolbar);
 
         if (mNavigationDrawerFragment == null) {
             mNavigationDrawerFragment = NavigationDrawerFragment.newInstance();
         }
-
-        updateActionBar(null);
 
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.navigation_drawer_container, mNavigationDrawerFragment,
@@ -128,14 +124,6 @@ public class MainActivity extends ActionBarActivity
         }
     }
 
-    private void updateActionBar(String sub) {
-        if (TextUtils.isEmpty(sub)) {
-            mToolbar.setTitle("FrontPage");
-        } else {
-            mToolbar.setTitle("/r/" + sub);
-        }
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
@@ -148,7 +136,6 @@ public class MainActivity extends ActionBarActivity
         if (drawerLayout != null) {
             drawerLayout.setEnabled(false);
             drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-//            getSupportActionBar().setHomeButtonEnabled(false);
         }
     }
 
@@ -157,7 +144,6 @@ public class MainActivity extends ActionBarActivity
         DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawerLayout.setEnabled(true);
         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-//        getSupportActionBar().setHomeButtonEnabled(true);
     }
 
     @Override

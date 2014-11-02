@@ -6,10 +6,9 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <FrameLayout
+    <FrameLayout style="@style/HeaderBar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?colorPrimaryDark">
+        android:layout_height="wrap_content">
 
         <include layout="@layout/toolbar_actionbar" />
 
@@ -19,7 +18,6 @@
         android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        style="@style/AppTheme"
         tools:context="me.williamhester.ui.activities.MainActivity">
 
         <FrameLayout
@@ -31,7 +29,7 @@
             android:layout_width="@dimen/navigation_drawer_width"
             android:layout_height="match_parent"
             android:layout_gravity="start"
-            android:background="@color/blackish"/>
+            android:background="?colorPrimaryDark"/>
 
     </me.williamhester.ui.views.HackyDrawerLayout>
 

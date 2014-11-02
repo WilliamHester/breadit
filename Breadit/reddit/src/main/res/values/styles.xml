@@ -19,7 +19,7 @@
         <item name="android:textColor">#fff</item>
         <item name="android:textSize">18sp</item>
         <item name="android:fontFamily">sans-serif-light</item>
-        <item name="android:textAllCaps">true</item>
+        <!--<item name="android:textAllCaps">true</item>-->
     </style>
 
     <style name="ActionBarThemeOverlay" parent="">

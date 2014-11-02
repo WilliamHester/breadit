@@ -4,10 +4,9 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <FrameLayout
+    <FrameLayout style="@style/HeaderBar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?colorPrimaryDark">
+        android:layout_height="wrap_content">
 
         <include layout="@layout/toolbar_actionbar" />
 
