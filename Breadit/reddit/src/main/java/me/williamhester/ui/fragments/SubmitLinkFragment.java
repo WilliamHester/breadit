@@ -26,6 +26,7 @@ import me.williamhester.reddit.R;
 public class SubmitLinkFragment extends SubmitFragment {
 
     private EditText mUrl;
+    private EditText mTitle;
 
     public static SubmitLinkFragment newInstance() {
         return new SubmitLinkFragment();
@@ -35,7 +36,7 @@ public class SubmitLinkFragment extends SubmitFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_submit_link, container, false);
-        final EditText title = (EditText) v.findViewById(R.id.title);
+        mTitle = (EditText) v.findViewById(R.id.title);
         mUrl = (EditText) v.findViewById(R.id.url);
         Button suggest = (Button) v.findViewById(R.id.suggest_title);
 
@@ -53,7 +54,7 @@ public class SubmitLinkFragment extends SubmitFragment {
                                 JsonArray array = result.get("jquery").getAsJsonArray();
                                 JsonArray suggested = array.get(12).getAsJsonArray();
                                 JsonArray nameArray = suggested.get(3).getAsJsonArray();
-                                title.setText(nameArray.get(0).getAsString());
+                                mTitle.setText(nameArray.get(0).getAsString());
                             }
                         });
             }
@@ -66,8 +67,10 @@ public class SubmitLinkFragment extends SubmitFragment {
         Map<String, List<String>> body = new HashMap<>();
         body.put("kind", new ArrayList<String>(1));
         body.get("kind").add("link");
-        body.put("link", new ArrayList<String>(1));
-        body.get("link").add(mUrl.getText().toString());
+        body.put("url", new ArrayList<String>(1));
+        body.get("url").add(mUrl.getText().toString());
+        body.put("title", new ArrayList<String>(1));
+        body.get("title").add(mTitle.getText().toString());
         return body;
     }
 }

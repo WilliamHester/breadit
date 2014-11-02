@@ -7,16 +7,27 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
+import android.widget.Button;
 
+import java.util.HashMap;
+
+import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
+import me.williamhester.ui.fragments.SubmitFragment;
 import me.williamhester.ui.fragments.SubmitLinkFragment;
 import me.williamhester.ui.fragments.SubmitSelfTextFragment;
 import me.williamhester.ui.views.SlidingTabLayout;
 
 /**
+ * This Activity houses a ViewPager and a button that sends the form data collected by calling
+ * SubmitFragment.getSubmitBody() on the currently selected Fragment.
+ *
  * Created by william on 10/31/14.
  */
 public class SubmitActivity extends ActionBarActivity {
+
+    private HashMap<Integer, SubmitFragment> mFragments;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -28,7 +39,7 @@ public class SubmitActivity extends ActionBarActivity {
         toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
         setSupportActionBar(toolbar);
         toolbar.setTitle(R.string.submit);
-        ViewPager viewPager = (ViewPager) findViewById(R.id.view_pager);
+        final ViewPager viewPager = (ViewPager) findViewById(R.id.view_pager);
         ReplyFragmentPagerAdapter adapter =
                 new ReplyFragmentPagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(adapter);
@@ -43,21 +54,34 @@ public class SubmitActivity extends ActionBarActivity {
             }
         });
         tabs.setViewPager(viewPager);
+
+        Button submit = (Button) findViewById(R.id.submit);
+        submit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                RedditApi.submit(v.getContext(),
+                        mFragments.get(viewPager.getCurrentItem()).getSubmitBody(),
+                        "breaditapp");
+            }
+        });
     }
 
     private class ReplyFragmentPagerAdapter extends FragmentPagerAdapter {
 
         public ReplyFragmentPagerAdapter(FragmentManager fm) {
             super(fm);
+            mFragments = new HashMap<>();
         }
 
         @Override
         public Fragment getItem(int position) {
             switch (position) {
                 case 0:
-                    return SubmitLinkFragment.newInstance();
+                    mFragments.put(0, SubmitLinkFragment.newInstance());
+                    return mFragments.get(0);
                 case 1:
-                    return SubmitSelfTextFragment.newInstance();
+                    mFragments.put(1, SubmitSelfTextFragment.newInstance());
+                    return mFragments.get(1);
                 case 2:
                     // Imgur submit
             }
