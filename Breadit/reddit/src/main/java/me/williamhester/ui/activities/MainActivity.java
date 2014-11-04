@@ -9,6 +9,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 
+import me.williamhester.models.Subreddit;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.fragments.ImageFragment;
 import me.williamhester.ui.fragments.ImagePagerFragment;
@@ -41,27 +42,30 @@ public class MainActivity extends ActionBarActivity
                 if (mSubreddit != null)
                     mSubreddit = mSubreddit.substring(mSubreddit.indexOf("/subreddit/") + 11);
             }
-            mNavigationDrawerFragment = NavigationDrawerFragment.newInstance(mSubreddit);
         } else {
             mSubreddit = "";
         }
 
         setSupportActionBar(toolbar);
 
-        if (mNavigationDrawerFragment == null) {
-            mNavigationDrawerFragment = NavigationDrawerFragment.newInstance();
+        Fragment f = getSupportFragmentManager().findFragmentById(R.id.drawer_container);
+        if (f == null) {
+            mNavigationDrawerFragment = NavigationDrawerFragment.newInstance(mSubreddit);
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.drawer_container, mNavigationDrawerFragment, "NavigationDrawer")
+                    .commit();
+        } else {
+            mNavigationDrawerFragment = (NavigationDrawerFragment) f;
         }
 
-        getSupportFragmentManager().beginTransaction()
-                .add(R.id.navigation_drawer_container, mNavigationDrawerFragment,
-                        "NavigationDrawer")
-                .commit();
-
-        if (getSupportFragmentManager().findFragmentByTag(mSubreddit) == null) {
+        Fragment sub = getSupportFragmentManager().findFragmentByTag(mSubreddit);
+        if (sub == null) {
             mSubredditFragment = SubredditFragment.newInstance(mSubreddit);
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, mSubredditFragment, mSubreddit)
+                    .replace(R.id.container, mSubredditFragment, mSubreddit)
                     .commit();
+        } else {
+            mSubredditFragment = (SubredditFragment) sub;
         }
 
         getSupportFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
