@@ -11,6 +11,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -52,9 +53,7 @@ import me.williamhester.ui.activities.SubmitActivity;
 public class NavigationDrawerFragment extends AccountFragment {
 
     private NavigationDrawerCallbacks mCallbacks;
-    private ActionBarDrawerToggle mDrawerToggle;
 
-    private DrawerLayout mDrawerLayout;
     private final ArrayList<Subreddit> mSubredditList = new ArrayList<>();
     private BaseAdapter mSubredditArrayAdapter;
 
@@ -97,63 +96,11 @@ public class NavigationDrawerFragment extends AccountFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_navigation_drawer, container, false);
-        mDrawerLayout = (DrawerLayout) container.getRootView().findViewById(R.id.drawer_layout);
         mSubredditArrayAdapter = new SubredditAdapter(mSubredditList);
         ListView drawerListView = (ListView) v.findViewById(R.id.list);
         drawerListView.addHeaderView(createHeaderView(inflater));
         drawerListView.setAdapter(mSubredditArrayAdapter);
         loadSubreddits(v);
-
-        drawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                selectItem(i - 2 >= 0 ? mSubredditList.get(i - 2).getDisplayName() : null);
-            }
-        });
-
-        Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar_actionbar);
-//        actionBar.setDisplayHomeAsUpEnabled(true);
-//        actionBar.setHomeButtonEnabled(true);
-
-        // ActionBarDrawerToggle ties together the the proper interactions
-        // between the navigation drawer and the action bar app icon.
-        mDrawerToggle = new ActionBarDrawerToggle(
-                getActivity(),                    /* host Activity */
-                mDrawerLayout,                    /* DrawerLayout object */
-                toolbar,
-                R.string.navigation_drawer_open,  /* "open drawer" description for accessibility */
-                R.string.navigation_drawer_close  /* "close drawer" description for accessibility */
-        ) {
-            @Override
-            public void onDrawerClosed(View drawerView) {
-                super.onDrawerClosed(drawerView);
-                if (!isAdded()) {
-                    return;
-                }
-                mIsOpen = false;
-                getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
-            }
-
-            @Override
-            public void onDrawerOpened(View drawerView) {
-                super.onDrawerOpened(drawerView);
-                if (!isAdded()) {
-                    return;
-                }
-                mIsOpen = true;
-                getActivity().invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
-            }
-        };
-
-        // Defer code dependent on restoration of previous instance state.
-        mDrawerLayout.post(new Runnable() {
-            @Override
-            public void run() {
-                mDrawerToggle.syncState();
-            }
-        });
-
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
 
         return v;
     }
@@ -276,6 +223,7 @@ public class NavigationDrawerFragment extends AccountFragment {
     private void loadSubreddits(View view) {
         mSubredditList.clear();
         if (view != null) {
+            ListView drawerListView = (ListView) view.findViewById(R.id.list);
             ListView listView = (ListView) view.findViewById(R.id.list);
             if (mAccount != null) {
                 mSubredditList.clear();
@@ -336,17 +284,26 @@ public class NavigationDrawerFragment extends AccountFragment {
                     listView.setAdapter(mSubredditArrayAdapter);
                 }
                 mSubredditArrayAdapter.notifyDataSetChanged();
+                drawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                        selectItem(i - 2 >= 0 ? mSubredditList.get(i - 2).getDisplayName() : null);
+                    }
+                });
             } else {
-                String[] subs = getResources().getStringArray(R.array.default_subreddits);
+                final String[] subs = getResources().getStringArray(R.array.default_subreddits);
                 listView.setAdapter(new SubredditStringAdapter(subs));
+                drawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                        selectItem(i - 2 >= 0 ? subs[i - 2] : null);
+                    }
+                });
             }
         }
     }
 
     private void selectItem(String subreddit) {
-        if (mDrawerLayout != null) {
-            mDrawerLayout.closeDrawers();
-        }
         if (mCallbacks != null) {
             mCallbacks.onSubredditSelected(subreddit);
         }
@@ -413,29 +370,6 @@ public class NavigationDrawerFragment extends AccountFragment {
         mCallbacks = null;
     }
 
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        // Forward the new configuration the drawer toggle component.
-        mDrawerToggle.onConfigurationChanged(newConfig);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        return mDrawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
-    }
-
-    public boolean isOpen() {
-        return mIsOpen;
-    }
-
-    public void toggle() {
-        if (mIsOpen)
-            mDrawerLayout.closeDrawer(Gravity.START);
-        else
-            mDrawerLayout.openDrawer(Gravity.START);
-    }
-
     public static interface NavigationDrawerCallbacks {
         public void onSubredditSelected(String subreddit);
         public void onAccountChanged();
@@ -454,7 +388,9 @@ public class NavigationDrawerFragment extends AccountFragment {
                 convertView = inflater.inflate(R.layout.list_item_subreddit, parent, false);
             }
             TextView text = (TextView) convertView.findViewById(R.id.subreddit_list_item_title);
-            text.setText(getItem(position) == null ? getResources().getString(R.string.front_page).toLowerCase() : getItem(position).getDisplayName().toLowerCase());
+            text.setText(getItem(position) == null
+                    ? getResources().getString(R.string.front_page).toLowerCase()
+                    : getItem(position).getDisplayName().toLowerCase());
             convertView.findViewById(R.id.mod_indicator).setVisibility(getItem(position) != null
                     && getItem(position).userIsModerator() ? View.VISIBLE : View.GONE);
 

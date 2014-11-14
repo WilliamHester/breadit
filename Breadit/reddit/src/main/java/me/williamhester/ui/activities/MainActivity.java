@@ -6,10 +6,13 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
 import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
 
-import me.williamhester.models.Subreddit;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.fragments.ImageFragment;
 import me.williamhester.ui.fragments.ImagePagerFragment;
@@ -24,6 +27,8 @@ public class MainActivity extends ActionBarActivity
 
     public static final String SUBREDDIT = "subreddit";
 
+    private ActionBarDrawerToggle mDrawerToggle;
+    private DrawerLayout mDrawerLayout;
     private NavigationDrawerFragment mNavigationDrawerFragment;
     private SubredditFragment mSubredditFragment;
     private String mSubreddit;
@@ -48,11 +53,11 @@ public class MainActivity extends ActionBarActivity
 
         setSupportActionBar(toolbar);
 
-        Fragment f = getSupportFragmentManager().findFragmentById(R.id.drawer_container);
+        Fragment f = getSupportFragmentManager().findFragmentById(R.id.left_drawer);
         if (f == null) {
             mNavigationDrawerFragment = NavigationDrawerFragment.newInstance(mSubreddit);
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.drawer_container, mNavigationDrawerFragment, "NavigationDrawer")
+                    .replace(R.id.left_drawer, mNavigationDrawerFragment, "NavigationDrawer")
                     .commit();
         } else {
             mNavigationDrawerFragment = (NavigationDrawerFragment) f;
@@ -79,6 +84,42 @@ public class MainActivity extends ActionBarActivity
                 }
             }
         });
+
+
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+
+        // ActionBarDrawerToggle ties together the the proper interactions
+        // between the navigation drawer and the action bar app icon.
+        mDrawerToggle = new ActionBarDrawerToggle(
+                this,                             /* host Activity */
+                mDrawerLayout,                    /* DrawerLayout object */
+                toolbar,
+                R.string.navigation_drawer_open,  /* "open drawer" description for accessibility */
+                R.string.navigation_drawer_close  /* "close drawer" description for accessibility */
+        ) {
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+                invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
+            }
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
+            }
+        };
+
+        // Defer code dependent on restoration of previous instance state.
+        mDrawerLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                mDrawerToggle.syncState();
+            }
+        });
+
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
+
     }
 
     @Override
@@ -92,6 +133,9 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public void onSubredditSelected(String subreddit) {
+        if (mDrawerLayout != null) {
+            mDrawerLayout.closeDrawers();
+        }
         if ((mSubreddit == null && subreddit == null)
                 || (mSubreddit != null && mSubreddit.equals(subreddit))) {
             mSubredditFragment.refreshData();
@@ -121,8 +165,8 @@ public class MainActivity extends ActionBarActivity
                 && ((YouTubeFragment) fragment).onBackPressed()) {
             return;
         }
-        if (mNavigationDrawerFragment.isOpen()) {
-            mNavigationDrawerFragment.toggle();
+        if (mDrawerLayout.isDrawerOpen(Gravity.START) || mDrawerLayout.isDrawerOpen(Gravity.END)) {
+            mDrawerLayout.closeDrawers();
         } else {
             super.onBackPressed();
         }
@@ -132,6 +176,16 @@ public class MainActivity extends ActionBarActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            if (mDrawerLayout.isDrawerOpen(R.id.right_drawer)) {
+                mDrawerLayout.closeDrawer(Gravity.END);
+            }
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

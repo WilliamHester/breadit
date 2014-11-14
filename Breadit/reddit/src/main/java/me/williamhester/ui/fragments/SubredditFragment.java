@@ -6,10 +6,14 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.PopupMenu;
+import android.text.Html;
 import android.text.TextUtils;
+import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -25,6 +29,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.koushikdutta.async.future.FutureCallback;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -39,6 +44,7 @@ import me.williamhester.models.Submission;
 import me.williamhester.models.Subreddit;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
+import me.williamhester.tools.HtmlParser;
 import me.williamhester.ui.activities.SubmissionActivity;
 import me.williamhester.ui.activities.UserActivity;
 import me.williamhester.ui.adapters.SubmissionAdapter;
@@ -117,6 +123,18 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle bundle) {
         View v = inflater.inflate(R.layout.fragment_subreddit, root, false);
+
+        DrawerLayout drawerLayout = (DrawerLayout) getActivity().findViewById(R.id.drawer_layout);
+        if (!TextUtils.isEmpty(mSubredditName)) {
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, Gravity.END);
+            getFragmentManager().beginTransaction()
+                    .replace(R.id.right_drawer, SidebarFragment.newInstance(mSubredditName), "side")
+                    .commit();
+        } else {
+            // Lock the drawer closed and don't fetch the subreddit because we're at the
+            // Front Page
+            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, Gravity.END);
+        }
 
         mFooter = createFooterView(inflater);
 

@@ -27,7 +27,7 @@ public class LogInActivity extends ActionBarActivity {
                 .replace(R.id.container, fragment, "LogIn")
                 .commit();
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     @Override

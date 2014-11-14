@@ -17,12 +17,12 @@ public class Subreddit implements Parcelable, Comparable<Subreddit> {
     private int mAccountsActive;
     @SerializedName("comment_score_hide_mins")
     private int mCommentScoreHideMins;
+    @SerializedName("subscribers")
+    private int mSubscribers;
     @SerializedName("created")
     private long mCreated;
     @SerializedName("created_utc")
     private long mCreatedUtc;
-    @SerializedName("subscribers")
-    private long mSubscribers;
     @SerializedName("description")
     private String mDescription;
     @SerializedName("description_html")
@@ -104,8 +104,8 @@ public class Subreddit implements Parcelable, Comparable<Subreddit> {
         return mHeaderTitle;
     }
 
-    public String getDescription() {
-        return mDescription;
+    public String getDescriptionHtml() {
+        return mDescriptionHtml;
     }
 
     public String getSubmitLinkLabel() {
@@ -116,7 +116,7 @@ public class Subreddit implements Parcelable, Comparable<Subreddit> {
         return mPublicTraffic;
     }
 
-    public long getSubscriberCount() {
+    public int getSubscriberCount() {
         return mSubscribers;
     }
 
@@ -189,9 +189,9 @@ public class Subreddit implements Parcelable, Comparable<Subreddit> {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(this.mAccountsActive);
         dest.writeInt(this.mCommentScoreHideMins);
+        dest.writeInt(this.mSubscribers);
         dest.writeLong(this.mCreated);
         dest.writeLong(this.mCreatedUtc);
-        dest.writeLong(this.mSubscribers);
         dest.writeString(this.mDescription);
         dest.writeString(this.mDescriptionHtml);
         dest.writeString(this.mDisplayName);
@@ -217,9 +217,9 @@ public class Subreddit implements Parcelable, Comparable<Subreddit> {
     private Subreddit(Parcel in) {
         this.mAccountsActive = in.readInt();
         this.mCommentScoreHideMins = in.readInt();
+        this.mSubscribers = in.readInt();
         this.mCreated = in.readLong();
         this.mCreatedUtc = in.readLong();
-        this.mSubscribers = in.readLong();
         this.mDescription = in.readString();
         this.mDescriptionHtml = in.readString();
         this.mDisplayName = in.readString();

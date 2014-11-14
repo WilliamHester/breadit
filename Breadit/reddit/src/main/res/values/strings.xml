@@ -112,6 +112,13 @@
     <string name="subscribe">Subscribed</string>
     <string name="sort_by">Sorted by</string>
 
+    <!-- Subreddit Drawer -->
+    <string name="description">Description</string>
+    <plurals name="subscribers">
+        <item quantity="one">subscriber</item>
+        <item quantity="other">subscribers</item>
+    </plurals>
+
     <!-- MessageFragment -->
     <string name="mark_unread">Mark unread</string>
     <string name="block_user">Block user</string>
