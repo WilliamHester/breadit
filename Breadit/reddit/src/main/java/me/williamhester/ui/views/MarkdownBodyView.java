@@ -1,16 +1,16 @@
-package me.williamhester.ui.fragments;
+package me.williamhester.ui.views;
 
+import android.annotation.TargetApi;
 import android.content.Context;
-import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.text.DecimalFormat;
@@ -18,62 +18,83 @@ import java.text.DecimalFormat;
 import me.williamhester.reddit.R;
 
 /**
- * Created by william on 10/21/14.
+ * Created by william on 11/14/14.
  */
-public class MarkdownBodyFragment extends Fragment {
+public class MarkdownBodyView extends LinearLayout {
 
     private static final int MODE_NONE = 0;
     private static final int MODE_BULLETS = 1;
     private static final int MODE_NUMBERED = 2;
-
+    
+    private Context mContext;
     private EditText mBody;
-    private String mBodyHint;
-    private String mBodyText;
-    private int mListMode;
 
-    public static MarkdownBodyFragment newInstance(String bodyHint) {
-        Bundle args = new Bundle();
-        args.putString("bodyHint", bodyHint);
-        MarkdownBodyFragment bodyFragment = new MarkdownBodyFragment();
-        bodyFragment.setArguments(args);
-        return bodyFragment;
+    private int mListMode = MODE_NONE;
+
+    public MarkdownBodyView(Context context) {
+        this(context, null, 0);
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        mBodyHint = getArguments().getString("bodyHint");
-        if (savedInstanceState != null) {
-            mListMode = savedInstanceState.getInt("listMode");
-            mBodyText = savedInstanceState.getString("body");
-        }
+    public MarkdownBodyView(Context context, AttributeSet attrs) {
+        this(context, attrs, 0);
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_markdown, container, false);
+    public MarkdownBodyView(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
 
+    @TargetApi(21)
+    public MarkdownBodyView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+
+        mContext = context;
+        
+        LayoutInflater layoutInflater =
+                (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        layoutInflater.inflate(R.layout.view_markdown_body, this);
+        
+        init();
+    }
+
+    private void init() {
         final DecimalFormat format = new DecimalFormat("##,##0");
-        final TextView charCount = (TextView) v.findViewById(R.id.char_count);
-        mBody = (EditText) v.findViewById(R.id.reply_body);
-        View actionLink = v.findViewById(R.id.action_link);
-        View actionBold = v.findViewById(R.id.action_bold);
-        View actionItalics = v.findViewById(R.id.action_italics);
-        View actionStrikethrough = v.findViewById(R.id.action_strikethrough);
-        View actionSuperscript = v.findViewById(R.id.action_superscript);
-        View actionBullets = v.findViewById(R.id.action_bullets);
-        View actionNumberedList = v.findViewById(R.id.action_numbered_list);
+        final TextView charCount = (TextView) findViewById(R.id.char_count);
+        mBody = (EditText) findViewById(R.id.reply_body);
+        View actionLink = findViewById(R.id.action_link);
+        View actionBold = findViewById(R.id.action_bold);
+        View actionItalics = findViewById(R.id.action_italics);
+        View actionStrikeThrough = findViewById(R.id.action_strikethrough);
+        View actionSuperscript = findViewById(R.id.action_superscript);
+        View actionBullets = findViewById(R.id.action_bullets);
+        View actionNumberedList = findViewById(R.id.action_numbered_list);
 
         actionLink.setOnClickListener(mTextFormattingClickListener);
         actionBold.setOnClickListener(mTextFormattingClickListener);
         actionItalics.setOnClickListener(mTextFormattingClickListener);
-        actionStrikethrough.setOnClickListener(mTextFormattingClickListener);
+        actionStrikeThrough.setOnClickListener(mTextFormattingClickListener);
         actionSuperscript.setOnClickListener(mTextFormattingClickListener);
         actionBullets.setOnClickListener(mTextFormattingClickListener);
         actionNumberedList.setOnClickListener(mTextFormattingClickListener);
 
         charCount.setText(format.format(mBody.length()) + "/10,000");
+        mBody.addTextChangedListener(new TextWatcher() {
+            private DecimalFormat format = new DecimalFormat("##,##0");
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // Do nothing
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // Do nothing
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                charCount.setText(format.format(s.length()) + "/10,000");
+            }
+        });
         mBody.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -91,29 +112,34 @@ public class MarkdownBodyFragment extends Fragment {
                 return false;
             }
         });
-        mBody.setHint(mBodyHint);
-        if (mBodyText != null) {
-            mBody.setText(mBodyText);
-        }
-        return v;
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
+    public void setHint(String hint) {
+        mBody.setHint(hint);
+    }
 
+    public String getBody() {
+        return mBody.getText().toString();
+    }
+
+    /**
+     * Sets the body text of the portion
+     *
+     * @param body the string that should go in the body.
+     */
+    public void setBody(String body) {
+        mBody.setText(body);
+    }
+
+    /**
+     * This method should be called by the parent Fragment during its onResume method to show the
+     * keyboard with this View's EditText focused.
+     */
+    public void showKeyboard() {
         mBody.requestFocus();
-        InputMethodManager imm =  (InputMethodManager) getActivity()
-                .getSystemService(Context.INPUT_METHOD_SERVICE);
+        InputMethodManager imm =  (InputMethodManager) mContext.getSystemService(
+                Context.INPUT_METHOD_SERVICE);
         imm.showSoftInput(mBody, InputMethodManager.SHOW_IMPLICIT);
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        outState.putInt("listMode", mListMode);
-        outState.putString("body", mBody.getText().toString());
     }
 
     private View.OnClickListener mTextFormattingClickListener = new View.OnClickListener() {
@@ -138,10 +164,10 @@ public class MarkdownBodyFragment extends Fragment {
                 case R.id.action_bullets:
                     insertInitialBullet();
                     if (mListMode == MODE_NUMBERED || mListMode == MODE_NONE) {
-                        getView().findViewById(R.id.numbered_list_selector).setVisibility(View.GONE);
-                        getView().findViewById(R.id.bullet_selector).setVisibility(View.VISIBLE);
+                        findViewById(R.id.numbered_list_selector).setVisibility(View.GONE);
+                        findViewById(R.id.bullet_selector).setVisibility(View.VISIBLE);
                     } else if (mListMode == MODE_BULLETS) {
-                        getView().findViewById(R.id.bullet_selector).setVisibility(View.GONE);
+                        findViewById(R.id.bullet_selector).setVisibility(View.GONE);
                         mListMode = MODE_NONE;
                     }
                     mListMode = MODE_BULLETS;
@@ -149,10 +175,10 @@ public class MarkdownBodyFragment extends Fragment {
                 case R.id.action_numbered_list:
                     insertInitialNumber();
                     if (mListMode == MODE_BULLETS) {
-                        getView().findViewById(R.id.bullet_selector).setVisibility(View.GONE);
-                        getView().findViewById(R.id.numbered_list_selector).setVisibility(View.VISIBLE);
+                        findViewById(R.id.bullet_selector).setVisibility(View.GONE);
+                        findViewById(R.id.numbered_list_selector).setVisibility(View.VISIBLE);
                     } else if (mListMode == MODE_NUMBERED) {
-                        getView().findViewById(R.id.numbered_list_selector).setVisibility(View.GONE);
+                        findViewById(R.id.numbered_list_selector).setVisibility(View.GONE);
                         mListMode = MODE_NONE;
                     }
                     mListMode = MODE_NUMBERED;
@@ -160,29 +186,6 @@ public class MarkdownBodyFragment extends Fragment {
             }
         }
     };
-
-    /**
-     * Gets the body of the Fragment
-     *
-     * @return the string that the EditText in the body contains
-     */
-    public String getMarkdownBody() {
-        return mBody.getText().toString();
-    }
-
-    /**
-     * Sets the text of the Markdown body in the Fragment. If the fragment's view is not yet
-     * created, the markdown body will be set during onCreateView.
-     *
-     * @param text the text to set in the Markdown body
-     */
-    public void setMarkdownBody(String text) {
-        if (mBody == null) {
-            mBodyText = text;
-        } else {
-            mBody.setText(text);
-        }
-    }
 
     private void wrapSelection(String wrapper) {
         wrapSelection(wrapper, wrapper);

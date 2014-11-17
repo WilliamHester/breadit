@@ -1,6 +1,7 @@
 package me.williamhester.ui.fragments;
 
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -8,6 +9,7 @@ import android.view.View;
 import android.widget.Button;
 
 import me.williamhester.reddit.R;
+import me.williamhester.ui.views.MarkdownBodyView;
 
 /**
  * This Fragment provides an abstraction between the ReplyFragment and ComposeMessageFragment. It
@@ -19,8 +21,8 @@ import me.williamhester.reddit.R;
  */
 public abstract class AsyncSendFragment extends Fragment {
 
-    protected MarkdownBodyFragment mBodyFragment;
     protected boolean mKillOnStart;
+    protected MarkdownBodyView mMarkdownBody;
 
     /**
      * This is called to get the body hint for the MarkdownBodyFragment
@@ -42,7 +44,7 @@ public abstract class AsyncSendFragment extends Fragment {
      *
      * @return the id of the container.
      */
-    protected abstract int getContainerId();
+    protected abstract int getMarkdownBodyId();
 
     /**
      * This method is called when the save button in the ActionBar is clicked.
@@ -75,17 +77,11 @@ public abstract class AsyncSendFragment extends Fragment {
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mBodyFragment = MarkdownBodyFragment.newInstance(getBodyHint());
-        if (savedInstanceState != null) {
-            SavedState state = savedInstanceState.getParcelable("savedState");
-            mBodyFragment.setInitialSavedState(state);
-        }
-        getChildFragmentManager().beginTransaction()
-                .replace(getContainerId(), mBodyFragment, "body")
-                .commit();
+        mMarkdownBody = (MarkdownBodyView) view.findViewById(getMarkdownBodyId());
+        mMarkdownBody.setHint(getBodyHint());
     }
 
     @Override
@@ -102,7 +98,5 @@ public abstract class AsyncSendFragment extends Fragment {
         super.onSaveInstanceState(outState);
 
         outState.putBoolean("killOnStart", mKillOnStart);
-        SavedState state = getChildFragmentManager().saveFragmentInstanceState(mBodyFragment);
-        outState.putParcelable("savedState", state);
     }
 }

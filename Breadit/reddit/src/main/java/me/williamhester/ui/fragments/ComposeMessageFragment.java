@@ -44,7 +44,7 @@ public class ComposeMessageFragment extends AsyncSendFragment {
     }
 
     @Override
-    protected int getContainerId() {
+    protected int getMarkdownBodyId() {
         return R.id.body_container;
     }
 
@@ -149,7 +149,7 @@ public class ComposeMessageFragment extends AsyncSendFragment {
                     }
                 } else {
                     RedditApi.compose(getActivity(), mComposeTo.getText().toString(),
-                            mSubject.getText().toString(), mBodyFragment.getMarkdownBody(),
+                            mSubject.getText().toString(), mMarkdownBody.getBody(),
                             sentMessage);
                 }
             }
@@ -165,7 +165,7 @@ public class ComposeMessageFragment extends AsyncSendFragment {
     private void showCaptchaDialog() {
         CaptchaDialogFragment fragment = CaptchaDialogFragment
                 .newInstance(mComposeTo.getText().toString(),
-                        mSubject.getText().toString(), mBodyFragment.getMarkdownBody());
+                        mSubject.getText().toString(), mMarkdownBody.getBody());
         fragment.setTargetFragment(this, COMPLETE_CAPTCHA);
         fragment.show(getFragmentManager(), "captcha");
     }

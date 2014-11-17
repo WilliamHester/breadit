@@ -13,13 +13,14 @@ import java.util.List;
 import java.util.Map;
 
 import me.williamhester.reddit.R;
+import me.williamhester.ui.views.MarkdownBodyView;
 
 /**
  * Created by william on 10/31/14.
  */
 public class SubmitSelfTextFragment extends SubmitFragment {
 
-    private MarkdownBodyFragment mBodyFragment;
+    private MarkdownBodyView mBody;
     private EditText mTitle;
 
     public static SubmitSelfTextFragment newInstance() {
@@ -31,11 +32,9 @@ public class SubmitSelfTextFragment extends SubmitFragment {
                              @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_submit_self_text, container, false);
         mTitle = (EditText) v.findViewById(R.id.title);
-        mBodyFragment = MarkdownBodyFragment.newInstance(
-                getResources().getString(R.string.self_text));
-        getChildFragmentManager().beginTransaction()
-                .replace(R.id.body_container, mBodyFragment, "bodyFragment")
-                .commit();
+        mBody = (MarkdownBodyView) v.findViewById(R.id.body);
+        mBody.setHint(getResources().getString(R.string.self_text));
+
         return v;
     }
 
@@ -44,7 +43,7 @@ public class SubmitSelfTextFragment extends SubmitFragment {
         body.put("kind", new ArrayList<String>(1));
         body.get("kind").add("self");
         body.put("text", new ArrayList<String>(1));
-        body.get("text").add(mBodyFragment.getMarkdownBody());
+        body.get("text").add(mBody.getBody());
         body.put("title", new ArrayList<String>(1));
         body.get("title").add(mTitle.getText().toString());
         return body;

@@ -61,7 +61,7 @@ public class ReplyFragment extends AsyncSendFragment {
     }
 
     @Override
-    protected int getContainerId() {
+    protected int getMarkdownBodyId() {
         return R.id.body_container;
     }
 
@@ -84,8 +84,15 @@ public class ReplyFragment extends AsyncSendFragment {
 
         if (mIsEditing && savedInstanceState == null) {
             Votable votable = getArguments().getParcelable("votable");
-            mBodyFragment.setMarkdownBody(votable.getRawMarkdown());
+            mMarkdownBody.setBody(votable.getRawMarkdown());
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        mMarkdownBody.showKeyboard();
     }
 
     @Override
@@ -133,10 +140,10 @@ public class ReplyFragment extends AsyncSendFragment {
             }
         };
         if (mIsEditing) {
-            votable.setRawMarkdown(mBodyFragment.getMarkdownBody());
+            votable.setRawMarkdown(mMarkdownBody.getBody());
             RedditApi.editThing(votable, callback);
         } else {
-            RedditApi.replyToComment(getActivity(), parent, mBodyFragment.getMarkdownBody(),
+            RedditApi.replyToComment(getActivity(), parent, mMarkdownBody.getBody(),
                     callback);
         }
     }

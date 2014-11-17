@@ -101,7 +101,7 @@ public class SidebarFragment extends Fragment {
                     subscribe.setVisibility(View.VISIBLE);
                     // Set subscribe's background to be dependent upon the user's subscription
                     // status
-//                    subscribe.setBackground();
+                    // subscribe.setBackground();
                 } else {
                     submit.setVisibility(View.GONE);
                     subscribe.setVisibility(View.GONE);
