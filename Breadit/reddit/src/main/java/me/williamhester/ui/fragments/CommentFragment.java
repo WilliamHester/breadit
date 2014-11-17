@@ -41,6 +41,7 @@ import me.williamhester.ui.activities.MainActivity;
 import me.williamhester.ui.activities.SubmissionActivity;
 import me.williamhester.ui.activities.UserActivity;
 import me.williamhester.ui.views.CommentViewHolder;
+import me.williamhester.ui.views.DividerItemDecoration;
 import me.williamhester.ui.views.SubmissionViewHolder;
 
 public class CommentFragment extends AccountFragment {
@@ -107,6 +108,7 @@ public class CommentFragment extends AccountFragment {
         RecyclerView commentsView = (RecyclerView) v.findViewById(R.id.comments);
         mCommentAdapter = new CommentArrayAdapter();
         commentsView.setAdapter(mCommentAdapter);
+        commentsView.addItemDecoration(new DividerItemDecoration(getResources().getDrawable(R.drawable.comments_divider)));
         commentsView.setLayoutManager(new LinearLayoutManager(getActivity()));
         return v;
     }
