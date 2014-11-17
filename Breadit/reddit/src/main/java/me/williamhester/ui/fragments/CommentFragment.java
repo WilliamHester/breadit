@@ -160,9 +160,6 @@ public class CommentFragment extends AccountFragment {
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(mSubmission.getUrl()));
                 startActivity(browserIntent);
                 break;
-            case android.R.id.home:
-                getActivity().onBackPressed();
-                break;
         }
         return super.onOptionsItemSelected(item);
     }

@@ -1,11 +1,15 @@
 package me.williamhester.ui.activities;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 
 import me.williamhester.models.ImgurAlbum;
 import me.williamhester.models.ImgurImage;
@@ -63,6 +67,17 @@ public class SubmissionActivity extends ActionBarActivity implements ImageFragme
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelable("urlParser", mParser);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                // return true here so we don't call the default android.R.id.home action.
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void setUpContent() {
@@ -132,6 +147,12 @@ public class SubmissionActivity extends ActionBarActivity implements ImageFragme
 
     @Override
     public void onBackPressed() {
+        // Hide the keyboard
+        InputMethodManager imm =  (InputMethodManager) getSystemService(
+                Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(mToolbar.getWindowToken(), 0);
+
+        // If the content fragment is a WebViewFragment, try to go back.
         Fragment f = getSupportFragmentManager().findFragmentByTag("content");
         if (f != null && f instanceof WebViewFragment) {
             WebViewFragment web = (WebViewFragment) f;
