@@ -62,6 +62,7 @@
                 android:layout_height="wrap_content"
                 android:layout_toEndOf="@id/flair"
                 android:layout_marginEnd="4dp"
+                android:fontFamily="sans-serif-light"
                 android:textSize="13sp"
                 android:textColor="@color/comment_metadata_gray"
                 android:singleLine="true"

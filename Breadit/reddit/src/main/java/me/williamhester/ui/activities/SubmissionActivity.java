@@ -26,10 +26,8 @@ import me.williamhester.ui.fragments.YouTubeFragment;
 
 public class SubmissionActivity extends ActionBarActivity implements ImageFragment.ImageTapCallbacks {
 
-    public static final String COMMENT_TAB = "comments";
     public static final String SUBMISSION = "submission";
     public static final String PERMALINK = "permalink";
-    public static final String TAB = "tab";
 
     private Submission mSubmission;
     private String mPermalink;

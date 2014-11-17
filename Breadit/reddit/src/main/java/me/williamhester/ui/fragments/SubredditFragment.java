@@ -355,7 +355,6 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
         Bundle args = new Bundle();
         args.putParcelable(SubmissionActivity.SUBMISSION, submission);
         args.putSerializable("media", submission.getMedia());
-        args.putString(SubmissionActivity.TAB, SubmissionActivity.COMMENT_TAB);
         i.putExtras(args);
         startActivityForResult(i, VOTE_REQUEST_CODE);
     }

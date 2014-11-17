@@ -14,7 +14,7 @@
         <RelativeLayout android:id="@+id/submission_data"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="6dp"
+            android:padding="8dp"
             android:background="?android:attr/selectableItemBackground"
             tools:ignore="SmallSp">
 
@@ -22,27 +22,23 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif-light"
-                android:textSize="11sp"
-                android:paddingLeft="8dp" />
+                android:textSize="11sp" />
 
             <TextView android:id="@+id/nsfw_warning"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
                 android:layout_alignParentTop="true"
                 android:textAllCaps="true"
-                android:fontFamily="sans-serif-condensed"
+                android:fontFamily="sans-serif-light"
                 android:text="@string/nsfw"
                 android:textColor="@color/nsfw_red"
-                android:textSize="11sp"
-                android:layout_marginRight="8dp"/>
+                android:textSize="11sp"/>
 
             <TextView
                 android:id="@+id/body"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingLeft="8dp"
-                android:paddingRight="8dp"
                 android:textSize="16sp"
                 android:fontFamily="sans-serif-light"
                 android:textColor="@color/ghostwhite"
@@ -52,37 +48,32 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="11sp"
-                android:paddingLeft="8dp"
-                android:fontFamily="sans-serif-condensed"
+                android:fontFamily="sans-serif-light"
                 android:textColor="@color/auburn_orange"
                 android:layout_below="@id/body"/>
 
             <TextView android:id="@+id/time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
                 android:textSize="11sp"
-                android:paddingRight="8dp"
-                android:fontFamily="sans-serif-condensed"
+                android:fontFamily="sans-serif-light"
                 android:textColor="@color/auburn_orange"
                 android:layout_below="@id/body"/>
 
             <TextView android:id="@+id/domain"
-                android:paddingRight="8dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="11sp"
-                android:fontFamily="sans-serif-condensed"
-                android:layout_alignParentRight="true"
+                android:fontFamily="sans-serif-light"
+                android:layout_alignParentEnd="true"
                 android:layout_below="@id/metadata"/>
 
             <TextView android:id="@+id/num_comments"
-                android:paddingLeft="8dp"
-                android:paddingBottom="6dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="11sp"
-                android:fontFamily="sans-serif-condensed"
+                android:fontFamily="sans-serif-light"
                 android:layout_below="@id/metadata"/>
 
         </RelativeLayout>
@@ -111,7 +102,6 @@
         </LinearLayout>
 
         <RelativeLayout android:id="@+id/content_preview"
-            android:paddingTop="2dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -133,7 +123,7 @@
                 android:textColor="@color/ghostwhite"
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"
-                android:paddingBottom="6dp"
+                android:paddingBottom="8dp"
                 android:textSize="14sp"
                 android:visibility="gone"/>
 
