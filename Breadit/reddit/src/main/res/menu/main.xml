@@ -4,8 +4,8 @@
     tools:context="me.williamhester.ui.activities.MainActivity" >
     <item android:id="@+id/search"
         android:title="@string/search_sub_hint"
-        android:icon="@drawable/ic_search"
+        android:icon="@drawable/abc_ic_search_api_mtrl_alpha"
         breadit:showAsAction="collapseActionView|ifRoom"
-        android:actionViewClass="android.widget.SearchView"
+        breadit:actionViewClass="android.widget.SearchView"
         android:orderInCategory="0"/>
 </menu>

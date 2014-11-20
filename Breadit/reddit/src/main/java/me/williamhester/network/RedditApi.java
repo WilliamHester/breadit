@@ -578,7 +578,8 @@ public class RedditApi {
                 .setCallback(callback);
     }
 
-    public static void submit(Context context, Map<String, List<String>> params, String subreddit) {
+    public static void submit(Context context, Map<String, List<String>> params, String subreddit,
+                              FutureCallback<JsonObject> callback) {
         Ion.with(context)
                 .load(REDDIT_URL + "/api/submit")
                 .addHeaders(getStandardHeaders())
@@ -589,14 +590,7 @@ public class RedditApi {
                 .setBodyParameter("then", "comments")
                 .setBodyParameter("resubmit", "false")
                 .asJsonObject()
-                .setCallback(new FutureCallback<JsonObject>() {
-                    @Override
-                    public void onCompleted(Exception e, JsonObject result) {
-                        if (result != null) {
-                            printOutLongString(result.toString());
-                        }
-                    }
-                });
+                .setCallback(callback);
     }
 
     public static void printOutLongString(String string) {

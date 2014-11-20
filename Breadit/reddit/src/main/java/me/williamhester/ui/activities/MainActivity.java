@@ -1,9 +1,12 @@
 package me.williamhester.ui.activities;
 
+import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -12,6 +15,8 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.SearchView;
+import android.widget.SimpleCursorAdapter;
 
 import me.williamhester.reddit.R;
 import me.williamhester.ui.fragments.ImageFragment;
@@ -175,6 +180,19 @@ public class MainActivity extends ActionBarActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
+        SearchView searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.search));
+        searchView.setSuggestionsAdapter(new SearchAdapter(MainActivity.this));
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -207,5 +225,42 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onImageTapped() {
         getSupportFragmentManager().popBackStack();
+    }
+
+    private static class SearchAdapter extends SimpleCursorAdapter {
+
+        private CharSequence mConstraint = "";
+
+        public SearchAdapter(Context context) {
+            super(context, android.R.layout.simple_dropdown_item_1line, null, new String[]{""}, null, 0);
+        }
+
+        @Override
+        public void bindView(View view, Context context, Cursor cursor) {
+            super.bindView(view, context, cursor);
+
+        }
+
+        @Override
+        public Cursor runQueryOnBackgroundThread(CharSequence constraint) {
+            mConstraint = constraint;
+            return null;
+        }
+
+        @Override
+        public Object getItem(int position) {
+            switch (position) {
+                case 0:
+                    return "/r/" + mConstraint;
+                case 1:
+                    return "/u/" + mConstraint;
+            }
+            return "";
+        }
+
+        @Override
+        public int getCount() {
+            return 2;
+        }
     }
 }

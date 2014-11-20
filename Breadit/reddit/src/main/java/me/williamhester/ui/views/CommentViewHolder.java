@@ -222,6 +222,7 @@ public class CommentViewHolder extends VotableViewHolder {
                 } else {
                     widget.getParent().requestDisallowInterceptTouchEvent(false);
                     ((View) widget.getParent()).onTouchEvent(event);
+                    return false;
                 }
             } else {
                 ((View) widget.getParent()).onTouchEvent(event);

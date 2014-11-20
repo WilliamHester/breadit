@@ -1,14 +1,24 @@
 package me.williamhester.ui.activities;
 
+import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.koushikdutta.async.future.FutureCallback;
 
 import java.util.HashMap;
 
@@ -55,13 +65,43 @@ public class SubmitActivity extends ActionBarActivity {
         });
         tabs.setViewPager(viewPager);
 
+        final EditText subreddit = (EditText) findViewById(R.id.submit_subreddit);
         Button submit = (Button) findViewById(R.id.submit);
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                final ProgressDialog dialog = new ProgressDialog(SubmitActivity.this);
+                dialog.setCancelable(false);
+                dialog.setMessage("Submitting");
+                dialog.show();
                 RedditApi.submit(v.getContext(),
                         mFragments.get(viewPager.getCurrentItem()).getSubmitBody(),
-                        "breaditapp");
+                        subreddit.getText().toString(), new FutureCallback<JsonObject>() {
+                            @Override
+                            public void onCompleted(Exception e, JsonObject result) {
+                                dialog.cancel();
+                                if (e != null) {
+                                    Toast.makeText(SubmitActivity.this, "Failed to submit. " +
+                                            "Please try again.", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+                                JsonObject json = result.get("json").getAsJsonObject();
+
+                                if (json.has("data")) {
+                                    // Consider submission successful
+                                    JsonObject data = json.get("data").getAsJsonObject();
+                                    String permalink = data.get("url").getAsString();
+                                    Bundle extras = new Bundle();
+                                    extras.putString("permalink", permalink);
+                                    Intent i = new Intent(SubmitActivity.this, SubmissionActivity.class);
+                                    i.putExtras(extras);
+                                    startActivity(i);
+                                    finish();
+                                } else {
+                                    // Submission unsuccessful for some reason, likely not described.
+                                }
+                            }
+                        });
             }
         });
     }

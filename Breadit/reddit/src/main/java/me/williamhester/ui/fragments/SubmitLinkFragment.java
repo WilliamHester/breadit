@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -43,20 +44,27 @@ public class SubmitLinkFragment extends SubmitFragment {
         suggest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                RedditApi.getSuggestedTitle(getActivity(), mUrl.getText().toString(),
-                        new FutureCallback<JsonObject>() {
-                            @Override
-                            public void onCompleted(Exception e, JsonObject result) {
-                                if (e != null) {
-                                    e.printStackTrace();
-                                    return;
+                if (mUrl.getText().toString().startsWith("http://")) {
+                    RedditApi.getSuggestedTitle(getActivity(), mUrl.getText().toString(),
+                            new FutureCallback<JsonObject>() {
+                                @Override
+                                public void onCompleted(Exception e, JsonObject result) {
+                                    if (e != null) {
+                                        e.printStackTrace();
+                                        return;
+                                    }
+                                    JsonArray array = result.get("jquery").getAsJsonArray();
+                                    if (array.size() < 13) {
+                                        Toast.makeText(getActivity(), R.string.failed_to_generate,
+                                                Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        JsonArray suggested = array.get(12).getAsJsonArray();
+                                        JsonArray nameArray = suggested.get(3).getAsJsonArray();
+                                        mTitle.setText(nameArray.get(0).getAsString());
+                                    }
                                 }
-                                JsonArray array = result.get("jquery").getAsJsonArray();
-                                JsonArray suggested = array.get(12).getAsJsonArray();
-                                JsonArray nameArray = suggested.get(3).getAsJsonArray();
-                                mTitle.setText(nameArray.get(0).getAsString());
-                            }
-                        });
+                            });
+                }
             }
         });
 
