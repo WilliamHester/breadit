@@ -98,7 +98,8 @@ public class SubmitActivity extends ActionBarActivity {
                                     startActivity(i);
                                     finish();
                                 } else {
-                                    // Submission unsuccessful for some reason, likely not described.
+                                    Toast.makeText(SubmitActivity.this, "Failed to submit. " +
+                                            "Please try again.", Toast.LENGTH_SHORT).show();
                                 }
                             }
                         });

@@ -81,36 +81,39 @@ public class HtmlParser {
 
     private Object getSpanFromTag(Node node, SpannableStringBuilder ssb) {
         if (node instanceof Element) {
-            String tag = ((Element) node).tag().getName();
-            if (tag.equalsIgnoreCase("code")) {
-                return new TypefaceSpan("monospace");
-            } else if (tag.equalsIgnoreCase("del")) {
-                return new StrikethroughSpan();
-            } else if (tag.equalsIgnoreCase("strong")) {
-                return new StyleSpan(Typeface.BOLD);
-            } else if (tag.equalsIgnoreCase("em")) {
-                return new StyleSpan(Typeface.ITALIC);
-            } else if (tag.equalsIgnoreCase("blockquote")) {
-                return new QuoteSpan(Color.rgb(246, 128, 38));
-            } else if (tag.equalsIgnoreCase("sup")) {
-                return new SuperscriptSpan();
-            } else if (tag.equalsIgnoreCase("a")) {
-                String url = node.attr("href");
-                if (url.equals("/spoiler")) {
-                    return new SpoilerSpan();
-                }
-                if (url.equals("/s") || url.equals("#s")) {
-                    String spoiler = node.attr("title");
-                    ssb.append(' ');
-                    ssb.append(spoiler);
-                    ssb.setSpan(new SpoilerSpan(), ssb.length() - spoiler.length(), ssb.length(),
-                            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    return new UnderlineSpan();
-                }
-                mLinks.add(new Link(ssb.toString(), url));
-                return new LinkSpan(url);
-            } else if (tag.equalsIgnoreCase("li")) {
-                return new BulletSpan(BulletSpan.STANDARD_GAP_WIDTH, 0xfff68026);
+            String tag = ((Element) node).tag().getName().toLowerCase();
+            switch (tag) {
+                case "code":
+                    return new TypefaceSpan("monospace");
+                case "del":
+                    return new StrikethroughSpan();
+                case "strong":
+                    return new StyleSpan(Typeface.BOLD);
+                case "em":
+                    return new StyleSpan(Typeface.ITALIC);
+                case "blockquote":
+                    return new QuoteSpan(Color.rgb(246, 128, 38));
+                case "sup":
+                    return new SuperscriptSpan();
+                case "a":
+                    String url = node.attr("href");
+                    if (url.equals("/spoiler")) {
+                        return new SpoilerSpan();
+                    }
+                    if (url.equals("/s") || url.equals("#s")) {
+                        String spoiler = node.attr("title");
+                        ssb.append(' ');
+                        ssb.append(spoiler);
+                        ssb.setSpan(new SpoilerSpan(), ssb.length() - spoiler.length(), ssb.length(),
+                                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        return new UnderlineSpan();
+                    }
+                    mLinks.add(new Link(ssb.toString(), url));
+                    return new LinkSpan(url);
+                case "li":
+                    return new BulletSpan(BulletSpan.STANDARD_GAP_WIDTH, 0xfff68026);
+                default:
+//                    Log.e("HtmlParser", "Unhandled tag: " + tag);
             }
         }
         return null;
@@ -122,8 +125,6 @@ public class HtmlParser {
                     && (!(node.childNode(0) instanceof Element)
                     || !((Element) node.childNode(0)).tagName().equalsIgnoreCase("p"))) {
                 sb.append("\n");
-            } else if (((Element) node).tagName().equalsIgnoreCase("code")) {
-                sb.append("    ");
             } else if (((Element) node).tagName().equalsIgnoreCase("p")
                     || ((Element) node).tagName().equalsIgnoreCase("pre")) {
                 sb.append("\n");
