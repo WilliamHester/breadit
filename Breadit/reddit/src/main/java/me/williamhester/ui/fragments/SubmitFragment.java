@@ -14,4 +14,6 @@ public abstract class SubmitFragment extends Fragment {
 
     public abstract Map<String, List<String>> getSubmitBody();
 
+    public abstract boolean isValid();
+
 }

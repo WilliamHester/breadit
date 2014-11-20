@@ -10,6 +10,7 @@ import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.SparseArray;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
@@ -37,7 +38,9 @@ import me.williamhester.ui.views.SlidingTabLayout;
  */
 public class SubmitActivity extends ActionBarActivity {
 
-    private HashMap<Integer, SubmitFragment> mFragments;
+    private EditText mSubreddit;
+    private SparseArray<SubmitFragment> mFragments;
+    private ViewPager mViewPager;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -49,10 +52,10 @@ public class SubmitActivity extends ActionBarActivity {
         toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
         setSupportActionBar(toolbar);
         toolbar.setTitle(R.string.submit);
-        final ViewPager viewPager = (ViewPager) findViewById(R.id.view_pager);
+        mViewPager = (ViewPager) findViewById(R.id.view_pager);
         ReplyFragmentPagerAdapter adapter =
                 new ReplyFragmentPagerAdapter(getSupportFragmentManager());
-        viewPager.setAdapter(adapter);
+        mViewPager.setAdapter(adapter);
 
         SlidingTabLayout tabs = (SlidingTabLayout) findViewById(R.id.sliding_tabs);
         tabs.setCustomTabView(R.layout.tab_indicator, android.R.id.text1);
@@ -63,55 +66,68 @@ public class SubmitActivity extends ActionBarActivity {
                 return getResources().getColor(R.color.auburn_orange);
             }
         });
-        tabs.setViewPager(viewPager);
+        tabs.setViewPager(mViewPager);
 
-        final EditText subreddit = (EditText) findViewById(R.id.submit_subreddit);
+        mSubreddit = (EditText) findViewById(R.id.submit_subreddit);
         Button submit = (Button) findViewById(R.id.submit);
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final ProgressDialog dialog = new ProgressDialog(SubmitActivity.this);
-                dialog.setCancelable(false);
-                dialog.setMessage("Submitting");
-                dialog.show();
-                RedditApi.submit(v.getContext(),
-                        mFragments.get(viewPager.getCurrentItem()).getSubmitBody(),
-                        subreddit.getText().toString(), new FutureCallback<JsonObject>() {
-                            @Override
-                            public void onCompleted(Exception e, JsonObject result) {
-                                dialog.cancel();
-                                if (e != null) {
-                                    Toast.makeText(SubmitActivity.this, "Failed to submit. " +
-                                            "Please try again.", Toast.LENGTH_SHORT).show();
-                                    return;
-                                }
-                                JsonObject json = result.get("json").getAsJsonObject();
-
-                                if (json.has("data")) {
-                                    // Consider submission successful
-                                    JsonObject data = json.get("data").getAsJsonObject();
-                                    String permalink = data.get("url").getAsString();
-                                    Bundle extras = new Bundle();
-                                    extras.putString("permalink", permalink);
-                                    Intent i = new Intent(SubmitActivity.this, SubmissionActivity.class);
-                                    i.putExtras(extras);
-                                    startActivity(i);
-                                    finish();
-                                } else {
-                                    Toast.makeText(SubmitActivity.this, "Failed to submit. " +
-                                            "Please try again.", Toast.LENGTH_SHORT).show();
-                                }
-                            }
-                        });
+                boolean valid = mFragments.get(mViewPager.getCurrentItem()).isValid();
+                // If the subreddit's length is at least 3 and the fragment says that it's valid
+                if (subredditNameIsValid() && valid) {
+                    submit();
+                }
             }
         });
+    }
+
+    public boolean subredditNameIsValid() {
+        String name = mSubreddit.getText().toString().toLowerCase().trim();
+        String regexedName = name.replaceAll("[abcdefghijklmnopqrstuvwxyz]", "");
+        return regexedName.length() == 0 &&  name.length() > 2;
+    }
+
+    public void submit() {
+        final ProgressDialog dialog = new ProgressDialog(SubmitActivity.this);
+        dialog.setCancelable(false);
+        dialog.setMessage(getResources().getString(R.string.submitting));
+        dialog.show();
+        RedditApi.submit(this, mFragments.get(mViewPager.getCurrentItem()).getSubmitBody(),
+                mSubreddit.getText().toString(), new FutureCallback<JsonObject>() {
+                    @Override
+                    public void onCompleted(Exception e, JsonObject result) {
+                        dialog.cancel();
+                        if (e != null) {
+                            Toast.makeText(SubmitActivity.this, "Failed to submit. " +
+                                    "Please try again.", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        JsonObject json = result.get("json").getAsJsonObject();
+
+                        if (json.has("data")) {
+                            // Consider submission successful
+                            JsonObject data = json.get("data").getAsJsonObject();
+                            String permalink = data.get("url").getAsString();
+                            Bundle extras = new Bundle();
+                            extras.putString("permalink", permalink);
+                            Intent i = new Intent(SubmitActivity.this, SubmissionActivity.class);
+                            i.putExtras(extras);
+                            startActivity(i);
+                            finish();
+                        } else {
+                            Toast.makeText(SubmitActivity.this, "Failed to submit. " +
+                                    "Please try again.", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
     }
 
     private class ReplyFragmentPagerAdapter extends FragmentPagerAdapter {
 
         public ReplyFragmentPagerAdapter(FragmentManager fm) {
             super(fm);
-            mFragments = new HashMap<>();
+            mFragments = new SparseArray<>();
         }
 
         @Override

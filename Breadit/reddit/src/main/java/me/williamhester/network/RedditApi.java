@@ -2,6 +2,7 @@ package me.williamhester.network;
 
 import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -32,6 +33,7 @@ import me.williamhester.models.Submission;
 import me.williamhester.models.Subreddit;
 import me.williamhester.models.Thing;
 import me.williamhester.models.Votable;
+import me.williamhester.reddit.R;
 
 /**
  * Created by William on 6/14/14.
@@ -341,8 +343,21 @@ public class RedditApi {
         // Just in case Reddit gives us a weird response, this will be wrapped in a try-catch
         try {
             JsonObject object = new JsonParser().parse(result).getAsJsonObject();
-            JsonArray array = object.get("json").getAsJsonObject()
-                    .get("data").getAsJsonObject()
+            JsonObject json = object.get("json").getAsJsonObject();
+
+            if (json.has("errors")) {
+                JsonArray errors = json.get("errors").getAsJsonArray();
+                if (errors.size() > 0) {
+                    // There was an error, probably because the submission was archived.
+                    if (errors.toString().contains("TOO_OLD")) {
+                        // it was archived
+                        callback.onCompleted(new ArchivedSubmissionException(), null);
+                    }
+                    return;
+                }
+            }
+
+            JsonArray array = json.get("data").getAsJsonObject()
                     .get("things").getAsJsonArray();
             ArrayList<Thing> things = new ArrayList<>();
             Gson gson = new Gson();
@@ -596,6 +611,14 @@ public class RedditApi {
     public static void printOutLongString(String string) {
         for (int i = 0; i < string.length(); i += 1000) {
             Log.d("RedditApi", string.substring(i, Math.min(string.length(), i + 1000)));
+        }
+    }
+
+    public static class ArchivedSubmissionException extends Exception {
+        private static final long serialVersionUID = -7235976548822039653L;
+
+        public ArchivedSubmissionException() {
+            super("Submission is archived. Commenting is disallowed");
         }
     }
 

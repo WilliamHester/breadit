@@ -32,6 +32,7 @@
     <string name="cancel">Cancel</string>
     <string name="reply">Reply</string>
     <string name="view_link">View link</string>
+    <string name="archived">Sorry, this submission is archived. Commenting is not allowed.</string>
 
     <!-- Comments -->
     <string name="edit">Edit</string>
@@ -219,13 +220,14 @@
     <!-- Submit Strings -->
     <string name="submit_to">Submit to /r/</string>
     <string name="subreddit">Subreddit</string>
+    <string name="submitting">Submitting</string>
 
     <!-- SubmitLinkFragment -->
     <string name="link">Link</string>
     <string name="imgur">Imgur Upload</string>
     <string name="url">URL</string>
     <string name="suggest_title">Suggest title</string>
-    <string name="failed_to_generate">Failed to suggest title.</string>
+    <string name="no_title_found">No title found.</string>
 
     <!-- SubmitSelfTextFragment -->
     <string name="self_text">Self text</string>

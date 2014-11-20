@@ -13,6 +13,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.koushikdutta.async.future.FutureCallback;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,7 +46,7 @@ public class SubmitLinkFragment extends SubmitFragment {
         suggest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mUrl.getText().toString().startsWith("http://")) {
+                if (urlIsValid()) {
                     RedditApi.getSuggestedTitle(getActivity(), mUrl.getText().toString(),
                             new FutureCallback<JsonObject>() {
                                 @Override
@@ -53,14 +55,19 @@ public class SubmitLinkFragment extends SubmitFragment {
                                         e.printStackTrace();
                                         return;
                                     }
-                                    JsonArray array = result.get("jquery").getAsJsonArray();
-                                    if (array.size() < 13) {
-                                        Toast.makeText(getActivity(), R.string.failed_to_generate,
+                                    try {
+                                        JsonArray array = result.get("jquery").getAsJsonArray();
+                                        if (array.size() < 13) {
+                                            Toast.makeText(getActivity(), R.string.no_title_found,
+                                                    Toast.LENGTH_SHORT).show();
+                                        } else {
+                                            JsonArray suggested = array.get(12).getAsJsonArray();
+                                            JsonArray nameArray = suggested.get(3).getAsJsonArray();
+                                            mTitle.setText(nameArray.get(0).getAsString());
+                                        }
+                                    } catch (IndexOutOfBoundsException e2) {
+                                        Toast.makeText(getActivity(), R.string.no_title_found,
                                                 Toast.LENGTH_SHORT).show();
-                                    } else {
-                                        JsonArray suggested = array.get(12).getAsJsonArray();
-                                        JsonArray nameArray = suggested.get(3).getAsJsonArray();
-                                        mTitle.setText(nameArray.get(0).getAsString());
                                     }
                                 }
                             });
@@ -69,6 +76,19 @@ public class SubmitLinkFragment extends SubmitFragment {
         });
 
         return v;
+    }
+
+    private boolean urlIsValid() {
+        try {
+            new URI(mUrl.getText().toString());
+            return true;
+        } catch (URISyntaxException e) {
+            return false;
+        }
+    }
+
+    public boolean isValid() {
+        return urlIsValid() && mTitle.getText().length() > 0;
     }
 
     public Map<String, List<String>> getSubmitBody() {

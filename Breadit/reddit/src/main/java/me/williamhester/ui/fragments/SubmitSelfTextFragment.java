@@ -38,6 +38,10 @@ public class SubmitSelfTextFragment extends SubmitFragment {
         return v;
     }
 
+    public boolean isValid() {
+        return mTitle.getText().length() > 0;
+    }
+
     public Map<String, List<String>> getSubmitBody() {
         Map<String, List<String>> body = new HashMap<>();
         body.put("kind", new ArrayList<String>(1));

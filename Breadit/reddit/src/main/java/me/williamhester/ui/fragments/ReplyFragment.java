@@ -113,10 +113,16 @@ public class ReplyFragment extends AsyncSendFragment {
                     public void run() {
                         dialog.dismiss();
                         if (e != null) {
-                            e.printStackTrace();
-                            Toast.makeText(getActivity(),
-                                    R.string.failed_to_post_reply,
-                                    Toast.LENGTH_SHORT).show();
+                            if (e instanceof RedditApi.ArchivedSubmissionException) {
+                                Toast.makeText(getActivity(), R.string.archived,
+                                        Toast.LENGTH_SHORT).show();
+                                kill();
+                            } else {
+                                e.printStackTrace();
+                                Toast.makeText(getActivity(),
+                                        R.string.failed_to_post_reply,
+                                        Toast.LENGTH_SHORT).show();
+                            }
                             return;
                         }
                         Intent i = new Intent();

@@ -1,11 +1,13 @@
 package me.williamhester.ui.fragments;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 
 import me.williamhester.reddit.R;
@@ -98,5 +100,15 @@ public abstract class AsyncSendFragment extends Fragment {
         super.onSaveInstanceState(outState);
 
         outState.putBoolean("killOnStart", mKillOnStart);
+    }
+
+    protected void kill() {
+        mKillOnStart = true;
+        if (isResumed()) {
+            getFragmentManager().popBackStack();
+            InputMethodManager imm =  (InputMethodManager) getActivity().getSystemService(
+                    Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);
+        }
     }
 }
