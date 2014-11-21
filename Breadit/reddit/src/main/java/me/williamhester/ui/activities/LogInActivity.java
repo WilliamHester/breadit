@@ -3,6 +3,7 @@ package me.williamhester.ui.activities;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import me.williamhester.reddit.R;
@@ -27,7 +28,9 @@ public class LogInActivity extends ActionBarActivity {
                 .replace(R.id.container, fragment, "LogIn")
                 .commit();
 
-//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
+        setSupportActionBar(toolbar);
+        toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
     }
 
     @Override

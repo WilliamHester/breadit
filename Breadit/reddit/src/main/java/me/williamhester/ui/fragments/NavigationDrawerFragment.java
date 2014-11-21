@@ -3,19 +3,10 @@ package me.williamhester.ui.fragments;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.os.Bundle;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.util.Log;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -105,6 +96,22 @@ public class NavigationDrawerFragment extends AccountFragment {
         return v;
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == SettingsFragment.LOG_IN_REQUEST) {
+            if (resultCode == SettingsActivity.RESULT_LOGGED_IN) {
+                AccountManager.init(getActivity());
+                mCallbacks.onAccountChanged();
+                if (getView() != null) {
+                    Spinner accountSpinner = (Spinner) getView().findViewById(R.id.account_spinner);
+                    accountSpinner.setAdapter(new AccountAdapter());
+                }
+                onAccountChanged();
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
     private View createHeaderView(LayoutInflater inflater) {
         View v = inflater.inflate(R.layout.header_drawer, null);
         final EditText subredditSearch = (EditText) v.findViewById(R.id.search_subreddit);
@@ -140,7 +147,7 @@ public class NavigationDrawerFragment extends AccountFragment {
             }
         });
 
-        Spinner accountSpinner = (Spinner) v.findViewById(R.id.accounts_spinner);
+        Spinner accountSpinner = (Spinner) v.findViewById(R.id.account_spinner);
         accountSpinner.setAdapter(new AccountAdapter());
         accountSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -193,7 +200,7 @@ public class NavigationDrawerFragment extends AccountFragment {
                 Intent i = new Intent(getActivity(), SettingsActivity.class);
                 Bundle b = new Bundle();
                 i.putExtras(b);
-                startActivity(i);
+                startActivityForResult(i, SettingsFragment.LOG_IN_REQUEST);
             }
         });
         mCheckbox = (CheckBox) v.findViewById(R.id.subscribed_checkbox);
@@ -211,11 +218,16 @@ public class NavigationDrawerFragment extends AccountFragment {
 
     private void selectCurrentAccount(View v) {
         if (v != null) {
-            Spinner accountSpinner = (Spinner) v.findViewById(R.id.accounts_spinner);
+            final Spinner accountSpinner = (Spinner) v.findViewById(R.id.account_spinner);
             if (AccountManager.getAccount() == null) {
                 accountSpinner.setSelection(AccountManager.getAccounts().size());
             } else {
-                accountSpinner.setSelection(AccountManager.getAccounts().indexOf(AccountManager.getAccount()));
+                accountSpinner.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        accountSpinner.setSelection(AccountManager.getAccounts().indexOf(AccountManager.getAccount()));
+                    }
+                });
             }
         }
     }
@@ -260,7 +272,7 @@ public class NavigationDrawerFragment extends AccountFragment {
 
                         dataSource.close();
 
-                        final boolean isNew = result.equals(savedSubscriptions);
+                        final boolean isNew = !result.equals(savedSubscriptions);
 
                         if (isNew) {
                             mSubredditList.clear();

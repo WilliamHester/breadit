@@ -98,7 +98,7 @@ public class SettingsFragment extends PreferenceFragment {
             builder.show();
         } else if (preference == mLogIn) {
             Intent i = new Intent(getActivity(), LogInActivity.class);
-            startActivityForResult(i, LOG_IN_REQUEST);
+            getActivity().startActivityForResult(i, LOG_IN_REQUEST);
         } else if (preference == mLogOut) {
             final List<Account> accounts;
             AccountDataSource dataSource = new AccountDataSource(getActivity());

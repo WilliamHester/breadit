@@ -233,4 +233,7 @@
     <!-- SubmitSelfTextFragment -->
     <string name="self_text">Self text</string>
 
+    <!-- Network stuff -->
+    <string name="network_problems">Network problems. Check your network and try again.</string>
+
 </resources>

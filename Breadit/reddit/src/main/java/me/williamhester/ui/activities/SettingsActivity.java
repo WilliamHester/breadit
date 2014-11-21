@@ -1,5 +1,6 @@
 package me.williamhester.ui.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
@@ -11,6 +12,8 @@ import me.williamhester.ui.fragments.SettingsFragment;
 
 
 public class SettingsActivity extends ActionBarActivity {
+
+    public static final int RESULT_LOGGED_IN = 4;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +29,16 @@ public class SettingsActivity extends ActionBarActivity {
         getFragmentManager().beginTransaction()
                 .replace(R.id.container, fragment)
                 .commit();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == SettingsFragment.LOG_IN_REQUEST) {
+            if (resultCode == RESULT_OK) {
+                setResult(RESULT_LOGGED_IN);
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
