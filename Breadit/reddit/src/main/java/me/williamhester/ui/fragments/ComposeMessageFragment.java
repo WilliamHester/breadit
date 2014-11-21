@@ -1,6 +1,7 @@
 package me.williamhester.ui.fragments;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -13,6 +14,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.koushikdutta.async.future.FutureCallback;
 
@@ -24,10 +26,9 @@ import me.williamhester.reddit.R;
  */
 public class ComposeMessageFragment extends AsyncSendFragment {
 
-    public static final int COMPLETE_CAPTCHA = 1;
-
     private boolean mCaptchaOnStart;
 
+    private CaptchaDialogFragment mCaptchaDialog;
     private EditText mComposeTo;
     private EditText mSubject;
 
@@ -103,14 +104,40 @@ public class ComposeMessageFragment extends AsyncSendFragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == COMPLETE_CAPTCHA) {
+        if (requestCode == CaptchaDialogFragment.COMPLETE_CAPTCHA) {
             if (resultCode == Activity.RESULT_OK) {
-                if (isResumed()) {
-                    Toast.makeText(getActivity(), R.string.message_sent, Toast.LENGTH_SHORT).show();
-                    getFragmentManager().popBackStack();
-                } else {
-                    mKillOnStart = true;
-                }
+                String iden = data.getStringExtra("iden");
+                String attempt = data.getStringExtra("attempt");
+                final ProgressDialog dialog = new ProgressDialog(getActivity());
+                dialog.setMessage(getResources().getString(R.string.sending_message));
+                dialog.show();
+                RedditApi.compose(getActivity(), iden, attempt, mComposeTo.getText().toString(),
+                        mSubject.getText().toString(), mMarkdownBody.getBody(),
+                        new FutureCallback<JsonObject>() {
+                            @Override
+                            public void onCompleted(Exception e, JsonObject result) {
+                                dialog.dismiss();
+                                if (e != null) {
+                                    e.printStackTrace();
+                                    return;
+                                }
+                                JsonObject json = result.get("json").getAsJsonObject();
+                                JsonArray errors = json.get("errors").getAsJsonArray();
+                                if (errors.size() == 0) {
+                                    if (mCaptchaDialog.isResumed()) {
+                                        mCaptchaDialog.dismiss();
+                                    } else {
+                                        mCaptchaDialog.setKillOnStart();
+                                    }
+                                    Toast.makeText(getActivity(), R.string.message_sent, Toast.LENGTH_SHORT).show();
+                                    kill();
+                                } else {
+                                    mCaptchaDialog.newCaptcha(json.get("captcha").getAsString());
+                                    Toast.makeText(getActivity(), R.string.failed_captcha,
+                                            Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
             }
             return;
         }
@@ -163,10 +190,8 @@ public class ComposeMessageFragment extends AsyncSendFragment {
     }
 
     private void showCaptchaDialog() {
-        CaptchaDialogFragment fragment = CaptchaDialogFragment
-                .newInstance(mComposeTo.getText().toString(),
-                        mSubject.getText().toString(), mMarkdownBody.getBody());
-        fragment.setTargetFragment(this, COMPLETE_CAPTCHA);
-        fragment.show(getFragmentManager(), "captcha");
+        mCaptchaDialog = CaptchaDialogFragment.newInstance();
+        mCaptchaDialog.setTargetFragment(this, CaptchaDialogFragment.COMPLETE_CAPTCHA);
+        mCaptchaDialog.show(getFragmentManager(), "captcha");
     }
 }

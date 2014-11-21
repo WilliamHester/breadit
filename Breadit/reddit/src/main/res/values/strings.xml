@@ -221,6 +221,7 @@
     <string name="submit_to">Submit to /r/</string>
     <string name="subreddit">Subreddit</string>
     <string name="submitting">Submitting</string>
+    <string name="sub_doesnt_exist">The subreddit that you attempted to submit to doesn\'t exist.</string>
 
     <!-- SubmitLinkFragment -->
     <string name="link">Link</string>

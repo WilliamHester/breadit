@@ -2,6 +2,7 @@ package me.williamhester.ui.fragments;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
@@ -25,14 +26,13 @@ import me.williamhester.reddit.R;
  */
 public class CaptchaDialogFragment extends DialogFragment {
 
+    public static final int COMPLETE_CAPTCHA = 1;
+
     private String mCaptchaIden;
     private boolean mKillOnStart;
 
-    public static CaptchaDialogFragment newInstance(String to, String subject, String body) {
+    public static CaptchaDialogFragment newInstance() {
         Bundle args = new Bundle();
-        args.putString("to", to);
-        args.putString("subject", subject);
-        args.putString("body", body);
         CaptchaDialogFragment fragment = new CaptchaDialogFragment();
         fragment.setArguments(args);
         return fragment;
@@ -72,41 +72,16 @@ public class CaptchaDialogFragment extends DialogFragment {
         continueButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final ProgressDialog dialog = new ProgressDialog(getActivity());
-                dialog.setMessage(getResources().getString(R.string.sending_message));
-                dialog.show();
-                String to = getArguments().getString("to");
-                String subject = getArguments().getString("subject");
-                String body = getArguments().getString("body");
                 EditText attempt = (EditText) view.findViewById(R.id.captcha_response);
-                RedditApi.compose(getActivity(), mCaptchaIden, attempt.getText().toString(), to,
-                        subject, body, new FutureCallback<JsonObject>() {
-                            @Override
-                            public void onCompleted(Exception e, JsonObject result) {
-                                dialog.dismiss();
-                                if (e != null) {
-                                    e.printStackTrace();
-                                    return;
-                                }
-                                JsonObject json = result.get("json").getAsJsonObject();
-                                JsonArray errors = json.get("errors").getAsJsonArray();
-                                if (errors.size() == 0) {
-                                    if (isResumed()) {
-                                        getTargetFragment().onActivityResult(
-                                                ComposeMessageFragment.COMPLETE_CAPTCHA,
-                                                Activity.RESULT_OK, null);
-                                        getDialog().dismiss();
-                                    } else {
-                                        mKillOnStart = true;
-                                    }
-                                } else {
-                                    mCaptchaIden = json.get("captcha").getAsString();
-                                    loadCaptcha(view);
-                                    Toast.makeText(getActivity(), R.string.failed_captcha,
-                                            Toast.LENGTH_SHORT).show();
-                                }
-                            }
-                        });
+                if (getTargetFragment() != null) {
+                    Intent i = new Intent();
+                    i.putExtra("iden", mCaptchaIden);
+                    i.putExtra("attempt", attempt.getText().toString());
+                    getTargetFragment().onActivityResult(COMPLETE_CAPTCHA, Activity.RESULT_OK, i);
+                } else if (getActivity() instanceof OnCaptchaAttemptListener) {
+                    ((OnCaptchaAttemptListener) getActivity()).onCaptchaAttempt(mCaptchaIden,
+                            attempt.getText().toString());
+                }
             }
         });
         getDialog().setTitle(R.string.captcha_response);
@@ -118,8 +93,6 @@ public class CaptchaDialogFragment extends DialogFragment {
         super.onResume();
 
         if (mKillOnStart) {
-            getTargetFragment().onActivityResult(ComposeMessageFragment.COMPLETE_CAPTCHA,
-                    Activity.RESULT_OK, null);
             dismiss();
         }
     }
@@ -129,6 +102,15 @@ public class CaptchaDialogFragment extends DialogFragment {
         super.onSaveInstanceState(outState);
 
         outState.putBoolean("killOnStart", mKillOnStart);
+    }
+
+    public void setKillOnStart() {
+        mKillOnStart = true;
+    }
+
+    public void newCaptcha(String captchaIden) {
+        mCaptchaIden = captchaIden;
+        loadCaptcha(getView());
     }
 
     private void loadCaptcha(final View v) {
@@ -147,5 +129,9 @@ public class CaptchaDialogFragment extends DialogFragment {
                 ImgurApi.loadImage(RedditApi.REDDIT_URL + "/captcha/" + mCaptchaIden, captcha, null);
             }
         });
+    }
+
+    public interface OnCaptchaAttemptListener {
+        public void onCaptchaAttempt(String iden, String attempt);
     }
 }

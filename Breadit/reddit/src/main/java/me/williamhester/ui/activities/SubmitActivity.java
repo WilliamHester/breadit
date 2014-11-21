@@ -6,25 +6,24 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.util.SparseArray;
-import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.koushikdutta.async.future.FutureCallback;
 
-import java.util.HashMap;
-
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
+import me.williamhester.ui.fragments.CaptchaDialogFragment;
 import me.williamhester.ui.fragments.SubmitFragment;
 import me.williamhester.ui.fragments.SubmitLinkFragment;
 import me.williamhester.ui.fragments.SubmitSelfTextFragment;
@@ -36,10 +35,12 @@ import me.williamhester.ui.views.SlidingTabLayout;
  *
  * Created by william on 10/31/14.
  */
-public class SubmitActivity extends ActionBarActivity {
+public class SubmitActivity extends ActionBarActivity implements
+        CaptchaDialogFragment.OnCaptchaAttemptListener {
 
+    private CaptchaDialogFragment mCaptchaDialog;
     private EditText mSubreddit;
-    private SparseArray<SubmitFragment> mFragments;
+    private ProgressDialog mProgressDialog;
     private ViewPager mViewPager;
 
     @Override
@@ -73,13 +74,23 @@ public class SubmitActivity extends ActionBarActivity {
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                boolean valid = mFragments.get(mViewPager.getCurrentItem()).isValid();
+                SubmitFragment fragment = (SubmitFragment) getSupportFragmentManager()
+                        .findFragmentByTag("android:switcher:" + R.id.view_pager + ":"
+                                + mViewPager.getCurrentItem());
+                boolean valid = fragment.isValid();
                 // If the subreddit's length is at least 3 and the fragment says that it's valid
                 if (subredditNameIsValid() && valid) {
                     submit();
                 }
             }
         });
+
+        mProgressDialog = new ProgressDialog(SubmitActivity.this);
+        mProgressDialog.setCancelable(false);
+        mProgressDialog.setMessage(getResources().getString(R.string.submitting));
+
+        mCaptchaDialog = (CaptchaDialogFragment) getSupportFragmentManager()
+                .findFragmentByTag("captcha");
     }
 
     public boolean subredditNameIsValid() {
@@ -89,23 +100,84 @@ public class SubmitActivity extends ActionBarActivity {
     }
 
     public void submit() {
-        final ProgressDialog dialog = new ProgressDialog(SubmitActivity.this);
-        dialog.setCancelable(false);
-        dialog.setMessage(getResources().getString(R.string.submitting));
-        dialog.show();
-        RedditApi.submit(this, mFragments.get(mViewPager.getCurrentItem()).getSubmitBody(),
-                mSubreddit.getText().toString(), new FutureCallback<JsonObject>() {
+        mProgressDialog.show();
+        final FutureCallback<JsonObject> submitCallback = new FutureCallback<JsonObject>() {
+            @Override
+            public void onCompleted(Exception e, JsonObject result) {
+                mProgressDialog.cancel();
+                if (e != null) {
+                    Toast.makeText(SubmitActivity.this, "Failed to submit. " +
+                            "Please try again.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                JsonObject json = result.get("json").getAsJsonObject();
+
+                if (json.has("data")) {
+                    // Consider submission successful
+                    JsonObject data = json.get("data").getAsJsonObject();
+                    String permalink = data.get("url").getAsString();
+                    Bundle extras = new Bundle();
+                    extras.putString("permalink", permalink);
+                    Intent i = new Intent(SubmitActivity.this, SubmissionActivity.class);
+                    i.putExtras(extras);
+                    startActivity(i);
+                    finish();
+                } else {
+                    Toast.makeText(SubmitActivity.this, "Failed to submit. " +
+                            "Please try again.", Toast.LENGTH_SHORT).show();
+                }
+            }
+        };
+
+        FutureCallback<String> needsCaptchaCallback = new FutureCallback<String>() {
+            @Override
+            public void onCompleted(Exception e, String result) {
+                if (e != null) {
+                    e.printStackTrace();
+                    return;
+                }
+                boolean needsCaptcha = Boolean.parseBoolean(result);
+                if (needsCaptcha) {
+                    mProgressDialog.dismiss();
+                    showCaptchaDialog();
+                } else {
+                    SubmitFragment fragment = (SubmitFragment) getSupportFragmentManager()
+                            .findFragmentByTag("android:switcher:" + R.id.view_pager + ":"
+                                    + mViewPager.getCurrentItem());
+                    RedditApi.submit(SubmitActivity.this, fragment.getSubmitBody(),
+                            mSubreddit.getText().toString(), submitCallback);
+                }
+            }
+        };
+
+        mProgressDialog.show();
+        RedditApi.needsCaptcha(this, needsCaptchaCallback);
+    }
+
+    private void showCaptchaDialog() {
+        mCaptchaDialog = CaptchaDialogFragment.newInstance();
+        mCaptchaDialog.show(getSupportFragmentManager(), "captcha");
+    }
+
+    @Override
+    public void onCaptchaAttempt(String iden, String attempt) {
+        SubmitFragment fragment = (SubmitFragment) getSupportFragmentManager()
+                .findFragmentByTag("android:switcher:" + R.id.view_pager + ":"
+                        + mViewPager.getCurrentItem());
+        RedditApi.submit(this, fragment.getSubmitBody(),
+                mSubreddit.getText().toString(), iden, attempt, new FutureCallback<JsonObject>() {
                     @Override
                     public void onCompleted(Exception e, JsonObject result) {
-                        dialog.cancel();
+                        mProgressDialog.dismiss();
                         if (e != null) {
                             Toast.makeText(SubmitActivity.this, "Failed to submit. " +
                                     "Please try again.", Toast.LENGTH_SHORT).show();
                             return;
                         }
                         JsonObject json = result.get("json").getAsJsonObject();
+                        JsonArray errors = json.get("errors").getAsJsonArray();
 
-                        if (json.has("data")) {
+                        if (errors.size() == 0 && json.has("data")) {
                             // Consider submission successful
                             JsonObject data = json.get("data").getAsJsonObject();
                             String permalink = data.get("url").getAsString();
@@ -115,10 +187,57 @@ public class SubmitActivity extends ActionBarActivity {
                             i.putExtras(extras);
                             startActivity(i);
                             finish();
+                        } else if (errors.size() > 0) {
+                            // Likely means that the user failed the captcha
+                            StringBuilder sb = new StringBuilder();
+                            for (JsonElement element : errors) {
+                                JsonArray array = element.getAsJsonArray();
+                                String errorName = array.get(0).getAsString();
+                                switch (errorName) {
+                                    case "RATELIMIT":
+                                        // You're ratelimited
+                                        long minutes = Math.round(json
+                                                .get("ratelimit").getAsDouble()) / 60;
+                                        sb.append(getResources().getString(R.string.ratelimited))
+                                                .append(' ')
+                                                .append(minutes)
+                                                .append(' ')
+                                                .append(getResources().getString(R.string.minutes))
+                                                .append('\n');
+                                        break;
+                                    case "BAD_CAPTCHA":
+                                        // The captcha response was wrong
+                                        mCaptchaDialog.newCaptcha(json.get("captcha").getAsString());
+                                        sb.append(getResources().getString(R.string.failed_captcha))
+                                                .append('\n');
+                                        break;
+                                    case "SUBREDDIT_NOEXIST":
+                                        // The subreddit doesn't exist.
+                                        sb.append(getResources().getString(
+                                                R.string.sub_doesnt_exist))
+                                                .append('\n');
+                                        break;
+                                    case "QUOTA_FILLED":
+                                        // You're really ratelimited
+                                        sb.append(array.get(1).getAsString())
+                                                .append('\n');
+                                        break;
+                                    default:
+                                        Log.e("SubmitActivity", "Unhandled error: \"" + errorName
+                                                + "\"");
+                                        RedditApi.printOutLongString(json.toString());
+                                }
+                            }
+                            if (sb.length() > 0) {
+                                sb.deleteCharAt(sb.length() - 1);
+                            }
+                            Toast.makeText(SubmitActivity.this, sb, Toast.LENGTH_LONG).show();
                         } else {
+                            // Likely means that the user entered a URL incorrectly
                             Toast.makeText(SubmitActivity.this, "Failed to submit. " +
                                     "Please try again.", Toast.LENGTH_SHORT).show();
                         }
+
                     }
                 });
     }
@@ -127,18 +246,15 @@ public class SubmitActivity extends ActionBarActivity {
 
         public ReplyFragmentPagerAdapter(FragmentManager fm) {
             super(fm);
-            mFragments = new SparseArray<>();
         }
 
         @Override
         public Fragment getItem(int position) {
             switch (position) {
                 case 0:
-                    mFragments.put(0, SubmitLinkFragment.newInstance());
-                    return mFragments.get(0);
+                   return SubmitLinkFragment.newInstance();
                 case 1:
-                    mFragments.put(1, SubmitSelfTextFragment.newInstance());
-                    return mFragments.get(1);
+                    return SubmitSelfTextFragment.newInstance();
                 case 2:
                     // Imgur submit
             }

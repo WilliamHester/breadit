@@ -595,6 +595,11 @@ public class RedditApi {
 
     public static void submit(Context context, Map<String, List<String>> params, String subreddit,
                               FutureCallback<JsonObject> callback) {
+        submit(context, params, subreddit, "", "", callback);
+    }
+
+    public static void submit(Context context, Map<String, List<String>> params, String subreddit,
+                              String iden, String response, FutureCallback<JsonObject> callback) {
         Ion.with(context)
                 .load(REDDIT_URL + "/api/submit")
                 .addHeaders(getStandardHeaders())
@@ -604,6 +609,8 @@ public class RedditApi {
                 .setBodyParameter("sr", subreddit)
                 .setBodyParameter("then", "comments")
                 .setBodyParameter("resubmit", "false")
+                .setBodyParameter("iden", iden)
+                .setBodyParameter("captcha", response)
                 .asJsonObject()
                 .setCallback(callback);
     }
@@ -618,7 +625,7 @@ public class RedditApi {
         private static final long serialVersionUID = -7235976548822039653L;
 
         public ArchivedSubmissionException() {
-            super("Submission is archived. Commenting is disallowed");
+            super("Submission is archived. Commenting is disallowed.");
         }
     }
 
