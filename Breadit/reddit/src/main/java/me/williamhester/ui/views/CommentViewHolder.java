@@ -30,7 +30,6 @@ public class CommentViewHolder extends VotableViewHolder {
 
     private Comment mComment;
     private CommentClickCallbacks mCallback;
-    private String mSubmissionAuthor;
     private TextView mAuthor;
     private TextView mFlairText;
     private View mContent;
@@ -38,11 +37,10 @@ public class CommentViewHolder extends VotableViewHolder {
     private View mGoldIndicator;
     private View mOptionsRow;
 
-    public CommentViewHolder(View itemView, CommentClickCallbacks callbacks, String submissionAuthor) {
+    public CommentViewHolder(View itemView, CommentClickCallbacks callbacks) {
         super(itemView);
         mCallback = callbacks;
         mBody.setMovementMethod(new CommentLinkMovementMethod());
-        mSubmissionAuthor = submissionAuthor;
         mContent = itemView.findViewById(R.id.comment_content);
         mAuthor = (TextView) itemView.findViewById(R.id.author);
         mFlairText = (TextView) itemView.findViewById(R.id.flair);
@@ -156,9 +154,22 @@ public class CommentViewHolder extends VotableViewHolder {
 
         mGoldIndicator.setVisibility(mComment.isGilded() ? View.VISIBLE : View.INVISIBLE);
 
-        if (mComment.getAuthor().equals(mSubmissionAuthor)) {
+        if (mComment.getAuthor().equals(mComment.getSubmissionAuthor())) {
             mAuthor.setBackgroundResource(R.drawable.author_background);
             mAuthor.setTextColor(itemView.getResources().getColor(R.color.ghostwhite));
+        } else if (mComment.getDistinguished() != null) {
+            switch (mComment.getDistinguished()) {
+                case "moderator":
+                    mAuthor.setBackgroundResource(R.drawable.mod_background);
+                    mAuthor.setTextColor(itemView.getResources().getColor(R.color.ghostwhite));
+                    break;
+                case "admin":
+                    mAuthor.setBackgroundResource(R.drawable.admin_background);
+                    mAuthor.setTextColor(itemView.getResources().getColor(R.color.ghostwhite));
+                default:
+                    mAuthor.setBackground(null);
+                    mAuthor.setTextColor(itemView.getResources().getColor(R.color.comment_metadata_gray));
+            }
         } else {
             mAuthor.setBackground(null);
             mAuthor.setTextColor(itemView.getResources().getColor(R.color.comment_metadata_gray));

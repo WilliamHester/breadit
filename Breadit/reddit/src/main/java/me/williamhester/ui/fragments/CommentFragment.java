@@ -380,7 +380,7 @@ public class CommentFragment extends AccountFragment {
                             parent, false), mSubmissionCallbacks);
                 case COMMENT:
                     return new CommentViewHolder(inflater.inflate(R.layout.list_item_comment,
-                            parent, false), mCommentCallbacks, mSubmission.getAuthor());
+                            parent, false), mCommentCallbacks);
                 case MORE_COMMENTS:
                     return new MoreCommentsViewHolder(
                             inflater.inflate(R.layout.list_item_more_comments, parent, false));

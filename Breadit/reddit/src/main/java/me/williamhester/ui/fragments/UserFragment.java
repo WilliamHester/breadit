@@ -135,7 +135,7 @@ public class UserFragment extends AccountFragment {
                     LayoutInflater inflater = (LayoutInflater) mContext
                             .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                     convertView = inflater.inflate(R.layout.list_item_comment_card, parent, false);
-                    convertView.setTag(new CommentViewHolder(convertView, this, mUsername));
+                    convertView.setTag(new CommentViewHolder(convertView, this));
                 }
             } else {
                 if (convertView == null || convertView.getTag() instanceof CommentViewHolder) {

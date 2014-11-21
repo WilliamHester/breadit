@@ -160,11 +160,15 @@ public class Comment extends AbsComment implements Votable, Parcelable {
         return mParentName;
     }
 
+    public String getDistinguished() {
+        return mDistinguished;
+    }
+
     public String getSubredditId() {
         return mSubredditId;
     }
 
-    public String getLinkAuthor() {
+    public String getSubmissionAuthor() {
         return mLinkAuthor;
     }
 

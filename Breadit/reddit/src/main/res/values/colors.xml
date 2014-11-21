@@ -26,6 +26,8 @@
     <color name="op">#0055DF</color>
     <color name="nsfw_red">#ac3939</color>
     <color name="gold">#ffffd700</color>
+    <color name="moderator">#228822</color>
+    <color name="admin">#FF0011</color>
 
     <!-- Level Indicator Colors -->
     <color name="green">#ff5aa000</color>
