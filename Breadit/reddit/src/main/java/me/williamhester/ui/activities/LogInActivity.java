@@ -12,7 +12,6 @@ import android.view.MenuItem;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.fragments.ForgotPasswordFragment;
 import me.williamhester.ui.fragments.LogInFragment;
-import me.williamhester.ui.fragments.LogInPagerFragment;
 import me.williamhester.ui.fragments.RegisterFragment;
 import me.williamhester.ui.views.SlidingTabLayout;
 
