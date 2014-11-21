@@ -48,7 +48,6 @@ public class NavigationDrawerFragment extends AccountFragment {
     private final ArrayList<Subreddit> mSubredditList = new ArrayList<>();
     private BaseAdapter mSubredditArrayAdapter;
 
-    private boolean mIsOpen = false;
     private Context mContext;
     private CheckBox mCheckbox;
     private Subreddit mSubreddit;
@@ -100,9 +99,11 @@ public class NavigationDrawerFragment extends AccountFragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == SettingsFragment.LOG_IN_REQUEST) {
             if (resultCode == SettingsActivity.RESULT_LOGGED_IN) {
+                // Reinitialize the AccountManager, as the list of accounts is now invalid
                 AccountManager.init(getActivity());
                 mCallbacks.onAccountChanged();
                 if (getView() != null) {
+                    // Refresh the list of accounts.
                     Spinner accountSpinner = (Spinner) getView().findViewById(R.id.account_spinner);
                     accountSpinner.setAdapter(new AccountAdapter());
                 }
