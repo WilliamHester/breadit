@@ -40,7 +40,15 @@ public class MarkdownBodyView extends LinearLayout {
     }
 
     public MarkdownBodyView(Context context, AttributeSet attrs, int defStyleAttr) {
-        this(context, attrs, defStyleAttr, 0);
+        super(context, attrs, defStyleAttr);
+
+        mContext = context;
+
+        LayoutInflater layoutInflater =
+                (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        layoutInflater.inflate(R.layout.view_markdown_body, this);
+
+        init();
     }
 
     @TargetApi(21)
