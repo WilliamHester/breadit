@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="submission_view_padding">8dp</dimen>
+
+    <dimen name="submission_list_divider_height">8dp</dimen>
+</resources>

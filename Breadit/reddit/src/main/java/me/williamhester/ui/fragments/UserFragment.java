@@ -19,11 +19,9 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
-import me.williamhester.models.AbsComment;
 import me.williamhester.models.AccountManager;
 import me.williamhester.models.Comment;
 import me.williamhester.models.Listing;
-import me.williamhester.models.MoreComments;
 import me.williamhester.models.ResponseRedditWrapper;
 import me.williamhester.models.Submission;
 import me.williamhester.models.User;
@@ -141,7 +139,7 @@ public class UserFragment extends AccountFragment {
                 if (convertView == null || convertView.getTag() instanceof CommentViewHolder) {
                     LayoutInflater inflater = (LayoutInflater) mContext
                             .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                    convertView = inflater.inflate(R.layout.list_item_post, parent, false);
+                    convertView = inflater.inflate(R.layout.list_item_submission, parent, false);
                     convertView.setTag(new SubmissionViewHolder(convertView, this));
                 }
             }

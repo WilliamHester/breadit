@@ -9,11 +9,10 @@ import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
-import android.text.Html;
+import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.text.method.LinkMovementMethod;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -21,15 +20,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.koushikdutta.async.future.FutureCallback;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -44,17 +40,18 @@ import me.williamhester.models.Submission;
 import me.williamhester.models.Subreddit;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
-import me.williamhester.tools.HtmlParser;
 import me.williamhester.ui.activities.SubmissionActivity;
 import me.williamhester.ui.activities.UserActivity;
 import me.williamhester.ui.adapters.SubmissionAdapter;
+import me.williamhester.ui.views.DividerItemDecoration;
 import me.williamhester.ui.views.SubmissionViewHolder;
 
 public class SubredditFragment extends AccountFragment implements SubmissionViewHolder.SubmissionCallbacks {
 
     public static final int VOTE_REQUEST_CODE = 1;
 
-    private ListView mListView;
+    private LinearLayoutManager mLayoutManager;
+    private RecyclerView mRecyclerView;
     private String mSubredditName;
     private SubmissionAdapter mSubmissionsAdapter;
     private SwipeRefreshLayout mSwipeRefreshLayout;
@@ -115,7 +112,7 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
         if (mSubredditName == null) {
             mSubredditName = "";
         }
-        mSubmissionsAdapter = new SubmissionAdapter(getActivity(), this, mSubmissionList);
+        mSubmissionsAdapter = new SubmissionAdapter(this, mSubmissionList);
         setHasOptionsMenu(true);
     }
 
@@ -138,10 +135,13 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
 
         mFooter = createFooterView(inflater);
 
-        mListView = (ListView) v.findViewById(R.id.submissions_list);
-        mListView.addFooterView(mFooter);
-        mListView.setAdapter(mSubmissionsAdapter);
-        mListView.setOnScrollListener(new InfiniteLoadingScrollListener());
+        mLayoutManager = new LinearLayoutManager(getActivity());
+        mRecyclerView = (RecyclerView) v.findViewById(R.id.submissions_list);
+        mRecyclerView.addItemDecoration(new DividerItemDecoration(getResources().getDrawable(
+                R.drawable.submissions_divider)));
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mRecyclerView.setAdapter(mSubmissionsAdapter);
+        mRecyclerView.setOnScrollListener(new InfiniteLoadingScrollListener());
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.swipe_refresh);
         mSwipeRefreshLayout.setProgressBackgroundColor(R.color.darkest_gray);
@@ -188,10 +188,10 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
             String name = b.getString("name");
             int status = b.getInt("status");
             if (name != null) {
-                for (Submission submission : mSubmissionList) {
-                    if (submission.getName().equals(name)) {
-                        submission.setVoteStatus(status);
-                        mSubmissionsAdapter.notifyDataSetChanged();
+                for (int i = 0; i < mSubmissionList.size(); i++) {
+                    if (mSubmissionList.get(i).getName().equals(name)) {
+                        mSubmissionList.get(i).setVoteStatus(status);
+                        mSubmissionsAdapter.notifyItemChanged(i);
                         return;
                     }
                 }
@@ -440,8 +440,9 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
                             e.printStackTrace();
                             return;
                         }
-                        mSubmissionList.remove(submission);
-                        mSubmissionsAdapter.notifyDataSetChanged();
+                        int i = mSubmissionList.indexOf(submission);
+                        mSubmissionList.remove(i);
+                        mSubmissionsAdapter.notifyItemRemoved(i);
                     }
                 };
                 switch (item.getItemId()) {
@@ -454,8 +455,9 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
                                     return;
                                 }
                                 if (!submission.isHidden()) {
-                                    mSubmissionList.remove(submission);
-                                    mSubmissionsAdapter.notifyDataSetChanged();
+                                    int i = mSubmissionList.indexOf(submission);
+                                    mSubmissionList.remove(i);
+                                    mSubmissionsAdapter.notifyItemRemoved(i);
                                 }
                             }
                         };
@@ -474,7 +476,8 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
                                     e.printStackTrace();
                                 }
                                 submission.setIsNsfw(!submission.isNsfw());
-                                mSubmissionsAdapter.notifyDataSetChanged();
+                                int i = mSubmissionList.indexOf(submission);
+                                mSubmissionsAdapter.notifyItemChanged(i);
                             }
                         };
                         if (submission.isNsfw()) {
@@ -615,27 +618,22 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
         }
     }
 
-    public class InfiniteLoadingScrollListener implements AbsListView.OnScrollListener {
+    public class InfiniteLoadingScrollListener extends RecyclerView.OnScrollListener {
 
         private final int VISIBLE_THRESHOLD = 5;
         private int previousTotal = 0;
         private boolean loading = true;
 
         @Override
-        public void onScrollStateChanged(AbsListView absListView, int i) {
-
-        }
-
-        @Override
-        public void onScroll(AbsListView absListView, int i, int i2, int i3) {
+        public void onScrolled(RecyclerView absListView, int dx, int dy) {
             if (loading) {
-                if (mSubmissionsAdapter.getCount() > previousTotal) {
-                    previousTotal = mSubmissionsAdapter.getCount();
+                if (mSubmissionsAdapter.getItemCount() > previousTotal) {
+                    previousTotal = mSubmissionsAdapter.getItemCount();
                     loading = false;
                 }
             } else if (mSubmissionList.size() > 0
-                    && (mSubmissionsAdapter.getCount() - mListView.getChildCount()) // 25 - 4 = 21
-                    <= (mListView.getFirstVisiblePosition() + VISIBLE_THRESHOLD)) { // 20 + 5 = 25
+                    && (mSubmissionsAdapter.getItemCount() - mRecyclerView.getChildCount()) // 25 - 4 = 21
+                    <= (mLayoutManager.findFirstVisibleItemPosition() + VISIBLE_THRESHOLD)) { // 20 + 5 = 25
                 loadMoreSubmissions();
                 loading = true;
             }
@@ -665,7 +663,8 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
                                     }
                                 }
                                 mSubmissionList.addAll(submissions);
-                                mSubmissionsAdapter.notifyDataSetChanged();
+                                mSubmissionsAdapter.notifyItemRangeInserted(
+                                        mSubmissionList.size() - submissions.size(), submissions.size());
                             }
                         } else {
                             e.printStackTrace();

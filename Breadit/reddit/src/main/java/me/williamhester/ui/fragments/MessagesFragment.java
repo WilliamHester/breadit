@@ -206,7 +206,7 @@ public class MessagesFragment extends AccountFragment {
         Context mContext;
 
         public MessageArrayAdapter(Context context) {
-            super(context, R.layout.list_item_post, mMessageList);
+            super(context, R.layout.list_item_submission, mMessageList);
             mContext = context;
         }
 
