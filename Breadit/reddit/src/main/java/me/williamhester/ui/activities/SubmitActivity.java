@@ -70,6 +70,15 @@ public class SubmitActivity extends ActionBarActivity implements
         tabs.setViewPager(mViewPager);
 
         mSubreddit = (EditText) findViewById(R.id.submit_subreddit);
+        if (savedInstanceState == null) {
+            String subName = getIntent().getStringExtra("subredditName");
+            if (subName == null) {
+                subName = "";
+            }
+            mSubreddit.setText(subName);
+            mSubreddit.setSelection(subName.length());
+        }
+
         Button submit = (Button) findViewById(R.id.submit);
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
