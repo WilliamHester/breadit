@@ -75,6 +75,7 @@ public class GifFragment extends Fragment {
         if (mImage != null) {
             GfycatApi.downloadImgurGif(mImage, progressBar, gif);
         } else if (mParser.getType() == Url.GFYCAT_LINK) {
+            progressBar.setIndeterminate(true);
             GfycatApi.getGfyDetails(getActivity(), mParser.getLinkId(), new FutureCallback<GfycatResponse>() {
                 @Override
                 public void onCompleted(Exception e, GfycatResponse result) {
@@ -84,6 +85,7 @@ public class GifFragment extends Fragment {
                     }
                     if (result.getGfyUrl() != null) {
                         setUrl(result.getGfyUrl());
+                        progressBar.setIndeterminate(false);
                         GfycatApi.downloadWebmGif(result.getGfyUrl(), progressBar, gif);
                     }
                 }
@@ -91,6 +93,7 @@ public class GifFragment extends Fragment {
         } else if (mParser.getType() == Url.DIRECT_GFY) {
             GfycatApi.downloadWebmGif(mParser.getUrl(), progressBar, gif);
         } else {
+            progressBar.setIndeterminate(true);
             GfycatApi.uploadOrConvertGif(getActivity(), mParser.getUrl(), new FutureCallback<ResponseGfycatUrlUpload>() {
                 @Override
                 public void onCompleted(Exception e, ResponseGfycatUrlUpload result) {
@@ -100,6 +103,7 @@ public class GifFragment extends Fragment {
                     }
                     if (result.getWebmUrl() != null) {
                         setUrl(result.getWebmUrl());
+                        progressBar.setIndeterminate(false);
                         GfycatApi.downloadWebmGif(result.getWebmUrl(), progressBar, gif);
                     }
                 }

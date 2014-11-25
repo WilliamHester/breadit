@@ -111,7 +111,7 @@ public class LinkSpan extends ClickableSpan {
         } else if (f != null) {
             ActionBarActivity activity = (ActionBarActivity) view.getContext();
             activity.getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, f, "Link")
+                    .add(R.id.main_container, f, "Link")
                     .addToBackStack("Link")
                     .commit();
         }

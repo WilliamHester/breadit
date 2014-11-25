@@ -20,7 +20,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+import android.widget.ProgressBar;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -50,6 +50,7 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
 
     public static final int VOTE_REQUEST_CODE = 1;
 
+    private InfiniteLoadingScrollListener mScrollListener;
     private LinearLayoutManager mLayoutManager;
     private RecyclerView mRecyclerView;
     private String mSubredditName;
@@ -68,7 +69,6 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
      */
     private String mSecondarySortType;
 
-    private View mFooter;
     private OnSubredditSelectedListener mCallback;
 
     /**
@@ -133,7 +133,7 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
             drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, Gravity.END);
         }
 
-        mFooter = createFooterView(inflater);
+        mScrollListener = new InfiniteLoadingScrollListener(v);
 
         mLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView = (RecyclerView) v.findViewById(R.id.submissions_list);
@@ -141,7 +141,7 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
                 R.drawable.submissions_divider)));
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(mSubmissionsAdapter);
-        mRecyclerView.setOnScrollListener(new InfiniteLoadingScrollListener());
+        mRecyclerView.setOnScrollListener(mScrollListener);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.swipe_refresh);
         mSwipeRefreshLayout.setProgressBackgroundColor(R.color.darkest_gray);
@@ -263,6 +263,7 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
         if (mSwipeRefreshLayout != null) {
             mSwipeRefreshLayout.setRefreshing(true);
             if (getActivity() != null) {
+                mNames.clear();
                 RedditApi.getSubmissions(getActivity(), mSubredditName, mPrimarySortType, mSecondarySortType,
                         null, null, new FutureCallback<JsonObject>() {
                             @Override
@@ -274,6 +275,8 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
                                         List<ResponseRedditWrapper> children = ((Listing) wrapper.getData()).getChildren();
                                         for (ResponseRedditWrapper innerWrapper : children) {
                                             if (innerWrapper.getData() instanceof Submission) {
+                                                mNames.add(((Submission) innerWrapper.getData())
+                                                        .getName());
                                                 submissions.add((Submission) innerWrapper.getData());
                                             }
                                         }
@@ -284,6 +287,7 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
                                             mSwipeRefreshLayout.setRefreshing(false);
                                         }
                                     }
+                                    mScrollListener.resetState();
                                 } else {
                                     e.printStackTrace();
                                     mSwipeRefreshLayout.setRefreshing(false);
@@ -294,34 +298,10 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
         }
     }
 
-    @SuppressLint("InflateParams")
-    private View createFooterView(LayoutInflater inflater) {
-        return inflater.inflate(R.layout.footer_subreddit_fragment, null);
-    }
-
-    private void setFooterFailedToLoad() {
-        TextView text = (TextView) mFooter.findViewById(R.id.footer_text);
-        text.setText(R.string.failed_to_load);
-        mFooter.findViewById(R.id.progress_bar).setVisibility(View.GONE);
-        mFooter.findViewById(R.id.inner).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loadMoreSubmissions();
-            }
-        });
-    }
-
-    private void setFooterLoading() {
-        TextView text = (TextView) mFooter.findViewById(R.id.footer_text);
-        text.setText(R.string.loading_submissions);
-        mFooter.findViewById(R.id.progress_bar).setVisibility(View.VISIBLE);
-        mFooter.findViewById(R.id.inner).setOnClickListener(null);
-    }
-
     @Override
     public void onImageViewClicked(Object imgurData) {
         getFragmentManager().beginTransaction()
-                .add(R.id.container, ImagePagerFragment.newInstance(imgurData), "ImagePagerFragment")
+                .add(R.id.main_container, ImagePagerFragment.newInstance(imgurData), "ImagePagerFragment")
                 .addToBackStack("ImagePagerFragment")
                 .commit();
     }
@@ -329,7 +309,7 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
     @Override
     public void onImageViewClicked(String imageUrl) {
         getFragmentManager().beginTransaction()
-                .add(R.id.container, ImagePagerFragment.newInstance(imageUrl), "ImagePagerFragment")
+                .add(R.id.main_container, ImagePagerFragment.newInstance(imageUrl), "ImagePagerFragment")
                 .addToBackStack("ImagePagerFragment")
                 .commit();
     }
@@ -339,7 +319,7 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
         // TODO: fix this when YouTube updates their Android API
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             getFragmentManager().beginTransaction()
-                    .add(R.id.container, YouTubeFragment.newInstance(videoId), "YouTubeFragment")
+                    .add(R.id.main_container, YouTubeFragment.newInstance(videoId), "YouTubeFragment")
                     .addToBackStack("YouTubeFragment")
                     .commit();
         } else {
@@ -621,22 +601,36 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
     public class InfiniteLoadingScrollListener extends RecyclerView.OnScrollListener {
 
         private final int VISIBLE_THRESHOLD = 5;
-        private int previousTotal = 0;
-        private boolean loading = true;
+        private int mPreviousTotal = 0;
+        private boolean mLoading = true;
+
+        private ProgressBar mProgressBar;
+
+        public InfiniteLoadingScrollListener(View view) {
+            mProgressBar = (ProgressBar) view.findViewById(R.id.progress_bar);
+        }
 
         @Override
         public void onScrolled(RecyclerView absListView, int dx, int dy) {
-            if (loading) {
-                if (mSubmissionsAdapter.getItemCount() > previousTotal) {
-                    previousTotal = mSubmissionsAdapter.getItemCount();
-                    loading = false;
+            if (mLoading) {
+                if (mSubmissionsAdapter.getItemCount() > mPreviousTotal) {
+                    mPreviousTotal = mSubmissionsAdapter.getItemCount();
+                    mLoading = false;
+                    mProgressBar.setVisibility(View.GONE);
                 }
             } else if (mSubmissionList.size() > 0
                     && (mSubmissionsAdapter.getItemCount() - mRecyclerView.getChildCount()) // 25 - 4 = 21
                     <= (mLayoutManager.findFirstVisibleItemPosition() + VISIBLE_THRESHOLD)) { // 20 + 5 = 25
                 loadMoreSubmissions();
-                loading = true;
+                mLoading = true;
+                mProgressBar.setVisibility(View.VISIBLE);
             }
+        }
+
+        public void resetState() {
+            mPreviousTotal = mSubmissionsAdapter.getItemCount();
+            mLoading = false;
+            mProgressBar.setVisibility(View.GONE);
         }
     }
 
@@ -647,31 +641,42 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
         } else {
             after = mSubmissionList.get(mSubmissionList.size() - 1).getName();
         }
-        setFooterLoading();
-        RedditApi.getSubmissions(getActivity(), mSubredditName, mPrimarySortType,
-                mSecondarySortType, null, after, new FutureCallback<JsonObject>() {
-                    @Override
-                    public void onCompleted(Exception e, JsonObject result) {
-                        if (e == null) {
-                            ResponseRedditWrapper wrapper = new ResponseRedditWrapper(result, new Gson());
-                            if (wrapper.getData() instanceof Listing) {
-                                ArrayList<Submission> submissions = new ArrayList<>();
-                                List<ResponseRedditWrapper> children = ((Listing) wrapper.getData()).getChildren();
-                                for (ResponseRedditWrapper innerWrapper : children) {
-                                    if (innerWrapper.getData() instanceof Submission) {
-                                        submissions.add((Submission) innerWrapper.getData());
-                                    }
-                                }
-                                mSubmissionList.addAll(submissions);
-                                mSubmissionsAdapter.notifyItemRangeInserted(
-                                        mSubmissionList.size() - submissions.size(), submissions.size());
-                            }
+//        setFooterLoading();
+        FutureCallback<JsonObject> callback = new FutureCallback<JsonObject>() {
+            @Override
+            public void onCompleted(Exception e, JsonObject result) {
+                if (e == null) {
+                    ResponseRedditWrapper wrapper = new ResponseRedditWrapper(result, new Gson());
+                    if (wrapper.getData() instanceof Listing) {
+                        ArrayList<Submission> submissions = new ArrayList<>();
+                        List<ResponseRedditWrapper> children = ((Listing) wrapper.getData())
+                                .getChildren();
+                        if (children.size() == 0) {
+                            // Reddit "barfed"
+//                            mSubmissionsAdapter.setFooterRedditBarfed();
                         } else {
-                            e.printStackTrace();
-                            setFooterFailedToLoad();
+                            for (ResponseRedditWrapper innerWrapper : children) {
+                                if (innerWrapper.getData() instanceof Submission &&
+                                        !mNames.contains(((Submission)innerWrapper.getData())
+                                                .getName())) {
+                                    submissions.add((Submission) innerWrapper.getData());
+                                    mNames.add(((Submission) innerWrapper.getData()).getName());
+                                }
+                            }
+                            mSubmissionList.addAll(submissions);
+                            mSubmissionsAdapter.notifyItemRangeInserted(
+                                    mSubmissionList.size() - submissions.size(),
+                                    submissions.size());
                         }
                     }
-                });
+                } else {
+                    e.printStackTrace();
+//                    mSubmissionsAdapter.setFooterFailedToLoad();
+                }
+            }
+        };
+        RedditApi.getSubmissions(getActivity(), mSubredditName, mPrimarySortType,
+                mSecondarySortType, null, after, callback);
     }
 
     public static interface OnSubredditSelectedListener {

@@ -1,34 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/transparent_gray">
 
-    <me.williamhester.ui.views.HackyViewPager android:id="@+id/view_pager"
+    <android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:breadit="http://schemas.android.com/apk/res-auto"
+        breadit:theme="@style/ActionBarThemeOverlay"
+        breadit:popupTheme="@style/ActionBarPopupThemeOverlay"
+        android:id="@+id/toolbar_actionbar"
+        android:background="@color/transparent_gray"
+        breadit:titleTextAppearance="@style/ActionBar.TitleText"
+        breadit:contentInsetStart="@dimen/keyline_2"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/transparent_gray"/>
+        android:layout_height="?actionBarSize" />
 
-    <ProgressBar android:id="@+id/progress_bar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:indeterminate="true"
-        android:layout_gravity="center"/>
+    <FrameLayout
+        android:orientation="vertical" android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <TextView android:id="@+id/pager_indicator"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="sans-serif-condensed-light"
-        android:layout_gravity="center_horizontal|bottom"
-        android:layout_marginBottom="8dp"
-        android:textColor="@color/ghostwhite"/>
+        <me.williamhester.ui.views.HackyViewPager android:id="@+id/view_pager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
 
-    <TextView android:id="@+id/album_title"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|center_horizontal"
-        android:textColor="@color/ghostwhite"
-        android:padding="8dp"
-        android:layout_marginBottom="16dp"/>
+        <ProgressBar android:id="@+id/progress_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            android:layout_gravity="center"/>
 
-</FrameLayout>
+        <TextView android:id="@+id/pager_indicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-condensed-light"
+            android:layout_gravity="center_horizontal|bottom"
+            android:layout_marginBottom="8dp"
+            android:textColor="@color/ghostwhite"/>
+
+        <TextView android:id="@+id/album_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|center_horizontal"
+            android:textColor="@color/ghostwhite"
+            android:padding="8dp"
+            android:layout_marginBottom="16dp"/>
+
+    </FrameLayout>
+
+</LinearLayout>

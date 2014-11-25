@@ -290,6 +290,7 @@ public class Comment extends AbsComment implements Votable, Parcelable {
         dest.writeString(this.mAuthorFlairText);
         dest.writeString(this.mBannedBy);
         dest.writeString(this.mBodyHtml);
+        dest.writeString(this.mName);
         dest.writeString(this.mSubreddit);
         dest.writeString(this.mSubredditId);
         dest.writeString(this.mLinkAuthor);
@@ -332,6 +333,7 @@ public class Comment extends AbsComment implements Votable, Parcelable {
         this.mAuthorFlairText = in.readString();
         this.mBannedBy = in.readString();
         this.mBodyHtml = in.readString();
+        this.mName = in.readString();
         this.mSubreddit = in.readString();
         this.mSubredditId = in.readString();
         this.mLinkAuthor = in.readString();

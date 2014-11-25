@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -131,6 +132,7 @@ public class ImagePagerFragment extends Fragment {
                 mAdapter = new SingleImageAdapter(getChildFragmentManager(), parser);
             }
         }
+
         mAnimHandler = new Handler();
     }
 
@@ -162,6 +164,16 @@ public class ImagePagerFragment extends Fragment {
         } else {
             setUpAdapter(v);
         }
+
+        Toolbar t = (Toolbar) v.findViewById(R.id.toolbar_actionbar);
+        t.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
+        t.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getFragmentManager().popBackStack();
+            }
+        });
+
         return v;
     }
 

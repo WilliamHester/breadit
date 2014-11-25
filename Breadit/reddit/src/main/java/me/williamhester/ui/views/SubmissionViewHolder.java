@@ -2,6 +2,7 @@ package me.williamhester.ui.views;
 
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -64,7 +65,7 @@ public class SubmissionViewHolder extends VotableViewHolder {
         mImageView = (ImageView) itemView.findViewById(R.id.image);
         mImageButton = (ImageButton) itemView.findViewById(R.id.preview_button);
         mOptionsRow = itemView.findViewById(R.id.options_row);
-        View submissionData = itemView.findViewById(R.id.submission_data);
+        final View submissionData = itemView.findViewById(R.id.submission_data);
         View optionReply = itemView.findViewById(R.id.option_reply);
         View optionUser = itemView.findViewById(R.id.option_view_user);
         View optionShare = itemView.findViewById(R.id.option_share);
@@ -86,6 +87,13 @@ public class SubmissionViewHolder extends VotableViewHolder {
         optionUser.setOnClickListener(mOptionsOnClickListener);
         optionSave.setOnClickListener(mOptionsOnClickListener);
         optionOverflow.setOnClickListener(mOptionsOnClickListener);
+        submissionData.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                v.onTouchEvent(event);
+                return false;
+            }
+        });
         submissionData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
