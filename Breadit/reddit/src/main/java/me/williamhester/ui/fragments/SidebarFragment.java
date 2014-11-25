@@ -13,11 +13,14 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.koushikdutta.async.future.FutureCallback;
 
 import java.text.DecimalFormat;
 
 import me.williamhester.models.AccountManager;
+import me.williamhester.models.ResponseRedditWrapper;
 import me.williamhester.models.Subreddit;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
@@ -30,11 +33,19 @@ import me.williamhester.ui.activities.SubmitActivity;
 public class SidebarFragment extends Fragment {
 
     private String mSubredditName;
-    private Subreddit mSubreddit;
+    private Subreddit mSubreddit = Subreddit.FRONT_PAGE;
 
     public static SidebarFragment newInstance(String subredditName) {
         Bundle b = new Bundle();
         b.putString("subredditName", subredditName);
+        SidebarFragment fragment = new SidebarFragment();
+        fragment.setArguments(b);
+        return fragment;
+    }
+
+    public static SidebarFragment newInstance(Subreddit subreddit) {
+        Bundle b = new Bundle();
+        b.putParcelable("subreddit", subreddit);
         SidebarFragment fragment = new SidebarFragment();
         fragment.setArguments(b);
         return fragment;
@@ -48,20 +59,6 @@ public class SidebarFragment extends Fragment {
 
         if (savedInstanceState != null) {
             mSubreddit = savedInstanceState.getParcelable("subreddit");
-        }
-
-        if (mSubreddit == null) {
-            RedditApi.getSubredditDetails(getActivity(), mSubredditName, new FutureCallback<Subreddit>() {
-                @Override
-                public void onCompleted(Exception e, Subreddit result) {
-                    if (e != null) {
-                        e.printStackTrace();
-                        return;
-                    }
-                    mSubreddit = result;
-                    setUpSideBar(getView()); // Refresh the data in the view
-                }
-            });
         }
     }
 
@@ -100,6 +97,11 @@ public class SidebarFragment extends Fragment {
         outState.putParcelable("subreddit", mSubreddit);
     }
 
+    public void setSubreddit(Subreddit subreddit) {
+        mSubreddit = subreddit;
+        setUpSideBar(getView()); // Refresh the data in the view
+    }
+
     /**
      * This method is called in onCreate (and later after the Subreddit is fetched) to set up the
      * sidebar that contains the description HTML and other parts.
@@ -115,7 +117,7 @@ public class SidebarFragment extends Fragment {
             TextView subscribers = (TextView) view.findViewById(R.id.subscribers);
             TextView description = (TextView) view.findViewById(R.id.description);
 
-            title.setText("/r/" + mSubredditName);
+            title.setText("/r/" + mSubreddit.getDisplayName());
             if (mSubreddit != null) {
                 if (AccountManager.isLoggedIn()) {
                     submit.setVisibility(View.VISIBLE);

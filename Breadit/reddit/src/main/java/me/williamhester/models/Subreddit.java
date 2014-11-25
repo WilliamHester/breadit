@@ -76,6 +76,28 @@ public class Subreddit implements Parcelable, Comparable<Subreddit> {
         }
     }
 
+    private Subreddit(boolean userIsBanned, String displayName, String title, boolean isNsfw,
+                      boolean userIsModerator, String descriptionHtml, int subscriberCount,
+                      String url, long created, String submissionType, boolean userIsSubscriber,
+                      long tableId, String name) {
+        mUserIsBanned = userIsBanned;
+        mDisplayName = displayName;
+        mTitle = title;
+        mOver18 = isNsfw;
+        mUserIsModerator = userIsModerator;
+        mDescriptionHtml = descriptionHtml;
+        mSubscribers = subscriberCount;
+        mUrl = url;
+        mCreated = created;
+        mSubmissionType = submissionType;
+        mUserIsSubscriber = userIsSubscriber;
+        mTableId = tableId;
+        this.name = name;
+    }
+
+    public static final Subreddit FRONT_PAGE = new Subreddit(false, "Front Page", "Front Page",
+            false, false, "", -1, "", -1, "", false, -1, "Front Page");
+
     public boolean userIsBanned() {
         return mUserIsBanned;
     }

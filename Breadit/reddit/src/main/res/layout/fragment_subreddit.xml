@@ -22,6 +22,16 @@
 
     </android.support.v4.widget.SwipeRefreshLayout>
 
+    <TextView android:id="@+id/subreddit_does_not_exist"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:textSize="16sp"
+        android:fontFamily="sans-serif-thin"
+        android:text="@string/subreddit_does_not_exist"
+        android:visibility="gone"/>
+
     <ProgressBar android:id="@+id/progress_bar"
         style="?android:progressBarStyleHorizontal"
         android:layout_marginTop="-7dp"

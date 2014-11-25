@@ -62,6 +62,7 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
     private SubmissionViewHolder mFocusedSubmission;
 
     private boolean mLoading = true;
+    private boolean mSubredditExists = true;
 
     /**
      * The primary sort type is set, by default to hot, Reddit's default sort for subreddits.
@@ -108,6 +109,7 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
             mNames = new HashSet<>();
             Collections.addAll(mNames, array);
             mLoading = savedInstanceState.getBoolean("loading");
+            mSubredditExists = savedInstanceState.getBoolean("subredditExists", true);
         } else if (getArguments() != null) {
             mSubredditName = getArguments().getString("subreddit");
             mNames = new HashSet<>();
@@ -124,18 +126,6 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle bundle) {
         View v = inflater.inflate(R.layout.fragment_subreddit, root, false);
-
-        DrawerLayout drawerLayout = (DrawerLayout) getActivity().findViewById(R.id.drawer_layout);
-        if (!TextUtils.isEmpty(mSubredditName)) {
-            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, Gravity.END);
-            getFragmentManager().beginTransaction()
-                    .replace(R.id.right_drawer, SidebarFragment.newInstance(mSubredditName), "side")
-                    .commit();
-        } else {
-            // Lock the drawer closed and don't fetch the subreddit because we're at the
-            // Front Page
-            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, Gravity.END);
-        }
 
         mScrollListener = new InfiniteLoadingScrollListener();
         mProgressBar = (ProgressBar) v.findViewById(R.id.progress_bar);
@@ -156,6 +146,11 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
                 refreshData();
             }
         });
+
+        if (!mSubredditExists) {
+            mSwipeRefreshLayout.setVisibility(View.GONE);
+            v.findViewById(R.id.subreddit_does_not_exist).setVisibility(View.VISIBLE);
+        }
 
         if (!mLoading && mSubmissionList.size() > 0) {
             mProgressBar.setVisibility(View.GONE);
@@ -237,6 +232,7 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
         mNames.toArray(array);
         outState.putStringArray("names", array);
         outState.putBoolean("loading", mLoading);
+        outState.putBoolean("subredditExists", mSubredditExists);
         super.onSaveInstanceState(outState);
     }
 
@@ -254,6 +250,14 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
             mPrimarySortType = primary;
             mSecondarySortType = secondary;
             refreshData();
+        }
+    }
+
+    public void showSubredditDoesNotExist() {
+        mSubredditExists = false;
+        if (getView() != null) {
+            mSwipeRefreshLayout.setVisibility(View.GONE);
+            getView().findViewById(R.id.subreddit_does_not_exist).setVisibility(View.VISIBLE);
         }
     }
 

@@ -24,6 +24,7 @@
     <string name="loading_submissions">Loading more submissions…</string>
     <string name="failed_to_load">Failed to load more submissions. Click to try again.</string>
     <string name="nothing_here">There\'s nothing here!</string>
+    <string name="subreddit_does_not_exist">This subreddit does not exist.</string>
 
     <!-- SubmissionFragment -->
     <string name="share">Share</string>

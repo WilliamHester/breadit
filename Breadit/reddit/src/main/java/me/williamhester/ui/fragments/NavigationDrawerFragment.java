@@ -22,6 +22,8 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.koushikdutta.async.future.FutureCallback;
 
 import java.util.ArrayList;
@@ -32,9 +34,11 @@ import java.util.List;
 import me.williamhester.databases.AccountDataSource;
 import me.williamhester.models.Account;
 import me.williamhester.models.AccountManager;
+import me.williamhester.models.ResponseRedditWrapper;
 import me.williamhester.models.Subreddit;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
+import me.williamhester.ui.activities.MainActivity;
 import me.williamhester.ui.activities.SettingsActivity;
 import me.williamhester.ui.activities.SubmitActivity;
 
@@ -323,30 +327,18 @@ public class NavigationDrawerFragment extends AccountFragment {
     }
 
     public void setSubreddit(String subreddit) {
+        mCheckbox.setVisibility(View.GONE);
         if (TextUtils.isEmpty(subreddit)) {
-            mSubreddit = null;
+            mSubreddit = Subreddit.FRONT_PAGE;
+        } else {
+            mCallbacks.onSubredditSelected(subreddit);
+        }
+    }
+
+    public void setSubreddit(final Subreddit subreddit) {
+        if (subreddit == null || subreddit == Subreddit.FRONT_PAGE) {
             mCheckbox.setVisibility(View.GONE);
         } else {
-            mCheckbox.setVisibility(View.VISIBLE);
-            RedditApi.getSubredditDetails(getActivity(), subreddit, new FutureCallback<Subreddit>() {
-                @Override
-                public void onCompleted(Exception e, Subreddit result) {
-                    if (e != null) {
-                        e.printStackTrace();
-                        return;
-                    }
-                    mSubreddit = result;
-                    if (mCheckbox != null) {
-                        if (mSubreddit != null) {
-                            mCheckbox.setChecked(mSubreddit.userIsSubscriber());
-                            mCheckbox.setEnabled(true);
-                        } else {
-                            mCheckbox.setChecked(false);
-                            mCheckbox.setEnabled(false);
-                        }
-                    }
-                }
-            });
             if (!AccountManager.isLoggedIn()) {
                 mCheckbox.setVisibility(View.GONE);
             } else {
@@ -355,18 +347,17 @@ public class NavigationDrawerFragment extends AccountFragment {
             mCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton compoundButton, final boolean b) {
-                    final Subreddit subreddit1 = mSubreddit;
-                    if (b != subreddit1.userIsSubscriber()) { // Only need to call this if one has changed
-                        RedditApi.subscribeSubreddit(getActivity(), b, subreddit1, new FutureCallback<String>() {
+                    if (b != subreddit.userIsSubscriber()) { // Only need to call this if one has changed
+                        RedditApi.subscribeSubreddit(getActivity(), b, subreddit, new FutureCallback<String>() {
                             @Override
                             public void onCompleted(Exception e, String result) {
-                                boolean contains = mSubredditList.contains(subreddit1.getTitle());
+                                boolean contains = mSubredditList.contains(subreddit);
                                 if (b && !contains) {
-                                    mSubredditList.add(subreddit1);
+                                    mSubredditList.add(subreddit);
                                     Collections.sort(mSubredditList);
                                     mSubredditArrayAdapter.notifyDataSetChanged();
                                 } else if (contains) {
-                                    mSubredditList.remove(subreddit1.getDisplayName());
+                                    mSubredditList.remove(subreddit);
                                     mSubredditArrayAdapter.notifyDataSetChanged();
                                 }
                             }
@@ -376,7 +367,6 @@ public class NavigationDrawerFragment extends AccountFragment {
             });
         }
     }
-
     @Override
     public void onDetach() {
         super.onDetach();

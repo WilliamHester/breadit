@@ -122,7 +122,7 @@ public class RedditApi {
     }
 
     public static void getSubredditDetails(Context context, String subredditName,
-                                           final FutureCallback<Subreddit> callback) {
+                                           final FutureCallback<JsonObject> callback) {
         if (subredditName != null && subredditName.length() > 0) {
             subredditName = "/r/" + subredditName;
         }
@@ -130,21 +130,7 @@ public class RedditApi {
                 .load(REDDIT_URL + subredditName + "/about.json")
                 .addHeaders(getStandardHeaders())
                 .asJsonObject()
-                .setCallback(new FutureCallback<JsonObject>() {
-                    @Override
-                    public void onCompleted(Exception e, JsonObject result) {
-                        if (e != null) {
-                            callback.onCompleted(e, null);
-                            return;
-                        }
-                        ResponseRedditWrapper wrapper = new ResponseRedditWrapper(result, new Gson());
-                        try {
-                            callback.onCompleted(null, (Subreddit) wrapper.getData());
-                        } catch (Exception e2) {
-                            callback.onCompleted(e2, null);
-                        }
-                    }
-                });
+                .setCallback(callback);
     }
 
     public static void getSubscribedSubreddits(FutureCallback<ArrayList<Subreddit>> callback) {
