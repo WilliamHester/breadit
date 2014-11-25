@@ -47,7 +47,6 @@ public class MainActivity extends ActionBarActivity
     private SubredditFragment mSubredditFragment;
     private SidebarFragment mSidebarFragment;
     private String mSubredditTitle;
-    private Subreddit mSubreddit;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -163,7 +162,6 @@ public class MainActivity extends ActionBarActivity
             mSubredditFragment.refreshData();
         } else {
             if (TextUtils.isEmpty(subreddit)) {
-                mSubreddit = Subreddit.FRONT_PAGE;
                 mNavigationDrawerFragment.setSubreddit(Subreddit.FRONT_PAGE);
             } else {
                 RedditApi.getSubredditDetails(this, subreddit, new FutureCallback<JsonObject>() {
@@ -175,7 +173,6 @@ public class MainActivity extends ActionBarActivity
                         }
                         ResponseRedditWrapper response = new ResponseRedditWrapper(result, new Gson());
                         if (response.getData() instanceof Subreddit) {
-                            mSubreddit = (Subreddit) response.getData();
                             mNavigationDrawerFragment.setSubreddit((Subreddit) response.getData());
                             mSidebarFragment.setSubreddit((Subreddit) response.getData());
                             mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED,
