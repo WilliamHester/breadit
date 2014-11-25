@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -46,7 +45,8 @@ import me.williamhester.ui.adapters.SubmissionAdapter;
 import me.williamhester.ui.views.DividerItemDecoration;
 import me.williamhester.ui.views.SubmissionViewHolder;
 
-public class SubredditFragment extends AccountFragment implements SubmissionViewHolder.SubmissionCallbacks {
+public class SubredditFragment extends AccountFragment implements
+        SubmissionViewHolder.SubmissionCallbacks {
 
     public static final int VOTE_REQUEST_CODE = 1;
 
@@ -173,7 +173,8 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
     public void onResume() {
         super.onResume();
         String title;
-        if (getActivity() != null && ((ActionBarActivity) getActivity()).getSupportActionBar() != null) {
+        if (getActivity() != null
+                && ((ActionBarActivity) getActivity()).getSupportActionBar() != null) {
             if (!TextUtils.isEmpty(mSubredditName)) {
                 title = "/r/" + mSubredditName;
             } else {
@@ -249,7 +250,8 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
                 || (secondary != null && !secondary.equals(mSecondarySortType))) {
             mPrimarySortType = primary;
             mSecondarySortType = secondary;
-            refreshData();
+            mProgressBar.setVisibility(View.VISIBLE);
+            loadAndClear();
         }
     }
 
@@ -276,47 +278,54 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
     public void refreshData() {
         if (mSwipeRefreshLayout != null) {
             mSwipeRefreshLayout.setRefreshing(true);
-            if (getActivity() != null) {
-                mNames.clear();
-                RedditApi.getSubmissions(getActivity(), mSubredditName, mPrimarySortType, mSecondarySortType,
-                        null, null, new FutureCallback<JsonObject>() {
-                            @Override
-                            public void onCompleted(Exception e, JsonObject result) {
-                                mLoading = false;
-                                if (e == null) {
-                                    ResponseRedditWrapper wrapper = new ResponseRedditWrapper(result, new Gson());
-                                    if (wrapper.getData() instanceof Listing) {
-                                        ArrayList<Submission> submissions = new ArrayList<>();
-                                        List<ResponseRedditWrapper> children = ((Listing) wrapper.getData()).getChildren();
-                                        for (ResponseRedditWrapper innerWrapper : children) {
-                                            if (innerWrapper.getData() instanceof Submission) {
-                                                mNames.add(((Submission) innerWrapper.getData())
-                                                        .getName());
-                                                submissions.add((Submission) innerWrapper.getData());
-                                            }
-                                        }
-                                        if (submissions.size() > 0) {
-                                            mSubmissionList.clear();
-                                            mSubmissionList.addAll(submissions);
-                                            mSubmissionsAdapter.notifyDataSetChanged();
-                                            mSwipeRefreshLayout.setRefreshing(false);
+            loadAndClear();
+        }
+    }
+
+    private void loadAndClear() {
+        if (getActivity() != null) {
+            RedditApi.getSubmissions(getActivity(), mSubredditName, mPrimarySortType,
+                    mSecondarySortType, null, null, new FutureCallback<JsonObject>() {
+                        @Override
+                        public void onCompleted(Exception e, JsonObject result) {
+                            mLoading = false;
+                            mProgressBar.setVisibility(View.GONE);
+                            mSwipeRefreshLayout.setRefreshing(false);
+                            if (e == null) {
+                                mNames.clear();
+                                ResponseRedditWrapper wrapper = new ResponseRedditWrapper(result,
+                                        new Gson());
+                                if (wrapper.getData() instanceof Listing) {
+                                    ArrayList<Submission> submissions = new ArrayList<>();
+                                    List<ResponseRedditWrapper> children =
+                                            ((Listing) wrapper.getData()).getChildren();
+                                    for (ResponseRedditWrapper innerWrapper : children) {
+                                        if (innerWrapper.getData() instanceof Submission) {
+                                            mNames.add(((Submission) innerWrapper.getData())
+                                                    .getName());
+                                            submissions.add((Submission) innerWrapper.getData());
                                         }
                                     }
-                                    mScrollListener.resetState();
-                                } else {
-                                    e.printStackTrace();
-                                    mSwipeRefreshLayout.setRefreshing(false);
+                                    if (submissions.size() > 0) {
+                                        mSubmissionList.clear();
+                                        mSubmissionList.addAll(submissions);
+                                        mSubmissionsAdapter.notifyDataSetChanged();
+                                    }
                                 }
+                                mScrollListener.resetState();
+                            } else {
+                                e.printStackTrace();
                             }
-                        });
-            }
+                        }
+                    });
         }
     }
 
     @Override
     public void onImageViewClicked(Object imgurData) {
         getFragmentManager().beginTransaction()
-                .add(R.id.main_container, ImagePagerFragment.newInstance(imgurData), "ImagePagerFragment")
+                .add(R.id.main_container, ImagePagerFragment.newInstance(imgurData),
+                        "ImagePagerFragment")
                 .addToBackStack("ImagePagerFragment")
                 .commit();
     }
@@ -324,7 +333,8 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
     @Override
     public void onImageViewClicked(String imageUrl) {
         getFragmentManager().beginTransaction()
-                .add(R.id.main_container, ImagePagerFragment.newInstance(imageUrl), "ImagePagerFragment")
+                .add(R.id.main_container, ImagePagerFragment.newInstance(imageUrl),
+                        "ImagePagerFragment")
                 .addToBackStack("ImagePagerFragment")
                 .commit();
     }
@@ -334,7 +344,8 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
         // TODO: fix this when YouTube updates their Android API
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             getFragmentManager().beginTransaction()
-                    .add(R.id.main_container, YouTubeFragment.newInstance(videoId), "YouTubeFragment")
+                    .add(R.id.main_container, YouTubeFragment.newInstance(videoId),
+                            "YouTubeFragment")
                     .addToBackStack("YouTubeFragment")
                     .commit();
         } else {
@@ -654,6 +665,7 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
         FutureCallback<JsonObject> callback = new FutureCallback<JsonObject>() {
             @Override
             public void onCompleted(Exception e, JsonObject result) {
+                mProgressBar.setVisibility(View.GONE);
                 if (e == null) {
                     ResponseRedditWrapper wrapper = new ResponseRedditWrapper(result, new Gson());
                     if (wrapper.getData() instanceof Listing) {

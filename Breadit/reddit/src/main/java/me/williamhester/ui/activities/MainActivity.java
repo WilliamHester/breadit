@@ -159,7 +159,7 @@ public class MainActivity extends ActionBarActivity
 
         if ((mSubredditTitle == null && subreddit == null)
                 || (mSubredditTitle != null && mSubredditTitle.equals(subreddit))) {
-            mSubredditFragment.refreshData();
+//            mSubredditFragment.refreshData();
         } else {
             if (TextUtils.isEmpty(subreddit)) {
                 mNavigationDrawerFragment.setSubreddit(Subreddit.FRONT_PAGE);
@@ -187,6 +187,12 @@ public class MainActivity extends ActionBarActivity
             mSubredditTitle = subreddit;
             if (getSupportFragmentManager().findFragmentByTag(subreddit) != null) {
                 mSubredditFragment = (SubredditFragment) getSupportFragmentManager().findFragmentByTag(subreddit);
+                if (!mSubredditFragment.isResumed()) {
+                    getSupportFragmentManager().beginTransaction()
+                            .addToBackStack(mSubredditTitle)
+                            .replace(R.id.container, mSubredditFragment, mSubredditTitle)
+                            .commit();
+                }
             } else {
                 mSubredditFragment = SubredditFragment.newInstance(subreddit);
                 getSupportFragmentManager().beginTransaction()

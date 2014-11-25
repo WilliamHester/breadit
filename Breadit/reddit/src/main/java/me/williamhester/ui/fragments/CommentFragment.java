@@ -310,6 +310,7 @@ public class CommentFragment extends AccountFragment {
             }
             if (!tempSort.equals(mSortType)) {
                 mSortType = tempSort;
+                mProgressBar.setVisibility(View.VISIBLE);
                 RedditApi.getSubmissionData(mContext, mPermalink, mSortType, mSubmissionCallback, mCommentCallback);
             }
             return true;
