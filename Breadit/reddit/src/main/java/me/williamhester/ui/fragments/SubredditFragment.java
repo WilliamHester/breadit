@@ -52,6 +52,7 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
 
     private InfiniteLoadingScrollListener mScrollListener;
     private LinearLayoutManager mLayoutManager;
+    private ProgressBar mProgressBar;
     private RecyclerView mRecyclerView;
     private String mSubredditName;
     private SubmissionAdapter mSubmissionsAdapter;
@@ -59,6 +60,8 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
     private ArrayList<Submission> mSubmissionList;
     private HashSet<String> mNames;
     private SubmissionViewHolder mFocusedSubmission;
+
+    private boolean mLoading = true;
 
     /**
      * The primary sort type is set, by default to hot, Reddit's default sort for subreddits.
@@ -104,6 +107,7 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
             String[] array = savedInstanceState.getStringArray("names");
             mNames = new HashSet<>();
             Collections.addAll(mNames, array);
+            mLoading = savedInstanceState.getBoolean("loading");
         } else if (getArguments() != null) {
             mSubredditName = getArguments().getString("subreddit");
             mNames = new HashSet<>();
@@ -133,7 +137,8 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
             drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, Gravity.END);
         }
 
-        mScrollListener = new InfiniteLoadingScrollListener(v);
+        mScrollListener = new InfiniteLoadingScrollListener();
+        mProgressBar = (ProgressBar) v.findViewById(R.id.progress_bar);
 
         mLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView = (RecyclerView) v.findViewById(R.id.submissions_list);
@@ -151,6 +156,10 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
                 refreshData();
             }
         });
+
+        if (!mLoading && mSubmissionList.size() > 0) {
+            mProgressBar.setVisibility(View.GONE);
+        }
 
         mSwipeRefreshLayout.setColorSchemeResources(R.color.orangered);
         if (mSubmissionList.size() == 0) {
@@ -227,6 +236,7 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
         String[] array = new String[mNames.size()];
         mNames.toArray(array);
         outState.putStringArray("names", array);
+        outState.putBoolean("loading", mLoading);
         super.onSaveInstanceState(outState);
     }
 
@@ -268,6 +278,7 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
                         null, null, new FutureCallback<JsonObject>() {
                             @Override
                             public void onCompleted(Exception e, JsonObject result) {
+                                mLoading = false;
                                 if (e == null) {
                                     ResponseRedditWrapper wrapper = new ResponseRedditWrapper(result, new Gson());
                                     if (wrapper.getData() instanceof Listing) {
@@ -603,12 +614,6 @@ public class SubredditFragment extends AccountFragment implements SubmissionView
         private final int VISIBLE_THRESHOLD = 5;
         private int mPreviousTotal = 0;
         private boolean mLoading = true;
-
-        private ProgressBar mProgressBar;
-
-        public InfiniteLoadingScrollListener(View view) {
-            mProgressBar = (ProgressBar) view.findViewById(R.id.progress_bar);
-        }
 
         @Override
         public void onScrolled(RecyclerView absListView, int dx, int dy) {

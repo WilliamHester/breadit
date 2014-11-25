@@ -138,7 +138,11 @@ public class RedditApi {
                             return;
                         }
                         ResponseRedditWrapper wrapper = new ResponseRedditWrapper(result, new Gson());
-                        callback.onCompleted(null, (Subreddit) wrapper.getData());
+                        try {
+                            callback.onCompleted(null, (Subreddit) wrapper.getData());
+                        } catch (Exception e2) {
+                            callback.onCompleted(e2, null);
+                        }
                     }
                 });
     }

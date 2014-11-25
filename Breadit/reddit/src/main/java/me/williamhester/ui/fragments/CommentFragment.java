@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
@@ -17,6 +18,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import com.koushikdutta.async.future.FutureCallback;
 
@@ -53,10 +55,15 @@ public class CommentFragment extends AccountFragment {
     private final ArrayList<AbsComment> mCommentsList = new ArrayList<>();
     private CommentArrayAdapter mCommentAdapter;
     private Context mContext;
+    private ProgressBar mProgressBar;
     private String mPermalink;
     private String mSortType;
+    private SwipeRefreshLayout mRefreshLayout;
     private Submission mSubmission;
     private OnSubmissionLoaded mCallback;
+
+    private boolean mLoading = true;
+    private boolean mRefreshing = false;
 
     public static CommentFragment newInstance(String permalink) {
         Bundle args = new Bundle();
@@ -85,6 +92,8 @@ public class CommentFragment extends AccountFragment {
             mSubmission = savedInstanceState.getParcelable("submission");
             mPermalink = savedInstanceState.getString("permalink");
             mSortType = savedInstanceState.getString("sortType");
+            mLoading = savedInstanceState.getBoolean("loading");
+            mRefreshing = savedInstanceState.getBoolean("refreshing");
         } else if (args != null) {
             mSortType = SettingsManager.getDefaultCommentSort();
             mSubmission = args.getParcelable("submission");
@@ -100,16 +109,35 @@ public class CommentFragment extends AccountFragment {
             }
         }
         setHasOptionsMenu(true);
+        setRetainInstance(true);
     }
 
+    @SuppressLint("ResourceAsColor")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_comment, root, false);
         RecyclerView commentsView = (RecyclerView) v.findViewById(R.id.comments);
+        mRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.swipe_refresh);
+        mRefreshLayout.setProgressBackgroundColor(R.color.darkest_gray);
+        mRefreshLayout.setColorSchemeResources(R.color.orangered);
+        mRefreshLayout.setRefreshing(mRefreshing);
+        mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                mRefreshing = true;
+                RedditApi.getSubmissionData(mContext, mPermalink, mSortType, mSubmissionCallback, mCommentCallback);
+            }
+        });
+        mProgressBar = (ProgressBar) v.findViewById(R.id.progress_bar);
         mCommentAdapter = new CommentArrayAdapter();
         commentsView.setAdapter(mCommentAdapter);
         commentsView.addItemDecoration(new DividerItemDecoration(getResources().getDrawable(R.drawable.comments_divider)));
         commentsView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        if (!mLoading) {
+            mProgressBar.setVisibility(View.GONE);
+        }
+
         return v;
     }
 
@@ -208,6 +236,8 @@ public class CommentFragment extends AccountFragment {
         outState.putParcelable("submission", mSubmission);
         outState.putString("permalink", mPermalink);
         outState.putString("sortType", mSortType);
+        outState.putBoolean("loading", mLoading);
+        outState.putBoolean("refreshing", mRefreshing);
     }
 
     /**
@@ -687,6 +717,9 @@ public class CommentFragment extends AccountFragment {
             mCommentsList.clear();
             mCommentsList.addAll(result);
             mCommentAdapter.notifyItemRangeInserted(1, mCommentsList.size());
+            mRefreshLayout.setRefreshing(false);
+            mProgressBar.setVisibility(View.GONE);
+            mRefreshing = mLoading = false;
         }
     };
 

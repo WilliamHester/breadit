@@ -4,10 +4,25 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/comments"
+    <android.support.v4.widget.SwipeRefreshLayout android:id="@+id/swipe_refresh"
+        android:layout_weight="1"
+        android:layout_height="0dp"
+        android:layout_width="match_parent">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/comments"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+    </android.support.v4.widget.SwipeRefreshLayout>
+
+    <ProgressBar android:id="@+id/progress_bar"
+        style="?android:progressBarStyleHorizontal"
+        android:indeterminate="true"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:descendantFocusability="afterDescendants"/>
+        android:layout_height="wrap_content"
+        android:layout_marginTop="-7dp"
+        android:layout_marginBottom="-7dp" />
 
 </LinearLayout>
