@@ -12,9 +12,7 @@
 
         <include layout="@layout/view_submission_content" />
 
-        <include layout="@layout/view_submission_self_text_inner" />
-
-        <include layout="@layout/view_submission_content_preview" />
+        <include layout="@layout/view_submission_link" />
 
         <include layout="@layout/view_submission_options" />
 

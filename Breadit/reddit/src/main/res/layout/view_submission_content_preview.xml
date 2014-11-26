@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/content_preview"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <ImageView android:id="@+id/image"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:scaleType="centerCrop"
+        android:visibility="gone"/>
+
+    <ImageButton android:id="@+id/preview_button"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:background="?android:activatedBackgroundIndicator"
+        android:visibility="gone"/>
+
+    <View android:id="@+id/nsfw_blocker"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:background="@android:color/black"
+        android:visibility="gone"/>
+
+</RelativeLayout>

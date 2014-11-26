@@ -6,6 +6,8 @@ import com.google.gson.reflect.TypeToken;
 
 import java.io.Serializable;
 
+import me.williamhester.tools.Url;
+
 /**
  * Created by william on 7/30/14.
  */
@@ -28,7 +30,11 @@ public class ResponseRedditWrapper implements Serializable {
             } else if (mKind.equals("t2")) {
                 // Account
             } else if (mKind.equals("t3")) {
-                mData = gson.fromJson(object.get("data"), Submission.class);
+                Submission s = gson.fromJson(object.get("data"), Submission.class);
+                if (!s.isSelf()) {
+                    s.setLinkDetails(new Url(s.getUrl()));
+                }
+                mData = s;
             } else if (mKind.equals("t4")) {
                 // Message
             } else if (mKind.equals("t5")) {
@@ -38,8 +44,7 @@ public class ResponseRedditWrapper implements Serializable {
             } else if (mKind.equals("t8")) {
                 // Promo Campaign
             } else if (mKind.equals("LiveUpdateEvent")) {
-                TypeToken<RedditLive> token = new TypeToken<RedditLive>() {
-                };
+                TypeToken<RedditLive> token = new TypeToken<RedditLive>() { };
                 mData = gson.fromJson(object.get("data"), token.getType());
             }
         }

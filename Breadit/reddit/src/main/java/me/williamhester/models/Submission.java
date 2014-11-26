@@ -7,6 +7,8 @@ import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
 
+import me.williamhester.tools.Url;
+
 @SuppressWarnings("unused")
 public class Submission implements Votable, Parcelable {
 
@@ -52,6 +54,7 @@ public class Submission implements Votable, Parcelable {
     private int mVoteStatus;
     private boolean mSelftextIsOpen;
     private boolean mIsNsfwShowing = false;
+    private Url mLinkDetails;
     private Object mImgurData;
     private int mImgurDataType = NO_IMGUR_DATA;
 
@@ -231,6 +234,14 @@ public class Submission implements Votable, Parcelable {
 
     public Media getMedia() {
         return media;
+    }
+
+    public Url getLinkDetails() {
+        return mLinkDetails;
+    }
+
+    public void setLinkDetails(Url link) {
+        mLinkDetails = link;
     }
 
     public Object getImgurData() {

@@ -173,6 +173,11 @@ public class UserFragment extends AccountFragment {
         }
 
         @Override
+        public void onLinkClicked(Submission submission) {
+
+        }
+
+        @Override
         public void onYouTubeVideoClicked(String videoId) {
 
         }

@@ -13,6 +13,9 @@ import me.williamhester.network.RedditApi;
  */
 public class SettingsManager {
 
+    private static boolean mShowThumbnails;
+    private static boolean mLowBandwidthMode;
+
     private static String mCommentSort;
     private static SharedPreferences mPrefs;
 
@@ -21,6 +24,8 @@ public class SettingsManager {
     public static void init(Context context) {
         mPrefs = context.getSharedPreferences("preferences", Context.MODE_PRIVATE);
         mCommentSort = mPrefs.getString("pref_default_comment_sort", RedditApi.COMMENT_SORT_BEST);
+        mShowThumbnails = mPrefs.getBoolean("pref_show_thumbnails", true);
+        mLowBandwidthMode = mPrefs.getBoolean("pref_low_bandwidth", false);
     }
 
     public static void setDefaultCommentSort(String string) {
@@ -29,6 +34,14 @@ public class SettingsManager {
 
     public static String getDefaultCommentSort() {
         return mCommentSort;
+    }
+
+    public static boolean isShowingThumbnails() {
+        return mShowThumbnails;
+    }
+
+    public static boolean isLowBandwidth() {
+        return mLowBandwidthMode;
     }
 
 }

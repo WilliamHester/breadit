@@ -478,6 +478,11 @@ public class CommentFragment extends AccountFragment {
         }
 
         @Override
+        public void onLinkClicked(Submission submission) {
+
+        }
+
+        @Override
         public void onYouTubeVideoClicked(String videoId) {
             // TODO: fix this when YouTube updates their Android API
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
