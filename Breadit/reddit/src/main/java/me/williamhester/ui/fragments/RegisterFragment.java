@@ -90,7 +90,7 @@ public class RegisterFragment extends Fragment {
                     // username invalid
                     valid = false;
                 }
-                if (password.length() < 2) {
+                if (password.length() < 6) {
                     // password invalid
                     valid = false;
                 }

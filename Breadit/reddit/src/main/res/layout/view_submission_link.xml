@@ -4,12 +4,14 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="16dp"
+    android:paddingLeft="12dp"
+    android:paddingRight="12dp"
+    android:paddingBottom="12dp"
     android:background="?android:attr/selectableItemBackground">
 
     <ImageView android:id="@+id/thumbnail"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
         android:layout_centerVertical="true"
         android:scaleType="centerCrop"
         android:src="@drawable/ic_action_web_site"
@@ -21,7 +23,8 @@
         android:layout_centerVertical="true"
         android:layout_toEndOf="@id/thumbnail"
         android:textColor="@color/dark_blue"
-        android:padding="16dp"
+        android:fontFamily="sans-serif-light"
+        android:paddingStart="16dp"
         android:textSize="16sp"
         android:maxLines="2"
         android:ellipsize="end"/>

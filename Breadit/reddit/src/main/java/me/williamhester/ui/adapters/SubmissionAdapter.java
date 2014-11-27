@@ -4,6 +4,7 @@ import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.List;
@@ -41,22 +42,22 @@ public class SubmissionAdapter extends RecyclerView.Adapter<SubmissionViewHolder
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         CardView cardView = (CardView) inflater.inflate(R.layout.view_content_card, parent, false);
         switch (viewType) {
-            case BASIC:
-                return new LinkSubmissionViewHolder(
-                        inflater.inflate(R.layout.view_submission_basic, cardView, false),
-                        mCallback);
-            case IMAGE:
-                return new ImageSubmissionViewHolder(
-                        inflater.inflate(R.layout.view_submission_image, cardView, false),
-                        mCallback);
-            case LINK:
-                return new LinkSubmissionViewHolder(
-                        inflater.inflate(R.layout.view_submission_basic, cardView, false),
-                        mCallback);
-            case SELF:
-                return new SelfTextSubmissionViewHolder(
-                        inflater.inflate(R.layout.view_submission_self_text, cardView, false),
-                        mCallback);
+            case BASIC: {
+                inflater.inflate(R.layout.view_submission_basic, cardView, true);
+                return new LinkSubmissionViewHolder(cardView, mCallback);
+            }
+            case IMAGE: {
+                inflater.inflate(R.layout.view_submission_image, cardView, true);
+                return new ImageSubmissionViewHolder(cardView, mCallback);
+            }
+            case LINK: {
+                inflater.inflate(R.layout.view_submission_basic, cardView, true);
+                return new LinkSubmissionViewHolder(cardView, mCallback);
+            }
+            case SELF: {
+                inflater.inflate(R.layout.view_submission_self_text, cardView, true);
+                return new SelfTextSubmissionViewHolder(cardView, mCallback);
+            }
         }
         Log.wtf("SubmissionAdapter", "Something went horribly wrong");
         return new SubmissionViewHolder(
@@ -66,12 +67,12 @@ public class SubmissionAdapter extends RecyclerView.Adapter<SubmissionViewHolder
 
     @Override
     public int getItemViewType(int position) {
-        if (SettingsManager.isLowBandwidth()) {
-            return BASIC;
-        }
         Submission s = mSubmissions.get(position);
         if (s.isSelf()) {
             return SELF;
+        }
+        if (SettingsManager.isLowBandwidth()) {
+            return BASIC;
         }
         switch (s.getLinkDetails().getType()) {
             case Url.IMGUR_IMAGE:
@@ -88,8 +89,9 @@ public class SubmissionAdapter extends RecyclerView.Adapter<SubmissionViewHolder
             case Url.USER:
             case Url.REDDIT_LIVE:
                 return LINK;
+            default:
+                return BASIC;
         }
-        return 0;
     }
 
     @Override
