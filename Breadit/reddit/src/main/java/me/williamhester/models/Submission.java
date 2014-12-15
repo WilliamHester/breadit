@@ -314,6 +314,7 @@ public class Submission implements Votable, Parcelable {
         dest.writeByte(mIsNsfwShowing ? (byte) 1 : (byte) 0);
         dest.writeString(this.id);
         dest.writeString(this.mName);
+        dest.writeParcelable(mLinkDetails, 0);
         if (mImgurData != null) {
             if (mImgurData instanceof ImgurAlbum) {
                 dest.writeInt(IMGUR_ALBUM);
@@ -363,6 +364,7 @@ public class Submission implements Votable, Parcelable {
         this.mIsNsfwShowing = in.readByte() != 0;
         this.id = in.readString();
         this.mName = in.readString();
+        this.mLinkDetails = in.readParcelable(Url.class.getClassLoader());
         int flag = in.readInt();
         if (flag != NO_IMGUR_DATA) {
             if (flag == IMGUR_ALBUM) {

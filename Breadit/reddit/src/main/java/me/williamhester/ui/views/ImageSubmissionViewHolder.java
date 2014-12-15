@@ -22,12 +22,14 @@ public class ImageSubmissionViewHolder extends SubmissionViewHolder {
 
     private ImageView mImageView;
     private ImageButton mImageButton;
+    private View mNsfwBlocker;
 
     public ImageSubmissionViewHolder(View itemView, SubmissionCallbacks callbacks) {
         super(itemView, callbacks);
 
         mImageView = (ImageView) itemView.findViewById(R.id.image);
         mImageButton = (ImageButton) itemView.findViewById(R.id.preview_button);
+        mNsfwBlocker = itemView.findViewById(R.id.nsfw_blocker);
     }
 
     @Override
@@ -36,6 +38,11 @@ public class ImageSubmissionViewHolder extends SubmissionViewHolder {
 
         final Url linkDetails = mSubmission.getLinkDetails();
         String id = linkDetails.getLinkId();
+//        if (mSubmission.isNsfw()) {
+//            mNsfwBlocker.setVisibility(View.VISIBLE);
+//            return;
+//        }
+//        mNsfwBlocker.setVisibility(View.GONE);
         switch (linkDetails.getType()) {
             case Url.IMGUR_IMAGE: {
                 mImageView.setVisibility(View.VISIBLE);

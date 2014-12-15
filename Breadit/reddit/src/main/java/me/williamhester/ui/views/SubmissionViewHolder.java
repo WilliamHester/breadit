@@ -1,33 +1,17 @@
 package me.williamhester.ui.views;
 
 import android.text.Html;
-import android.text.method.LinkMovementMethod;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.koushikdutta.async.future.FutureCallback;
-
-import java.util.List;
-
 import me.williamhester.models.AccountManager;
-import me.williamhester.models.ImgurAlbum;
-import me.williamhester.models.ImgurImage;
 import me.williamhester.models.Submission;
-import me.williamhester.network.ImgurApi;
 import me.williamhester.reddit.R;
-import me.williamhester.tools.HtmlParser;
-import me.williamhester.tools.Url;
 
 /**
  * This class is intended to be used with the RecyclerView class; however, it can be used nearly
  * just as easily with ListView to provide the View Holder pattern for optimization.
- *
- * TODO: break this up into a few different ViewHolders and use different item types.
  *
  * Created by William on 10/19/14.
  */
@@ -36,9 +20,7 @@ public class SubmissionViewHolder extends VotableViewHolder {
     private TextView mDomain;
     private TextView mCommentData;
     private TextView mSubreddit;
-    private View mContainer;
     private View mNsfwWarning;
-    private View mNsfwBlocker;
     private View mOptionsRow;
 
     protected Submission mSubmission;
@@ -48,12 +30,10 @@ public class SubmissionViewHolder extends VotableViewHolder {
         super(itemView);
         mCallback = callbacks;
 
-        mContainer = itemView.findViewById(R.id.content_preview);
         mDomain = (TextView) itemView.findViewById(R.id.domain);
         mCommentData = (TextView) itemView.findViewById(R.id.num_comments);
         mSubreddit = (TextView) itemView.findViewById(R.id.subreddit_title);
         mNsfwWarning = itemView.findViewById(R.id.nsfw_warning);
-        mNsfwBlocker = itemView.findViewById(R.id.nsfw_blocker);
         mOptionsRow = itemView.findViewById(R.id.options_row);
         final View submissionData = itemView.findViewById(R.id.submission_data);
         View optionReply = itemView.findViewById(R.id.option_reply);
@@ -103,14 +83,6 @@ public class SubmissionViewHolder extends VotableViewHolder {
                 return true;
             }
         });
-//        mNsfwBlocker.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                view.setVisibility(View.GONE);
-//                mSubmission.setShowNsfwContent();
-//            }
-//        });
-
     }
 
     @Override
@@ -134,22 +106,7 @@ public class SubmissionViewHolder extends VotableViewHolder {
                 + itemView.getResources().getQuantityString(R.plurals.points,
                 mSubmission.getScore()));
 
-        if (!mSubmission.isNsfw()) {
-            mNsfwWarning.setVisibility(View.GONE);
-            if (!mSubmission.isSelf()) {
-//                mNsfwBlocker.setVisibility(View.GONE);
-            }
-        } else if (!mSubmission.isSelf() && mSubmission.isShowingNsfw()) {
-            mNsfwWarning.setVisibility(View.VISIBLE);
-//            mNsfwBlocker.setVisibility(View.GONE);
-        } else {
-            mNsfwWarning.setVisibility(View.VISIBLE);
-            if (!mSubmission.isSelf()) {
-//                mNsfwBlocker.setVisibility(View.VISIBLE);
-            } else {
-//                mNsfwBlocker.setVisibility(View.GONE);
-            }
-        }
+        mNsfwWarning.setVisibility(mSubmission.isNsfw() ? View.VISIBLE : View.GONE);
     }
 
     public void disableClicks() {

@@ -2,8 +2,6 @@ package me.williamhester;
 
 import android.app.Application;
 
-import com.crittercism.app.Crittercism;
-
 import me.williamhester.models.AccountManager;
 import me.williamhester.network.GfycatApi;
 import me.williamhester.network.ImgurApi;
@@ -21,6 +19,5 @@ public class BreaditApplication extends Application {
         GfycatApi.init(this);
         ImgurApi.init(this);
         SettingsManager.init(this);
-//        Crittercism.initialize(getApplicationContext(), Auth.CRITTERCISM_APP_ID);
     }
 }
