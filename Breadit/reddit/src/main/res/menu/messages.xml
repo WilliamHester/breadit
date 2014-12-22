@@ -2,10 +2,9 @@
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:breadit="http://schemas.android.com/apk/res-auto">
-    <item android:id="@+id/action_reply"
-        android:title="@string/reply"
-        android:icon="@android:drawable/ic_menu_share"
+    <item android:id="@+id/action_compose_message"
+        android:title="@string/action_compose_message"
+        android:icon="@drawable/ic_action_new_email"
         android:orderInCategory="1"
-        breadit:actionLayout="@layout/button_reply"
         breadit:showAsAction="always"/>
 </menu>

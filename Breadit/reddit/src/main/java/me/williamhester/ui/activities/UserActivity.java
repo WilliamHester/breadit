@@ -53,7 +53,7 @@ public class UserActivity extends ActionBarActivity {
             case R.id.action_compose_message:
                 ComposeMessageFragment fragment = ComposeMessageFragment.newInstance(mUsername);
                 getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.container, fragment, "compose")
+                        .replace(R.id.main_container, fragment, "compose")
                         .addToBackStack("compose")
                         .commit();
                 return true;

@@ -12,6 +12,8 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -40,7 +42,7 @@ import me.williamhester.ui.text.ClickableLinkMovementMethod;
 import me.williamhester.ui.views.DividerItemDecoration;
 import me.williamhester.ui.views.VotableViewHolder;
 
-public class MessagesFragment extends AccountFragment {
+public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuItemClickListener {
 
     private boolean mRefreshing = false;
 
@@ -83,6 +85,10 @@ public class MessagesFragment extends AccountFragment {
                 getActivity().finish();
             }
         });
+        toolbar.setOnMenuItemClickListener(this);
+        new MenuInflater(getActivity()).inflate(R.menu.messages, toolbar.getMenu());
+        toolbar.getMenu().findItem(R.id.action_compose_message)
+                .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
 
         mProgressBar = (ProgressBar) v.findViewById(R.id.progress_bar);
         mRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.swipe_refresh);
@@ -114,32 +120,36 @@ public class MessagesFragment extends AccountFragment {
         messagesType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                String filterType = null;
                 switch (i) {
                     case 0:
-                        mFilterType = Message.ALL;
+                        filterType = Message.ALL;
                         break;
                     case 1:
-                        mFilterType = Message.UNREAD;
+                        filterType = Message.UNREAD;
                         break;
                     case 2:
-                        mFilterType = Message.MESSAGES;
+                        filterType = Message.MESSAGES;
                         break;
                     case 3:
-                        mFilterType = Message.COMMENT_REPLIES;
+                        filterType = Message.COMMENT_REPLIES;
                         break;
                     case 4:
-                        mFilterType = Message.POST_REPLIES;
+                        filterType = Message.POST_REPLIES;
                         break;
                     case 5:
-                        mFilterType = Message.SENT;
+                        filterType = Message.SENT;
                         break;
                     case 6:
-                        mFilterType = Message.MOD_MAIL;
+                        filterType = Message.MOD_MAIL;
                         break;
                 }
-                mRefreshing = true;
-                mProgressBar.setVisibility(View.VISIBLE);
-                RedditApi.getMessages(getActivity(), mFilterType, null, mMessageCallback);
+                if (filterType != null && !filterType.equals(mFilterType)) {
+                    mFilterType = filterType;
+                    mRefreshing = true;
+                    mProgressBar.setVisibility(View.VISIBLE);
+                    RedditApi.getMessages(getActivity(), mFilterType, null, mMessageCallback);
+                }
             }
 
             @Override
@@ -147,6 +157,8 @@ public class MessagesFragment extends AccountFragment {
                 // Do nothing
             }
         });
+
+        RedditApi.getMessages(getActivity(), mFilterType, null, mMessageCallback);
 
         return v;
     }
@@ -166,6 +178,7 @@ public class MessagesFragment extends AccountFragment {
             mRefreshLayout.setRefreshing(false);
             if (e != null) {
                 // Failed to load
+                return;
             }
             if (mRefreshing) {
                 mRefreshing = false;
@@ -194,6 +207,20 @@ public class MessagesFragment extends AccountFragment {
             }
         }
     };
+
+    @Override
+    public boolean onMenuItemClick(MenuItem menuItem) {
+        switch (menuItem.getItemId()) {
+            case R.id.action_compose_message: {
+                ComposeMessageFragment fragment = ComposeMessageFragment.newInstance();
+                getFragmentManager().beginTransaction()
+                        .replace(R.id.container, fragment, "composeMessage")
+                        .addToBackStack("composeMessage")
+                        .commit();
+            }
+        }
+        return false;
+    }
 
     public class InfiniteLoadingScrollListener extends RecyclerView.OnScrollListener {
 

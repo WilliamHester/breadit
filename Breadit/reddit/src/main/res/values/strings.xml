@@ -186,7 +186,7 @@
         and try again.</string>
     
     <!-- MessageFragment -->
-    <string name="compose_to_hint">Username or Subreddit</string>
+    <string name="compose_to_hint">Username or /r/Subreddit</string>
     <string name="sending_message">Sending message…</string>
     <string name="message_sent">Message sent</string>
 
@@ -245,4 +245,6 @@
     <!-- MessagesFragment -->
     <string name="messages">Messages</string>
 
+    <!-- ComposeMessageFragment -->
+    <string name="compose_to">Compose to</string>
 </resources>

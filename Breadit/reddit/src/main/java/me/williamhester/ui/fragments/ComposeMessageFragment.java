@@ -5,7 +5,9 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -69,6 +71,17 @@ public class ComposeMessageFragment extends AsyncSendFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_message, container, false);
+
+        Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar_actionbar);
+        toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getFragmentManager().popBackStack();
+            }
+        });
+        toolbar.setTitle(R.string.compose_message);
+        onCreateOptionsMenu(toolbar.getMenu(), new MenuInflater(getActivity()));
 
         mComposeTo = (EditText) v.findViewById(R.id.compose_to);
         mSubject = (EditText) v.findViewById(R.id.subject);

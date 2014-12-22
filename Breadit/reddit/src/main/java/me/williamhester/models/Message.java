@@ -156,8 +156,8 @@ public class Message implements Votable, Parcelable {
         return mUnread;
     }
 
-    public void setUnread(boolean read) {
-        mUnread = !read;
+    public void setUnread(boolean unread) {
+        mUnread = unread;
     }
 
     public boolean isComment() {

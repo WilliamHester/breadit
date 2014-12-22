@@ -4,6 +4,14 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <FrameLayout style="@style/HeaderBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <include layout="@layout/toolbar_actionbar" />
+
+    </FrameLayout>
+
     <EditText android:id="@+id/compose_to"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -13,6 +21,7 @@
         android:inputType="textNoSuggestions"
         android:singleLine="true"
         android:fontFamily="sans-serif-thin"
+        android:hint="@string/compose_to_hint"
         android:gravity="top|start"/>
 
     <EditText android:id="@+id/subject"

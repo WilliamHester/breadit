@@ -4,8 +4,10 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.MenuItemCompat;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -68,7 +70,13 @@ public abstract class AsyncSendFragment extends Fragment {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.fragment_reply, menu);
 
-        Button button = (Button) menu.findItem(R.id.action_reply).getActionView();
+        MenuItem reply = menu.findItem(R.id.action_reply);
+        Button button = (Button) MenuItemCompat.getActionView(reply);
+        if (button == null) {
+            reply.setActionView(R.layout.button_reply);
+            button = (Button) MenuItemCompat.getActionView(reply);
+            reply.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        }
         button.setText(getButtonText());
         button.setOnClickListener(new View.OnClickListener() {
             @Override
