@@ -32,8 +32,10 @@ public class User implements Parcelable {
         mCreatedUtc = data.get("created_utc").getAsLong();
         mIsFriend = data.get("is_friend").getAsBoolean();
         mIsMod = data.get("is_mod").getAsBoolean();
-        mHasVerifiedEmail = data.get("has_verified_email").getAsBoolean();
         mUsername = data.get("name").getAsString();
+        if (!data.get("has_verified_email").isJsonNull()) {
+            mHasVerifiedEmail = data.get("has_verified_email").getAsBoolean();
+        }
     }
 
     public static User getUser(String username, Account account) throws IOException,

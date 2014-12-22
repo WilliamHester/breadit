@@ -3,11 +3,13 @@ package me.williamhester.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.Spannable;
+import android.util.Log;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.annotations.SerializedName;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,65 +20,81 @@ import me.williamhester.models.utils.Utilities;
 /**
  * Created by William on 4/12/14.
  */
-public class Message implements Thing, Parcelable {
+public class Message implements Votable, Parcelable {
 
-    public static final int ALL = 0;
-    public static final int UNREAD = 1;
-    public static final int MESSAGES = 2;
-    public static final int COMMENT_REPLIES = 3;
-    public static final int POST_REPLIES = 4;
-    public static final int SENT = 5;
-    public static final int MOD_MAIL = 6;
+    public static final String ALL = "inbox";
+    public static final String UNREAD = "unread";
+    public static final String MESSAGES = "messages";
+    public static final String COMMENT_REPLIES = "comments";
+    public static final String POST_REPLIES = "selfreply";
+    public static final String SENT = "sent";
+    public static final String MOD_MAIL = "moderator";
 
+    @SerializedName("created")
     private long mCreated;
+    @SerializedName("created_utc")
     private long mCreatedUtc;
+    @SerializedName("author")
     private String mAuthor;
+    @SerializedName("body")
     private String mBody;
+    @SerializedName("body_html")
     private String mBodyHtml;
+    @SerializedName("context")
     private String mContext;
+    @SerializedName("dest")
     private String mDestination;
+    @SerializedName("id")
     private String mId;
+    @SerializedName("link_title")
     private String mLinkTitle;
+    @SerializedName("name")
     private String mName;
+    @SerializedName("parent_id")
     private String mParentId;
+    @SerializedName("replies")
     private String mReplies;
+    @SerializedName("subject")
     private String mSubject;
+    @SerializedName("subreddit")
     private String mSubreddit;
-    private int mVoteStatus = Votable.NEUTRAL;
+    @SerializedName("likes")
+    private Boolean mVoteStatus;
+    @SerializedName("new")
     private boolean mUnread;
+    @SerializedName("was_comment")
     private boolean mWasComment;
+    @SerializedName("first_message")
+    private String mFirstMessage;
 
     public Message(JsonObject data) {
-        JsonObject dataObj = data.getAsJsonObject("data");
-        mCreated = dataObj.get("created").getAsLong();
-        mCreatedUtc = dataObj.get("created_utc").getAsLong();
-        mAuthor = dataObj.get("author").getAsString();
-        mBody = dataObj.get("body").getAsString();
-        mBodyHtml = dataObj.get("body_html").getAsString();
-        mContext = dataObj.get("context").getAsString();
-        mDestination = dataObj.get("dest").getAsString();
-        if (dataObj.get("link_title") != null)
-            mLinkTitle = dataObj.get("link_title").getAsString();
-        mName = dataObj.get("name").getAsString();
-        if (!dataObj.get("parent_id").isJsonNull())
-            mParentId = dataObj.get("parent_id").getAsString();
-//        if (!dataObj.get("replies").isJsonNull())
-//            mReplies = dataObj.get("replies").getAsString();
-        mId = dataObj.get("id").getAsString();
-        mSubject = dataObj.get("subject").getAsString();
-        mWasComment = dataObj.get("was_comment").getAsBoolean();
+        mCreated = data.get("created").getAsLong();
+        mCreatedUtc = data.get("created_utc").getAsLong();
+        mAuthor = data.get("author").getAsString();
+        mBody = data.get("body").getAsString();
+        mBodyHtml = data.get("body_html").getAsString();
+        mContext = data.get("context").getAsString();
+        mDestination = data.get("dest").getAsString();
+        if (data.get("link_title") != null)
+            mLinkTitle = data.get("link_title").getAsString();
+        mName = data.get("name").getAsString();
+        if (!data.get("parent_id").isJsonNull())
+            mParentId = data.get("parent_id").getAsString();
+//        if (!data.get("replies").isJsonNull())
+//            mReplies = data.get("replies").getAsString();
+        mId = data.get("id").getAsString();
+        mSubject = data.get("subject").getAsString();
+        mWasComment = data.get("was_comment").getAsBoolean();
         if (mWasComment) {
-            mSubreddit = dataObj.get("subreddit").getAsString();
-            JsonElement je = dataObj.getAsJsonObject().get("likes");
+            mSubreddit = data.get("subreddit").getAsString();
+            JsonElement je = data.getAsJsonObject().get("likes");
             if (je.isJsonNull()) {
-                mVoteStatus = Votable.NEUTRAL;
-            } else if (je.getAsBoolean()) {
-                mVoteStatus = Votable.UPVOTED;
+                mVoteStatus = null;
             } else {
-                mVoteStatus = Votable.DOWNVOTED;
+                mVoteStatus = je.getAsBoolean();
             }
         }
-        mUnread = dataObj.get("new").getAsBoolean();
+        mUnread = data.get("new").getAsBoolean();
 
     }
 
@@ -86,6 +104,16 @@ public class Message implements Thing, Parcelable {
 
     public long getCreatedUtc() {
         return mCreatedUtc;
+    }
+
+    @Override
+    public String getRawMarkdown() {
+        return null;
+    }
+
+    @Override
+    public void setRawMarkdown(String string) {
+
     }
 
     public String getBody() {
@@ -128,8 +156,8 @@ public class Message implements Thing, Parcelable {
         return mUnread;
     }
 
-    public void setIsRead(boolean read) {
-        mUnread = read;
+    public void setUnread(boolean read) {
+        mUnread = !read;
     }
 
     public boolean isComment() {
@@ -146,16 +174,18 @@ public class Message implements Thing, Parcelable {
         return mId;
     }
 
-
     public int getVoteStatus() {
-        return mVoteStatus;
+//        Log.d("Message.getVoteStatus()", "" + mVoteStatus);
+        return mVoteStatus == null ? NEUTRAL : (mVoteStatus ? UPVOTED : DOWNVOTED);
     }
-
 
     public void setVoteStatus(int status) {
-        mVoteStatus = status;
+        if (status == Votable.NEUTRAL) {
+            mVoteStatus = null;
+        } else {
+            mVoteStatus = status == Votable.UPVOTED;
+        }
     }
-
 
     public int getScore() {
         return -1;
@@ -166,70 +196,8 @@ public class Message implements Thing, Parcelable {
         return mAuthor;
     }
 
-
     public void setSpannableBody(Spannable body) {
 
-    }
-
-    /**
-     * This method returns a list of all of the messages for an account.
-     *
-     * @param before            The before= argument
-     * @param after             The after= argument
-     * @param account              The account. If the account is not connected, it will throw an exception.
-     *
-     * @return The list containing submissions
-     *
-     * @throws java.io.IOException      If connection fails
-     */
-    public static List<Message> getMessages(int type, String before, String after,
-            Account account) throws IOException {
-        String append = "";
-        switch (type) {
-            case ALL:
-                append = "inbox/";
-                break;
-            case UNREAD:
-                append = "unread/";
-                break;
-            case MESSAGES:
-                append = "messages/";
-                break;
-            case COMMENT_REPLIES:
-                append = "comments/";
-                break;
-            case POST_REPLIES:
-                append = "selfreply/";
-                break;
-            case SENT:
-                append = "sent/";
-                break;
-            case MOD_MAIL:
-                append = "moderator/";
-                break;
-        }
-
-        ArrayList<Message> messages = new ArrayList<Message>();
-        String urlString = "http://www.reddit.com/message/" + append + ".json";
-
-        if (after != null) {
-            urlString += "after=" + after;
-        } else if (before != null) {
-            urlString += "before=" + before;
-        }
-
-        JsonObject object = new JsonParser().parse(Utilities.get(null, urlString,
-                account.getCookie(), account.getModhash()))
-                .getAsJsonObject();
-        JsonObject data = object.get("data").getAsJsonObject();
-        JsonArray array = data.get("children").getAsJsonArray();
-
-        for (int i = 0; i < array.size(); i++) {
-            JsonObject jsonData = (JsonObject)array.get(i);
-            messages.add(new Message(jsonData));
-        }
-
-        return messages;
     }
 
     @Override
@@ -252,7 +220,7 @@ public class Message implements Thing, Parcelable {
         dest.writeString(this.mReplies);
         dest.writeString(this.mSubject);
         dest.writeString(this.mSubreddit);
-        dest.writeInt(this.mVoteStatus);
+        dest.writeInt(this.mVoteStatus == null ? NEUTRAL : mVoteStatus ? UPVOTED : DOWNVOTED);
         dest.writeByte(mUnread ? (byte) 1 : (byte) 0);
         dest.writeByte(mWasComment ? (byte) 1 : (byte) 0);
     }
@@ -271,7 +239,7 @@ public class Message implements Thing, Parcelable {
         this.mReplies = in.readString();
         this.mSubject = in.readString();
         this.mSubreddit = in.readString();
-        this.mVoteStatus = in.readInt();
+        setVoteStatus(in.readInt());
         this.mUnread = in.readByte() != 0;
         this.mWasComment = in.readByte() != 0;
     }

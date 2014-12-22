@@ -73,6 +73,10 @@
             android:label="@string/submit"
             android:windowSoftInputMode="adjustPan">
         </activity>
+        <activity android:name="me.williamhester.ui.activities.MessageActivity"
+            android:label="@string/submit"
+            android:windowSoftInputMode="adjustPan">
+        </activity>
     </application>
 
 </manifest>

@@ -1,5 +1,8 @@
 package me.williamhester.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
@@ -11,9 +14,7 @@ import me.williamhester.tools.Url;
 /**
  * Created by william on 7/30/14.
  */
-public class ResponseRedditWrapper implements Serializable {
-
-    private static final long serialVersionUID = 5856868935847897955L;
+public class ResponseRedditWrapper {
 
     private String mKind;
     private Object mData;
@@ -36,7 +37,7 @@ public class ResponseRedditWrapper implements Serializable {
                 }
                 mData = s;
             } else if (mKind.equals("t4")) {
-                // Message
+                mData = new Message(object.get("data").getAsJsonObject());
             } else if (mKind.equals("t5")) {
                 mData = gson.fromJson(object.get("data"), Subreddit.class);
             } else if (mKind.equals("t6")) {
@@ -57,5 +58,4 @@ public class ResponseRedditWrapper implements Serializable {
     public Object getData() {
         return mData;
     }
-
 }

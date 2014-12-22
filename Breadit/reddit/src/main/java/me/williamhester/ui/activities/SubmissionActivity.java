@@ -83,7 +83,9 @@ public class SubmissionActivity extends ActionBarActivity implements ImageFragme
         if (f == null) {
             CommentFragment comments;
             if (mSubmission == null) {
-                comments = CommentFragment.newInstance(mPermalink);
+                comments = CommentFragment.newInstance(mPermalink,
+                        getIntent().getExtras() != null &&
+                                getIntent().getExtras().getBoolean("isSingleThread", false));
                 comments.setOnSubmissionLoadedListener(new CommentFragment.OnSubmissionLoaded() {
                     @Override
                     public void onSubmissionLoaded(Submission submission) {
@@ -131,7 +133,8 @@ public class SubmissionActivity extends ActionBarActivity implements ImageFragme
                 case Url.NORMAL_IMAGE:
                     return ImagePagerFragment.newInstance(mParser);
                 case Url.SUBMISSION:
-                    return CommentFragment.newInstance(mParser.getUrl());
+                    return CommentFragment.newInstance(mParser.getUrl(),
+                            mParser.getUrl().contains("?context="));
                 case Url.SUBREDDIT:
                     return SubredditFragment.newInstance(mParser.getLinkId());
                 case Url.USER:

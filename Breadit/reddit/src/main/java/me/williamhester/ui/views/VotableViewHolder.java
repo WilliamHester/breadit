@@ -1,6 +1,7 @@
 package me.williamhester.ui.views;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
@@ -98,7 +99,7 @@ public abstract class VotableViewHolder extends RecyclerView.ViewHolder {
 
     public static void expand(final View v) {
         v.measure(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT);
-        final int targtetHeight = v.getMeasuredHeight();
+        final int targetHeight = v.getMeasuredHeight();
 
         v.getLayoutParams().height = 0;
         v.setVisibility(View.VISIBLE);
@@ -107,7 +108,7 @@ public abstract class VotableViewHolder extends RecyclerView.ViewHolder {
             protected void applyTransformation(float interpolatedTime, Transformation t) {
                 v.getLayoutParams().height = interpolatedTime == 1
                         ? FrameLayout.LayoutParams.WRAP_CONTENT
-                        : (int)(targtetHeight * interpolatedTime);
+                        : (int)(targetHeight * interpolatedTime);
                 v.requestLayout();
             }
 
@@ -117,8 +118,8 @@ public abstract class VotableViewHolder extends RecyclerView.ViewHolder {
             }
         };
 
-        // 1dp/ms
-        a.setDuration((int)(targtetHeight / v.getContext().getResources().getDisplayMetrics().density));
+        a.setDuration((int) Math.min(targetHeight
+                / v.getContext().getResources().getDisplayMetrics().density, 300));
         v.startAnimation(a);
     }
 
@@ -142,8 +143,8 @@ public abstract class VotableViewHolder extends RecyclerView.ViewHolder {
             }
         };
 
-        // 1dp/ms
-        a.setDuration((int)(initialHeight / v.getContext().getResources().getDisplayMetrics().density));
+        a.setDuration((int) Math.min(initialHeight
+                / v.getContext().getResources().getDisplayMetrics().density, 300));
         v.startAnimation(a);
     }
 }

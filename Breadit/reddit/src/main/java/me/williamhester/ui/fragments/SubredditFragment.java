@@ -133,7 +133,7 @@ public class SubredditFragment extends AccountFragment implements
         mLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView = (RecyclerView) v.findViewById(R.id.submissions_list);
         mRecyclerView.addItemDecoration(new DividerItemDecoration(getResources().getDrawable(
-                R.drawable.submissions_divider)));
+                R.drawable.card_divider)));
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(mSubmissionsAdapter);
         mRecyclerView.setOnScrollListener(mScrollListener);

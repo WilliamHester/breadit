@@ -134,7 +134,7 @@
 
     <!-- NavigationDrawerFragment -->
     <string name="go">Go</string>
-    <string name="messages">Unread Messages</string>
+    <string name="unread_messages">Unread Messages</string>
     <string name="front_page">Front Page</string>
     <string name="logged_out">Logged out</string>
     <string name="preferences">Preferences</string>
@@ -236,5 +236,8 @@
 
     <!-- Network stuff -->
     <string name="network_problems">Network problems. Check your network and try again.</string>
+
+    <!-- MessagesFragment -->
+    <string name="messages">Messages</string>
 
 </resources>

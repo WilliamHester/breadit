@@ -14,11 +14,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 
-import me.williamhester.models.AbsComment;
 import me.williamhester.models.AccountManager;
 import me.williamhester.models.Comment;
 import me.williamhester.reddit.R;
 import me.williamhester.tools.HtmlParser;
+import me.williamhester.ui.text.ClickableLinkMovementMethod;
 
 /**
  * CommentViewHolder is an extension of the VotableViewHolder and contains all of the necessary
@@ -40,7 +40,7 @@ public class CommentViewHolder extends VotableViewHolder {
     public CommentViewHolder(View itemView, CommentClickCallbacks callbacks) {
         super(itemView);
         mCallback = callbacks;
-        mBody.setMovementMethod(new CommentLinkMovementMethod());
+        mBody.setMovementMethod(new ClickableLinkMovementMethod());
         mContent = itemView.findViewById(R.id.comment_content);
         mAuthor = (TextView) itemView.findViewById(R.id.author);
         mFlairText = (TextView) itemView.findViewById(R.id.flair);
@@ -79,7 +79,7 @@ public class CommentViewHolder extends VotableViewHolder {
                 builder.setNegativeButton(R.string.close, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-
+                        // Do nothing except close the dialog.
                     }
                 });
                 builder.show();
@@ -203,45 +203,6 @@ public class CommentViewHolder extends VotableViewHolder {
             mCallback.onBodyClick(CommentViewHolder.this, mComment);
         }
     };
-
-    private static class CommentLinkMovementMethod extends LinkMovementMethod {
-        @Override
-        public boolean onTouchEvent(@NonNull TextView widget, @NonNull Spannable buffer,
-                                    @NonNull MotionEvent event) {
-            int action = event.getAction();
-            if (action == MotionEvent.ACTION_UP ||
-                    action == MotionEvent.ACTION_DOWN) {
-                int x = (int) event.getX();
-                int y = (int) event.getY();
-                x -= widget.getTotalPaddingLeft();
-                y -= widget.getTotalPaddingTop();
-                x += widget.getScrollX();
-                y += widget.getScrollY();
-                Layout layout = widget.getLayout();
-                int line = layout.getLineForVertical(y);
-                int off = layout.getOffsetForHorizontal(line, x);
-                ClickableSpan[] link = buffer.getSpans(off, off, ClickableSpan.class);
-                if (link.length != 0) {
-                    if (action == MotionEvent.ACTION_UP) {
-                        link[0].onClick(widget);
-                    } else {
-                        Selection.setSelection(buffer,
-                                buffer.getSpanStart(link[0]),
-                                buffer.getSpanEnd(link[0]));
-                    }
-                    return true;
-                } else {
-                    widget.getParent().requestDisallowInterceptTouchEvent(false);
-                    ((View) widget.getParent()).onTouchEvent(event);
-                    return false;
-                }
-            } else {
-                ((View) widget.getParent()).onTouchEvent(event);
-                Selection.removeSelection(buffer);
-            }
-            return false;
-        }
-    }
 
     public interface CommentClickCallbacks {
         public void onBodyClick(CommentViewHolder viewHolder, Comment comment);

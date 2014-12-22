@@ -64,10 +64,12 @@ public class CommentFragment extends AccountFragment {
 
     private boolean mLoading = true;
     private boolean mRefreshing = false;
+    private boolean mIsSingleThread = false;
 
-    public static CommentFragment newInstance(String permalink) {
+    public static CommentFragment newInstance(String permalink, boolean isSingleThread) {
         Bundle args = new Bundle();
         args.putString(PERMALINK, permalink);
+        args.putBoolean("isSingleThread", isSingleThread);
         CommentFragment fragment = new CommentFragment();
         fragment.setArguments(args);
         return fragment;
@@ -94,6 +96,7 @@ public class CommentFragment extends AccountFragment {
             mSortType = savedInstanceState.getString("sortType");
             mLoading = savedInstanceState.getBoolean("loading");
             mRefreshing = savedInstanceState.getBoolean("refreshing");
+            mIsSingleThread = savedInstanceState.getBoolean("isSingleThread");
         } else if (args != null) {
             mSortType = SettingsManager.getDefaultCommentSort();
             mSubmission = args.getParcelable("submission");
@@ -101,6 +104,7 @@ public class CommentFragment extends AccountFragment {
                 mPermalink = mSubmission.getPermalink();
                 RedditApi.getSubmissionData(mContext, mPermalink, mSortType, mSubmissionCallback, mCommentCallback);
             } else {
+                mIsSingleThread = args.getBoolean("isSingleThread", false);
                 mPermalink = args.getString(PERMALINK);
                 if (mPermalink.contains("reddit.com")) {
                     mPermalink = mPermalink.substring(mPermalink.indexOf("reddit.com") + 10);

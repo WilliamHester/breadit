@@ -50,7 +50,7 @@ public class WebViewFragment extends Fragment {
     @SuppressLint("SetJavaScriptEnabled")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_webview, null);
+        View v = inflater.inflate(R.layout.fragment_webview, root, false);
         mWebView = (WebView) v.findViewById(R.id.content);
         mWebView.setWebViewClient(new WebViewClient());
         mWebView.getSettings().setBuiltInZoomControls(true);

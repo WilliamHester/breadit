@@ -1,75 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    style="@style/CardView.Dark"
     android:id="@+id/root"
     android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    card_view:cardCornerRadius="2dp">
 
-    <View android:id="@+id/vote_status"
-        android:layout_width="6dp"
-        android:layout_height="match_parent"/>
-
-    <LinearLayout
-        android:layout_width="0dp"
-        android:layout_weight="1"
+    <me.williamhester.ui.views.SwipeView android:id="@+id/swipe_view"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="@color/blackish">
+        android:orientation="vertical" >
 
-        <TextView android:id="@+id/subject"
-            android:paddingTop="8dp"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-condensed"
-            android:textColor="@color/auburn_orange"/>
-
-        <LinearLayout
-            android:padding="8dp"
+        <LinearLayout android:id="@+id/message_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="vertical"
+            android:padding="8dp"
+            android:background="?android:selectableItemBackground" >
 
-            <TextView
-                android:id="@+id/to_from"
+            <TextView android:id="@+id/subject"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-condensed"
-                android:textColor="@color/auburn_orange"/>
+                android:fontFamily="sans-serif-light"
+                android:textStyle="bold"
+                android:textColor="@color/mid_gray"/>
 
-            <!--Todo: make the next TextView a DistinguishedTextView-->
-            <TextView
-                android:id="@+id/author"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-condensed"
-                android:textColor="@color/auburn_orange"/>
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/to_from"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-light"
+                    android:textColor="@color/mid_gray"/>
+
+                <TextView
+                    android:id="@+id/author"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-light"
+                    android:textColor="@color/mid_gray"/>
+
+                <TextView
+                    android:id="@+id/metadata"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-light"
+                    android:textColor="@color/mid_gray"/>
+
+            </LinearLayout>
 
             <TextView
-                android:id="@+id/metadata"
-                android:layout_width="wrap_content"
+                android:id="@+id/body"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-condensed"
-                android:textColor="@color/auburn_orange"/>
+                android:textColor="@color/mid_gray"/>
 
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/body"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textColor="@color/mid_gray"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp"
-            android:paddingBottom="8dp"/>
+        <include layout="@layout/view_submission_options"
+            android:visibility="gone" />
 
-    </LinearLayout>
+    </me.williamhester.ui.views.SwipeView>
+
+    <View android:id="@+id/vote_background"
+        android:layout_width="4dp"
+        android:layout_height="match_parent"
+        android:background="@android:color/holo_green_light"/>
+
+    <View android:id="@+id/vote_foreground"
+        android:layout_width="4dp"
+        android:layout_height="match_parent"
+        android:background="@android:color/holo_green_dark"/>
 
     <View android:id="@+id/read_status"
-        android:layout_width="6dp"
+        android:layout_width="4dp"
         android:layout_height="match_parent"
-        android:background="@android:color/holo_red_light"/>
+        android:background="@android:color/holo_red_light"
+        android:layout_gravity="end"/>
 
-</LinearLayout>
+</android.support.v7.widget.CardView>

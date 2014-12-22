@@ -605,6 +605,31 @@ public class RedditApi {
                 .setCallback(callback);
     }
 
+    public static void markMessageRead(Context context, boolean read, String messageFullname,
+                                       FutureCallback<String> callback) {
+        Ion.with(context)
+                .load(REDDIT_URL + "/api/read_message")
+                .addHeaders(getStandardHeaders())
+                .setBodyParameter("id", messageFullname)
+                .asString()
+                .setCallback(callback);
+    }
+
+    public static void getMessages(Context context, String type, String after,
+                                   FutureCallback<JsonObject> callback) {
+        Map<String, List<String>> queries = new HashMap<>();
+        if (after != null) {
+            queries.put("after", new ArrayList<String>());
+            queries.get("after").add(after);
+        }
+        Ion.with(context)
+                .load(REDDIT_URL + "/message/" + type + "/")
+                .addHeaders(getStandardHeaders())
+                .addQueries(queries)
+                .asJsonObject()
+                .setCallback(callback);
+    }
+
     public static void printOutLongString(String string) {
         for (int i = 0; i < string.length(); i += 1000) {
             Log.d("RedditApi", string.substring(i, Math.min(string.length(), i + 1000)));

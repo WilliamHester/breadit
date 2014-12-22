@@ -2,6 +2,7 @@ package me.williamhester.ui.adapters;
 
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -69,7 +70,11 @@ public class SubmissionAdapter extends RecyclerView.Adapter<SubmissionViewHolder
     public int getItemViewType(int position) {
         Submission s = mSubmissions.get(position);
         if (s.isSelf()) {
-            return SELF;
+            if (TextUtils.isEmpty(s.getRawMarkdown())) {
+                return BASIC;
+            } else {
+                return SELF;
+            }
         }
         if (SettingsManager.isLowBandwidth()) {
             return BASIC;

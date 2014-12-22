@@ -24,7 +24,6 @@
     </FrameLayout>
 
     <me.williamhester.ui.views.SwipeView android:id="@+id/swipe_view"
-        android:layout_toRightOf="@+id/level_indicator"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"

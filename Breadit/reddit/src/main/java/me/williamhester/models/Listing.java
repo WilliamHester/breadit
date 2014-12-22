@@ -12,8 +12,7 @@ import java.util.List;
 /**
  * Created by william on 8/3/14.
  */
-public class Listing implements Serializable {
-    private static final long serialVersionUID = 4321840693498849062L;
+public class Listing {
 
     private String mModhash;
     private ArrayList<ResponseRedditWrapper> mChildren;

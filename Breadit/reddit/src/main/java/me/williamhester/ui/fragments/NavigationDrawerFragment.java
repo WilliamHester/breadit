@@ -22,8 +22,6 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.koushikdutta.async.future.FutureCallback;
 
 import java.util.ArrayList;
@@ -34,11 +32,10 @@ import java.util.List;
 import me.williamhester.databases.AccountDataSource;
 import me.williamhester.models.Account;
 import me.williamhester.models.AccountManager;
-import me.williamhester.models.ResponseRedditWrapper;
 import me.williamhester.models.Subreddit;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
-import me.williamhester.ui.activities.MainActivity;
+import me.williamhester.ui.activities.MessageActivity;
 import me.williamhester.ui.activities.SettingsActivity;
 import me.williamhester.ui.activities.SubmitActivity;
 
@@ -188,6 +185,13 @@ public class NavigationDrawerFragment extends AccountFragment {
         });
         TextView unreadMessages = (TextView) v.findViewById(R.id.unread_count);
         unreadMessages.setText("0 Unread Messages");
+        unreadMessages.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(getActivity(), MessageActivity.class);
+                startActivity(i);
+            }
+        });
 
         View submit = v.findViewById(R.id.submit);
         submit.setOnClickListener(new View.OnClickListener() {

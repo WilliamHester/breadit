@@ -1,171 +1,112 @@
 package me.williamhester.ui.fragments;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.text.Html;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
+import com.koushikdutta.async.future.FutureCallback;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
-
-import java.io.IOException;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.List;
 
+import me.williamhester.models.GenericListing;
+import me.williamhester.models.GenericResponseRedditWrapper;
 import me.williamhester.models.Message;
-import me.williamhester.models.Votable;
 import me.williamhester.models.utils.Utilities;
+import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
+import me.williamhester.tools.HtmlParser;
+import me.williamhester.ui.activities.SubmissionActivity;
 import me.williamhester.ui.activities.UserActivity;
+import me.williamhester.ui.text.ClickableLinkMovementMethod;
+import me.williamhester.ui.views.DividerItemDecoration;
+import me.williamhester.ui.views.VotableViewHolder;
 
 public class MessagesFragment extends AccountFragment {
 
+    private boolean mRefreshing = false;
+
     private Context mContext;
 
-    private ListView mMessagesListView;
-    private List<Message> mMessageList;
+    private ArrayList<Message> mMessages;
     private MessageArrayAdapter mMessageAdapter;
-    private TextView mCommentKarma;
-    private TextView mLinkKarma;
-    private TextView mCakeDay;
-    private View mHeaderView;
-    private int mFilterType = Message.ALL;
+    private ProgressBar mProgressBar;
+    private RecyclerView mMessagesRecyclerView;
+    private String mFilterType;
+    private SwipeRefreshLayout mRefreshLayout;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mMessageList = new ArrayList<Message>();
+        mMessages = new ArrayList<>();
         mContext = getActivity();
-        if (getArguments() != null) {
-            mFilterType = getArguments().getInt("filter_by", Message.ALL);
+        if (savedInstanceState != null) {
+            mFilterType = savedInstanceState.getString("filter_by");
+            mRefreshing = savedInstanceState.getBoolean("refreshing");
+        } else if (getArguments() != null) {
+            mFilterType = getArguments().getString("filter_by", Message.ALL);
+        } else {
+            mFilterType = Message.ALL;
         }
     }
 
+    @SuppressLint("ResourceAsColor")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_messages, null);
-        mMessagesListView = (ListView) v.findViewById(R.id.messages);
-        mMessageAdapter = new MessageArrayAdapter(mContext);
-        mHeaderView = createHeaderView(inflater);
-        mMessagesListView.addHeaderView(mHeaderView);
-        mMessagesListView.setAdapter(mMessageAdapter);
-        mMessagesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        View v = inflater.inflate(R.layout.fragment_messages, root, false);
+
+        Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar_actionbar);
+        toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                final Message m = mMessageList.get(position - 1);
-                if (m.isUnread()) {
-                    new MarkReadTask(m, true).execute();
-                }
+            public void onClick(View v) {
+                getActivity().finish();
             }
         });
-        mMessagesListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+
+        mProgressBar = (ProgressBar) v.findViewById(R.id.progress_bar);
+        mRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.swipe_refresh);
+        mRefreshLayout.setProgressBackgroundColor(R.color.darkest_gray);
+        mRefreshLayout.setColorSchemeResources(R.color.orangered);
+        mRefreshLayout.setRefreshing(mRefreshing);
+        mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
-            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int position,
-                                           long l) {
-                if (position > 0) {
-                    final Message m = mMessageList.get(position - 1);
-                    if (!m.isUnread()) {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(mContext,
-                                android.R.style.Theme_Holo_Dialog);
-                        ArrayList<String> options = new ArrayList<String>();
-                        options.add(getResources().getString(R.string.reply));
-                        options.add(getResources().getString(R.string.mark_unread));
-                        options.add(getResources().getString(R.string.view_profile));
-                        if (m.isComment()) {
-                            options.add(getResources().getString(R.string.view_context));
-                            options.add(getResources().getString(R.string.report));
-                            options.add(getResources().getString(R.string.full_comments));
-                        } else {
-                            options.add(getResources().getString(R.string.block_user));
-                        }
-                        String[] array = new String[options.size()];
-                        options.toArray(array);
-                        builder.setItems(array, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int position) {
-                                switch (position) {
-                                    case 0:
-                                        // Reply
-//                                        MessageDialogFragment mf = MessageDialogFragment
-//                                                .newInstance(m.getName());
-//                                        mf.show(getFragmentManager(), "reply_fragment");
-                                        break;
-                                    case 1:
-                                        // Mark unread
-                                        new MarkReadTask(m, false).execute();
-                                        break;
-                                    case 2:
-                                        // View user's profile
-                                        Bundle b = new Bundle();
-                                        b.putString("username", m.getAuthor());
-                                        Intent i = new Intent(mContext, UserActivity.class);
-                                        i.putExtras(b);
-                                        mContext.startActivity(i);
-                                        break;
-                                    case 3:
-                                        if (m.isComment()) {
-                                            // report
-                                            new ReportCommentTask(m).execute();
-                                        } else {
-                                            // Block user
-                                            new BlockUserTask(m).execute();
-                                        }
-                                        break;
-                                    case 4:
-                                        // view context
-                                        break;
-                                    case 5:
-                                        // full comments
-                                        break;
-                                }
-                            }
-                        });
-                        Dialog d = builder.create();
-                        d.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-                        d.show();
-                    }
-                }
-                return false;
+            public void onRefresh() {
+                mRefreshing = true;
+                RedditApi.getMessages(getActivity(), mFilterType, null, mMessageCallback);
             }
         });
-        new LoadMessagesTask().execute();
-        return v;
-    }
+        mMessagesRecyclerView = (RecyclerView) v.findViewById(R.id.messages);
+        mMessageAdapter = new MessageArrayAdapter();
+        mMessagesRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mMessagesRecyclerView.setAdapter(mMessageAdapter);
+        mMessagesRecyclerView.addItemDecoration(new DividerItemDecoration(getResources()
+                .getDrawable(R.drawable.card_divider)));
 
-    private View createHeaderView(LayoutInflater inflater) {
-        View v = inflater.inflate(R.layout.header_messages, null);
-        TextView username = (TextView) v.findViewById(R.id.username);
-        mCommentKarma = (TextView) v.findViewById(R.id.comment_karma);
-        mLinkKarma = (TextView) v.findViewById(R.id.link_karma);
-        mCakeDay = (TextView) v.findViewById(R.id.cakeday);
-
-        username.setText(mAccount.getUsername());
-
-        new LoadAccountDataTask().execute();
-
-        Spinner filter = (Spinner) v.findViewById(R.id.filter);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(mContext,
-                R.layout.spinner_item, R.id.orange_spinner_text,
+        Spinner messagesType = (Spinner) v.findViewById(R.id.messages_type);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(mContext,
+                R.layout.spinner_item, R.id.spinner_text,
                 getResources().getStringArray(R.array.filter_types));
-        filter.setAdapter(adapter);
-        filter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        messagesType.setAdapter(adapter);
+        messagesType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 switch (i) {
@@ -191,7 +132,9 @@ public class MessagesFragment extends AccountFragment {
                         mFilterType = Message.MOD_MAIL;
                         break;
                 }
-                new LoadMessagesTask(true).execute();
+                mRefreshing = true;
+                mProgressBar.setVisibility(View.VISIBLE);
+                RedditApi.getMessages(getActivity(), mFilterType, null, mMessageCallback);
             }
 
             @Override
@@ -199,198 +142,235 @@ public class MessagesFragment extends AccountFragment {
                 // Do nothing
             }
         });
+
         return v;
     }
 
-    private class MessageArrayAdapter extends ArrayAdapter<Message> {
-        Context mContext;
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
 
-        public MessageArrayAdapter(Context context) {
-            super(context, R.layout.list_item_submission, mMessageList);
-            mContext = context;
+        outState.putString("filter_by", mFilterType);
+        outState.putBoolean("refreshing", mRefreshing);
+    }
+
+    private FutureCallback<JsonObject> mMessageCallback = new FutureCallback<JsonObject>() {
+        @Override
+        public void onCompleted(Exception e, JsonObject result) {
+            mProgressBar.setVisibility(View.GONE);
+            mRefreshLayout.setRefreshing(false);
+            if (e != null) {
+                // Failed to load
+            }
+            if (mRefreshing) {
+                mRefreshing = false;
+                mMessages.clear();
+            }
+            Gson gson = new Gson();
+
+            // Generics are just beautiful.
+            TypeToken<GenericResponseRedditWrapper<GenericListing<Message>>> token =
+                    new TypeToken<GenericResponseRedditWrapper<GenericListing<Message>>>() {};
+
+            GenericResponseRedditWrapper<GenericListing<Message>> wrapper =
+                    gson.fromJson(result, token.getType());
+            GenericListing<Message> listing = wrapper.getData();
+            ArrayList<Message> messages = new ArrayList<>();
+            for (GenericResponseRedditWrapper<Message> message : listing.getChildren()) {
+                messages.add(message.getData());
+            }
+            mMessages.addAll(messages);
+            if (mMessages.size() == messages.size()) {
+                mMessageAdapter.notifyDataSetChanged();
+            } else {
+                mMessageAdapter.notifyItemRangeInserted(mMessages.size() - messages.size(),
+                        messages.size());
+            }
+        }
+    };
+
+    private class MessageArrayAdapter extends RecyclerView.Adapter<VotableViewHolder> {
+        @Override
+        public VotableViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+            return new MessageViewHolder(LayoutInflater.from(getActivity())
+                    .inflate(R.layout.list_item_message, mMessagesRecyclerView, false));
         }
 
-        public View getView(final int position, View convertView, ViewGroup parent) {
-            Message m = getItem(position);
+        @Override
+        public void onBindViewHolder(VotableViewHolder votableViewHolder, int i) {
+            votableViewHolder.setContent(mMessages.get(i));
+        }
 
-            if (convertView == null) {
-                LayoutInflater inflater = (LayoutInflater)
-                        mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                convertView = inflater.inflate(R.layout.list_item_message, parent, false);
-            } else {
-                convertView.invalidate();
-            }
-
-            TextView subject = (TextView) convertView.findViewById(R.id.subject);
-            TextView toFrom = (TextView) convertView.findViewById(R.id.to_from);
-            TextView author = (TextView) convertView.findViewById(R.id.author);
-            TextView metadata = (TextView) convertView.findViewById(R.id.metadata);
-            TextView body = (TextView) convertView.findViewById(R.id.body);
-
-            View readStatus = convertView.findViewById(R.id.read_status);
-
-            final View voteStatus = convertView.findViewById(R.id.vote_status);
-            switch (m.getVoteStatus()) {
-                case Votable.DOWNVOTED:
-                    voteStatus.setVisibility(View.VISIBLE);
-                    voteStatus.setBackgroundColor(getResources().getColor(R.color.periwinkle));
-                    break;
-                case Votable.UPVOTED:
-                    voteStatus.setVisibility(View.VISIBLE);
-                    voteStatus.setBackgroundColor(getResources().getColor(R.color.orangered));
-                    break;
-                default:
-                    voteStatus.setVisibility(View.GONE);
-                    break;
-            }
-
-            if (m.getAuthor().equals(mAccount.getUsername())) {
-                toFrom.setText(getResources().getString(R.string.to) + " ");
-            } else {
-                toFrom.setText(getResources().getString(R.string.from) + " ");
-            }
-
-            author.setText(m.getAuthor());
-            metadata.setText(" " + Utilities.calculateTimeShort(m.getCreatedUtc()));
-            String unescaped = Html.fromHtml(m.getBodyHtml()).toString();
-            String formatted = unescaped.substring(31, unescaped.length() - 20);
-            body.setText(Html.fromHtml(formatted));
-
-            if (m.isUnread()) {
-                readStatus.setVisibility(View.VISIBLE);
-            } else {
-                readStatus.setVisibility(View.GONE);
-            }
-
-            subject.setText(m.getSubject());
-
-            return convertView;
+        @Override
+        public int getItemCount() {
+            return mMessages.size();
         }
     }
 
-    private class LoadMessagesTask extends AsyncTask<Void, Void, List<Message>> {
-        private boolean mClear;
-
-        public LoadMessagesTask() {
-            mClear = false;
-        }
-
-        public LoadMessagesTask(boolean clear) {
-            mClear = clear;
-        }
-
-        @Override
-        protected List<Message> doInBackground(Void... voids) {
-            try {
-                return Message.getMessages(mFilterType, null, null, mAccount);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(List<Message> result) {
-            if (mClear) {
-                mMessageList.clear();
-            }
-            for (Message m : result) {
-                mMessageList.add(m);
-            }
-            mMessageAdapter.notifyDataSetChanged();
-        }
-    }
-
-    private class LoadAccountDataTask extends AsyncTask<Void, Void, JsonObject> {
-        @Override
-        protected JsonObject doInBackground(Void... voids) {
-            try {
-                String s = Utilities.get("", "http://www.reddit.com/api/me.json",
-                        mAccount.getCookie(), mAccount.getModhash());
-                JsonObject jsonObject = new JsonParser().parse(s).getAsJsonObject();
-                return jsonObject;
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(JsonObject result) {
-            if (result != null && !result.isJsonNull()) {
-                DecimalFormat format = new DecimalFormat("###,###,###,##0");
-                mLinkKarma.setText(format.format(result.get("data").getAsJsonObject()
-                        .get("link_karma").getAsLong()) + " Link karma");
-                mCommentKarma.setText(format.format(result.get("data").getAsJsonObject()
-                        .get("comment_karma").getAsLong()) + " Comment karma");
-
-            }
-            mMessageAdapter.notifyDataSetChanged();
-        }
-    }
-
-    private class MarkReadTask extends AsyncTask<Void, Void, Void> {
+    private class MessageViewHolder extends VotableViewHolder {
 
         private Message mMessage;
-        private boolean mRead;
+        private TextView mSubject;
+        private TextView mToFrom;
+        private TextView mAuthor;
+        private TextView mMetadata;
+        private TextView mBody;
+        private View mReadStatus;
 
-        public MarkReadTask(Message m, boolean read) {
-            mMessage = m;
-            mRead = read;
+        public MessageViewHolder(View itemView) {
+            super(itemView);
+
+            mSubject = (TextView) itemView.findViewById(R.id.subject);
+            mToFrom = (TextView) itemView.findViewById(R.id.to_from);
+            mAuthor = (TextView) itemView.findViewById(R.id.author);
+            mMetadata = (TextView) itemView.findViewById(R.id.metadata);
+            mBody = (TextView) itemView.findViewById(R.id.body);
+            mBody.setMovementMethod(new ClickableLinkMovementMethod());
+            mReadStatus = itemView.findViewById(R.id.read_status);
+            mSwipeView.findViewById(R.id.message_content).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (mMessage.isUnread()) {
+                        mMessage.setUnread(false);
+                        mReadStatus.setVisibility(View.GONE);
+                        RedditApi.markMessageRead(getActivity(), true, mMessage.getName(),
+                                new FutureCallback<String>() {
+                                    @Override
+                                    public void onCompleted(Exception e, String result) {
+                                        if (e != null) {
+                                            // do something about the exception
+                                        }
+                                        // The result here is not needed, because as long as it
+                                        // doesn't contain an error, we're good.
+                                    }
+                                });
+                    } else if (mMessage.isComment()) {
+                        Bundle extras = new Bundle();
+                        Intent i = new Intent(getActivity(), SubmissionActivity.class);
+                        extras.putBoolean("isSingleThread", true);
+                        extras.putString("permalink", mMessage.getContext());
+                        i.putExtras(extras);
+                        startActivity(i);
+                    } else {
+                        // Start a new fragment that shows the conversation like an instant messenger
+                    }
+                    // Do something specific to the message type. If it was a comment, then prompt
+                    //     the user to either view context or that comment's single thread
+                    //     either case will require a modification to the CommentsFragment that will
+                    //     allow the user to switch to view the ENTIRE list of comments instead of
+                    //     just that comment's thread. This should be done through a flag to the
+                    //     activity, or maybe just simply containing the specific comment to get the
+                    //     context of.
+                }
+            });
+            mSwipeView.findViewById(R.id.message_content).setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    if (!mMessage.isUnread()) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                    ArrayList<String> options = new ArrayList<>();
+                    options.add(getResources().getString(R.string.reply));
+                    options.add(getResources().getString(R.string.mark_unread));
+                    options.add(getResources().getString(R.string.view_profile));
+                    if (mMessage.isComment()) {
+                        options.add(getResources().getString(R.string.view_context));
+                        options.add(getResources().getString(R.string.report));
+                        options.add(getResources().getString(R.string.full_comments));
+                    } else {
+                        options.add(getResources().getString(R.string.block_user));
+                    }
+                    String[] array = new String[options.size()];
+                    options.toArray(array);
+                    builder.setItems(array, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int position) {
+                            switch (position) {
+                                case 0:
+                                    // Reply
+//                                        MessageDialogFragment mf = MessageDialogFragment
+//                                                .newInstance(m.getName());
+//                                        mf.show(getFragmentManager(), "reply_fragment");
+                                    break;
+                                case 1:
+                                    // Mark unread
+                                    mMessage.setUnread(true);
+                                    RedditApi.markMessageRead(getActivity(), false, mMessage.getName(), new FutureCallback<String>() {
+                                        @Override
+                                        public void onCompleted(Exception e, String result) {
+                                            if (e != null) {
+                                                // do something about the exception
+                                            }
+                                            // The result here is not needed, because as long as it doesn't contain
+                                            // an error, we're good.
+                                        }
+                                    });
+                                    break;
+                                case 2:
+                                    // View user's profile
+                                    Bundle b = new Bundle();
+                                    b.putString("username", mMessage.getAuthor());
+                                    Intent i = new Intent(mContext, UserActivity.class);
+                                    i.putExtras(b);
+                                    mContext.startActivity(i);
+                                    break;
+                                case 3:
+                                    if (mMessage.isComment()) {
+                                        // report
+//                                        new ReportCommentTask(m).execute();
+                                    } else {
+                                        // Block user
+//                                        new BlockUserTask(m).execute();
+                                    }
+                                    break;
+                                case 4:
+                                    // view context
+                                    break;
+                                case 5:
+                                    // full comments
+                                    break;
+                            }
+                        }
+                    });
+                    builder.show();
+                }
+                    return false;
+                }
+            });
         }
 
         @Override
-        protected Void doInBackground(Void... voids) {
-            List<NameValuePair> apiParams = new ArrayList<NameValuePair>();
-            apiParams.add(new BasicNameValuePair("id", mMessage.getName()));
-            if (mRead) {
-                Log.i("MessagesFragment", Utilities.post(apiParams, "http://www.reddit.com/api/read_message", mAccount));
+        protected void onVoted() {
+
+        }
+
+        public void setContent(Object object) {
+            super.setContent(object);
+            mMessage = (Message) object;
+            if (mMessage.getAuthor().equalsIgnoreCase(mAccount.getUsername())) {
+                mToFrom.setText(getResources().getString(R.string.to) + " ");
             } else {
-                Log.i("MessagesFragment", Utilities.post(apiParams, "http://www.reddit.com/api/unread_message", mAccount));
+                mToFrom.setText(getResources().getString(R.string.from) + " ");
             }
-            return null;
-        }
 
-        @Override
-        protected void onPostExecute(Void result) {
-            mMessage.setIsRead(!mRead);
-            mMessageAdapter.notifyDataSetChanged();
-        }
-    }
+            if (mMessage.isComment()) {
+                mSwipeView.setEnabled(true);
+            } else {
+                mSwipeView.setEnabled(false);
+            }
 
-    private class BlockUserTask extends AsyncTask<Void, Void, Void> {
+            mAuthor.setText(mMessage.getAuthor());
+            mMetadata.setText(" " + Utilities.calculateTimeShort(mMessage.getCreatedUtc()));
+            String unescaped = Html.fromHtml(mMessage.getBodyHtml()).toString();
+            HtmlParser parser = new HtmlParser(unescaped);
+            mBody.setText(parser.getSpannableString());
 
-        private Message mMessage;
+            if (mMessage.isUnread()) {
+                mReadStatus.setVisibility(View.VISIBLE);
+            } else {
+                mReadStatus.setVisibility(View.GONE);
+            }
 
-        public BlockUserTask(Message m) {
-            mMessage = m;
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            List<NameValuePair> apiParams = new ArrayList<NameValuePair>();
-            apiParams.add(new BasicNameValuePair("id", mMessage.getName()));
-            Log.i("MessagesFragment", Utilities.post(apiParams, "http://www.reddit.com/api/block",
-                    mAccount));
-            return null;
-        }
-    }
-
-    private class ReportCommentTask extends AsyncTask<Void, Void, Void> {
-
-        private Message mMessage;
-
-        public ReportCommentTask(Message m) {
-            mMessage = m;
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            List<NameValuePair> apiParams = new ArrayList<NameValuePair>();
-            apiParams.add(new BasicNameValuePair("id", mMessage.getName()));
-            Log.i("MessagesFragment", Utilities.post(apiParams, "http://www.reddit.com/api/report",
-                    mAccount));
-            return null;
+            mSubject.setText(mMessage.getSubject());
         }
     }
 }
