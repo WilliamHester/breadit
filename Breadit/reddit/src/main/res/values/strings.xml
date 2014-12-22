@@ -36,7 +36,7 @@
     <string name="archived">Sorry, this submission is archived. Commenting is not allowed.</string>
 
     <!-- CommentFragment -->
-    <string name="viewing_single_thread">You\'re viewing a single comment's thread.</string>
+    <string name="viewing_single_thread">You\'re viewing a single comment\'s thread.</string>
     <string name="view_all_comments">View all comments</string>
     <string name="view_full_context">View the full context</string>
 

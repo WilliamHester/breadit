@@ -47,7 +47,9 @@ public class MessagesFragment extends AccountFragment {
     private Context mContext;
 
     private ArrayList<Message> mMessages;
+    private InfiniteLoadingScrollListener mScrollListener;
     private MessageArrayAdapter mMessageAdapter;
+    private LinearLayoutManager mLayoutManager;
     private ProgressBar mProgressBar;
     private RecyclerView mMessagesRecyclerView;
     private String mFilterType;
@@ -96,8 +98,11 @@ public class MessagesFragment extends AccountFragment {
         });
         mMessagesRecyclerView = (RecyclerView) v.findViewById(R.id.messages);
         mMessageAdapter = new MessageArrayAdapter();
-        mMessagesRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mLayoutManager = new LinearLayoutManager(getActivity());
+        mScrollListener = new InfiniteLoadingScrollListener();
+        mMessagesRecyclerView.setLayoutManager(mLayoutManager);
         mMessagesRecyclerView.setAdapter(mMessageAdapter);
+        mMessagesRecyclerView.setOnScrollListener(mScrollListener);
         mMessagesRecyclerView.addItemDecoration(new DividerItemDecoration(getResources()
                 .getDrawable(R.drawable.card_divider)));
 
@@ -165,6 +170,7 @@ public class MessagesFragment extends AccountFragment {
             if (mRefreshing) {
                 mRefreshing = false;
                 mMessages.clear();
+                mScrollListener.resetState();
             }
             Gson gson = new Gson();
 
@@ -188,6 +194,46 @@ public class MessagesFragment extends AccountFragment {
             }
         }
     };
+
+    public class InfiniteLoadingScrollListener extends RecyclerView.OnScrollListener {
+
+        private final int VISIBLE_THRESHOLD = 5;
+        private int mPreviousTotal = 0;
+        private boolean mLoading = true;
+
+        @Override
+        public void onScrolled(RecyclerView absListView, int dx, int dy) {
+            if (mLoading) {
+                if (mMessageAdapter.getItemCount() > mPreviousTotal) {
+                    mPreviousTotal = mMessageAdapter.getItemCount();
+                    mLoading = false;
+                    mProgressBar.setVisibility(View.GONE);
+                }
+            } else if (mMessages.size() > 0
+                    && (mMessageAdapter.getItemCount() - mMessagesRecyclerView.getChildCount()) // 25 - 4 = 21
+                    <= (mLayoutManager.findFirstVisibleItemPosition() + VISIBLE_THRESHOLD)) { // 20 + 5 = 25
+                loadMoreMessages();
+                mLoading = true;
+                mProgressBar.setVisibility(View.VISIBLE);
+            }
+        }
+
+        public void resetState() {
+            mPreviousTotal = mMessageAdapter.getItemCount();
+            mLoading = false;
+            mProgressBar.setVisibility(View.GONE);
+        }
+
+        private void loadMoreMessages() {
+            String after;
+            if (mMessages == null || mMessages.size() == 0) {
+                after = null;
+            } else {
+                after = mMessages.get(mMessages.size() - 1).getName();
+            }
+            RedditApi.getMessages(getActivity(), mFilterType, after, mMessageCallback);
+        }
+    }
 
     private class MessageArrayAdapter extends RecyclerView.Adapter<VotableViewHolder> {
         @Override
