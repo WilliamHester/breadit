@@ -211,7 +211,7 @@ public class CommentFragment extends AccountFragment {
             }
             mCommentsList.add(index, newComment);
             if (mCommentAdapter != null) {
-                mCommentAdapter.notifyItemInserted(index + CommentArrayAdapter.HEADER_VIEW_COUNT);
+                mCommentAdapter.notifyItemInserted(index + mCommentAdapter.getHeaderViewCount());
             }
             return;
         } else if (requestCode == EDIT_REQUEST) {
@@ -226,7 +226,7 @@ public class CommentFragment extends AccountFragment {
                 mCommentsList.set(index, (Comment) newThing);
                 if (mCommentAdapter != null) {
                     mCommentAdapter.notifyItemChanged(index
-                            + CommentArrayAdapter.HEADER_VIEW_COUNT);
+                            + mCommentAdapter.getHeaderViewCount());
                 }
             }
         }
@@ -242,6 +242,7 @@ public class CommentFragment extends AccountFragment {
         outState.putString("sortType", mSortType);
         outState.putBoolean("loading", mLoading);
         outState.putBoolean("refreshing", mRefreshing);
+        outState.putBoolean("isSingleThread", mIsSingleThread);
     }
 
     /**
@@ -402,8 +403,7 @@ public class CommentFragment extends AccountFragment {
         private static final int SUBMISSION = 1;
         private static final int COMMENT = 2;
         private static final int MORE_COMMENTS = 3;
-
-        private static final int HEADER_VIEW_COUNT = 1;
+        private static final int SINGLE_THREAD_HEADER = 4;
 
         @SuppressLint("InflateParams")
         @Override
@@ -419,6 +419,8 @@ public class CommentFragment extends AccountFragment {
                 case MORE_COMMENTS:
                     return new MoreCommentsViewHolder(
                             inflater.inflate(R.layout.list_item_more_comments, parent, false));
+                case SINGLE_THREAD_HEADER:
+                    return new SingleThreadHeader(inflater, parent);
             }
             return null; // Should never hit this case
         }
@@ -433,11 +435,11 @@ public class CommentFragment extends AccountFragment {
                     break;
                 case COMMENT:
                     ((CommentViewHolder) vh).setContent(
-                            mCommentsList.get(position - HEADER_VIEW_COUNT));
+                            mCommentsList.get(position - getHeaderViewCount()));
                     break;
                 case MORE_COMMENTS:
                     ((MoreCommentsViewHolder) vh).setContent(
-                            (MoreComments) mCommentsList.get(position - HEADER_VIEW_COUNT));
+                            (MoreComments) mCommentsList.get(position - getHeaderViewCount()));
                     break;
             }
         }
@@ -445,23 +447,66 @@ public class CommentFragment extends AccountFragment {
         @Override
         public int getItemViewType(int position) {
             if (position == 0) {
-                return SUBMISSION;
-            } else if (mCommentsList.get(position - HEADER_VIEW_COUNT) instanceof Comment) {
+                if (mSubmission != null) {
+                    return SUBMISSION;
+                } else if (mIsSingleThread) {
+                    return SINGLE_THREAD_HEADER;
+                }
+            } else if (position == 1 && mIsSingleThread) {
+                return SINGLE_THREAD_HEADER;
+            } else if (mCommentsList.get(position - getHeaderViewCount()) instanceof Comment) {
                 return COMMENT;
             } else {
                 return MORE_COMMENTS;
             }
+            return -1;
         }
 
         @Override
         public long getItemId(int position) {
-            return Long.parseLong(mCommentsList.get(position - HEADER_VIEW_COUNT).getId(), 36);
+            return Long.parseLong(mCommentsList.get(position - getHeaderViewCount()).getId(), 36);
         }
 
         @Override
         public int getItemCount() {
-            return mCommentsList.size() + (mSubmission != null ? 1 : 0);
+            return mCommentsList.size() + getHeaderViewCount();
         }
+
+        public int getHeaderViewCount() {
+            return (mSubmission != null ? 1 : 0) + (mIsSingleThread ? 1 : 0);
+        }
+    }
+
+    private class SingleThreadHeader extends RecyclerView.ViewHolder {
+
+        public SingleThreadHeader(LayoutInflater inflater, ViewGroup parent) {
+            super(inflater.inflate(R.layout.header_single_thread, parent, false));
+
+            itemView.findViewById(R.id.view_all_comments).setOnClickListener(
+                    new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            mPermalink = mPermalink.substring(0, mPermalink.lastIndexOf('/'));
+                            mRefreshing = true;
+                            mIsSingleThread = false;
+                            RedditApi.getSubmissionData(mContext, mPermalink, mSortType,
+                                    mSubmissionCallback, mCommentCallback);
+                            mProgressBar.setVisibility(View.VISIBLE);
+                        }
+                    });
+            itemView.findViewById(R.id.view_full_context).setOnClickListener(
+                    new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            mPermalink = mPermalink.replace("context=3", "context=10000");
+                            mRefreshing = true;
+                            RedditApi.getSubmissionData(mContext, mPermalink, mSortType,
+                                    mSubmissionCallback, mCommentCallback);
+                            mProgressBar.setVisibility(View.VISIBLE);
+                        }
+                    });
+        }
+
     }
 
     private SubmissionViewHolder.SubmissionCallbacks mSubmissionCallbacks = new SubmissionViewHolder.SubmissionCallbacks() {
