@@ -12,6 +12,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -46,7 +47,7 @@ import me.williamhester.ui.views.CommentViewHolder;
 import me.williamhester.ui.views.DividerItemDecoration;
 import me.williamhester.ui.views.SubmissionViewHolder;
 
-public class CommentFragment extends AccountFragment {
+public class CommentFragment extends AccountFragment implements Toolbar.OnMenuItemClickListener {
 
     private static final String PERMALINK = "permalink";
     private static final int REPLY_REQUEST = 1;
@@ -120,6 +121,19 @@ public class CommentFragment extends AccountFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_comment, root, false);
+
+        Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar_actionbar);
+        toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getFragmentManager().popBackStack();
+            }
+        });
+        toolbar.setTitle(R.string.comments);
+        toolbar.setOnMenuItemClickListener(this);
+        onCreateOptionsMenu(toolbar.getMenu(), new MenuInflater(getActivity()));
+
         RecyclerView commentsView = (RecyclerView) v.findViewById(R.id.comments);
         mRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.swipe_refresh);
         mRefreshLayout.setProgressBackgroundColor(R.color.darkest_gray);
@@ -150,6 +164,8 @@ public class CommentFragment extends AccountFragment {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.submission_fragment, menu);
 
+        menu.findItem(R.id.action_view_link).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        menu.findItem(R.id.action_sort_comments).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
         if (mSubmission != null) {
             Url url = new Url(mSubmission.getUrl());
             if (mSubmission.isSelf()) {
@@ -168,7 +184,7 @@ public class CommentFragment extends AccountFragment {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_sort_comments: {
                 View anchor = getActivity().findViewById(R.id.action_sort_comments);
@@ -185,7 +201,7 @@ public class CommentFragment extends AccountFragment {
                     getFragmentManager().popBackStack();
                 } else {
                     getFragmentManager().beginTransaction()
-                            .add(R.id.container, ((SubmissionActivity) getActivity()).getContentFragment(), "content")
+                            .add(R.id.main_container, ((SubmissionActivity) getActivity()).getContentFragment(), "content")
                             .addToBackStack("content")
                             .commit();
                 }
@@ -361,7 +377,7 @@ public class CommentFragment extends AccountFragment {
                     Fragment reply = ReplyFragment.newInstance(comment);
                     reply.setTargetFragment(CommentFragment.this, REPLY_REQUEST);
                     getFragmentManager().beginTransaction()
-                            .replace(R.id.container, reply, "ReplyFragment")
+                            .replace(R.id.main_container, reply, "ReplyFragment")
                             .addToBackStack("ReplyFragment")
                             .commit();
                     break;
@@ -379,7 +395,7 @@ public class CommentFragment extends AccountFragment {
                     ReplyFragment fragment = ReplyFragment.newInstance(parent, comment);
                     fragment.setTargetFragment(CommentFragment.this, EDIT_REQUEST);
                     getFragmentManager().beginTransaction()
-                            .replace(R.id.container, fragment, "Edit")
+                            .replace(R.id.main_container, fragment, "Edit")
                             .addToBackStack("Edit")
                             .commit();
                     break;
@@ -513,7 +529,7 @@ public class CommentFragment extends AccountFragment {
         @Override
         public void onImageViewClicked(Object imgurData) {
             getFragmentManager().beginTransaction()
-                    .add(R.id.container, ImagePagerFragment.newInstance(imgurData), "ImagePagerFragment")
+                    .add(R.id.main_container, ImagePagerFragment.newInstance(imgurData), "ImagePagerFragment")
                     .addToBackStack("ImagePagerFragment")
                     .commit();
         }
@@ -521,7 +537,7 @@ public class CommentFragment extends AccountFragment {
         @Override
         public void onImageViewClicked(String imageUrl) {
             getFragmentManager().beginTransaction()
-                    .add(R.id.container, ImagePagerFragment.newInstance(imageUrl), "ImagePagerFragment")
+                    .add(R.id.main_container, ImagePagerFragment.newInstance(imageUrl), "ImagePagerFragment")
                     .addToBackStack("ImagePagerFragment")
                     .commit();
         }
@@ -536,7 +552,7 @@ public class CommentFragment extends AccountFragment {
             // TODO: fix this when YouTube updates their Android API
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
                 getFragmentManager().beginTransaction()
-                        .add(R.id.container, YouTubeFragment.newInstance(videoId), "YouTubeFragment")
+                        .add(R.id.main_container, YouTubeFragment.newInstance(videoId), "YouTubeFragment")
                         .addToBackStack("YouTubeFragment")
                         .commit();
             } else {
@@ -572,7 +588,7 @@ public class CommentFragment extends AccountFragment {
                     ReplyFragment fragment = ReplyFragment.newInstance(submission);
                     fragment.setTargetFragment(CommentFragment.this, REPLY_REQUEST);
                     getFragmentManager().beginTransaction()
-                            .replace(R.id.container, fragment, "Reply")
+                            .replace(R.id.main_container, fragment, "Reply")
                             .addToBackStack("Reply")
                             .commit();
                     break;
@@ -581,7 +597,7 @@ public class CommentFragment extends AccountFragment {
                     ReplyFragment fragment = ReplyFragment.newInstance(null, submission);
                     fragment.setTargetFragment(CommentFragment.this, EDIT_REQUEST);
                     getFragmentManager().beginTransaction()
-                            .replace(R.id.container, fragment, "Reply")
+                            .replace(R.id.main_container, fragment, "Reply")
                             .addToBackStack("Reply")
                             .commit();
                     break;

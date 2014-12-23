@@ -1,11 +1,10 @@
 package me.williamhester.ui.fragments;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -36,6 +35,7 @@ import me.williamhester.models.utils.Utilities;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 import me.williamhester.tools.HtmlParser;
+import me.williamhester.ui.activities.MainActivity;
 import me.williamhester.ui.activities.SubmissionActivity;
 import me.williamhester.ui.activities.UserActivity;
 import me.williamhester.ui.text.ClickableLinkMovementMethod;
@@ -51,6 +51,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
     private ArrayList<Message> mMessages;
     private InfiniteLoadingScrollListener mScrollListener;
     private MessageArrayAdapter mMessageAdapter;
+    private MessageViewHolder mFocusedViewHolder;
     private LinearLayoutManager mLayoutManager;
     private ProgressBar mProgressBar;
     private RecyclerView mMessagesRecyclerView;
@@ -262,16 +263,17 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
         }
     }
 
-    private class MessageArrayAdapter extends RecyclerView.Adapter<VotableViewHolder> {
+    private class MessageArrayAdapter extends RecyclerView.Adapter<MessageViewHolder> {
         @Override
-        public VotableViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+        public MessageViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
             return new MessageViewHolder(LayoutInflater.from(getActivity())
                     .inflate(R.layout.list_item_message, mMessagesRecyclerView, false));
         }
 
         @Override
-        public void onBindViewHolder(VotableViewHolder votableViewHolder, int i) {
+        public void onBindViewHolder(MessageViewHolder votableViewHolder, int i) {
             votableViewHolder.setContent(mMessages.get(i));
+            MessageViewHolder.collapse(votableViewHolder.mOptionsRow);
         }
 
         @Override
@@ -288,6 +290,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
         private TextView mAuthor;
         private TextView mMetadata;
         private TextView mBody;
+        private View mOptionsRow;
         private View mReadStatus;
 
         public MessageViewHolder(View itemView) {
@@ -299,7 +302,36 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
             mMetadata = (TextView) itemView.findViewById(R.id.metadata);
             mBody = (TextView) itemView.findViewById(R.id.body);
             mBody.setMovementMethod(new ClickableLinkMovementMethod());
+
+            mOptionsRow = itemView.findViewById(R.id.options_row);
+            View reply = itemView.findViewById(R.id.option_reply);
+            View unread = itemView.findViewById(R.id.option_mark_unread);
+            View user = itemView.findViewById(R.id.option_view_user);
+            View overflow = itemView.findViewById(R.id.option_overflow);
+            final View subreddit = itemView.findViewById(R.id.option_go_to_subreddit);
+
+            reply.setOnClickListener(mOptionsClickListener);
+            unread.setOnClickListener(mOptionsClickListener);
+            user.setOnClickListener(mOptionsClickListener);
+            overflow.setOnClickListener(mOptionsClickListener);
+            subreddit.setOnClickListener(mOptionsClickListener);
+
             mReadStatus = itemView.findViewById(R.id.read_status);
+            mSwipeView.findViewById(R.id.message_content).setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    if (!mMessage.isUnread()) {
+                        expand(mOptionsRow);
+                        if (mFocusedViewHolder != null) {
+                            collapse(mFocusedViewHolder.mOptionsRow);
+                        }
+                        mFocusedViewHolder = MessageViewHolder.this;
+                        subreddit.setVisibility(mMessage.isComment() ? View.VISIBLE : View.GONE);
+                        return true;
+                    }
+                    return false;
+                }
+            });
             mSwipeView.findViewById(R.id.message_content).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -334,79 +366,6 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
                     //     just that comment's thread. This should be done through a flag to the
                     //     activity, or maybe just simply containing the specific comment to get the
                     //     context of.
-                }
-            });
-            mSwipeView.findViewById(R.id.message_content).setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    if (!mMessage.isUnread()) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                    ArrayList<String> options = new ArrayList<>();
-                    options.add(getResources().getString(R.string.reply));
-                    options.add(getResources().getString(R.string.mark_unread));
-                    options.add(getResources().getString(R.string.view_profile));
-                    if (mMessage.isComment()) {
-                        options.add(getResources().getString(R.string.view_context));
-                        options.add(getResources().getString(R.string.report));
-                        options.add(getResources().getString(R.string.full_comments));
-                    } else {
-                        options.add(getResources().getString(R.string.block_user));
-                    }
-                    String[] array = new String[options.size()];
-                    options.toArray(array);
-                    builder.setItems(array, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int position) {
-                            switch (position) {
-                                case 0:
-                                    // Reply
-//                                        MessageDialogFragment mf = MessageDialogFragment
-//                                                .newInstance(m.getName());
-//                                        mf.show(getFragmentManager(), "reply_fragment");
-                                    break;
-                                case 1:
-                                    // Mark unread
-                                    mMessage.setUnread(true);
-                                    RedditApi.markMessageRead(getActivity(), false, mMessage.getName(), new FutureCallback<String>() {
-                                        @Override
-                                        public void onCompleted(Exception e, String result) {
-                                            if (e != null) {
-                                                // do something about the exception
-                                            }
-                                            // The result here is not needed, because as long as it doesn't contain
-                                            // an error, we're good.
-                                        }
-                                    });
-                                    break;
-                                case 2:
-                                    // View user's profile
-                                    Bundle b = new Bundle();
-                                    b.putString("username", mMessage.getAuthor());
-                                    Intent i = new Intent(mContext, UserActivity.class);
-                                    i.putExtras(b);
-                                    mContext.startActivity(i);
-                                    break;
-                                case 3:
-                                    if (mMessage.isComment()) {
-                                        // report
-//                                        new ReportCommentTask(m).execute();
-                                    } else {
-                                        // Block user
-//                                        new BlockUserTask(m).execute();
-                                    }
-                                    break;
-                                case 4:
-                                    // view context
-                                    break;
-                                case 5:
-                                    // full comments
-                                    break;
-                            }
-                        }
-                    });
-                    builder.show();
-                }
-                    return false;
                 }
             });
         }
@@ -445,5 +404,57 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
 
             mSubject.setText(mMessage.getSubject());
         }
+
+        private View.OnClickListener mOptionsClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switch (v.getId()) {
+                    case R.id.option_reply: {
+                        Fragment reply = ReplyFragment.newInstance(mMessage);
+                        getFragmentManager().beginTransaction()
+                                .replace(R.id.container, reply, "ReplyFragment")
+                                .addToBackStack("ReplyFragment")
+                                .commit();
+                        break;
+                    }
+                    case R.id.option_mark_unread: {
+                        mMessage.setUnread(true);
+                        mReadStatus.setVisibility(View.VISIBLE);
+                        RedditApi.markMessageRead(getActivity(), false, mMessage.getName(),
+                                new FutureCallback<String>() {
+                                    @Override
+                                    public void onCompleted(Exception e, String result) {
+                                        if (e != null) {
+                                            // do something about the exception
+                                        }
+                                        // The result here is not needed, because as long as it
+                                        // doesn't contain an error, we're good.
+                                    }
+                                });
+                        break;
+                    }
+                    case R.id.option_view_user: {
+                        Bundle b = new Bundle();
+                        b.putString("username", mMessage.getAuthor());
+                        Intent i = new Intent(getActivity(), UserActivity.class);
+                        i.putExtras(b);
+                        getActivity().startActivity(i);
+                        break;
+                    }
+                    case R.id.option_go_to_subreddit: {
+                        Intent i = new Intent(getActivity(), MainActivity.class);
+                        i.setAction(Intent.ACTION_VIEW);
+                        Bundle args = new Bundle();
+                        args.putString(MainActivity.SUBREDDIT, mMessage.getSubreddit());
+                        i.putExtras(args);
+                        startActivity(i);
+                        break;
+                    }
+                    case R.id.option_overflow: {
+                        break;
+                    }
+                }
+            }
+        };
     }
 }

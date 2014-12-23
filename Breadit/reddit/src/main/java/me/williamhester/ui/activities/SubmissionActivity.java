@@ -31,17 +31,12 @@ public class SubmissionActivity extends ActionBarActivity implements ImageFragme
 
     private Submission mSubmission;
     private String mPermalink;
-    private Toolbar mToolbar;
     private Url mParser;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_content);
-
-        mToolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
-        mToolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
-        setSupportActionBar(mToolbar);
 
         if (savedInstanceState != null) {
             mParser = savedInstanceState.getParcelable("urlParser");
@@ -52,9 +47,6 @@ public class SubmissionActivity extends ActionBarActivity implements ImageFragme
                 mPermalink = extras.getString(PERMALINK);
             } else {
                 mSubmission = extras.getParcelable(SUBMISSION);
-                if (mSubmission != null) {
-                    mToolbar.setTitle("/r/" + mSubmission.getSubredditName());
-                }
             }
         }
 
@@ -90,7 +82,6 @@ public class SubmissionActivity extends ActionBarActivity implements ImageFragme
                     @Override
                     public void onSubmissionLoaded(Submission submission) {
                         mSubmission = submission;
-                        mToolbar.setTitle("/r/" + mSubmission.getSubredditName());
                         mParser = new Url(mSubmission.getUrl());
                         invalidateOptionsMenu();
                     }
@@ -100,7 +91,7 @@ public class SubmissionActivity extends ActionBarActivity implements ImageFragme
                 mParser = new Url(mSubmission.getUrl());
             }
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.container, comments, "comments")
+                    .replace(R.id.main_container, comments, "comments")
                     .commit();
         }
     }
@@ -151,7 +142,7 @@ public class SubmissionActivity extends ActionBarActivity implements ImageFragme
         // Hide the keyboard
         InputMethodManager imm =  (InputMethodManager) getSystemService(
                 Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(mToolbar.getWindowToken(), 0);
+        imm.hideSoftInputFromWindow(findViewById(R.id.main_container).getWindowToken(), 0);
 
         // If the content fragment is a WebViewFragment, try to go back.
         Fragment f = getSupportFragmentManager().findFragmentByTag("content");

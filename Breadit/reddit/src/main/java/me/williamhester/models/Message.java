@@ -148,7 +148,7 @@ public class Message implements Votable, Parcelable {
         return mSubject;
     }
 
-    public String getmSubreddit() {
+    public String getSubreddit() {
         return mSubreddit;
     }
 

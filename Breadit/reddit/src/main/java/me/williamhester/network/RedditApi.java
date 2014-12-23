@@ -234,7 +234,7 @@ public class RedditApi {
                                          final FutureCallback<Submission> submissionCallback,
                                          final FutureCallback<List<AbsComment>> commentCallback) {
         Ion.with(context)
-                .load(REDDIT_URL + permalink + ".json")
+                .load(REDDIT_URL + permalink)
                 .addQuery("sort", sortType)
                 .addHeaders(getStandardHeaders())
                 .asString()

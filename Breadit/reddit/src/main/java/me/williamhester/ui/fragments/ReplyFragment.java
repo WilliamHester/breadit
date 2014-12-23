@@ -6,7 +6,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -75,7 +77,18 @@ public class ReplyFragment extends AsyncSendFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_reply, container, false);
+        View v = inflater.inflate(R.layout.fragment_reply, container, false);
+        Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar_actionbar);
+        toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getFragmentManager().popBackStack();
+            }
+        });
+        toolbar.setTitle(R.string.reply);
+        onCreateOptionsMenu(toolbar.getMenu(), new MenuInflater(getActivity()));
+        return v;
     }
 
     @Override

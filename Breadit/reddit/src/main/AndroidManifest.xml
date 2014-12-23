@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     package="me.williamhester.reddit" >
-
-    <!--<uses-sdk android:minSdkVersion="17" />-->
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -74,8 +71,7 @@
             android:windowSoftInputMode="adjustPan">
         </activity>
         <activity android:name="me.williamhester.ui.activities.MessageActivity"
-            android:label="@string/submit"
-            android:windowSoftInputMode="adjustPan">
+            android:label="@string/submit">
         </activity>
     </application>
 
