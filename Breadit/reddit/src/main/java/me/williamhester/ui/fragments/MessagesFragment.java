@@ -66,6 +66,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
         if (savedInstanceState != null) {
             mFilterType = savedInstanceState.getString("filter_by");
             mRefreshing = savedInstanceState.getBoolean("refreshing");
+            mMessages = savedInstanceState.getParcelableArrayList("messages");
         } else if (getArguments() != null) {
             mFilterType = getArguments().getString("filter_by", Message.ALL);
         } else {
@@ -159,7 +160,11 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
             }
         });
 
-        RedditApi.getMessages(getActivity(), mFilterType, null, mMessageCallback);
+        if (mMessages.size() == 0) {
+            RedditApi.getMessages(getActivity(), mFilterType, null, mMessageCallback);
+        } else {
+            mProgressBar.setVisibility(View.GONE);
+        }
 
         return v;
     }
@@ -170,6 +175,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
 
         outState.putString("filter_by", mFilterType);
         outState.putBoolean("refreshing", mRefreshing);
+        outState.putParcelableArrayList("messages", mMessages);
     }
 
     private FutureCallback<JsonObject> mMessageCallback = new FutureCallback<JsonObject>() {

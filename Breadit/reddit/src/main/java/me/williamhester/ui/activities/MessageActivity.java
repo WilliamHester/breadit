@@ -17,8 +17,10 @@ public class MessageActivity extends ActionBarActivity {
 
         setContentView(R.layout.activity_message);
 
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.container, new MessagesFragment())
-                .commit();
+        if (getSupportFragmentManager().findFragmentById(R.id.container) == null) {
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.container, new MessagesFragment())
+                    .commit();
+        }
     }
 }
