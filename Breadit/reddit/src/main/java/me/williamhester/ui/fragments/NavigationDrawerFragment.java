@@ -22,6 +22,9 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import com.koushikdutta.async.future.FutureCallback;
 
 import java.util.ArrayList;
@@ -32,6 +35,9 @@ import java.util.List;
 import me.williamhester.databases.AccountDataSource;
 import me.williamhester.models.Account;
 import me.williamhester.models.AccountManager;
+import me.williamhester.models.GenericListing;
+import me.williamhester.models.GenericResponseRedditWrapper;
+import me.williamhester.models.Message;
 import me.williamhester.models.Subreddit;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
@@ -52,6 +58,7 @@ public class NavigationDrawerFragment extends AccountFragment {
     private Context mContext;
     private CheckBox mCheckbox;
     private Subreddit mSubreddit;
+    private TextView mUnreadMessages;
 
     public static NavigationDrawerFragment newInstance() {
         return newInstance(null);
@@ -179,19 +186,15 @@ public class NavigationDrawerFragment extends AccountFragment {
         View unread = v.findViewById(R.id.messages);
         unread.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                // Do nothing for now
-            }
-        });
-        TextView unreadMessages = (TextView) v.findViewById(R.id.unread_count);
-        unreadMessages.setText("0 Unread Messages");
-        unreadMessages.setOnClickListener(new View.OnClickListener() {
-            @Override
             public void onClick(View v) {
                 Intent i = new Intent(getActivity(), MessageActivity.class);
                 startActivity(i);
             }
         });
+        mUnreadMessages = (TextView) v.findViewById(R.id.unread_count);
+        mUnreadMessages.setText("0 " + getResources().getQuantityString(R.plurals.new_messages, 0));
+
+        RedditApi.getMessages(getActivity(), Message.UNREAD, null, mUnreadCallback);
 
         View submit = v.findViewById(R.id.submit);
         submit.setOnClickListener(new View.OnClickListener() {
@@ -376,6 +379,34 @@ public class NavigationDrawerFragment extends AccountFragment {
         super.onDetach();
         mCallbacks = null;
     }
+
+    private FutureCallback<JsonObject> mUnreadCallback = new FutureCallback<JsonObject>() {
+        @Override
+        public void onCompleted(Exception e, JsonObject result) {
+            if (e != null) {
+                // do something?
+                return;
+            }
+            Gson gson = new Gson();
+
+            // Generics are just beautiful.
+            TypeToken<GenericResponseRedditWrapper<GenericListing<Message>>> token =
+                    new TypeToken<GenericResponseRedditWrapper<GenericListing<Message>>>() {
+                    };
+
+            GenericResponseRedditWrapper<GenericListing<Message>> wrapper =
+                    gson.fromJson(result, token.getType());
+            GenericListing<Message> listing = wrapper.getData();
+            ArrayList<Message> messages = new ArrayList<>();
+
+            for (GenericResponseRedditWrapper<Message> message : listing.getChildren()) {
+                messages.add(message.getData());
+            }
+
+            mUnreadMessages.setText(messages.size() + " "
+                    + getResources().getQuantityString(R.plurals.new_messages, messages.size()));
+        }
+    };
 
     public static interface NavigationDrawerCallbacks {
         public void onSubredditSelected(String subreddit);

@@ -18,6 +18,7 @@ public class SettingsManager {
 
     private static String mCommentSort;
     private static SharedPreferences mPrefs;
+    private static int mNotificationInterval;
 
     private SettingsManager() { }
 
@@ -26,6 +27,7 @@ public class SettingsManager {
         mCommentSort = mPrefs.getString("pref_default_comment_sort", RedditApi.COMMENT_SORT_BEST);
         mShowThumbnails = mPrefs.getBoolean("pref_show_thumbnails", true);
         mLowBandwidthMode = mPrefs.getBoolean("pref_low_bandwidth", false);
+        mNotificationInterval = Integer.parseInt(mPrefs.getString("pref_notification_interval", "60"));
     }
 
     public static void setDefaultCommentSort(String string) {
@@ -42,6 +44,10 @@ public class SettingsManager {
 
     public static boolean isLowBandwidth() {
         return mLowBandwidthMode;
+    }
+
+    public static int getNotificationInterval() {
+        return mNotificationInterval;
     }
 
 }

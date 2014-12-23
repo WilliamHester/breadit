@@ -71,8 +71,16 @@
             android:windowSoftInputMode="adjustPan">
         </activity>
         <activity android:name="me.williamhester.ui.activities.MessageActivity"
+            android:parentActivityName="me.williamhester.ui.activities.MainActivity"
             android:label="@string/submit">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="me.williamhester.ui.activities.MainActivity" />
         </activity>
+        <receiver
+            android:name="me.williamhester.notifications.MessageNotificationBroadcastReceiver"
+            android:exported="false">
+        </receiver>
     </application>
 
 </manifest>

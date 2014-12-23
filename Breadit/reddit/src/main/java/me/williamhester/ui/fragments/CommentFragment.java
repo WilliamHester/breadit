@@ -127,7 +127,7 @@ public class CommentFragment extends AccountFragment implements Toolbar.OnMenuIt
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getFragmentManager().popBackStack();
+                getActivity().onBackPressed();
             }
         });
         toolbar.setTitle(R.string.comments);

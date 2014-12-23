@@ -94,11 +94,11 @@
     <string name="remove_viewed_sub_title">Hide from Subreddit</string>
     <string name="remove_viewed_sub">Remove viewed submissions from Subreddit view</string>
     <string name="hide_nsfw">Hide NSFW submissions</string>
-    <string name="history_settings">History Settings</string>
-    <string name="nsfw_settings">NSFW Settings</string>
+    <string name="history">History</string>
+    <string name="nsfw_settings">NSFW</string>
     <string name="warn_nsfw_title">NSFW Safeguard</string>
     <string name="warn_nsfw">Warn before entering NSFW Subreddit</string>
-    <string name="user_options">User Options</string>
+    <string name="users">Users</string>
     <string name="login">Log In</string>
     <string name="log_out">Log Out</string>
     <string name="switch_users">Switch users or log out</string>
@@ -112,6 +112,8 @@
     <string name="sorting_settings">Sorting</string>
     <string name="default_comment_sort_title">Default comment sort</string>
     <string name="default_comment_sort">Default sort type when viewing comments</string>
+    <string name="notifications">Notifications</string>
+    <string name="notification_interval">Notification interval</string>
 
     <!-- Drawer -->
     <string name="search_sub_hint">Go to a Subreddit</string>
@@ -247,4 +249,10 @@
 
     <!-- ComposeMessageFragment -->
     <string name="compose_to">Compose to</string>
+
+    <!-- Message Notification -->
+    <plurals name="new_messages">
+        <item quantity="one">New Message</item>
+        <item quantity="other">New Messages</item>
+    </plurals>
 </resources>

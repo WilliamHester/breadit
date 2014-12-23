@@ -1,8 +1,10 @@
 package me.williamhester.ui.activities;
 
+import android.app.NotificationManager;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 
+import me.williamhester.notifications.MessageNotificationBroadcastReceiver;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.fragments.MessagesFragment;
 
@@ -22,5 +24,9 @@ public class MessageActivity extends ActionBarActivity {
                     .add(R.id.container, new MessagesFragment())
                     .commit();
         }
+
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.cancel(MessageNotificationBroadcastReceiver.ID);
     }
 }

@@ -46,8 +46,6 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
 
     private boolean mRefreshing = false;
 
-    private Context mContext;
-
     private ArrayList<Message> mMessages;
     private InfiniteLoadingScrollListener mScrollListener;
     private MessageArrayAdapter mMessageAdapter;
@@ -62,7 +60,6 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mMessages = new ArrayList<>();
-        mContext = getActivity();
         if (savedInstanceState != null) {
             mFilterType = savedInstanceState.getString("filter_by");
             mRefreshing = savedInstanceState.getBoolean("refreshing");
@@ -84,7 +81,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getActivity().finish();
+                getActivity().onBackPressed();
             }
         });
         toolbar.setOnMenuItemClickListener(this);
@@ -115,7 +112,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
                 .getDrawable(R.drawable.card_divider)));
 
         Spinner messagesType = (Spinner) v.findViewById(R.id.messages_type);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(mContext,
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(),
                 R.layout.spinner_item, R.id.spinner_text,
                 getResources().getStringArray(R.array.filter_types));
         messagesType.setAdapter(adapter);
@@ -331,7 +328,11 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
                         if (mFocusedViewHolder != null) {
                             collapse(mFocusedViewHolder.mOptionsRow);
                         }
-                        mFocusedViewHolder = MessageViewHolder.this;
+                        if (mFocusedViewHolder == MessageViewHolder.this) {
+                            mFocusedViewHolder = null;
+                        } else {
+                            mFocusedViewHolder = MessageViewHolder.this;
+                        }
                         subreddit.setVisibility(mMessage.isComment() ? View.VISIBLE : View.GONE);
                         return true;
                     }

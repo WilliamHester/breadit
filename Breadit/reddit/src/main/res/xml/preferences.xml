@@ -16,7 +16,7 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="@string/history_settings"
+        android:title="@string/history"
         android:key="pref_submission_settings">
 
         <CheckBoxPreference
@@ -54,7 +54,7 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="@string/user_options"
+        android:title="@string/users"
         android:key="pref_user_options" >
 
         <Preference
@@ -64,6 +64,19 @@
         <Preference
             android:title="@string/switch_users"
             android:key="pref_switch_users" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/notifications"
+        android:key="pref_user_options" >
+
+        <ListPreference
+            android:title="@string/notification_interval"
+            android:key="pref_notification_interval"
+            android:entries="@array/notification_intervals"
+            android:entryValues="@array/notification_interval_values"
+            android:defaultValue="60"/>
 
     </PreferenceCategory>
 </PreferenceScreen>

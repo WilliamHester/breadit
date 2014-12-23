@@ -608,7 +608,7 @@ public class RedditApi {
     public static void markMessageRead(Context context, boolean read, String messageFullname,
                                        FutureCallback<String> callback) {
         Ion.with(context)
-                .load(REDDIT_URL + "/api/read_message")
+                .load(REDDIT_URL + "/api/" + (read ? "read_message" : "unread_message"))
                 .addHeaders(getStandardHeaders())
                 .setBodyParameter("id", messageFullname)
                 .asString()
@@ -628,6 +628,27 @@ public class RedditApi {
                 .addQueries(queries)
                 .asJsonObject()
                 .setCallback(callback);
+    }
+
+    public static void getMe(Context context, final FutureCallback<JsonObject> callback) {
+        AsyncHttpRequest request = new AsyncHttpGet(REDDIT_URL + "/api/me.json");
+        Account account = AccountManager.getAccount();
+        request.addHeader("Cookie", "reddit_session=\"" + account.getCookie() + "\"");
+        request.addHeader("X-Modhash", account.getModhash());
+        request.addHeader("User-Agent", USER_AGENT);
+        request.addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+
+        AsyncHttpClient.getDefaultInstance().executeString(request, new AsyncHttpClient.StringCallback() {
+            @Override
+            public void onCompleted(final Exception e, AsyncHttpResponse source, final String result) {
+                AsyncHttpClient.getDefaultInstance().getServer().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        callback.onCompleted(e, new JsonParser().parse(result).getAsJsonObject());
+                    }
+                });
+            }
+        });
     }
 
     public static void printOutLongString(String string) {
