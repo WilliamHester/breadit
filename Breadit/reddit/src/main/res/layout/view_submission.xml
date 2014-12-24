@@ -16,6 +16,8 @@
 
         <include layout="@layout/view_submission_content_preview" />
 
+        <include layout="@layout/view_submission_link" />
+
         <include layout="@layout/view_submission_options" />
 
     </me.williamhester.ui.views.SwipeView>

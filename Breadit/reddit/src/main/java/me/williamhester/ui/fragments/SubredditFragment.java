@@ -372,8 +372,13 @@ public class SubredditFragment extends AccountFragment implements
 
     @Override
     public void onCardLongPressed(SubmissionViewHolder holder) {
+        holder.expandOptions();
         if (mFocusedSubmission != null) {
             mFocusedSubmission.collapseOptions();
+            if (mFocusedSubmission == holder) {
+                mFocusedSubmission = null;
+                return;
+            }
         }
         mFocusedSubmission = holder;
     }

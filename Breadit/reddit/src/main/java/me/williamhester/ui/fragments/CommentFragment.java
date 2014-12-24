@@ -446,7 +446,7 @@ public class CommentFragment extends AccountFragment implements Toolbar.OnMenuIt
             switch (getItemViewType(position)) {
                 case SUBMISSION:
                     ((SubmissionViewHolder) vh).setContent(mSubmission);
-                    ((SubmissionViewHolder) vh).expandOptions();
+                    ((SubmissionViewHolder) vh).expandOptionsForComments();
                     ((SubmissionViewHolder) vh).disableClicks();
                     break;
                 case COMMENT:

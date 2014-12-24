@@ -1,13 +1,29 @@
 package me.williamhester.ui.views;
 
 import android.text.Html;
+import android.text.TextUtils;
+import android.text.method.LinkMovementMethod;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.koushikdutta.async.future.FutureCallback;
+
+import java.util.List;
+
+import me.williamhester.SettingsManager;
 import me.williamhester.models.AccountManager;
+import me.williamhester.models.ImgurAlbum;
+import me.williamhester.models.ImgurImage;
 import me.williamhester.models.Submission;
+import me.williamhester.network.ImgurApi;
 import me.williamhester.reddit.R;
+import me.williamhester.tools.HtmlParser;
+import me.williamhester.tools.Url;
 
 /**
  * This class is intended to be used with the RecyclerView class; however, it can be used nearly
@@ -17,11 +33,22 @@ import me.williamhester.reddit.R;
  */
 public class SubmissionViewHolder extends VotableViewHolder {
 
-    private TextView mDomain;
+    private ImageButton mImageButton;
+    private ImageView mImageView;
+    private ImageView mThumbnail;
     private TextView mCommentData;
+    private TextView mDomain;
+    private TextView mSelfText;
     private TextView mSubreddit;
+    private TextView mUrl;
+    private View mBasicLinkView;
+    private View mExpandButton;
     private View mNsfwWarning;
     private View mOptionsRow;
+    private View mImagePreviewView;
+    private View mNsfwBlocker;
+    private View mSelfTextView;
+    private View mShowSelfText;
 
     protected Submission mSubmission;
     protected SubmissionCallbacks mCallback;
@@ -71,18 +98,56 @@ public class SubmissionViewHolder extends VotableViewHolder {
             }
         });
         submissionData.setOnLongClickListener(new View.OnLongClickListener() {
+            long time = -1L;
             @Override
             public boolean onLongClick(View v) {
-                if (mOptionsRow.getVisibility() == View.VISIBLE) {
-                    mCallback.onCardLongPressed(null);
-                } else {
-                    expandOptions(optionSubreddit, optionSave, optionOverflow);
+                if (System.currentTimeMillis() - time > 50) { // Terrible hack to prevent this
+                                                              // from being called twice
                     mCallback.onCardLongPressed(SubmissionViewHolder.this);
-                    expand(mOptionsRow);
                 }
+                time = System.currentTimeMillis();
                 return true;
             }
         });
+
+        mBasicLinkView = itemView.findViewById(R.id.submission_link);
+        mThumbnail = (ImageView) itemView.findViewById(R.id.thumbnail);
+        mUrl = (TextView) itemView.findViewById(R.id.url);
+        mBasicLinkView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCallback.onLinkClicked(mSubmission);
+            }
+        });
+
+        mImagePreviewView = itemView.findViewById(R.id.submission_image_preview);
+        mImageView = (ImageView) itemView.findViewById(R.id.image);
+        mImageButton = (ImageButton) itemView.findViewById(R.id.preview_button);
+        mNsfwBlocker = itemView.findViewById(R.id.nsfw_blocker);
+
+        mSelfTextView = itemView.findViewById(R.id.submission_self_text);
+        mSelfText = (TextView) itemView.findViewById(R.id.self_text);
+        mShowSelfText = itemView.findViewById(R.id.show_self_text);
+        mExpandButton = itemView.findViewById(R.id.expand_self_text);
+
+        View.OnClickListener expandListener = new View.OnClickListener() {
+            @Override
+            public void onClick(final View view) {
+                Animation anim;
+                if (mSubmission.isSelftextOpen()) {
+                    anim = AnimationUtils.loadAnimation(view.getContext(), R.anim.rotate_left);
+                    collapse(mSelfText);
+                } else {
+                    anim = AnimationUtils.loadAnimation(view.getContext(), R.anim.rotate_right);
+                    expand(mSelfText);
+                }
+                mSubmission.setSelftextOpen(!mSubmission.isSelftextOpen());
+                anim.setFillBefore(true);
+                anim.setFillAfter(true);
+                view.startAnimation(anim);
+            }
+        };
+        mExpandButton.setOnClickListener(expandListener);
     }
 
     @Override
@@ -107,6 +172,190 @@ public class SubmissionViewHolder extends VotableViewHolder {
                 mSubmission.getScore()));
 
         mNsfwWarning.setVisibility(mSubmission.isNsfw() ? View.VISIBLE : View.GONE);
+
+        if (mSubmission.isSelf()) {
+            if (TextUtils.isEmpty(mSubmission.getRawMarkdown())) {
+                setUpBasic();
+            } else {
+                setUpSelfText();
+            }
+        } else if (SettingsManager.isLowBandwidth()) {
+            setUpLink();
+        } else {
+            switch (mSubmission.getLinkDetails().getType()) {
+                case Url.IMGUR_IMAGE:
+                case Url.IMGUR_ALBUM:
+                case Url.NORMAL_IMAGE:
+                case Url.YOUTUBE:
+                    setUpImage();
+                    break;
+                case Url.GFYCAT_LINK:
+                case Url.GIF:
+                case Url.DIRECT_GFY:
+                case Url.IMGUR_GALLERY:
+                case Url.SUBMISSION:
+                case Url.SUBREDDIT:
+                case Url.USER:
+                case Url.REDDIT_LIVE:
+                    setUpLink();
+                    break;
+                default:
+                    setUpLink();
+                    break;
+            }
+        }
+    }
+
+    private void setUpBasic() {
+        mBasicLinkView.setVisibility(View.GONE);
+        mImagePreviewView.setVisibility(View.GONE);
+        mSelfTextView.setVisibility(View.GONE);
+    }
+
+    private void setUpLink() {
+        mBasicLinkView.setVisibility(View.VISIBLE);
+        mImagePreviewView.setVisibility(View.GONE);
+        mSelfTextView.setVisibility(View.GONE);
+
+        if (SettingsManager.isShowingThumbnails()
+                && !TextUtils.isEmpty(mSubmission.getThumbnailUrl())) {
+            ImgurApi.loadImage(mSubmission.getThumbnailUrl(), mThumbnail, null);
+        } else {
+            mThumbnail.setImageDrawable(mThumbnail.getResources().getDrawable(
+                    R.drawable.ic_action_web_site));
+        }
+
+        mUrl.setText(mSubmission.getUrl());
+    }
+
+    private void setUpSelfText() {
+        mBasicLinkView.setVisibility(View.GONE);
+        mImagePreviewView.setVisibility(View.GONE);
+        mSelfTextView.setVisibility(View.VISIBLE);
+
+        if (mSubmission.getBodyHtml() != null) {
+            mShowSelfText.setVisibility(View.VISIBLE);
+//            mContentPreview.setVisibility(View.VISIBLE);
+            if (mSubmission.isSelftextOpen()) {
+                mExpandButton.setRotation(-180f);
+                mSelfText.setVisibility(View.VISIBLE);
+            } else {
+                mExpandButton.setRotation(0f);
+                mSelfText.setVisibility(View.GONE);
+            }
+            HtmlParser parser = new HtmlParser(Html.fromHtml(mSubmission.getBodyHtml()).toString());
+            mSelfText.setText(parser.getSpannableString());
+            mSelfText.setMovementMethod(new LinkMovementMethod());
+        } else {
+//            mContentPreview.setVisibility(View.GONE);
+        }
+    }
+
+    private void setUpImage() {
+        mBasicLinkView.setVisibility(View.GONE);
+        mImagePreviewView.setVisibility(View.VISIBLE);
+        mSelfTextView.setVisibility(View.GONE);
+
+        final Url linkDetails = mSubmission.getLinkDetails();
+        String id = linkDetails.getLinkId();
+//        if (mSubmission.isNsfw()) {
+//            mNsfwBlocker.setVisibility(View.VISIBLE);
+//            return;
+//        }
+//        mNsfwBlocker.setVisibility(View.GONE);
+        switch (linkDetails.getType()) {
+            case Url.IMGUR_IMAGE: {
+                mImageView.setVisibility(View.VISIBLE);
+                mImageButton.setVisibility(View.GONE);
+                if (mSubmission.getImgurData() == null) {
+                    mImageView.setImageDrawable(null);
+                    ImgurApi.getImageDetails(id, itemView.getContext(), mSubmission, mImgurCallback);
+                } else {
+                    setImagePreview();
+                }
+                break;
+            }
+            case Url.IMGUR_ALBUM: {
+                mImageView.setVisibility(View.VISIBLE);
+                mImageButton.setVisibility(View.GONE);
+                if (mSubmission.getImgurData() == null) {
+                    mImageView.setImageDrawable(null);
+                    ImgurApi.getAlbumDetails(id, itemView.getContext(), mSubmission, mImgurCallback);
+                } else {
+                    setImagePreview();
+                }
+                break;
+            }
+            case Url.YOUTUBE: {
+                mImageView.setVisibility(View.VISIBLE);
+                ImgurApi.loadImage(linkDetails.getUrl(), mImageView, null);
+                mImageButton.setImageResource(R.drawable.ic_youtube);
+                mImageButton.setVisibility(View.VISIBLE);
+                mImageButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        mCallback.onYouTubeVideoClicked(linkDetails.getLinkId());
+                    }
+                });
+                break;
+            }
+            case Url.NORMAL_IMAGE: {
+                mImageView.setVisibility(View.VISIBLE);
+                mImageButton.setVisibility(View.GONE);
+                ImgurApi.loadImage(linkDetails.getUrl(), mImageView, null);
+                mImageView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        mCallback.onImageViewClicked(mSubmission.getUrl());
+                    }
+                });
+                break;
+            }
+            default: { // It's special, but not special enough
+//                mContainer.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    private FutureCallback<Submission> mImgurCallback = new FutureCallback<Submission>() {
+        @Override
+        public void onCompleted(Exception e, Submission result) {
+            if (e != null) {
+                e.printStackTrace();
+            } else if (mSubmission == result) {
+                setImagePreview();
+            }
+        }
+    };
+
+    /**
+     * Attempts to set the image preview
+     */
+    private void setImagePreview() {
+        final ImgurImage image;
+        if (mSubmission.getImgurData() instanceof ImgurAlbum) {
+            List<ImgurImage> images = ((ImgurAlbum) mSubmission.getImgurData()).getImages();
+            if (images != null) {
+                image = images.get(0);
+            } else {
+                image = null;
+            }
+        } else if (mSubmission.getImgurData() instanceof ImgurImage) {
+            image = (ImgurImage) mSubmission.getImgurData();
+        } else {
+            image = null;
+        }
+        if (image != null) {
+            ImgurApi.loadImage(image.getHugeThumbnail(), mImageView, null);
+            mImageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    mCallback.onImageViewClicked(mSubmission.getImgurData());
+                }
+            });
+        } else {
+//            mContainer.setVisibility(View.GONE);
+        }
     }
 
     public void disableClicks() {
@@ -114,6 +363,7 @@ public class SubmissionViewHolder extends VotableViewHolder {
         subData.setOnClickListener(null);
         subData.setOnLongClickListener(null);
         subData.setClickable(false);
+        subData.setBackground(null);
     }
 
     public void collapseOptions() {
@@ -121,6 +371,16 @@ public class SubmissionViewHolder extends VotableViewHolder {
     }
 
     public void expandOptions() {
+        expand(mOptionsRow);
+        expandOptions(itemView.findViewById(R.id.option_go_to_subreddit),
+                itemView.findViewById(R.id.option_save),
+                itemView.findViewById(R.id.option_overflow));
+        itemView.findViewById(R.id.option_edit).setVisibility(AccountManager.isLoggedIn()
+                && AccountManager.getAccount().getUsername()
+                .equalsIgnoreCase(mSubmission.getAuthor()) ? View.VISIBLE : View.GONE);
+    }
+
+    public void expandOptionsForComments() {
         mOptionsRow.setVisibility(View.VISIBLE);
         expandOptions(itemView.findViewById(R.id.option_go_to_subreddit),
                 itemView.findViewById(R.id.option_save),
