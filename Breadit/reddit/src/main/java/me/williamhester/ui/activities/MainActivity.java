@@ -34,10 +34,11 @@ import me.williamhester.ui.fragments.SidebarFragment;
 import me.williamhester.ui.fragments.SubredditFragment;
 import me.williamhester.ui.fragments.YouTubeFragment;
 
-public class MainActivity extends ActionBarActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks,
-        ImagePagerFragment.ImagePagerCallbacks, ImageFragment.ImageTapCallbacks,
-        SubredditFragment.SubredditFragmentCallbacks {
+public class MainActivity extends ActionBarActivity implements ImageFragment.ImageTapCallbacks,
+        NavigationDrawerFragment.NavigationDrawerCallbacks,
+        ImagePagerFragment.ImagePagerCallbacks,
+        SubredditFragment.SubredditFragmentCallbacks,
+        MessagesFragment.MessageFragmentCallbacks {
 
     public static final String SUBREDDIT = "subreddit";
 

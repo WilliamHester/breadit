@@ -1,6 +1,8 @@
 package me.williamhester.ui.fragments;
 
+import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -17,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -49,15 +52,28 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
     private ArrayList<Message> mMessages;
     private InfiniteLoadingScrollListener mScrollListener;
     private MessageArrayAdapter mMessageAdapter;
+    private MessageFragmentCallbacks mCallback;
     private MessageViewHolder mFocusedViewHolder;
     private LinearLayoutManager mLayoutManager;
     private ProgressBar mProgressBar;
     private RecyclerView mMessagesRecyclerView;
     private String mFilterType;
     private SwipeRefreshLayout mRefreshLayout;
+    private Toolbar mToolbar;
 
     public static MessagesFragment newInstance() {
         return new MessagesFragment();
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        try {
+            mCallback = (MessageFragmentCallbacks) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException("Parent activity must implement MessageFragmentCallbacks.");
+        }
     }
 
     @Override
@@ -80,16 +96,16 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_messages, root, false);
 
-        Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar_actionbar);
-        toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+        mToolbar = (Toolbar) v.findViewById(R.id.toolbar_actionbar);
+        mToolbar.setNavigationIcon(R.drawable.ic_drawer);
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getActivity().onBackPressed();
+                mCallback.onHomeClicked();
             }
         });
-        toolbar.setOnMenuItemClickListener(this);
-        onCreateOptionsMenu(toolbar.getMenu(), getActivity().getMenuInflater());
+        mToolbar.setOnMenuItemClickListener(this);
+        onCreateOptionsMenu(mToolbar.getMenu(), getActivity().getMenuInflater());
 
         mProgressBar = (ProgressBar) v.findViewById(R.id.progress_bar);
         mRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.swipe_refresh);
@@ -250,11 +266,36 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
                     mProgressBar.setVisibility(View.GONE);
                 }
             } else if (mMessages.size() > 0
-                    && (mMessageAdapter.getItemCount() - mMessagesRecyclerView.getChildCount()) // 25 - 4 = 21
-                    <= (mLayoutManager.findFirstVisibleItemPosition() + VISIBLE_THRESHOLD)) { // 20 + 5 = 25
+                    && (mMessageAdapter.getItemCount() - mMessagesRecyclerView.getChildCount())
+                    <= (mLayoutManager.findFirstVisibleItemPosition() + VISIBLE_THRESHOLD)) {
                 loadMoreMessages();
                 mLoading = true;
                 mProgressBar.setVisibility(View.VISIBLE);
+            }
+
+            float prevY = mToolbar.getTranslationY();
+            mToolbar.setTranslationY(Math.min(Math.max(-mToolbar.getHeight(), prevY - dy), 0));
+        }
+
+        @Override
+        public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            switch (newState) {
+                case RecyclerView.SCROLL_STATE_IDLE:
+                    if (Math.abs(mToolbar.getTranslationY()) < mToolbar.getHeight() / 2
+                            || mLayoutManager.findFirstVisibleItemPosition() == 0) {
+                        // Need to move it back to completely visible.
+                        ObjectAnimator objectAnimator =
+                                ObjectAnimator.ofFloat(mToolbar, "translationY", mToolbar.getTranslationY(), 0.0F);
+                        objectAnimator.setDuration((int) -mToolbar.getTranslationY());
+                        objectAnimator.start();
+                    } else {
+                        // Hide the header bar.
+                        ObjectAnimator objectAnimator =
+                                ObjectAnimator.ofFloat(mToolbar, "translationY", mToolbar.getTranslationY(), -mToolbar.getHeight());
+                        objectAnimator.setDuration(mToolbar.getHeight() - (long) mToolbar.getTranslationY());
+                        objectAnimator.start();
+                    }
+                    break;
             }
         }
 
@@ -275,22 +316,42 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
         }
     }
 
-    private class MessageArrayAdapter extends RecyclerView.Adapter<MessageViewHolder> {
+    private class MessageArrayAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+        
+        private static final int MESSAGE = 1;
+        private static final int HEADER = 2;
+        
         @Override
-        public MessageViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
+            if (viewType == HEADER) {
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT, mToolbar.getHeight());
+                View header = new View(getActivity());
+                header.setLayoutParams(params);
+                return new RecyclerView.ViewHolder(header) { };
+            }
             return new MessageViewHolder(LayoutInflater.from(getActivity())
                     .inflate(R.layout.list_item_message, mMessagesRecyclerView, false));
         }
 
         @Override
-        public void onBindViewHolder(MessageViewHolder votableViewHolder, int i) {
-            votableViewHolder.setContent(mMessages.get(i));
-            MessageViewHolder.collapse(votableViewHolder.mOptionsRow);
+        public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int position) {
+            if (position > 0) {
+                ((MessageViewHolder) viewHolder).setContent(mMessages.get(position));
+            }
         }
 
         @Override
         public int getItemCount() {
-            return mMessages.size();
+            return mMessages.size() + 1;
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            if (position == 0) {
+                return HEADER;
+            }
+            return MESSAGE;
         }
     }
 
@@ -394,6 +455,8 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
         public void setContent(Object object) {
             super.setContent(object);
             mMessage = (Message) object;
+            
+            collapse(mOptionsRow);
             if (mMessage.getAuthor().equalsIgnoreCase(mAccount.getUsername())) {
                 mToFrom.setText(getResources().getString(R.string.to) + " ");
             } else {
@@ -472,5 +535,9 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
                 }
             }
         };
+    }
+
+    public interface MessageFragmentCallbacks {
+        public void onHomeClicked();
     }
 }
