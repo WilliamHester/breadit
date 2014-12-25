@@ -3,6 +3,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:focusable="false"
     android:clickable="true">
 
     <include layout="@layout/navigation_spacer"/>
@@ -53,91 +54,21 @@
         android:layout_height="wrap_content"
         android:layout_margin="8dp"/>
 
-    <LinearLayout android:id="@+id/submit"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:background="?android:attr/selectableItemBackground">
+    <TextView android:id="@+id/home"
+        style="@style/NavigationItemText"
+        android:textStyle="bold"
+        android:text="@string/home"/>
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-light"
-            android:textSize="16sp"
-            android:text="@string/submit"
-            android:padding="12dp"/>
+    <TextView android:id="@+id/inbox"
+        style="@style/NavigationItemText"
+        android:text="@string/inbox"/>
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_action_share"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            android:paddingTop="4dp"
-            android:paddingBottom="4dp"/>
+    <TextView android:id="@+id/submit"
+        style="@style/NavigationItemText"
+        android:text="@string/submit"/>
 
-    </LinearLayout>
-
-    <LinearLayout android:id="@+id/messages"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:background="?android:attr/selectableItemBackground">
-
-        <TextView android:id="@+id/unread_count"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-light"
-            android:textSize="16sp"
-            android:padding="12dp"/>
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_action_unread"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            android:paddingTop="4dp"
-            android:paddingBottom="4dp"/>
-
-    </LinearLayout>
-
-    <LinearLayout android:id="@+id/preferences"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:background="?android:attr/selectableItemBackground">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-light"
-            android:textSize="16sp"
-            android:text="@string/preferences"
-            android:padding="12dp"/>
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_action_settings"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            android:paddingTop="4dp"
-            android:paddingBottom="4dp"/>
-
-    </LinearLayout>
-
-    <CheckBox android:id="@+id/subscribed_checkbox"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/subscribe"
-        android:textSize="16sp"
-        android:fontFamily="sans-serif-light"
-        android:textColor="@color/gainsboro"
-        android:checked="true"
-        android:padding="8dp"/>
+    <TextView android:id="@+id/preferences"
+        style="@style/NavigationItemText"
+        android:text="@string/preferences"/>
 
 </LinearLayout>

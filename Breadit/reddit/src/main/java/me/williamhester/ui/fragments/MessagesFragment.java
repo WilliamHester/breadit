@@ -1,7 +1,6 @@
 package me.williamhester.ui.fragments;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -57,6 +56,10 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
     private String mFilterType;
     private SwipeRefreshLayout mRefreshLayout;
 
+    public static MessagesFragment newInstance() {
+        return new MessagesFragment();
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -100,7 +103,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
                 RedditApi.getMessages(getActivity(), mFilterType, null, mMessageCallback);
             }
         });
-        mMessagesRecyclerView = (RecyclerView) v.findViewById(R.id.messages);
+        mMessagesRecyclerView = (RecyclerView) v.findViewById(R.id.inbox);
         mMessageAdapter = new MessageArrayAdapter();
         mLayoutManager = new LinearLayoutManager(getActivity());
         mScrollListener = new InfiniteLoadingScrollListener();

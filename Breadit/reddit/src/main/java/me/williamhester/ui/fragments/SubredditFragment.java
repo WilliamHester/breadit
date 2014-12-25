@@ -152,7 +152,7 @@ public class SubredditFragment extends AccountFragment implements Toolbar.OnMenu
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mCallback.onHomePressed();
+                mCallback.onHomeClicked();
             }
         });
 
@@ -839,10 +839,7 @@ public class SubredditFragment extends AccountFragment implements Toolbar.OnMenu
                         ArrayList<Submission> submissions = new ArrayList<>();
                         List<ResponseRedditWrapper> children = ((Listing) wrapper.getData())
                                 .getChildren();
-                        if (children.size() == 0) {
-                            // Reddit "barfed"
-//                            mSubmissionsAdapter.setFooterRedditBarfed();
-                        } else {
+                        if (children.size() != 0) {
                             for (ResponseRedditWrapper innerWrapper : children) {
                                 if (innerWrapper.getData() instanceof Submission &&
                                         !mNames.contains(((Submission)innerWrapper.getData())
@@ -983,6 +980,6 @@ public class SubredditFragment extends AccountFragment implements Toolbar.OnMenu
 
     public static interface SubredditFragmentCallbacks {
         public void onSubredditSelected(String subreddit);
-        public void onHomePressed();
+        public void onHomeClicked();
     }
 }

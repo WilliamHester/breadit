@@ -146,6 +146,7 @@
     <string name="logged_out">Logged out</string>
     <string name="preferences">Preferences</string>
     <string name="subreddits">Subreddits</string>
+    <string name="home">Home</string>
 
     <!-- ImgurImageFragment -->
     <string name="toggle_description">Toggle description</string>

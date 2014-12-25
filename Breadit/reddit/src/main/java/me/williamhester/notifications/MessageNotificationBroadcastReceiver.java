@@ -22,7 +22,7 @@ import me.williamhester.models.GenericResponseRedditWrapper;
 import me.williamhester.models.Message;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
-import me.williamhester.ui.activities.MessageActivity;
+import me.williamhester.ui.activities.MainActivity;
 
 /**
  * Created by william on 12/22/14.
@@ -97,7 +97,7 @@ public class MessageNotificationBroadcastReceiver extends BroadcastReceiver {
                     builder.setStyle(inboxStyle);
                     // Issue the notification here.
 
-                    Intent messageIntent = new Intent(context, MessageActivity.class);
+                    Intent messageIntent = new Intent(context, MainActivity.class);
 
                     // The stack builder object will contain an artificial back stack for the
                     // started Activity.
@@ -105,7 +105,7 @@ public class MessageNotificationBroadcastReceiver extends BroadcastReceiver {
                     // your application to the Home screen.
                     TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
                     // Adds the back stack for the Intent (but not the Intent itself)
-                    stackBuilder.addParentStack(MessageActivity.class);
+                    stackBuilder.addParentStack(MainActivity.class);
                     // Adds the Intent that starts the Activity to the top of the stack
                     stackBuilder.addNextIntent(messageIntent);
                     PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0,

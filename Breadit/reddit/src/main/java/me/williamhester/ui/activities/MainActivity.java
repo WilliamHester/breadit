@@ -4,17 +4,16 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.View;
-import android.widget.SimpleCursorAdapter;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -29,6 +28,7 @@ import me.williamhester.notifications.MessageNotificationBroadcastReceiver;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.fragments.ImageFragment;
 import me.williamhester.ui.fragments.ImagePagerFragment;
+import me.williamhester.ui.fragments.MessagesFragment;
 import me.williamhester.ui.fragments.NavigationDrawerFragment;
 import me.williamhester.ui.fragments.SidebarFragment;
 import me.williamhester.ui.fragments.SubredditFragment;
@@ -43,7 +43,8 @@ public class MainActivity extends ActionBarActivity
 
     private ActionBarDrawerToggle mDrawerToggle;
     private DrawerLayout mDrawerLayout;
-    private NavigationDrawerFragment mNavigationDrawerFragment;
+    private Fragment mCurrentFragment;
+    private MessagesFragment mMessagesFragment;
     private SubredditFragment mSubredditFragment;
     private SidebarFragment mSidebarFragment;
     private String mSubredditTitle;
@@ -67,22 +68,28 @@ public class MainActivity extends ActionBarActivity
 
         Fragment f = getSupportFragmentManager().findFragmentById(R.id.left_drawer);
         if (f == null) {
-            mNavigationDrawerFragment = NavigationDrawerFragment.newInstance(mSubredditTitle);
+            NavigationDrawerFragment ndf = NavigationDrawerFragment.newInstance();
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.left_drawer, mNavigationDrawerFragment, "NavigationDrawer")
+                    .replace(R.id.left_drawer, ndf, "NavigationDrawer")
                     .commit();
-        } else {
-            mNavigationDrawerFragment = (NavigationDrawerFragment) f;
         }
 
-        Fragment sub = getSupportFragmentManager().findFragmentByTag(mSubredditTitle);
+        Fragment sub = getSupportFragmentManager().findFragmentByTag("subreddit");
         if (sub == null) {
             mSubredditFragment = SubredditFragment.newInstance(mSubredditTitle);
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.main_container, mSubredditFragment, mSubredditTitle)
+                    .replace(R.id.main_container, mSubredditFragment, "subreddit")
                     .commit();
+            mCurrentFragment = mSubredditFragment;
         } else {
             mSubredditFragment = (SubredditFragment) sub;
+        }
+
+        Fragment messages = getSupportFragmentManager().findFragmentByTag("messages");
+        if (messages == null) {
+            mMessagesFragment = MessagesFragment.newInstance();
+        } else {
+            mMessagesFragment = (MessagesFragment) messages;
         }
 
         Fragment side = getSupportFragmentManager().findFragmentById(R.id.right_drawer);
@@ -102,7 +109,6 @@ public class MainActivity extends ActionBarActivity
                 if (fragment != null && fragment instanceof SubredditFragment) {
                     mSubredditFragment = (SubredditFragment) fragment;
                     onSubredditSelected(mSubredditFragment.getSubreddit());
-//                    mNavigationDrawerFragment.setSubreddit(mSubredditTitle);
                 }
             }
         });
@@ -169,13 +175,9 @@ public class MainActivity extends ActionBarActivity
             mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, Gravity.END);
         }
 
-        if ((mSubredditTitle == null && subreddit == null)
-                || (mSubredditTitle != null && mSubredditTitle.equals(subreddit))) {
-//            mSubredditFragment.refreshData();
-        } else {
-            if (TextUtils.isEmpty(subreddit)) {
-//                mNavigationDrawerFragment.setSubreddit(Subreddit.FRONT_PAGE);
-            } else {
+        if (!((mSubredditTitle == null && subreddit == null)
+                || (mSubredditTitle != null && mSubredditTitle.equals(subreddit)))) {
+            if (!TextUtils.isEmpty(subreddit)) {
                 RedditApi.getSubredditDetails(this, subreddit, new FutureCallback<JsonObject>() {
                     @Override
                     public void onCompleted(Exception e, JsonObject result) {
@@ -185,13 +187,11 @@ public class MainActivity extends ActionBarActivity
                         }
                         ResponseRedditWrapper response = new ResponseRedditWrapper(result, new Gson());
                         if (response.getData() instanceof Subreddit) {
-//                            mNavigationDrawerFragment.setSubreddit((Subreddit) response.getData());
                             mSidebarFragment.setSubreddit((Subreddit) response.getData());
                             mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED,
                                     Gravity.END);
                         } else {
                             mSubredditFragment.showSubredditDoesNotExist();
-//                            mNavigationDrawerFragment.setSubreddit((Subreddit) null);
                         }
                     }
                 });
@@ -202,21 +202,21 @@ public class MainActivity extends ActionBarActivity
                 if (!mSubredditFragment.isResumed()) {
                     getSupportFragmentManager().beginTransaction()
                             .addToBackStack(mSubredditTitle)
-                            .replace(R.id.main_container, mSubredditFragment, mSubredditTitle)
+                            .replace(R.id.main_container, mSubredditFragment, "subreddit")
                             .commit();
                 }
             } else {
                 mSubredditFragment = SubredditFragment.newInstance(subreddit);
                 getSupportFragmentManager().beginTransaction()
                         .addToBackStack(mSubredditTitle)
-                        .replace(R.id.main_container, mSubredditFragment, mSubredditTitle)
+                        .replace(R.id.main_container, mSubredditFragment, "subreddit")
                         .commit();
             }
         }
     }
 
     @Override
-    public void onHomePressed() {
+    public void onHomeClicked() {
         if (mDrawerLayout.isDrawerOpen(Gravity.START | Gravity.END)) {
             mDrawerLayout.closeDrawers();
         } else {
@@ -227,6 +227,39 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onAccountChanged() {
         mSubredditFragment.onAccountChanged();
+    }
+
+    @Override
+    public void onHomeSelected() {
+        if (mSubredditFragment.isDetached()) {
+            getSupportFragmentManager().beginTransaction()
+                    .attach(mSubredditFragment)
+                    .detach(mCurrentFragment)
+                    .commit();
+            mCurrentFragment = mSubredditFragment;
+        }
+        mDrawerLayout.closeDrawer(Gravity.START);
+    }
+
+    @Override
+    public void onMessagesSelected() {
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        if (mMessagesFragment.isDetached()) {
+            ft.attach(mMessagesFragment)
+                    .detach(mCurrentFragment)
+                    .commit();
+        } else if (!mMessagesFragment.isAdded()) {
+            ft.add(R.id.main_container, mMessagesFragment, "messages")
+                    .detach(mCurrentFragment)
+                    .commit();
+        }
+        mDrawerLayout.closeDrawer(Gravity.START);
+        mCurrentFragment = mMessagesFragment;
+    }
+
+    @Override
+    public void onSubmitSelected() {
+
     }
 
     @Override
@@ -262,42 +295,5 @@ public class MainActivity extends ActionBarActivity
     @Override
     public void onImageTapped() {
         getSupportFragmentManager().popBackStack();
-    }
-
-    private static class SearchAdapter extends SimpleCursorAdapter {
-
-        private CharSequence mConstraint = "";
-
-        public SearchAdapter(Context context) {
-            super(context, android.R.layout.simple_dropdown_item_1line, null, new String[]{""}, null, 0);
-        }
-
-        @Override
-        public void bindView(View view, Context context, Cursor cursor) {
-            super.bindView(view, context, cursor);
-
-        }
-
-        @Override
-        public Cursor runQueryOnBackgroundThread(CharSequence constraint) {
-            mConstraint = constraint;
-            return null;
-        }
-
-        @Override
-        public Object getItem(int position) {
-            switch (position) {
-                case 0:
-                    return "/r/" + mConstraint;
-                case 1:
-                    return "/u/" + mConstraint;
-            }
-            return "";
-        }
-
-        @Override
-        public int getCount() {
-            return 2;
-        }
     }
 }
