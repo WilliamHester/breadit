@@ -45,8 +45,6 @@ public class NavigationDrawerFragment extends AccountFragment {
 
     private NavigationDrawerCallbacks mCallbacks;
 
-    private final ArrayList<Subreddit> mSubredditList = new ArrayList<>();
-
     private Context mContext;
     private CheckBox mCheckbox;
     private Subreddit mSubreddit;
@@ -199,105 +197,6 @@ public class NavigationDrawerFragment extends AccountFragment {
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
-    }
-
-    private View createHeaderView(LayoutInflater inflater) {
-        View v = inflater.inflate(R.layout.fragment_navigation_drawer, null);
-        final EditText subredditSearch = (EditText) v.findViewById(R.id.search_subreddit);
-        final ImageButton search = (ImageButton) v.findViewById(R.id.search_button);
-        ImageButton clear = (ImageButton) v.findViewById(R.id.clear);
-        search.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                InputMethodManager imm = (InputMethodManager) mContext.getSystemService(
-                        Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(search.getWindowToken(), 0);
-                selectItem(subredditSearch.getText().toString().trim());
-            }
-        });
-        subredditSearch.setImeActionLabel(getResources().getString(R.string.go),
-                EditorInfo.IME_ACTION_GO);
-        subredditSearch.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
-                if (actionId == EditorInfo.IME_ACTION_GO) {
-                    InputMethodManager imm = (InputMethodManager) mContext.getSystemService(
-                            Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(search.getWindowToken(), 0);
-                    selectItem(subredditSearch.getText().toString().trim().replace(" ", ""));
-                }
-                return false;
-            }
-        });
-        clear.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                subredditSearch.setText("");
-            }
-        });
-
-        Spinner accountSpinner = (Spinner) v.findViewById(R.id.account_spinner);
-        accountSpinner.setAdapter(new AccountAdapter());
-        accountSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                if (i == AccountManager.getAccounts().size()) {
-                    if (AccountManager.getAccount() != null) {
-                        AccountManager.setAccount(null);
-                        mCallbacks.onAccountChanged();
-                        onAccountChanged();
-                    }
-                } else {
-                    Account a = AccountManager.getAccounts().get(i);
-                    if (!a.equals(AccountManager.getAccount())) {
-                        AccountManager.setAccount(AccountManager.getAccounts().get(i));
-                        mCallbacks.onAccountChanged();
-                        onAccountChanged();
-                    }
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-                // Do nothing
-            }
-        });
-        selectCurrentAccount(v);
-        View unread = v.findViewById(R.id.messages);
-        unread.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(getActivity(), MessageActivity.class);
-                startActivity(i);
-            }
-        });
-        mUnreadMessages = (TextView) v.findViewById(R.id.unread_count);
-        mUnreadMessages.setText("0 " + getResources().getQuantityString(R.plurals.new_messages, 0));
-
-        RedditApi.getMessages(getActivity(), Message.UNREAD, null, mUnreadCallback);
-
-        View submit = v.findViewById(R.id.submit);
-        submit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(getActivity(), SubmitActivity.class);
-                startActivity(i);
-            }
-        });
-
-        View settings = v.findViewById(R.id.preferences);
-        settings.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent i = new Intent(getActivity(), SettingsActivity.class);
-                Bundle b = new Bundle();
-                i.putExtras(b);
-                startActivityForResult(i, SettingsFragment.LOG_IN_REQUEST);
-            }
-        });
-        mCheckbox = (CheckBox) v.findViewById(R.id.subscribed_checkbox);
-        mCheckbox.setVisibility(View.GONE);
-        return v;
     }
 
     @Override
