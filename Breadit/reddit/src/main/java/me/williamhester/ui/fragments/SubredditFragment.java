@@ -687,7 +687,6 @@ public class SubredditFragment extends AccountFragment implements Toolbar.OnMenu
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
             switch (newState) {
                 case RecyclerView.SCROLL_STATE_IDLE:
-//                case RecyclerView.SCROLL_STATE_SETTLING:
                     if (Math.abs(mHeaderBar.getTranslationY()) < mHeaderBar.getHeight() / 2
                             || mLayoutManager.findFirstVisibleItemPosition() == 0) {
                         // Need to move it back to completely visible.

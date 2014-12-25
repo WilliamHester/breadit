@@ -1,5 +1,6 @@
 package me.williamhester.ui.views;
 
+import android.animation.ObjectAnimator;
 import android.text.Html;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
@@ -133,18 +134,19 @@ public class SubmissionViewHolder extends VotableViewHolder {
         View.OnClickListener expandListener = new View.OnClickListener() {
             @Override
             public void onClick(final View view) {
-                Animation anim;
+                ObjectAnimator objectAnimator;
                 if (mSubmission.isSelftextOpen()) {
-                    anim = AnimationUtils.loadAnimation(view.getContext(), R.anim.rotate_left);
+                    objectAnimator =
+                            ObjectAnimator.ofFloat(view, "rotation", view.getRotation(), 0F);
                     collapse(mSelfText);
                 } else {
-                    anim = AnimationUtils.loadAnimation(view.getContext(), R.anim.rotate_right);
+                    objectAnimator =
+                            ObjectAnimator.ofFloat(view, "rotation", view.getRotation(), 180F);
                     expand(mSelfText);
                 }
+                objectAnimator.setDuration(300);
+                objectAnimator.start();
                 mSubmission.setSelftextOpen(!mSubmission.isSelftextOpen());
-                anim.setFillBefore(true);
-                anim.setFillAfter(true);
-                view.startAnimation(anim);
             }
         };
         mExpandButton.setOnClickListener(expandListener);
@@ -160,6 +162,7 @@ public class SubmissionViewHolder extends VotableViewHolder {
         super.setContent(object);
         mSubmission = (Submission) object;
 
+        mExpandButton.setRotation(mSubmission.isSelftextOpen() ? 180 : 0);
         mOptionsRow.setVisibility(View.GONE);
         mBody.setText(Html.fromHtml(mSubmission.getTitle()).toString());
         mDomain.setText(mSubmission.getDomain());
