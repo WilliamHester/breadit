@@ -174,7 +174,7 @@ public class MainActivity extends ActionBarActivity
 //            mSubredditFragment.refreshData();
         } else {
             if (TextUtils.isEmpty(subreddit)) {
-                mNavigationDrawerFragment.setSubreddit(Subreddit.FRONT_PAGE);
+//                mNavigationDrawerFragment.setSubreddit(Subreddit.FRONT_PAGE);
             } else {
                 RedditApi.getSubredditDetails(this, subreddit, new FutureCallback<JsonObject>() {
                     @Override
@@ -185,13 +185,13 @@ public class MainActivity extends ActionBarActivity
                         }
                         ResponseRedditWrapper response = new ResponseRedditWrapper(result, new Gson());
                         if (response.getData() instanceof Subreddit) {
-                            mNavigationDrawerFragment.setSubreddit((Subreddit) response.getData());
+//                            mNavigationDrawerFragment.setSubreddit((Subreddit) response.getData());
                             mSidebarFragment.setSubreddit((Subreddit) response.getData());
                             mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED,
                                     Gravity.END);
                         } else {
                             mSubredditFragment.showSubredditDoesNotExist();
-                            mNavigationDrawerFragment.setSubreddit((Subreddit) null);
+//                            mNavigationDrawerFragment.setSubreddit((Subreddit) null);
                         }
                     }
                 });

@@ -3,6 +3,7 @@ package me.williamhester.ui.fragments;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -15,6 +16,7 @@ import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -22,8 +24,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -31,10 +38,12 @@ import com.koushikdutta.async.future.FutureCallback;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import me.williamhester.databases.AccountDataSource;
 import me.williamhester.models.Account;
 import me.williamhester.models.AccountManager;
 import me.williamhester.models.Listing;
@@ -53,15 +62,20 @@ public class SubredditFragment extends AccountFragment implements Toolbar.OnMenu
 
     public static final int VOTE_REQUEST_CODE = 1;
 
-    private InfiniteLoadingScrollListener mScrollListener;
-    private LinearLayoutManager mLayoutManager;
-    private ProgressBar mProgressBar;
-    private RecyclerView mRecyclerView;
     private String mSubredditName;
-    private SubmissionAdapter mSubmissionsAdapter;
-    private SwipeRefreshLayout mSwipeRefreshLayout;
+    private ArrayList<Subreddit> mSubredditList = new ArrayList<>();
     private ArrayList<Submission> mSubmissionList;
     private HashSet<String> mNames;
+
+    private InfiniteLoadingScrollListener mScrollListener;
+    private LinearLayoutManager mLayoutManager;
+
+    private SubmissionAdapter mSubmissionsAdapter;
+    private SubredditAdapter mSubredditAdapter;
+
+    private ProgressBar mProgressBar;
+    private RecyclerView mRecyclerView;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
     private SubmissionViewHolder mFocusedSubmission;
     private Toolbar mToolbar;
     private View mHeaderBar;
@@ -134,11 +148,6 @@ public class SubredditFragment extends AccountFragment implements Toolbar.OnMenu
 
         mHeaderBar = v.findViewById(R.id.header_bar);
         mToolbar = (Toolbar) v.findViewById(R.id.toolbar_actionbar);
-        if (TextUtils.isEmpty(mSubredditName)) {
-            mToolbar.setTitle(R.string.front_page);
-        } else {
-            mToolbar.setTitle("/r/" + mSubredditName);
-        }
         onCreateOptionsMenu(mToolbar.getMenu(), getActivity().getMenuInflater());
 
         mToolbar.setOnMenuItemClickListener(this);
@@ -169,6 +178,11 @@ public class SubredditFragment extends AccountFragment implements Toolbar.OnMenu
                 refreshData();
             }
         });
+
+        mSubredditAdapter = new SubredditAdapter();
+        Spinner subreddits = (Spinner) v.findViewById(R.id.subreddit_spinner);
+        subreddits.setAdapter(mSubredditAdapter);
+        loadSubreddits(v);
 
         if (!mSubredditExists) {
             v.findViewById(R.id.subreddit_does_not_exist).setVisibility(View.VISIBLE);
@@ -238,6 +252,7 @@ public class SubredditFragment extends AccountFragment implements Toolbar.OnMenu
     public void onAccountChanged() {
         super.onAccountChanged();
         refreshData();
+        loadSubreddits(getView());
     }
 
     @Override
@@ -333,6 +348,103 @@ public class SubredditFragment extends AccountFragment implements Toolbar.OnMenu
                             }
                         }
                     });
+        }
+    }
+
+    private void loadSubreddits(View view) {
+        mSubredditList.clear();
+        if (view != null) {
+            Spinner spinner = (Spinner) view.findViewById(R.id.subreddit_spinner);
+            if (mAccount != null) {
+                mSubredditList.clear();
+                AccountDataSource dataSource = new AccountDataSource(getActivity());
+                dataSource.open();
+                mSubredditList.addAll(dataSource.getCurrentAccountSubreddits());
+                dataSource.close();
+                HashMap<String, Subreddit> subscriptions = AccountManager.getAccount().getSubscriptions();
+                for (Subreddit s : mSubredditList) {
+                    subscriptions.put(s.getDisplayName().toLowerCase(), s);
+                }
+                Collections.sort(mSubredditList);
+                RedditApi.getSubscribedSubreddits(new FutureCallback<ArrayList<Subreddit>>() {
+                    @Override
+                    public void onCompleted(Exception e, ArrayList<Subreddit> result) {
+                        if (e != null) {
+                            e.printStackTrace();
+                            return;
+                        }
+                        AccountDataSource dataSource = new AccountDataSource(getActivity());
+                        dataSource.open();
+                        ArrayList<Subreddit> allSubs = dataSource.getAllSubreddits();
+                        ArrayList<Subreddit> savedSubscriptions = dataSource.getCurrentAccountSubreddits();
+
+                        for (Subreddit s : result) {
+                            int index = allSubs.indexOf(s); // Get the subreddit WITH the table id
+                            if (index < 0) { // if it doesn't exist, create one with a table id
+                                dataSource.addSubreddit(s);
+                                dataSource.addSubscriptionToCurrentAccount(s);
+                            } else if (!savedSubscriptions.contains(s)) {
+                                dataSource.addSubscriptionToCurrentAccount(allSubs.get(index));
+                            }
+                        }
+
+                        dataSource.close();
+
+                        final boolean isNew = !result.equals(savedSubscriptions);
+
+                        if (isNew) {
+                            mSubredditList.clear();
+                            mSubredditList.addAll(result);
+                        }
+
+                        if (getView() != null) {
+                            getView().post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (isNew) {
+                                        Collections.sort(mSubredditList);
+                                        mSubredditAdapter.notifyDataSetChanged();
+                                    }
+                                }
+                            });
+                        }
+                    }
+                });
+                mSubredditAdapter.notifyDataSetChanged();
+                spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        mProgressBar.setVisibility(View.VISIBLE);
+                        mSubredditName = position == 0 ? "" : mSubredditList.get(position - 1).getDisplayName();
+                        mSubmissionList.clear();
+                        mSubmissionsAdapter.notifyDataSetChanged();
+                        loadAndClear();
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+
+                    }
+                });
+            } else {
+                final String[] subs = getResources().getStringArray(R.array.default_subreddits);
+                spinner.setAdapter(new SubredditStringAdapter(subs));
+                spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        mProgressBar.setVisibility(View.VISIBLE);
+                        mSubredditName = position == 0 ? "" : subs[position - 1];
+                        mSubmissionList.clear();
+                        mSubmissionsAdapter.notifyDataSetChanged();
+                        loadAndClear();
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+
+                    }
+                });
+            }
         }
     }
 
@@ -806,6 +918,69 @@ public class SubredditFragment extends AccountFragment implements Toolbar.OnMenu
             } else {
                 return SUBMISSION;
             }
+        }
+    }
+
+    private class SubredditAdapter extends ArrayAdapter<Subreddit> {
+
+        public SubredditAdapter() {
+            super(getActivity(), R.layout.list_item_subreddit, R.id.subreddit_list_item_title, mSubredditList);
+        }
+
+        @Override
+        public View getDropDownView (int position, View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                LayoutInflater inflater =
+                        (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                convertView = inflater.inflate(R.layout.list_item_subreddit, parent, false);
+            }
+            TextView text = (TextView) convertView.findViewById(R.id.subreddit_list_item_title);
+            text.setText(getItem(position) == null ? getResources().getString(R.string.front_page)
+                    : getItem(position).getDisplayName());
+            convertView.findViewById(R.id.mod_indicator).setVisibility(getItem(position) != null
+                    && getItem(position).userIsModerator() ? View.VISIBLE : View.GONE);
+
+            return convertView;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            return getDropDownView(position, convertView, parent);
+        }
+
+        @Override
+        public Subreddit getItem(int position) {
+            if (position == 0) {
+                return null;
+            } else {
+                return super.getItem(position - 1);
+            }
+        }
+
+        @Override
+        public int getCount() {
+            return super.getCount() + 1; // Have to account for the "Front Page" option
+        }
+    }
+
+    private class SubredditStringAdapter extends ArrayAdapter<String> {
+
+        public SubredditStringAdapter(String[] items) {
+            super(getActivity(), R.layout.list_item_subreddit, R.id.subreddit_list_item_title, items);
+        }
+
+        @Override
+        public String getItem(int position) {
+            if (position == 0) {
+                return getResources().getString(R.string.front_page).toLowerCase();
+            } else {
+                return super.getItem(position - 1).toLowerCase();
+            }
+        }
+
+        @Override
+        public int getCount() {
+            return super.getCount() + 1; // Have to account for the "Front Page" option
         }
     }
 

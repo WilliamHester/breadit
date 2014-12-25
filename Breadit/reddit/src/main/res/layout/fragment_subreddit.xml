@@ -9,7 +9,22 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <include layout="@layout/toolbar_actionbar" />
+        <android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:breadit="http://schemas.android.com/apk/res-auto"
+            breadit:theme="@style/ActionBarThemeOverlay"
+            breadit:popupTheme="@style/ActionBarPopupThemeOverlay"
+            android:id="@+id/toolbar_actionbar"
+            android:background="@null"
+            breadit:titleTextAppearance="@style/ActionBar.TitleText"
+            breadit:contentInsetStart="@dimen/keyline_1"
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize">
+
+            <Spinner android:id="@+id/subreddit_spinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+        </android.support.v7.widget.Toolbar>
 
     </FrameLayout>
 

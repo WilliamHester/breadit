@@ -6,8 +6,6 @@ import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -162,7 +160,6 @@ public class SubmissionViewHolder extends VotableViewHolder {
         super.setContent(object);
         mSubmission = (Submission) object;
 
-        mExpandButton.setRotation(mSubmission.isSelftextOpen() ? 180 : 0);
         mOptionsRow.setVisibility(View.GONE);
         mBody.setText(Html.fromHtml(mSubmission.getTitle()).toString());
         mDomain.setText(mSubmission.getDomain());
@@ -238,9 +235,8 @@ public class SubmissionViewHolder extends VotableViewHolder {
 
         if (mSubmission.getBodyHtml() != null) {
             mShowSelfText.setVisibility(View.VISIBLE);
-//            mContentPreview.setVisibility(View.VISIBLE);
             if (mSubmission.isSelftextOpen()) {
-                mExpandButton.setRotation(-180f);
+                mExpandButton.setRotation(180f);
                 mSelfText.setVisibility(View.VISIBLE);
             } else {
                 mExpandButton.setRotation(0f);
@@ -249,8 +245,6 @@ public class SubmissionViewHolder extends VotableViewHolder {
             HtmlParser parser = new HtmlParser(Html.fromHtml(mSubmission.getBodyHtml()).toString());
             mSelfText.setText(parser.getSpannableString());
             mSelfText.setMovementMethod(new LinkMovementMethod());
-        } else {
-//            mContentPreview.setVisibility(View.GONE);
         }
     }
 
