@@ -75,7 +75,6 @@ public abstract class AsyncSendFragment extends Fragment {
         if (button == null) {
             reply.setActionView(R.layout.button_reply);
             button = (Button) MenuItemCompat.getActionView(reply);
-            reply.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
         }
         button.setText(getButtonText());
         button.setOnClickListener(new View.OnClickListener() {

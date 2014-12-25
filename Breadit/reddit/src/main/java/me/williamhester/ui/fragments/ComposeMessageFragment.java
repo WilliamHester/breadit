@@ -81,7 +81,7 @@ public class ComposeMessageFragment extends AsyncSendFragment {
             }
         });
         toolbar.setTitle(R.string.compose_message);
-        onCreateOptionsMenu(toolbar.getMenu(), new MenuInflater(getActivity()));
+        onCreateOptionsMenu(toolbar.getMenu(), getActivity().getMenuInflater());
 
         mComposeTo = (EditText) v.findViewById(R.id.compose_to);
         mSubject = (EditText) v.findViewById(R.id.subject);

@@ -132,7 +132,7 @@ public class CommentFragment extends AccountFragment implements Toolbar.OnMenuIt
         });
         toolbar.setTitle(R.string.comments);
         toolbar.setOnMenuItemClickListener(this);
-        onCreateOptionsMenu(toolbar.getMenu(), new MenuInflater(getActivity()));
+        onCreateOptionsMenu(toolbar.getMenu(), getActivity().getMenuInflater());
 
         RecyclerView commentsView = (RecyclerView) v.findViewById(R.id.comments);
         mRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.swipe_refresh);
@@ -164,8 +164,6 @@ public class CommentFragment extends AccountFragment implements Toolbar.OnMenuIt
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.submission_fragment, menu);
 
-        menu.findItem(R.id.action_view_link).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
-        menu.findItem(R.id.action_sort_comments).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
         if (mSubmission != null) {
             Url url = new Url(mSubmission.getUrl());
             if (mSubmission.isSelf()) {

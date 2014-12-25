@@ -11,6 +11,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -85,9 +86,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
             }
         });
         toolbar.setOnMenuItemClickListener(this);
-        new MenuInflater(getActivity()).inflate(R.menu.messages, toolbar.getMenu());
-        toolbar.getMenu().findItem(R.id.action_compose_message)
-                .setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        onCreateOptionsMenu(toolbar.getMenu(), getActivity().getMenuInflater());
 
         mProgressBar = (ProgressBar) v.findViewById(R.id.progress_bar);
         mRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.swipe_refresh);
@@ -211,6 +210,13 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
             }
         }
     };
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+
+        inflater.inflate(R.menu.messages, menu);
+    }
 
     @Override
     public boolean onMenuItemClick(MenuItem menuItem) {

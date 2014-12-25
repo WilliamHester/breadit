@@ -6,5 +6,5 @@
         android:title="@string/sort_by"
         android:icon="@drawable/ic_action_sort_by_size"
         android:orderInCategory="1"
-        breadit:showAsAction="ifRoom"/>
+        breadit:showAsAction="always"/>
 </menu>

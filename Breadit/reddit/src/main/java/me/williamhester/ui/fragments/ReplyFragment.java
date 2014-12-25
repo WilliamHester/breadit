@@ -87,7 +87,7 @@ public class ReplyFragment extends AsyncSendFragment {
             }
         });
         toolbar.setTitle(R.string.reply);
-        onCreateOptionsMenu(toolbar.getMenu(), new MenuInflater(getActivity()));
+        onCreateOptionsMenu(toolbar.getMenu(), getActivity().getMenuInflater());
         return v;
     }
 

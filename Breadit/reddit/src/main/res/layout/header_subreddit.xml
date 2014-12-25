@@ -1,18 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/blackish"
-    android:padding="8dp">
-
-    <TextView android:id="@+id/subreddit"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColor="@color/auburn_orange"
-        android:fontFamily="sans-serif-condensed"
-        android:textStyle="bold"
-        android:textSize="18sp"/>
-
-</LinearLayout>
+    android:layout_height="?actionBarSize"
+    android:background="@color/blackish"/>

@@ -8,17 +8,12 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.Gravity;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.SearchView;
 import android.widget.SimpleCursorAdapter;
 
 import com.google.gson.Gson;
@@ -42,7 +37,7 @@ import me.williamhester.ui.fragments.YouTubeFragment;
 public class MainActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks,
         ImagePagerFragment.ImagePagerCallbacks, ImageFragment.ImageTapCallbacks,
-        SubredditFragment.OnSubredditSelectedListener {
+        SubredditFragment.SubredditFragmentCallbacks {
 
     public static final String SUBREDDIT = "subreddit";
 
@@ -57,7 +52,6 @@ public class MainActivity extends ActionBarActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
 
         if (Intent.ACTION_VIEW.equals(getIntent().getAction())) {
             if (getIntent().getExtras() != null) {
@@ -70,8 +64,6 @@ public class MainActivity extends ActionBarActivity
         } else {
             mSubredditTitle = "";
         }
-
-        setSupportActionBar(toolbar);
 
         Fragment f = getSupportFragmentManager().findFragmentById(R.id.left_drawer);
         if (f == null) {
@@ -87,7 +79,7 @@ public class MainActivity extends ActionBarActivity
         if (sub == null) {
             mSubredditFragment = SubredditFragment.newInstance(mSubredditTitle);
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.container, mSubredditFragment, mSubredditTitle)
+                    .replace(R.id.main_container, mSubredditFragment, mSubredditTitle)
                     .commit();
         } else {
             mSubredditFragment = (SubredditFragment) sub;
@@ -106,7 +98,7 @@ public class MainActivity extends ActionBarActivity
         getSupportFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
             @Override
             public void onBackStackChanged() {
-                Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.container);
+                Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.main_container);
                 if (fragment != null && fragment instanceof SubredditFragment) {
                     mSubredditFragment = (SubredditFragment) fragment;
                     onSubredditSelected(mSubredditFragment.getSubreddit());
@@ -123,7 +115,7 @@ public class MainActivity extends ActionBarActivity
         mDrawerToggle = new ActionBarDrawerToggle(
                 this,                             /* host Activity */
                 mDrawerLayout,                    /* DrawerLayout object */
-                toolbar,
+//                toolbar,
                 R.string.navigation_drawer_open,  /* "open drawer" description for accessibility */
                 R.string.navigation_drawer_close  /* "close drawer" description for accessibility */
         ) {
@@ -210,16 +202,25 @@ public class MainActivity extends ActionBarActivity
                 if (!mSubredditFragment.isResumed()) {
                     getSupportFragmentManager().beginTransaction()
                             .addToBackStack(mSubredditTitle)
-                            .replace(R.id.container, mSubredditFragment, mSubredditTitle)
+                            .replace(R.id.main_container, mSubredditFragment, mSubredditTitle)
                             .commit();
                 }
             } else {
                 mSubredditFragment = SubredditFragment.newInstance(subreddit);
                 getSupportFragmentManager().beginTransaction()
                         .addToBackStack(mSubredditTitle)
-                        .replace(R.id.container, mSubredditFragment, mSubredditTitle)
+                        .replace(R.id.main_container, mSubredditFragment, mSubredditTitle)
                         .commit();
             }
+        }
+    }
+
+    @Override
+    public void onHomePressed() {
+        if (mDrawerLayout.isDrawerOpen(Gravity.START | Gravity.END)) {
+            mDrawerLayout.closeDrawers();
+        } else {
+            mDrawerLayout.openDrawer(Gravity.START);
         }
     }
 
@@ -240,35 +241,6 @@ public class MainActivity extends ActionBarActivity
         } else {
             super.onBackPressed();
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
-        SearchView searchView = (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.search));
-        searchView.setSuggestionsAdapter(new SearchAdapter(MainActivity.this));
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                return false;
-            }
-        });
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            if (mDrawerLayout.isDrawerOpen(R.id.right_drawer)) {
-                mDrawerLayout.closeDrawer(Gravity.END);
-            }
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
