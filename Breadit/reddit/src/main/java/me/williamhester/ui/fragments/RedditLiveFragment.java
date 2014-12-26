@@ -1,15 +1,13 @@
 package me.williamhester.ui.fragments;
 
-import android.support.v4.app.Fragment;
-import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.koushikdutta.async.ByteBufferList;
@@ -18,10 +16,8 @@ import com.koushikdutta.async.callback.DataCallback;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.async.http.AsyncHttpClient;
 import com.koushikdutta.async.http.WebSocket;
-import com.koushikdutta.async.http.socketio.Acknowledge;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import me.williamhester.models.LiveResponse;
 import me.williamhester.models.RedditLive;

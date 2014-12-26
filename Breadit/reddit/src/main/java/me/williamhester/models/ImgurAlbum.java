@@ -3,16 +3,13 @@ package me.williamhester.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by william on 6/22/14.
  */
-public class ImgurAlbum implements Serializable, Parcelable {
-
-    private static final long serialVersionUID = 2086261516664607998L;
+public class ImgurAlbum implements Parcelable {
 
     private String id;
     private String title;

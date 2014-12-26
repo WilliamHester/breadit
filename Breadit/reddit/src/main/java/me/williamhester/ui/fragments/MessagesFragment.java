@@ -52,7 +52,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
     private ArrayList<Message> mMessages;
     private InfiniteLoadingScrollListener mScrollListener;
     private MessageArrayAdapter mMessageAdapter;
-    private MessageFragmentCallbacks mCallback;
+    private TopLevelFragmentCallbacks mCallback;
     private MessageViewHolder mFocusedViewHolder;
     private LinearLayoutManager mLayoutManager;
     private ProgressBar mProgressBar;
@@ -70,7 +70,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
         super.onAttach(activity);
 
         try {
-            mCallback = (MessageFragmentCallbacks) activity;
+            mCallback = (TopLevelFragmentCallbacks) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException("Parent activity must implement MessageFragmentCallbacks.");
         }
@@ -535,9 +535,5 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
                 }
             }
         };
-    }
-
-    public interface MessageFragmentCallbacks {
-        public void onHomeClicked();
     }
 }

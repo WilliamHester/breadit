@@ -35,10 +35,8 @@ import me.williamhester.ui.fragments.WebViewFragment;
 import me.williamhester.ui.fragments.YouTubeFragment;
 
 public class MainActivity extends ActionBarActivity implements ImageFragment.ImageTapCallbacks,
-        NavigationDrawerFragment.NavigationDrawerCallbacks,
-        ImagePagerFragment.ImagePagerCallbacks,
-        SubredditFragment.SubredditFragmentCallbacks,
-        MessagesFragment.MessageFragmentCallbacks {
+        NavigationDrawerFragment.NavigationDrawerCallbacks, ImagePagerFragment.ImagePagerCallbacks,
+        SubredditFragment.SubredditFragmentCallbacks {
 
     public static final String SUBREDDIT = "subreddit";
 

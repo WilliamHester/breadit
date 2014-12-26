@@ -1,13 +1,8 @@
 package me.williamhester.models;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
-
-import java.io.Serializable;
 
 import me.williamhester.tools.Url;
 

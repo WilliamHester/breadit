@@ -489,7 +489,7 @@ public class SubredditFragment extends AccountFragment implements Toolbar.OnMenu
         Intent i = new Intent(getActivity(), SubmissionActivity.class);
         Bundle args = new Bundle();
         args.putParcelable(SubmissionActivity.SUBMISSION, submission);
-        args.putSerializable("media", submission.getMedia());
+        args.putParcelable("media", submission.getMedia());
         i.putExtras(args);
         startActivityForResult(i, VOTE_REQUEST_CODE);
     }
@@ -978,8 +978,7 @@ public class SubredditFragment extends AccountFragment implements Toolbar.OnMenu
         }
     }
 
-    public static interface SubredditFragmentCallbacks {
+    public static interface SubredditFragmentCallbacks extends TopLevelFragmentCallbacks {
         public void onSubredditSelected(String subreddit);
-        public void onHomeClicked();
     }
 }

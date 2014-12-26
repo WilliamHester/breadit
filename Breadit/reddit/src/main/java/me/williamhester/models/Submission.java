@@ -5,8 +5,6 @@ import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.io.Serializable;
-
 import me.williamhester.tools.Url;
 
 @SuppressWarnings("unused")
@@ -255,13 +253,17 @@ public class Submission implements Votable, Parcelable {
         score = submission.score;
     }
 
-    public static class Media implements Serializable {
+    public static class Media implements Parcelable {
         private static final long serialVersionUID = -3883427725988406001L;
 
         @SerializedName("type")
         private String mType;
         @SerializedName("event_id")
         private String mEventId;
+
+        public Media() {
+
+        }
 
         public String getType() {
             return mType;
@@ -270,6 +272,32 @@ public class Submission implements Votable, Parcelable {
         public String getEventId() {
             return mEventId;
         }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(this.mType);
+            dest.writeString(this.mEventId);
+        }
+
+        private Media(Parcel in) {
+            this.mType = in.readString();
+            this.mEventId = in.readString();
+        }
+
+        public static final Creator<Media> CREATOR = new Creator<Media>() {
+            public Media createFromParcel(Parcel source) {
+                return new Media(source);
+            }
+
+            public Media[] newArray(int size) {
+                return new Media[size];
+            }
+        };
     }
 
     @Override
@@ -308,7 +336,7 @@ public class Submission implements Votable, Parcelable {
         dest.writeLong(this.ups);
         dest.writeLong(this.downs);
         dest.writeValue(this.likes);
-        dest.writeSerializable(this.media);
+        dest.writeParcelable(this.media, 0);
         dest.writeInt(this.mVoteStatus);
         dest.writeByte(mSelftextIsOpen ? (byte) 1 : (byte) 0);
         dest.writeByte(mIsNsfwShowing ? (byte) 1 : (byte) 0);
@@ -358,7 +386,7 @@ public class Submission implements Votable, Parcelable {
         this.ups = in.readLong();
         this.downs = in.readLong();
         this.likes = (Boolean) in.readValue(Boolean.class.getClassLoader());
-        this.media = (Media) in.readSerializable();
+        this.media = in.readParcelable(Media.class.getClassLoader());
         this.mVoteStatus = in.readInt();
         this.mSelftextIsOpen = in.readByte() != 0;
         this.mIsNsfwShowing = in.readByte() != 0;

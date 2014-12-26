@@ -3,8 +3,6 @@ package me.williamhester.ui.fragments;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -46,7 +44,7 @@ public class ImageFragment extends Fragment {
     public static ImageFragment newInstance(ImgurImage image) {
         ImageFragment fragment = new ImageFragment();
         Bundle args = new Bundle();
-        args.putSerializable(IMGUR_IMAGE_KEY, image);
+        args.putParcelable(IMGUR_IMAGE_KEY, image);
         fragment.setArguments(args);
         return fragment;
     }
@@ -66,7 +64,7 @@ public class ImageFragment extends Fragment {
 
         if (getArguments() != null) {
             mUrl = getArguments().getString(IMAGE_URL_KEY);
-            mImgurImage = (ImgurImage) getArguments().getSerializable(IMGUR_IMAGE_KEY);
+            mImgurImage = getArguments().getParcelable(IMGUR_IMAGE_KEY);
             if (mImgurImage != null) {
                 mUrl = mImgurImage.getHugeThumbnail();
             }
