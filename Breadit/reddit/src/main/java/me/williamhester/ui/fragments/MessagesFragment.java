@@ -337,7 +337,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int position) {
             if (position > 0) {
-                ((MessageViewHolder) viewHolder).setContent(mMessages.get(position));
+                ((MessageViewHolder) viewHolder).setContent(mMessages.get(position - 1));
             }
         }
 
