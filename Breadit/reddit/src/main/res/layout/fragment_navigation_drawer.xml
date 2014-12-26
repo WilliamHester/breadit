@@ -1,74 +1,120 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:focusable="false"
     android:clickable="true">
 
-    <include layout="@layout/navigation_spacer"/>
-
-    <LinearLayout
-        android:layout_height="wrap_content"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:padding="8dp">
+        android:layout_height="168dp"
+        android:orientation="vertical"
+        android:paddingBottom="8dp"
+        android:layout_marginBottom="8dp">
 
-        <FrameLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1">
-
-            <EditText
-                android:id="@+id/search_subreddit"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:singleLine="true"
-                android:imeOptions="actionGo"
-                android:imeActionLabel="@string/go"
-                android:textColor="@color/mid_gray"
-                android:hint="@string/search_sub_hint"/>
-
-            <ImageButton android:id="@+id/clear"
-                android:layout_width="25dp"
-                android:layout_height="25dp"
-                android:scaleType="fitCenter"
-                android:background="@android:color/transparent"
-                android:src="@android:drawable/ic_menu_close_clear_cancel"
-                android:paddingEnd="8dp"
-                android:layout_gravity="end|center_vertical"
-                android:layout_marginEnd="8dp" />
-
-        </FrameLayout>
-
-        <ImageButton
-            android:layout_width="wrap_content"
+        <ImageView
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/search_button"
-            android:src="@android:drawable/ic_menu_send"
-            android:background="@android:color/transparent" />
+            android:src="@drawable/breadit_material"
+            android:scaleType="centerCrop"
+            tools:ignore="ContentDescription" />
 
-    </LinearLayout>
+        <include layout="@layout/navigation_spacer"/>
 
-    <Spinner android:id="@+id/account_spinner"
+        <Spinner android:id="@+id/account_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_margin="8dp"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout style="@style/NavigationItemRelativeLayout"
+        android:id="@+id/home">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/keyline_1"
+            android:src="@drawable/ic_home"/>
+
+        <TextView
+            style="@style/NavigationItemText"
+            android:text="@string/home"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout style="@style/NavigationItemRelativeLayout"
+        android:id="@+id/inbox">
+
+        <TextView
+            style="@style/NavigationItemText"
+            android:text="@string/inbox"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout style="@style/NavigationItemRelativeLayout"
+        android:id="@+id/my_account">
+
+        <TextView
+            style="@style/NavigationItemText"
+            android:text="@string/my_account"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout style="@style/NavigationItemRelativeLayout"
+        android:id="@+id/friends">
+
+        <TextView
+            style="@style/NavigationItemText"
+            android:text="@string/friends"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout style="@style/NavigationItemRelativeLayout"
+        android:id="@+id/saved">
+
+        <TextView
+            style="@style/NavigationItemText"
+            android:text="@string/saved"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout style="@style/NavigationItemRelativeLayout"
+        android:id="@+id/submit">
+
+        <TextView
+            style="@style/NavigationItemText"
+            android:text="@string/submit"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout style="@style/NavigationItemRelativeLayout"
+        android:id="@+id/search">
+
+        <TextView
+            style="@style/NavigationItemText"
+            android:text="@string/search"/>
+
+    </RelativeLayout>
+
+    <View
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"/>
+        android:layout_height="1dp"
+        android:background="@color/darker_gray"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"/>
 
-    <TextView android:id="@+id/home"
-        style="@style/NavigationItemText"
-        android:textStyle="bold"
-        android:text="@string/home"/>
+    <RelativeLayout style="@style/NavigationItemRelativeLayout"
+        android:id="@+id/settings">
 
-    <TextView android:id="@+id/inbox"
-        style="@style/NavigationItemText"
-        android:text="@string/inbox"/>
+        <TextView
+            style="@style/NavigationItemText"
+            android:text="@string/settings"/>
 
-    <TextView android:id="@+id/submit"
-        style="@style/NavigationItemText"
-        android:text="@string/submit"/>
-
-    <TextView android:id="@+id/preferences"
-        style="@style/NavigationItemText"
-        android:text="@string/preferences"/>
+    </RelativeLayout>
 
 </LinearLayout>

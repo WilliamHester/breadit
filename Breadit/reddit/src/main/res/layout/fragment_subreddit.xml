@@ -16,7 +16,7 @@
             android:id="@+id/toolbar_actionbar"
             android:background="@null"
             breadit:titleTextAppearance="@style/ActionBar.TitleText"
-            breadit:contentInsetStart="@dimen/keyline_1"
+            breadit:contentInsetStart="@dimen/drawer_inset"
             android:layout_width="match_parent"
             android:layout_height="?actionBarSize">
 

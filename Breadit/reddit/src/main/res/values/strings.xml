@@ -137,16 +137,19 @@
 
     <!-- AccountActivity -->
     <string name="inbox">Inbox</string>
-    <string name="my_account">My account</string>
 
     <!-- NavigationDrawerFragment -->
     <string name="go">Go</string>
     <string name="unread_messages">Unread Messages</string>
     <string name="front_page">Front Page</string>
     <string name="logged_out">Logged out</string>
-    <string name="preferences">Preferences</string>
+    <string name="settings">Settings</string>
     <string name="subreddits">Subreddits</string>
     <string name="home">Home</string>
+    <string name="my_account">My Account</string>
+    <string name="search">Search</string>
+    <string name="friends">Friends</string>
+    <string name="saved">Saved</string>
 
     <!-- ImgurImageFragment -->
     <string name="toggle_description">Toggle description</string>

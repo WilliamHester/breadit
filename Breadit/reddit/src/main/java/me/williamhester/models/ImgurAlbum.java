@@ -26,9 +26,11 @@ public class ImgurAlbum implements Serializable, Parcelable {
     private int datetime;
     private int cover_width;
     private int cover_height;
-    private int ivews;
+    private int views;
     private int images_count;
     private ArrayList<ImgurImage> images;
+
+    private int mLastViewePosition = 0;
 
     public String getTitle() {
         return title;
@@ -36,6 +38,14 @@ public class ImgurAlbum implements Serializable, Parcelable {
 
     public List<ImgurImage> getImages() {
         return images;
+    }
+
+    public int getLastViewedPosition() {
+        return mLastViewePosition;
+    }
+
+    public void setLastViewedPosition(int position) {
+        mLastViewePosition = position;
     }
 
     @Override
@@ -57,8 +67,9 @@ public class ImgurAlbum implements Serializable, Parcelable {
         dest.writeInt(this.datetime);
         dest.writeInt(this.cover_width);
         dest.writeInt(this.cover_height);
-        dest.writeInt(this.ivews);
+        dest.writeInt(this.views);
         dest.writeInt(this.images_count);
+        dest.writeInt(this.mLastViewePosition);
         dest.writeList(this.images);
     }
 
@@ -75,8 +86,9 @@ public class ImgurAlbum implements Serializable, Parcelable {
         this.datetime = in.readInt();
         this.cover_width = in.readInt();
         this.cover_height = in.readInt();
-        this.ivews = in.readInt();
+        this.views = in.readInt();
         this.images_count = in.readInt();
+        this.mLastViewePosition = in.readInt();
         this.images = new ArrayList<>();
         in.readList(this.images, ImgurImage.class.getClassLoader());
     }

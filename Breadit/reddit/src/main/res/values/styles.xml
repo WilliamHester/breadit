@@ -29,12 +29,18 @@
         <item name="colorControlHighlight">#3fff</item>
     </style>
 
-    <style name="NavigationItemText" >
+    <style name="NavigationItemText">
         <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:textSize">16sp</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:layout_marginStart">@dimen/keyline_2</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:textSize">14sp</item>
         <item name="android:fontFamily">sans-serif</item>
-        <item name="android:padding">12sp</item>
+    </style>
+
+    <style name="NavigationItemRelativeLayout">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">48dp</item>
         <item name="android:background">?android:attr/selectableItemBackground</item>
     </style>
 

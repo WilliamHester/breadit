@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
@@ -32,6 +31,7 @@ import me.williamhester.ui.fragments.MessagesFragment;
 import me.williamhester.ui.fragments.NavigationDrawerFragment;
 import me.williamhester.ui.fragments.SidebarFragment;
 import me.williamhester.ui.fragments.SubredditFragment;
+import me.williamhester.ui.fragments.WebViewFragment;
 import me.williamhester.ui.fragments.YouTubeFragment;
 
 public class MainActivity extends ActionBarActivity implements ImageFragment.ImageTapCallbacks,
@@ -58,30 +58,29 @@ public class MainActivity extends ActionBarActivity implements ImageFragment.Ima
         if (Intent.ACTION_VIEW.equals(getIntent().getAction())) {
             if (getIntent().getExtras() != null) {
                 mSubredditTitle = getIntent().getExtras().getString(SUBREDDIT);
-            } else {
-                mSubredditTitle = getIntent().getDataString();
-                if (mSubredditTitle != null)
-                    mSubredditTitle = mSubredditTitle.substring(mSubredditTitle.indexOf("/subreddit/") + 11);
             }
         } else {
             mSubredditTitle = "";
+        }
+
+        String startFrom;
+        if (getIntent().getExtras() != null) {
+            startFrom = getIntent().getExtras().getString("startFrom", "subreddit");
+        } else {
+            startFrom = "subreddit";
         }
 
         Fragment f = getSupportFragmentManager().findFragmentById(R.id.left_drawer);
         if (f == null) {
             NavigationDrawerFragment ndf = NavigationDrawerFragment.newInstance();
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.left_drawer, ndf, "NavigationDrawer")
+                    .replace(R.id.left_drawer, ndf, "drawer")
                     .commit();
         }
 
         Fragment sub = getSupportFragmentManager().findFragmentByTag("subreddit");
         if (sub == null) {
             mSubredditFragment = SubredditFragment.newInstance(mSubredditTitle);
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.main_container, mSubredditFragment, "subreddit")
-                    .commit();
-            mCurrentFragment = mSubredditFragment;
         } else {
             mSubredditFragment = (SubredditFragment) sub;
         }
@@ -97,32 +96,32 @@ public class MainActivity extends ActionBarActivity implements ImageFragment.Ima
         if (side == null) {
             mSidebarFragment = SidebarFragment.newInstance(mSubredditTitle);
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.right_drawer, mSidebarFragment, "side")
+                    .replace(R.id.right_drawer, mSidebarFragment, "sidebar")
                     .commit();
         } else {
             mSidebarFragment = (SidebarFragment) side;
         }
 
-        getSupportFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
-            @Override
-            public void onBackStackChanged() {
-                Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.main_container);
-                if (fragment != null && fragment instanceof SubredditFragment) {
-                    mSubredditFragment = (SubredditFragment) fragment;
-                    onSubredditSelected(mSubredditFragment.getSubreddit());
-                }
-            }
-        });
-
+        switch (startFrom) {
+            case "inbox":
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.main_container, mMessagesFragment, "messages")
+                        .commit();
+                mCurrentFragment = mMessagesFragment;
+                break;
+            default:
+            case "subreddit":
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.main_container, mSubredditFragment, "subreddit")
+                        .commit();
+                mCurrentFragment = mSubredditFragment;
+                break;
+        }
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-
-        // ActionBarDrawerToggle ties together the the proper interactions
-        // between the navigation drawer and the action bar app icon.
         mDrawerToggle = new ActionBarDrawerToggle(
                 this,                             /* host Activity */
                 mDrawerLayout,                    /* DrawerLayout object */
-//                toolbar,
                 R.string.navigation_drawer_open,  /* "open drawer" description for accessibility */
                 R.string.navigation_drawer_close  /* "close drawer" description for accessibility */
         ) {
@@ -138,15 +137,12 @@ public class MainActivity extends ActionBarActivity implements ImageFragment.Ima
                 invalidateOptionsMenu(); // calls onPrepareOptionsMenu()
             }
         };
-
-        // Defer code dependent on restoration of previous instance state.
         mDrawerLayout.post(new Runnable() {
             @Override
             public void run() {
                 mDrawerToggle.syncState();
             }
         });
-
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
         if (AccountManager.isLoggedIn()) {
@@ -176,43 +172,26 @@ public class MainActivity extends ActionBarActivity implements ImageFragment.Ima
             mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, Gravity.END);
         }
 
-        if (!((mSubredditTitle == null && subreddit == null)
-                || (mSubredditTitle != null && mSubredditTitle.equals(subreddit)))) {
-            if (!TextUtils.isEmpty(subreddit)) {
-                RedditApi.getSubredditDetails(this, subreddit, new FutureCallback<JsonObject>() {
-                    @Override
-                    public void onCompleted(Exception e, JsonObject result) {
-                        if (e != null) {
-                            e.printStackTrace();
-                            return;
-                        }
-                        ResponseRedditWrapper response = new ResponseRedditWrapper(result, new Gson());
-                        if (response.getData() instanceof Subreddit) {
-                            mSidebarFragment.setSubreddit((Subreddit) response.getData());
-                            mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED,
-                                    Gravity.END);
-                        } else {
-                            mSubredditFragment.showSubredditDoesNotExist();
-                        }
+        mSubredditFragment.loadSubreddit(subreddit);
+
+        if (!TextUtils.isEmpty(subreddit)) {
+            RedditApi.getSubredditDetails(this, subreddit, new FutureCallback<JsonObject>() {
+                @Override
+                public void onCompleted(Exception e, JsonObject result) {
+                    if (e != null) {
+                        e.printStackTrace();
+                        return;
                     }
-                });
-            }
-            mSubredditTitle = subreddit;
-            if (getSupportFragmentManager().findFragmentByTag(subreddit) != null) {
-                mSubredditFragment = (SubredditFragment) getSupportFragmentManager().findFragmentByTag(subreddit);
-                if (!mSubredditFragment.isResumed()) {
-                    getSupportFragmentManager().beginTransaction()
-                            .addToBackStack(mSubredditTitle)
-                            .replace(R.id.main_container, mSubredditFragment, "subreddit")
-                            .commit();
+                    ResponseRedditWrapper response = new ResponseRedditWrapper(result, new Gson());
+                    if (response.getData() instanceof Subreddit) {
+                        mSidebarFragment.setSubreddit((Subreddit) response.getData());
+                        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED,
+                                Gravity.END);
+                    } else {
+                        mSubredditFragment.showSubredditDoesNotExist();
+                    }
                 }
-            } else {
-                mSubredditFragment = SubredditFragment.newInstance(subreddit);
-                getSupportFragmentManager().beginTransaction()
-                        .addToBackStack(mSubredditTitle)
-                        .replace(R.id.main_container, mSubredditFragment, "subreddit")
-                        .commit();
-            }
+            });
         }
     }
 
@@ -259,15 +238,12 @@ public class MainActivity extends ActionBarActivity implements ImageFragment.Ima
     }
 
     @Override
-    public void onSubmitSelected() {
-
-    }
-
-    @Override
     public void onBackPressed()  {
-        Fragment fragment = getSupportFragmentManager().findFragmentByTag("YouTubeFragment");
-        if (fragment != null && fragment instanceof YouTubeFragment
-                && ((YouTubeFragment) fragment).onBackPressed()) {
+        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.main_container);
+        if (fragment instanceof YouTubeFragment && ((YouTubeFragment) fragment).onBackPressed()) {
+            return;
+        }
+        if (fragment instanceof WebViewFragment && ((WebViewFragment) fragment).onBackPressed()) {
             return;
         }
         if (mDrawerLayout.isDrawerOpen(Gravity.START) || mDrawerLayout.isDrawerOpen(Gravity.END)) {

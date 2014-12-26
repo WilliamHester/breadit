@@ -1,21 +1,15 @@
 package me.williamhester.ui.fragments;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -50,38 +44,6 @@ public class NavigationDrawerFragment extends AccountFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_navigation_drawer, container, false);
-        final EditText subredditSearch = (EditText) v.findViewById(R.id.search_subreddit);
-        final ImageButton search = (ImageButton) v.findViewById(R.id.search_button);
-        ImageButton clear = (ImageButton) v.findViewById(R.id.clear);
-        search.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
-                        Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(search.getWindowToken(), 0);
-                selectItem(subredditSearch.getText().toString().trim());
-            }
-        });
-        subredditSearch.setImeActionLabel(getResources().getString(R.string.go),
-                EditorInfo.IME_ACTION_GO);
-        subredditSearch.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
-                if (actionId == EditorInfo.IME_ACTION_GO) {
-                    InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
-                            Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(search.getWindowToken(), 0);
-                    selectItem(subredditSearch.getText().toString().trim().replace(" ", ""));
-                }
-                return false;
-            }
-        });
-        clear.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                subredditSearch.setText("");
-            }
-        });
 
         Spinner accountSpinner = (Spinner) v.findViewById(R.id.account_spinner);
         accountSpinner.setAdapter(new AccountAdapter());
@@ -111,22 +73,18 @@ public class NavigationDrawerFragment extends AccountFragment {
         });
         selectCurrentAccount(v);
 
-        final TextView home = (TextView) v.findViewById(R.id.home);
-        final TextView messages = (TextView) v.findViewById(R.id.inbox);
+        final View home = v.findViewById(R.id.home);
+        final View messages = v.findViewById(R.id.inbox);
 
         home.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                messages.setTypeface(Typeface.SANS_SERIF);
-                home.setTypeface(home.getTypeface(), Typeface.BOLD);
                 mCallback.onHomeSelected();
             }
         });
         messages.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                messages.setTypeface(messages.getTypeface(), Typeface.BOLD);
-                home.setTypeface(Typeface.SANS_SERIF);
                 mCallback.onMessagesSelected();
             }
         });
@@ -140,7 +98,7 @@ public class NavigationDrawerFragment extends AccountFragment {
             }
         });
 
-        View settings = v.findViewById(R.id.preferences);
+        View settings = v.findViewById(R.id.settings);
         settings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -216,7 +174,6 @@ public class NavigationDrawerFragment extends AccountFragment {
         public void onAccountChanged();
         public void onHomeSelected();
         public void onMessagesSelected();
-        public void onSubmitSelected();
     }
 
     private class AccountAdapter extends ArrayAdapter<String> {

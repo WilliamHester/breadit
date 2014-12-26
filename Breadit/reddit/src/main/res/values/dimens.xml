@@ -1,7 +1,8 @@
 <resources>
 
     <dimen name="headerbar_elevation">4dp</dimen>
-    <dimen name="keyline_1">48dp</dimen>
+    <dimen name="drawer_inset">48dp</dimen>
+    <dimen name="keyline_1">16dp</dimen>
     <dimen name="keyline_2">60dp</dimen>
 
     <!-- Default screen margins, per the Android Design guidelines. -->
@@ -10,7 +11,7 @@
 
         <!-- Per the design guidelines, navigation drawers should be between 240dp and 320dp:
          https://developer.android.com/design/patterns/navigation-drawer.html -->
-    <dimen name="navigation_drawer_width">270dp</dimen>
+    <dimen name="navigation_drawer_width">300dp</dimen>
 
     <dimen name="clear_button_font_size">20sp</dimen>
 

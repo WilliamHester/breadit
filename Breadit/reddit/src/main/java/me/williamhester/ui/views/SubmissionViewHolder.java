@@ -45,7 +45,6 @@ public class SubmissionViewHolder extends VotableViewHolder {
     private View mNsfwWarning;
     private View mOptionsRow;
     private View mImagePreviewView;
-    private View mNsfwBlocker;
     private View mSelfTextView;
     private View mShowSelfText;
 
@@ -122,7 +121,6 @@ public class SubmissionViewHolder extends VotableViewHolder {
         mImagePreviewView = itemView.findViewById(R.id.submission_image_preview);
         mImageView = (ImageView) itemView.findViewById(R.id.image);
         mImageButton = (ImageButton) itemView.findViewById(R.id.preview_button);
-        mNsfwBlocker = itemView.findViewById(R.id.nsfw_blocker);
 
         mSelfTextView = itemView.findViewById(R.id.submission_self_text);
         mSelfText = (TextView) itemView.findViewById(R.id.self_text);
@@ -182,6 +180,9 @@ public class SubmissionViewHolder extends VotableViewHolder {
         } else if (SettingsManager.isLowBandwidth()) {
             setUpLink();
         } else {
+            if (mSubmission.getLinkDetails() == null) {
+                mSubmission.setLinkDetails(new Url(mSubmission.getUrl()));
+            }
             switch (mSubmission.getLinkDetails().getType()) {
                 case Url.IMGUR_IMAGE:
                 case Url.IMGUR_ALBUM:
@@ -255,11 +256,6 @@ public class SubmissionViewHolder extends VotableViewHolder {
 
         final Url linkDetails = mSubmission.getLinkDetails();
         String id = linkDetails.getLinkId();
-//        if (mSubmission.isNsfw()) {
-//            mNsfwBlocker.setVisibility(View.VISIBLE);
-//            return;
-//        }
-//        mNsfwBlocker.setVisibility(View.GONE);
         switch (linkDetails.getType()) {
             case Url.IMGUR_IMAGE: {
                 mImageView.setVisibility(View.VISIBLE);
@@ -308,9 +304,6 @@ public class SubmissionViewHolder extends VotableViewHolder {
                 });
                 break;
             }
-            default: { // It's special, but not special enough
-//                mContainer.setVisibility(View.GONE);
-            }
         }
     }
 
@@ -350,8 +343,6 @@ public class SubmissionViewHolder extends VotableViewHolder {
                     mCallback.onImageViewClicked(mSubmission.getImgurData());
                 }
             });
-        } else {
-//            mContainer.setVisibility(View.GONE);
         }
     }
 

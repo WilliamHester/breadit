@@ -41,6 +41,7 @@ public class ImagePagerFragment extends Fragment {
 
     private FragmentPagerAdapter mAdapter;
     private Handler mAnimHandler;
+    private ImgurAlbum mAlbum;
     private Runnable mAnimRunnable;
     private String mTitle;
     private int mCurrentPosition;
@@ -49,7 +50,7 @@ public class ImagePagerFragment extends Fragment {
 
     public static ImagePagerFragment newInstance(ImgurImage image) {
         Bundle args = new Bundle();
-        args.putSerializable(IMAGE, image);
+        args.putParcelable(IMAGE, image);
         ImagePagerFragment fragment = new ImagePagerFragment();
         fragment.setArguments(args);
         return fragment;
@@ -57,7 +58,7 @@ public class ImagePagerFragment extends Fragment {
 
     public static ImagePagerFragment newInstance(ImgurAlbum album) {
         Bundle args = new Bundle();
-        args.putSerializable(ALBUM, album);
+        args.putParcelable(ALBUM, album);
         ImagePagerFragment fragment = new ImagePagerFragment();
         fragment.setArguments(args);
         return fragment;
@@ -117,13 +118,13 @@ public class ImagePagerFragment extends Fragment {
 
         if (getArguments() != null) {
             if (getArguments().containsKey(IMAGE)) {
-                ImgurImage image = (ImgurImage) getArguments().getSerializable(IMAGE);
+                ImgurImage image = getArguments().getParcelable(IMAGE);
                 mAdapter = new ImgurAlbumAdapter(getChildFragmentManager(), image);
                 mTitle = image.getTitle();
             } else if (getArguments().containsKey(ALBUM)) {
-                ImgurAlbum album = (ImgurAlbum) getArguments().getSerializable(ALBUM);
-                mAdapter = new ImgurAlbumAdapter(getChildFragmentManager(), album);
-                mTitle = album.getTitle();
+                mAlbum = getArguments().getParcelable(ALBUM);
+                mAdapter = new ImgurAlbumAdapter(getChildFragmentManager(), mAlbum);
+                mTitle = mAlbum.getTitle();
             } else if (getArguments().containsKey(IMAGE_URL)) {
                 String imageUrl = getArguments().getString(IMAGE_URL);
                 mAdapter = new SingleImageAdapter(getChildFragmentManager(), imageUrl);
@@ -180,6 +181,7 @@ public class ImagePagerFragment extends Fragment {
     private void setUpAdapter(View v) {
         View progressBar = v.findViewById(R.id.progress_bar);
         progressBar.setVisibility(View.GONE);
+        ViewPager pager = (ViewPager) v.findViewById(R.id.view_pager);
         final TextView indicator = (TextView) v.findViewById(R.id.pager_indicator);
         if (mAdapter.getCount() < 2) {
             indicator.setVisibility(View.INVISIBLE);
@@ -209,40 +211,42 @@ public class ImagePagerFragment extends Fragment {
                 }
             };
             mAnimHandler.postDelayed(mAnimRunnable, PAGER_INDICATOR_MS);
+            pager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+                @Override
+                public void onPageScrolled(int position, float positionOffset, int pixels) {
+                    if (positionOffset > 0.5f) {
+                        mCurrentPosition = position + 1;
+                    } else if (positionOffset < -0.5f) {
+                        mCurrentPosition = position - 1;
+                    } else {
+                        mCurrentPosition = position;
+                    }
+                    indicator.setText((mCurrentPosition + 1) + " of " + mAdapter.getCount());
+                }
+
+                @Override
+                public void onPageSelected(int i) {
+                    mCurrentPosition = i;
+                }
+
+                @Override
+                public void onPageScrollStateChanged(int i) {
+                    switch (i) {
+                        case ViewPager.SCROLL_STATE_DRAGGING:
+                            indicator.setVisibility(View.VISIBLE);
+                            mAnimHandler.removeCallbacks(mAnimRunnable);
+                            break;
+                        case ViewPager.SCROLL_STATE_IDLE:
+                            mAnimHandler.postDelayed(mAnimRunnable, PAGER_INDICATOR_MS);
+                            break;
+                    }
+                }
+            });
         }
-        ViewPager pager = (ViewPager) v.findViewById(R.id.view_pager);
-        pager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int pixels) {
-                if (positionOffset > 0.5f) {
-                    mCurrentPosition = position + 1;
-                } else if (positionOffset < -0.5f) {
-                    mCurrentPosition = position - 1;
-                } else {
-                    mCurrentPosition = position;
-                }
-                indicator.setText((mCurrentPosition + 1) + " of " + mAdapter.getCount());
-            }
-
-            @Override
-            public void onPageSelected(int i) {
-                mCurrentPosition = i;
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int i) {
-                switch (i) {
-                    case ViewPager.SCROLL_STATE_DRAGGING:
-                        indicator.setVisibility(View.VISIBLE);
-                        mAnimHandler.removeCallbacks(mAnimRunnable);
-                        break;
-                    case ViewPager.SCROLL_STATE_IDLE:
-                        mAnimHandler.postDelayed(mAnimRunnable, PAGER_INDICATOR_MS);
-                        break;
-                }
-            }
-        });
         pager.setAdapter(mAdapter);
+        if (mAlbum != null) {
+            pager.setCurrentItem(mAlbum.getLastViewedPosition());
+        }
     }
 
     @Override

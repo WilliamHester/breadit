@@ -411,11 +411,7 @@ public class SubredditFragment extends AccountFragment implements Toolbar.OnMenu
                 spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     @Override
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        mProgressBar.setVisibility(View.VISIBLE);
-                        mSubredditName = position == 0 ? "" : mSubredditList.get(position - 1).getDisplayName();
-                        mSubmissionList.clear();
-                        mSubmissionsAdapter.notifyDataSetChanged();
-                        loadAndClear();
+                        loadSubreddit(position == 0 ? "" : mSubredditList.get(position - 1).getDisplayName());
                     }
 
                     @Override
@@ -429,11 +425,7 @@ public class SubredditFragment extends AccountFragment implements Toolbar.OnMenu
                 spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     @Override
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        mProgressBar.setVisibility(View.VISIBLE);
-                        mSubredditName = position == 0 ? "" : subs[position - 1];
-                        mSubmissionList.clear();
-                        mSubmissionsAdapter.notifyDataSetChanged();
-                        loadAndClear();
+                        loadSubreddit(position == 0 ? "" : subs[position - 1]);
                     }
 
                     @Override
@@ -443,6 +435,14 @@ public class SubredditFragment extends AccountFragment implements Toolbar.OnMenu
                 });
             }
         }
+    }
+
+    public void loadSubreddit(String subredditTitle) {
+        mSubredditName = subredditTitle;
+        mProgressBar.setVisibility(View.VISIBLE);
+        mSubmissionList.clear();
+        mSubmissionsAdapter.notifyDataSetChanged();
+        loadAndClear();
     }
 
     @Override

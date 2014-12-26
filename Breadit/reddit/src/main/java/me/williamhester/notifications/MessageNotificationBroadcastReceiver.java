@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;
+import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.text.Html;
 
@@ -98,6 +99,9 @@ public class MessageNotificationBroadcastReceiver extends BroadcastReceiver {
                     // Issue the notification here.
 
                     Intent messageIntent = new Intent(context, MainActivity.class);
+                    Bundle args = new Bundle();
+                    args.putString("startFrom", "inbox");
+                    messageIntent.putExtras(args);
 
                     // The stack builder object will contain an artificial back stack for the
                     // started Activity.

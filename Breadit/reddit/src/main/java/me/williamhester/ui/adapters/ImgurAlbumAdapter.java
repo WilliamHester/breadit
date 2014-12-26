@@ -19,6 +19,7 @@ import me.williamhester.ui.fragments.ImageFragment;
  */
 public class ImgurAlbumAdapter extends FragmentPagerAdapter {
 
+    private ImgurAlbum mAlbum;
     private List<ImgurImage> mImages;
     private FragmentManager mFragmentManager;
 
@@ -26,6 +27,7 @@ public class ImgurAlbumAdapter extends FragmentPagerAdapter {
         super(fm);
         mImages = album.getImages();
         mFragmentManager = fm;
+        mAlbum = album;
     }
 
     public ImgurAlbumAdapter(FragmentManager fm, ImgurImage image) {
@@ -39,6 +41,9 @@ public class ImgurAlbumAdapter extends FragmentPagerAdapter {
     public Object instantiateItem(ViewGroup viewGroup, int position) {
         mFragmentManager.executePendingTransactions();
         FragmentTransaction ft = mFragmentManager.beginTransaction();
+        if (mAlbum != null) {
+            mAlbum.setLastViewedPosition(position);
+        }
 
         // Do we already have this fragment?
         Fragment fragment = mFragmentManager.findFragmentByTag("IMAGE_" + mImages.get(position).getId());
