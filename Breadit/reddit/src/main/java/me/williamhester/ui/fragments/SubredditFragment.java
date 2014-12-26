@@ -206,7 +206,7 @@ public class SubredditFragment extends AccountFragment implements Toolbar.OnMenu
         anchor.setTag(popupMenu);
         anchor.setOnTouchListener(popupMenu.getDragToOpenListener());
         popupMenu.setOnMenuItemClickListener(mSortClickListener);
-        popupMenu.inflate(R.menu.comment_sorts);
+        popupMenu.inflate(R.menu.primary_sorts);
     }
 
     @Override
@@ -693,7 +693,7 @@ public class SubredditFragment extends AccountFragment implements Toolbar.OnMenu
         @Override
         public boolean onMenuItemClick(MenuItem item) {
             String tempSortType;
-            View anchor = getActivity().findViewById(R.id.action_sort);
+            View anchor = mToolbar.findViewById(R.id.action_sort);
             switch (item.getItemId()) {
                 case R.id.sort_hot:
                     tempSortType = RedditApi.SORT_TYPE_HOT;
