@@ -29,35 +29,7 @@ public class UserActivity extends ActionBarActivity {
             mUsername = getIntent().getExtras().getString("username");
         }
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.container, UserFragment.newInstance(mUsername))
+                .replace(R.id.main_container, UserFragment.newInstance(mUsername))
                 .commit();
-
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.user, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        switch (id) {
-            case android.R.id.home:
-                finish();
-                return true;
-            case R.id.action_compose_message:
-                ComposeMessageFragment fragment = ComposeMessageFragment.newInstance(mUsername);
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.main_container, fragment, "compose")
-                        .addToBackStack("compose")
-                        .commit();
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 }

@@ -1,17 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ListView
-        android:paddingLeft="8dp"
-        android:paddingRight="8dp"
-        android:id="@+id/submitted"
+    <FrameLayout style="@style/HeaderBar"
+        android:id="@+id/header_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:breadit="http://schemas.android.com/apk/res-auto"
+            breadit:theme="@style/ActionBarThemeOverlay"
+            breadit:popupTheme="@style/ActionBarPopupThemeOverlay"
+            android:id="@+id/toolbar_actionbar"
+            android:background="@null"
+            breadit:titleTextAppearance="@style/ActionBar.TitleText"
+            breadit:contentInsetStart="@dimen/drawer_inset"
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize">
+
+            <Spinner android:id="@+id/user_spinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+        </android.support.v7.widget.Toolbar>
+
+    </FrameLayout>
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:divider="@android:color/transparent"
-        android:dividerHeight="4dp"
-        android:descendantFocusability="afterDescendants"/>
+        android:orientation="vertical">
 
-</LinearLayout>
+        <FrameLayout android:id="@+id/content_container"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <android.support.v4.widget.SwipeRefreshLayout
+                android:id="@+id/swipe_refresh"
+                android:layout_height="match_parent"
+                android:layout_width="match_parent">
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/content_list"
+                    android:scrollbars="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:paddingLeft="@dimen/submission_view_padding"
+                    android:paddingRight="@dimen/submission_view_padding"/>
+
+            </android.support.v4.widget.SwipeRefreshLayout>
+
+            <!-- This view is set to invisible for now, because it's not done yet. -->
+            <!--<me.williamhester.ui.views.CircleImageView android:id="@+id/scroll_to_top"-->
+            <!--android:layout_gravity="center_horizontal"-->
+            <!--android:layout_marginTop="24dp"-->
+            <!--android:layout_width="40dp"-->
+            <!--android:layout_height="40dp"-->
+            <!--android:padding="4dp"-->
+            <!--android:src="@drawable/ic_action_up"/>-->
+
+        </FrameLayout>
+
+        <ProgressBar android:id="@+id/progress_bar"
+            style="?android:progressBarStyleHorizontal"
+            android:layout_marginTop="-7dp"
+            android:layout_marginBottom="-7dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"/>
+
+    </LinearLayout>
+
+    <TextView android:id="@+id/theres_nothing_here"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:textSize="16sp"
+        android:fontFamily="sans-serif-thin"
+        android:text="@string/theres_nothing_here"
+        android:visibility="gone"/>
+
+</FrameLayout>

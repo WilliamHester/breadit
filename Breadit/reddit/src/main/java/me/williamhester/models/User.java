@@ -3,19 +3,23 @@ package me.williamhester.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.annotations.SerializedName;
 
-import java.io.IOException;
 import java.util.Calendar;
-
-import me.williamhester.models.utils.Utilities;
 
 /**
  * Created by William on 4/13/14.
  */
 public class User implements Parcelable {
+
+    public static final String OVERVIEW = "";
+    public static final String COMMENTS = "comments";
+    public static final String SUBMITTED = "submitted";
+    public static final String GILDED = "gilded";
+    public static final String LIKED = "liked";
+    public static final String DISLIKED = "disliked";
+    public static final String HIDDEN = "hidden";
+    public static final String SAVED = "saved";
 
     @SerializedName("name")
     private String mUsername;
@@ -50,6 +54,9 @@ public class User implements Parcelable {
     @SerializedName("has_mod_mail")
     private boolean mHasModMail;
 
+    public User() {
+
+    }
 
     public int getCommentKarma() {
         return mCommentKarma;
@@ -144,6 +151,10 @@ public class User implements Parcelable {
         return sb.toString();
     }
 
+    public static class UserNotFoundException extends Exception {
+
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -151,28 +162,44 @@ public class User implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.mUsername);
+        dest.writeString(this.mModhash);
+        dest.writeString(this.mId);
         dest.writeInt(this.mCommentKarma);
         dest.writeInt(this.mLinkKarma);
-        dest.writeLong(this.mCreated);
+        dest.writeInt(this.mGoldExpiration);
+        dest.writeInt(this.mGoldCreddits);
         dest.writeLong(this.mCreatedUtc);
-        dest.writeByte(mIsFriend ? (byte) 1 : (byte) 0);
-        dest.writeByte(mIsMod ? (byte) 1 : (byte) 0);
+        dest.writeLong(this.mCreated);
         dest.writeByte(mHasVerifiedEmail ? (byte) 1 : (byte) 0);
-        dest.writeString(this.mUsername);
+        dest.writeByte(mIsFriend ? (byte) 1 : (byte) 0);
+        dest.writeByte(mHasMail ? (byte) 1 : (byte) 0);
+        dest.writeByte(mIsOver18 ? (byte) 1 : (byte) 0);
+        dest.writeByte(mIsGold ? (byte) 1 : (byte) 0);
+        dest.writeByte(mIsMod ? (byte) 1 : (byte) 0);
+        dest.writeByte(mHasModMail ? (byte) 1 : (byte) 0);
     }
 
     private User(Parcel in) {
+        this.mUsername = in.readString();
+        this.mModhash = in.readString();
+        this.mId = in.readString();
         this.mCommentKarma = in.readInt();
         this.mLinkKarma = in.readInt();
-        this.mCreated = in.readLong();
+        this.mGoldExpiration = in.readInt();
+        this.mGoldCreddits = in.readInt();
         this.mCreatedUtc = in.readLong();
-        this.mIsFriend = in.readByte() != 0;
-        this.mIsMod = in.readByte() != 0;
+        this.mCreated = in.readLong();
         this.mHasVerifiedEmail = in.readByte() != 0;
-        this.mUsername = in.readString();
+        this.mIsFriend = in.readByte() != 0;
+        this.mHasMail = in.readByte() != 0;
+        this.mIsOver18 = in.readByte() != 0;
+        this.mIsGold = in.readByte() != 0;
+        this.mIsMod = in.readByte() != 0;
+        this.mHasModMail = in.readByte() != 0;
     }
 
-    public static Parcelable.Creator<User> CREATOR = new Parcelable.Creator<User>() {
+    public static final Creator<User> CREATOR = new Creator<User>() {
         public User createFromParcel(Parcel source) {
             return new User(source);
         }
@@ -181,8 +208,4 @@ public class User implements Parcelable {
             return new User[size];
         }
     };
-
-    public static class UserNotFoundException extends Exception {
-
-    }
 }

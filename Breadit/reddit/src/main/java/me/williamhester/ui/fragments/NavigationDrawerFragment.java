@@ -108,6 +108,14 @@ public class NavigationDrawerFragment extends AccountFragment {
                 startActivityForResult(i, SettingsFragment.LOG_IN_REQUEST);
             }
         });
+
+        View myAccount = v.findViewById(R.id.my_account);
+        myAccount.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCallback.onMyAccountSelected();
+            }
+        });
         return v;
     }
 
@@ -174,6 +182,7 @@ public class NavigationDrawerFragment extends AccountFragment {
         public void onAccountChanged();
         public void onHomeSelected();
         public void onMessagesSelected();
+        public void onMyAccountSelected();
     }
 
     private class AccountAdapter extends ArrayAdapter<String> {

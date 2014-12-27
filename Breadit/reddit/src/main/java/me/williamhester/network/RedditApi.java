@@ -527,10 +527,10 @@ public class RedditApi {
         });
     }
 
-    public static void getUserContent(Context context, String username, String after,
+    public static void getUserContent(Context context, String username, String after, String type,
                                       FutureCallback<JsonObject> callback) {
         Ion.with(context)
-                .load(REDDIT_URL + "/user/" + username + "/.json")
+                .load(REDDIT_URL + "/user/" + username + "/" + type)
                 .addHeaders(getStandardHeaders())
                 .addQuery("after", after)
                 .asJsonObject()

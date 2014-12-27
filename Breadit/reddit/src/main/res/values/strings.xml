@@ -259,4 +259,9 @@
         <item quantity="one">New Message</item>
         <item quantity="other">New Messages</item>
     </plurals>
+
+    <!-- UserFragment -->
+    <string name="theres_nothing_here">There\'s nothing here.</string>
+    <string name="user">User</string>
+
 </resources>

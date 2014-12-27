@@ -31,6 +31,7 @@ import me.williamhester.ui.fragments.MessagesFragment;
 import me.williamhester.ui.fragments.NavigationDrawerFragment;
 import me.williamhester.ui.fragments.SidebarFragment;
 import me.williamhester.ui.fragments.SubredditFragment;
+import me.williamhester.ui.fragments.UserFragment;
 import me.williamhester.ui.fragments.WebViewFragment;
 import me.williamhester.ui.fragments.YouTubeFragment;
 
@@ -45,6 +46,7 @@ public class MainActivity extends ActionBarActivity implements ImageFragment.Ima
     private Fragment mCurrentFragment;
     private MessagesFragment mMessagesFragment;
     private SubredditFragment mSubredditFragment;
+    private UserFragment mMyAccountFragment;
     private SidebarFragment mSidebarFragment;
     private String mSubredditTitle;
 
@@ -90,6 +92,13 @@ public class MainActivity extends ActionBarActivity implements ImageFragment.Ima
             mMessagesFragment = (MessagesFragment) messages;
         }
 
+        Fragment myAccount = getSupportFragmentManager().findFragmentByTag("myAccount");
+        if (myAccount == null) {
+            mMyAccountFragment = UserFragment.newInstance();
+        } else {
+            mMyAccountFragment = (UserFragment) myAccount;
+        }
+
         Fragment side = getSupportFragmentManager().findFragmentById(R.id.right_drawer);
         if (side == null) {
             mSidebarFragment = SidebarFragment.newInstance(mSubredditTitle);
@@ -100,20 +109,30 @@ public class MainActivity extends ActionBarActivity implements ImageFragment.Ima
             mSidebarFragment = (SidebarFragment) side;
         }
 
-        switch (startFrom) {
-            case "inbox":
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.main_container, mMessagesFragment, "messages")
-                        .commit();
-                mCurrentFragment = mMessagesFragment;
-                break;
-            default:
-            case "subreddit":
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.main_container, mSubredditFragment, "subreddit")
-                        .commit();
-                mCurrentFragment = mSubredditFragment;
-                break;
+        if (savedInstanceState == null) {
+            switch (startFrom) {
+                case "inbox":
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.main_container, mMessagesFragment, "messages")
+                            .commit();
+                    mCurrentFragment = mMessagesFragment;
+                    break;
+                case "myAccount":
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.main_container, mMyAccountFragment, "messages")
+                            .commit();
+                    mCurrentFragment = mMessagesFragment;
+                    break;
+                default:
+                case "subreddit":
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.main_container, mSubredditFragment, "subreddit")
+                            .commit();
+                    mCurrentFragment = mSubredditFragment;
+                    break;
+            }
+        } else {
+            mCurrentFragment = getSupportFragmentManager().findFragmentById(R.id.main_container);
         }
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -233,6 +252,22 @@ public class MainActivity extends ActionBarActivity implements ImageFragment.Ima
         }
         mDrawerLayout.closeDrawer(Gravity.START);
         mCurrentFragment = mMessagesFragment;
+    }
+
+    @Override
+    public void onMyAccountSelected() {
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        if (mMyAccountFragment.isDetached()) {
+            ft.attach(mMyAccountFragment)
+                    .detach(mCurrentFragment)
+                    .commit();
+        } else if (!mMyAccountFragment.isAdded()) {
+            ft.add(R.id.main_container, mMyAccountFragment, "myAccount")
+                    .detach(mCurrentFragment)
+                    .commit();
+        }
+        mDrawerLayout.closeDrawer(Gravity.START);
+        mCurrentFragment = mMyAccountFragment;
     }
 
     @Override

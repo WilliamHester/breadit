@@ -160,7 +160,7 @@ public class SubredditFragment extends AccountFragment implements Toolbar.OnMenu
         mProgressBar = (ProgressBar) v.findViewById(R.id.progress_bar);
 
         mLayoutManager = new LinearLayoutManager(getActivity());
-        mRecyclerView = (RecyclerView) v.findViewById(R.id.submissions_list);
+        mRecyclerView = (RecyclerView) v.findViewById(R.id.content_list);
         mRecyclerView.addItemDecoration(new DividerItemDecoration(getResources().getDrawable(
                 R.drawable.card_divider)));
         mRecyclerView.setLayoutManager(mLayoutManager);
@@ -177,7 +177,7 @@ public class SubredditFragment extends AccountFragment implements Toolbar.OnMenu
         });
 
         mSubredditAdapter = new SubredditAdapter();
-        Spinner subreddits = (Spinner) v.findViewById(R.id.subreddit_spinner);
+        Spinner subreddits = (Spinner) v.findViewById(R.id.user_spinner);
         subreddits.setAdapter(mSubredditAdapter);
         loadSubreddits(v);
 
@@ -351,7 +351,7 @@ public class SubredditFragment extends AccountFragment implements Toolbar.OnMenu
     private void loadSubreddits(View view) {
         mSubredditList.clear();
         if (view != null) {
-            Spinner spinner = (Spinner) view.findViewById(R.id.subreddit_spinner);
+            Spinner spinner = (Spinner) view.findViewById(R.id.user_spinner);
             if (mAccount != null) {
                 mSubredditList.clear();
                 AccountDataSource dataSource = new AccountDataSource(getActivity());

@@ -433,16 +433,9 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
                         extras.putString("permalink", mMessage.getContext());
                         i.putExtras(extras);
                         startActivity(i);
-                    } else {
-                        // Start a new fragment that shows the conversation like an instant messenger
+//                    } else {
+                        // Todo: make a new fragment that shows the conversation like an instant messenger
                     }
-                    // Do something specific to the message type. If it was a comment, then prompt
-                    //     the user to either view context or that comment's single thread
-                    //     either case will require a modification to the CommentsFragment that will
-                    //     allow the user to switch to view the ENTIRE list of comments instead of
-                    //     just that comment's thread. This should be done through a flag to the
-                    //     activity, or maybe just simply containing the specific comment to get the
-                    //     context of.
                 }
             });
         }

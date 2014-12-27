@@ -85,4 +85,22 @@
         <item>1440</item>
         <item>-1</item>
     </string-array>
+
+    <string-array name="user_data_types">
+        <item>Overview</item>
+        <item>Comments</item>
+        <item>Submitted</item>
+        <item>Gilded</item>
+    </string-array>
+
+    <string-array name="my_account_data_types">
+        <item>Overview</item>
+        <item>Comments</item>
+        <item>Submitted</item>
+        <item>Gilded</item>
+        <item>Liked</item>
+        <item>Disliked</item>
+        <item>Hidden</item>
+        <item>Saved</item>
+    </string-array>
 </resources>
