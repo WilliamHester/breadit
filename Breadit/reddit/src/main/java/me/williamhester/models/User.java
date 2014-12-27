@@ -5,6 +5,7 @@ import android.os.Parcelable;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.annotations.SerializedName;
 
 import java.io.IOException;
 import java.util.Calendar;
@@ -16,37 +17,39 @@ import me.williamhester.models.utils.Utilities;
  */
 public class User implements Parcelable {
 
-    private int mCommentKarma;
-    private int mLinkKarma;
-    private long mCreated;
-    private long mCreatedUtc;
-    private boolean mIsFriend;
-    private boolean mIsMod;
-    private boolean mHasVerifiedEmail;
+    @SerializedName("name")
     private String mUsername;
+    @SerializedName("modhash")
+    private String mModhash;
+    @SerializedName("id")
+    private String mId;
+    @SerializedName("comment_karma")
+    private int mCommentKarma;
+    @SerializedName("link_karma")
+    private int mLinkKarma;
+    @SerializedName("gold_expiration")
+    private int mGoldExpiration;
+    @SerializedName("gold_creddits")
+    private int mGoldCreddits;
+    @SerializedName("created_utc")
+    private long mCreatedUtc;
+    @SerializedName("created")
+    private long mCreated;
+    @SerializedName("has_verified_email")
+    private boolean mHasVerifiedEmail;
+    @SerializedName("is_friend")
+    private boolean mIsFriend;
+    @SerializedName("has_mail")
+    private boolean mHasMail;
+    @SerializedName("over_18")
+    private boolean mIsOver18;
+    @SerializedName("is_gold")
+    private boolean mIsGold;
+    @SerializedName("is_mod")
+    private boolean mIsMod;
+    @SerializedName("has_mod_mail")
+    private boolean mHasModMail;
 
-    private User(JsonObject data) {
-        mCommentKarma = data.get("comment_karma").getAsInt();
-        mLinkKarma = data.get("link_karma").getAsInt();
-        mCreated = data.get("created").getAsLong();
-        mCreatedUtc = data.get("created_utc").getAsLong();
-        mIsFriend = data.get("is_friend").getAsBoolean();
-        mIsMod = data.get("is_mod").getAsBoolean();
-        mUsername = data.get("name").getAsString();
-        if (!data.get("has_verified_email").isJsonNull()) {
-            mHasVerifiedEmail = data.get("has_verified_email").getAsBoolean();
-        }
-    }
-
-    public static User getUser(String username, Account account) throws IOException,
-            UserNotFoundException {
-        String s;
-        s = Utilities.get("", "http://www.reddit.com/user/" + username + "/about.json", account);
-        if (s.equals("{\"error\": 404}"))
-            throw new UserNotFoundException();
-        JsonObject jsonObject = new JsonParser().parse(s).getAsJsonObject();
-        return new User(jsonObject.getAsJsonObject("data"));
-    }
 
     public int getCommentKarma() {
         return mCommentKarma;
@@ -74,6 +77,10 @@ public class User implements Parcelable {
 
     public boolean hasVerifiedEmail() {
         return mHasVerifiedEmail;
+    }
+
+    public boolean isLoggedInAccount() {
+        return mModhash != null;
     }
 
     public String getUsername() {

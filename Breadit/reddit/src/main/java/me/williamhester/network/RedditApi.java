@@ -2,7 +2,6 @@ package me.williamhester.network;
 
 import android.content.Context;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -27,13 +26,14 @@ import me.williamhester.models.AbsComment;
 import me.williamhester.models.Account;
 import me.williamhester.models.AccountManager;
 import me.williamhester.models.Comment;
+import me.williamhester.models.GenericResponseRedditWrapper;
 import me.williamhester.models.Listing;
 import me.williamhester.models.ResponseRedditWrapper;
 import me.williamhester.models.Submission;
 import me.williamhester.models.Subreddit;
 import me.williamhester.models.Thing;
+import me.williamhester.models.User;
 import me.williamhester.models.Votable;
-import me.williamhester.reddit.R;
 
 /**
  * Created by William on 6/14/14.
@@ -527,13 +527,22 @@ public class RedditApi {
         });
     }
 
-    public static void getUserDetails(Context context, String username, String after,
+    public static void getUserContent(Context context, String username, String after,
                                       FutureCallback<JsonObject> callback) {
         Ion.with(context)
                 .load(REDDIT_URL + "/user/" + username + "/.json")
                 .addHeaders(getStandardHeaders())
                 .addQuery("after", after)
                 .asJsonObject()
+                .setCallback(callback);
+    }
+
+    public static void getUserAbout(Context context, String username,
+                                    FutureCallback<GenericResponseRedditWrapper<User>> callback) {
+        Ion.with(context)
+                .load(REDDIT_URL + "/user/" + username + "/about.json")
+                .addHeaders(getStandardHeaders())
+                .as(new TypeToken<GenericResponseRedditWrapper<User>>() {})
                 .setCallback(callback);
     }
 

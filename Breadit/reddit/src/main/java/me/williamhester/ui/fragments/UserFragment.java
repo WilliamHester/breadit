@@ -1,7 +1,6 @@
 package me.williamhester.ui.fragments;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,12 +14,12 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.koushikdutta.async.future.FutureCallback;
 
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import me.williamhester.models.AccountManager;
 import me.williamhester.models.Comment;
+import me.williamhester.models.GenericResponseRedditWrapper;
 import me.williamhester.models.Listing;
 import me.williamhester.models.ResponseRedditWrapper;
 import me.williamhester.models.Submission;
@@ -73,8 +72,20 @@ public class UserFragment extends AccountFragment {
         listView.addHeaderView(createHeaderView(inflater));
         listView.setAdapter(mSubmittedAdapter);
         listView.setOnScrollListener(new InfiniteLoadingScrollListener());
-        RedditApi.getUserDetails(getActivity(), mUsername, null, mSubmittedThingsCallback);
-        new LoadUserDataTask().execute();
+        RedditApi.getUserContent(getActivity(), mUsername, null, mSubmittedThingsCallback);
+        RedditApi.getUserAbout(getActivity(), mUsername, new FutureCallback<GenericResponseRedditWrapper<User>>() {
+            @Override
+            public void onCompleted(Exception e, GenericResponseRedditWrapper<User> result) {
+                if (e != null) {
+                    return;
+                }
+                mUser = result.getData();
+                DecimalFormat format = new DecimalFormat("###,###,###,##0");
+                mLinkKarma.setText(format.format(mUser.getLinkKarma()) + " Link karma");
+                mCommentKarma.setText(format.format(mUser.getCommentKarma()) + " Comment karma");
+                mCakeDay.setText(mUser.calculateCakeDay());
+            }
+        });
         return v;
     }
 
@@ -242,34 +253,7 @@ public class UserFragment extends AccountFragment {
         } else {
             after = mSubmittedThings.get(mSubmittedThings.size() - 1).getName();
         }
-        RedditApi.getUserDetails(getActivity(), mUsername, after, mSubmittedThingsCallback);
-    }
-
-    private class LoadUserDataTask extends AsyncTask<Void, Void, User> {
-        @Override
-        protected User doInBackground(Void... voids) {
-            try {
-                return User.getUser(mUsername, mAccount);
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (User.UserNotFoundException e) {
-                // Tell the user that the user could not be found.
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(User result) {
-            if (result != null) {
-                mUser = result;
-                DecimalFormat format = new DecimalFormat("###,###,###,##0");
-                mLinkKarma.setText(format.format(result.getLinkKarma()) + " Link karma");
-                mCommentKarma.setText(format.format(result.getCommentKarma()) + " Comment karma");
-                mCakeDay.setText(mUser.calculateCakeDay());
-            }
-            mSubmittedAdapter.notifyDataSetChanged();
-        }
+        RedditApi.getUserContent(getActivity(), mUsername, after, mSubmittedThingsCallback);
     }
 
 }
