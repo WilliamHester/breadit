@@ -19,6 +19,7 @@ import com.koushikdutta.async.future.FutureCallback;
 import me.williamhester.models.ImgurAlbum;
 import me.williamhester.models.ImgurImage;
 import me.williamhester.models.ResponseImgurWrapper;
+import me.williamhester.models.Submission;
 import me.williamhester.network.ImgurApi;
 import me.williamhester.reddit.R;
 import me.williamhester.tools.Url;
@@ -78,6 +79,10 @@ public class ImagePagerFragment extends Fragment {
         ImagePagerFragment fragment = new ImagePagerFragment();
         fragment.setArguments(args);
         return fragment;
+    }
+
+    public static ImagePagerFragment newInstance(Submission submission) {
+        return ImagePagerFragment.newInstance(submission.getImgurData());
     }
 
     public static ImagePagerFragment newInstance(Object object) {

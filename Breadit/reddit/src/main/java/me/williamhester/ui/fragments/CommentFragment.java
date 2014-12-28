@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
@@ -47,7 +48,8 @@ import me.williamhester.ui.views.CommentViewHolder;
 import me.williamhester.ui.views.DividerItemDecoration;
 import me.williamhester.ui.views.SubmissionViewHolder;
 
-public class CommentFragment extends AccountFragment implements Toolbar.OnMenuItemClickListener {
+public class CommentFragment extends AccountFragment implements Toolbar.OnMenuItemClickListener,
+        SubmissionViewHolder.OnVotedListener{
 
     private static final String PERMALINK = "permalink";
     private static final int REPLY_REQUEST = 1;
@@ -301,6 +303,16 @@ public class CommentFragment extends AccountFragment implements Toolbar.OnMenuIt
         return children.size();
     }
 
+    @Override
+    public void onVoted(Submission submission) {
+        Bundle data = new Bundle();
+        Intent i = new Intent();
+        data.putString("name", submission.getName());
+        data.putInt("status", submission.getVoteStatus());
+        i.putExtras(data);
+        getActivity().setResult(Activity.RESULT_OK, i);
+    }
+
     private PopupMenu.OnMenuItemClickListener mSortClickListener = new PopupMenu.OnMenuItemClickListener() {
         @Override
         public boolean onMenuItemClick(MenuItem item) {
@@ -425,8 +437,11 @@ public class CommentFragment extends AccountFragment implements Toolbar.OnMenuIt
             LayoutInflater inflater = LayoutInflater.from(parent.getContext());
             switch (viewType) {
                 case SUBMISSION:
-                    return new SubmissionViewHolder(inflater.inflate(R.layout.header_comments,
+                    SubmissionViewHolder holder = new SubmissionViewHolder(
+                            inflater.inflate(R.layout.header_comments,
                             parent, false), mSubmissionCallbacks);
+                    holder.setOnVotedListener(CommentFragment.this);
+                    return holder;
                 case COMMENT:
                     return new CommentViewHolder(inflater.inflate(R.layout.list_item_comment,
                             parent, false), mCommentCallbacks);
@@ -524,40 +539,15 @@ public class CommentFragment extends AccountFragment implements Toolbar.OnMenuIt
     }
 
     private SubmissionViewHolder.SubmissionCallbacks mSubmissionCallbacks = new SubmissionViewHolder.SubmissionCallbacks() {
+
         @Override
-        public void onImageViewClicked(Object imgurData) {
-            getFragmentManager().beginTransaction()
-                    .add(R.id.main_container, ImagePagerFragment.newInstance(imgurData), "ImagePagerFragment")
-                    .addToBackStack("ImagePagerFragment")
-                    .commit();
+        public FragmentManager getFragmentManager() {
+            return CommentFragment.this.getFragmentManager();
         }
 
         @Override
-        public void onImageViewClicked(String imageUrl) {
-            getFragmentManager().beginTransaction()
-                    .add(R.id.main_container, ImagePagerFragment.newInstance(imageUrl), "ImagePagerFragment")
-                    .addToBackStack("ImagePagerFragment")
-                    .commit();
-        }
-
-        @Override
-        public void onLinkClicked(Submission submission) {
-
-        }
-
-        @Override
-        public void onYouTubeVideoClicked(String videoId) {
-            // TODO: fix this when YouTube updates their Android API
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                getFragmentManager().beginTransaction()
-                        .add(R.id.main_container, YouTubeFragment.newInstance(videoId), "YouTubeFragment")
-                        .addToBackStack("YouTubeFragment")
-                        .commit();
-            } else {
-                Intent i = new Intent(Intent.ACTION_VIEW,
-                        Uri.parse("http://www.youtube.com/watch?v=" + videoId));
-                getActivity().startActivity(i);
-            }
+        public Activity getActivity() {
+            return CommentFragment.this.getActivity();
         }
 
         @Override
@@ -636,16 +626,6 @@ public class CommentFragment extends AccountFragment implements Toolbar.OnMenuIt
                     inflateOverflowPopupMenu(view, submission);
                     break;
             }
-        }
-
-        @Override
-        public void onVoted(Submission submission) {
-            Bundle data = new Bundle();
-            Intent i = new Intent();
-            data.putString("name", submission.getName());
-            data.putInt("status", submission.getVoteStatus());
-            i.putExtras(data);
-            getActivity().setResult(Activity.RESULT_OK, i);
         }
 
         @Override

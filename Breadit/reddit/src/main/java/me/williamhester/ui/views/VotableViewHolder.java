@@ -63,6 +63,10 @@ public abstract class VotableViewHolder extends RecyclerView.ViewHolder {
      */
     protected abstract void onVoted();
 
+    public abstract void expandOptions();
+
+    public abstract void collapseOptions();
+
     public void setContent(Object object) {
         if (object instanceof Votable) {
             mVotable = (Votable) object;

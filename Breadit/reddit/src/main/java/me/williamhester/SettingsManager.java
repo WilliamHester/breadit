@@ -26,7 +26,7 @@ public class SettingsManager {
         mPrefs = context.getSharedPreferences("preferences", Context.MODE_PRIVATE);
         mCommentSort = mPrefs.getString("pref_default_comment_sort", RedditApi.COMMENT_SORT_BEST);
         mShowThumbnails = mPrefs.getBoolean("pref_show_thumbnails", true);
-        mLowBandwidthMode = mPrefs.getBoolean("pref_low_bandwidth", false);
+        mLowBandwidthMode = mPrefs.getBoolean("pref_low_bandwidth_mode", false);
         mNotificationInterval = Integer.parseInt(mPrefs.getString("pref_notification_interval", "60"));
     }
 

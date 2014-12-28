@@ -445,6 +445,16 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
 
         }
 
+        @Override
+        public void expandOptions() {
+
+        }
+
+        @Override
+        public void collapseOptions() {
+
+        }
+
         public void setContent(Object object) {
             super.setContent(object);
             mMessage = (Message) object;

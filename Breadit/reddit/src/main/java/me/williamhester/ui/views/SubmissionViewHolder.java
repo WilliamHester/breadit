@@ -1,6 +1,13 @@
 package me.williamhester.ui.views;
 
 import android.animation.ObjectAnimator;
+import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.text.Html;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
@@ -23,6 +30,12 @@ import me.williamhester.network.ImgurApi;
 import me.williamhester.reddit.R;
 import me.williamhester.tools.HtmlParser;
 import me.williamhester.tools.Url;
+import me.williamhester.ui.activities.MainActivity;
+import me.williamhester.ui.activities.SubmissionActivity;
+import me.williamhester.ui.activities.UserActivity;
+import me.williamhester.ui.fragments.ImagePagerFragment;
+import me.williamhester.ui.fragments.WebViewFragment;
+import me.williamhester.ui.fragments.YouTubeFragment;
 
 /**
  * This class is intended to be used with the RecyclerView class; however, it can be used nearly
@@ -48,6 +61,7 @@ public class SubmissionViewHolder extends VotableViewHolder {
     private View mSelfTextView;
     private View mShowSelfText;
 
+    private OnVotedListener mOnVotedListener;
     protected Submission mSubmission;
     protected SubmissionCallbacks mCallback;
 
@@ -114,7 +128,7 @@ public class SubmissionViewHolder extends VotableViewHolder {
         mBasicLinkView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mCallback.onLinkClicked(mSubmission);
+                onLinkClicked();
             }
         });
 
@@ -146,11 +160,6 @@ public class SubmissionViewHolder extends VotableViewHolder {
             }
         };
         mExpandButton.setOnClickListener(expandListener);
-    }
-
-    @Override
-    protected void onVoted() {
-        mCallback.onVoted(mSubmission);
     }
 
     @Override
@@ -205,6 +214,20 @@ public class SubmissionViewHolder extends VotableViewHolder {
                     break;
             }
         }
+    }
+
+    @Override
+    protected void onVoted() {
+        if (mOnVotedListener != null) {
+            mOnVotedListener.onVoted(mSubmission);
+        }
+        mMetadata.setText(mSubmission.getAuthor() + " " + mSubmission.getScore() + " "
+                + itemView.getResources().getQuantityString(R.plurals.points,
+                mSubmission.getScore()));
+    }
+
+    public void setOnVotedListener(OnVotedListener listener) {
+        mOnVotedListener = listener;
     }
 
     private void setUpBasic() {
@@ -287,7 +310,7 @@ public class SubmissionViewHolder extends VotableViewHolder {
                 mImageButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        mCallback.onYouTubeVideoClicked(linkDetails.getLinkId());
+                        onYouTubeVideoClicked(linkDetails.getLinkId());
                     }
                 });
                 break;
@@ -299,7 +322,7 @@ public class SubmissionViewHolder extends VotableViewHolder {
                 mImageView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        mCallback.onImageViewClicked(mSubmission.getUrl());
+                        onImageViewClicked();
                     }
                 });
                 break;
@@ -340,9 +363,86 @@ public class SubmissionViewHolder extends VotableViewHolder {
             mImageView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    mCallback.onImageViewClicked(mSubmission.getImgurData());
+                    onImageViewClicked();
                 }
             });
+        }
+    }
+
+    public void onImageViewClicked() {
+        mCallback.getFragmentManager().beginTransaction()
+                .add(R.id.main_container, ImagePagerFragment.newInstance(mSubmission),
+                        "ImagePagerFragment")
+                .addToBackStack("ImagePagerFragment")
+                .commit();
+    }
+
+    public void onLinkClicked() {
+        Url link = mSubmission.getLinkDetails();
+        Bundle args = new Bundle();
+        args.putString("permalink", link.getUrl());
+        Intent i = null;
+        Fragment f = null;
+        switch (link.getType()) {
+            case Url.SUBMISSION:
+                i = new Intent(mCallback.getActivity(), SubmissionActivity.class);
+                break;
+            case Url.SUBREDDIT:
+                i = new Intent(mCallback.getActivity(), MainActivity.class);
+                i.setAction(Intent.ACTION_VIEW);
+                args.putString(MainActivity.SUBREDDIT, link.getLinkId());
+                break;
+            case Url.USER:
+                i = new Intent(mCallback.getActivity(), UserActivity.class);
+                break;
+            case Url.IMGUR_GALLERY: // For now, we're going to go to a WebView because weird things happen with galleries
+            case Url.NOT_SPECIAL: // Go to a WebView
+                f = WebViewFragment.newInstance(link.getUrl());
+                break;
+            case Url.IMGUR_ALBUM:
+                f = ImagePagerFragment.newInstanceLazyLoaded(link.getLinkId(), true);
+                break;
+            case Url.IMGUR_IMAGE:
+                f = ImagePagerFragment.newInstanceLazyLoaded(link.getLinkId(), false);
+                break;
+            case Url.YOUTUBE:
+                // TODO: fix this when YouTube updates their Android API
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                    f = YouTubeFragment.newInstance(link.getLinkId());
+                } else {
+                    i = new Intent(Intent.ACTION_VIEW, Uri.parse(mSubmission.getUrl()));
+                }
+                break;
+            case Url.DIRECT_GFY:
+            case Url.GFYCAT_LINK:
+            case Url.GIF:
+            case Url.NORMAL_IMAGE:
+                f = ImagePagerFragment.newInstance(link);
+                break;
+        }
+        if (i != null) {
+            i.putExtras(args);
+            mCallback.getActivity().startActivity(i);
+        } else if (f != null) {
+            mCallback.getFragmentManager().beginTransaction()
+                    .add(R.id.main_container, f, "Link")
+                    .addToBackStack("Link")
+                    .commit();
+        }
+    }
+
+    public void onYouTubeVideoClicked(String videoId) {
+        // TODO: fix this when YouTube updates their Android API
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            mCallback.getFragmentManager().beginTransaction()
+                    .add(R.id.main_container, YouTubeFragment.newInstance(videoId),
+                            "YouTubeFragment")
+                    .addToBackStack("YouTubeFragment")
+                    .commit();
+        } else {
+            Intent i = new Intent(Intent.ACTION_VIEW,
+                    Uri.parse("http://www.youtube.com/watch?v=" + videoId));
+            mCallback.getActivity().startActivity(i);
         }
     }
 
@@ -387,15 +487,16 @@ public class SubmissionViewHolder extends VotableViewHolder {
 //        optionSave.setVisibility(AccountManager.isLoggedIn() ? View.VISIBLE : View.GONE);
     }
 
+    public static interface OnVotedListener {
+        public void onVoted(Submission submission);
+    }
+
     public static interface SubmissionCallbacks {
-        public void onImageViewClicked(Object imgurData);
-        public void onImageViewClicked(String imageUrl);
-        public void onLinkClicked(Submission submission);
-        public void onYouTubeVideoClicked(String videoId);
+        public FragmentManager getFragmentManager();
+        public Activity getActivity();
         public void onCardClicked(Submission submission);
         public void onCardLongPressed(SubmissionViewHolder holder);
         public void onOptionsRowItemSelected(View view, Submission submission);
-        public void onVoted(Submission submission);
         public boolean isFrontPage();
     }
 }

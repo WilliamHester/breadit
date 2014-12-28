@@ -7,6 +7,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import me.williamhester.SettingsManager;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.fragments.SettingsFragment;
 
@@ -58,4 +59,10 @@ public class SettingsActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        SettingsManager.init(this);
+    }
 }

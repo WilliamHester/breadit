@@ -112,8 +112,12 @@
     <string name="sorting_settings">Sorting</string>
     <string name="default_comment_sort_title">Default comment sort</string>
     <string name="default_comment_sort">Default sort type when viewing comments</string>
-    <string name="notifications">Notifications</string>
+    <string name="network">Network</string>
     <string name="notification_interval">Notification interval</string>
+    <string name="low_bandwidth_mode">Low Bandwidth Mode</string>
+    <string name="low_bandwidth_mode_summary">Don\'t load image or video previews.</string>
+    <string name="show_thumbnails">Show Thumbnails</string>
+    <string name="show_thumbnails_summary">Load link thumbnails.</string>
 
     <!-- Drawer -->
     <string name="search_sub_hint">Go to a Subreddit</string>

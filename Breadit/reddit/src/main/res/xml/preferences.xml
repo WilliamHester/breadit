@@ -68,7 +68,7 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="@string/notifications"
+        android:title="@string/network"
         android:key="pref_user_options" >
 
         <ListPreference
@@ -77,6 +77,19 @@
             android:entries="@array/notification_intervals"
             android:entryValues="@array/notification_interval_values"
             android:defaultValue="60"/>
+
+        <CheckBoxPreference
+            android:title="@string/low_bandwidth_mode"
+            android:summary="@string/low_bandwidth_mode_summary"
+            android:key="pref_low_bandwidth_mode"
+            android:defaultValue="false"/>
+
+        <CheckBoxPreference
+            android:title="@string/show_thumbnails"
+            android:summary="@string/show_thumbnails_summary"
+            android:dependency="pref_low_bandwidth_mode"
+            android:key="pref_show_thumbnails"
+            android:defaultValue="true"/>
 
     </PreferenceCategory>
 </PreferenceScreen>

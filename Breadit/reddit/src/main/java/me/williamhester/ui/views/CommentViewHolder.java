@@ -114,6 +114,16 @@ public class CommentViewHolder extends VotableViewHolder {
         // Don't do anything
     }
 
+    @Override
+    public void expandOptions() {
+
+    }
+
+    @Override
+    public void collapseOptions() {
+        collapse(mOptionsRow);
+    }
+
     public void setContent(Object comment) {
         super.setContent(comment);
         mComment = (Comment) comment;
@@ -191,10 +201,6 @@ public class CommentViewHolder extends VotableViewHolder {
 
     public boolean isHidden() {
         return mComment.isHidden();
-    }
-
-    public void collapseOptions() {
-        collapse(mOptionsRow);
     }
 
     private View.OnClickListener mHideCommentsClickListener = new View.OnClickListener() {

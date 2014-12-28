@@ -5,8 +5,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarActivity;
@@ -446,45 +444,6 @@ public class SubredditFragment extends AccountFragment implements Toolbar.OnMenu
     }
 
     @Override
-    public void onImageViewClicked(Object imgurData) {
-        getFragmentManager().beginTransaction()
-                .add(R.id.main_container, ImagePagerFragment.newInstance(imgurData),
-                        "ImagePagerFragment")
-                .addToBackStack("ImagePagerFragment")
-                .commit();
-    }
-
-    @Override
-    public void onImageViewClicked(String imageUrl) {
-        getFragmentManager().beginTransaction()
-                .add(R.id.main_container, ImagePagerFragment.newInstance(imageUrl),
-                        "ImagePagerFragment")
-                .addToBackStack("ImagePagerFragment")
-                .commit();
-    }
-
-    @Override
-    public void onLinkClicked(Submission submission) {
-
-    }
-
-    @Override
-    public void onYouTubeVideoClicked(String videoId) {
-        // TODO: fix this when YouTube updates their Android API
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            getFragmentManager().beginTransaction()
-                    .add(R.id.main_container, YouTubeFragment.newInstance(videoId),
-                            "YouTubeFragment")
-                    .addToBackStack("YouTubeFragment")
-                    .commit();
-        } else {
-            Intent i = new Intent(Intent.ACTION_VIEW,
-                    Uri.parse("http://www.youtube.com/watch?v=" + videoId));
-            getActivity().startActivity(i);
-        }
-    }
-
-    @Override
     public void onCardClicked(Submission submission) {
         Intent i = new Intent(getActivity(), SubmissionActivity.class);
         Bundle args = new Bundle();
@@ -549,11 +508,6 @@ public class SubredditFragment extends AccountFragment implements Toolbar.OnMenu
                 inflateOverflowPopupMenu(view, submission);
                 break;
         }
-    }
-
-    @Override
-    public void onVoted(Submission submission) {
-        // Don't do anything
     }
 
     @Override

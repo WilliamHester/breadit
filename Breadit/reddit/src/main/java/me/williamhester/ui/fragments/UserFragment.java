@@ -3,6 +3,7 @@ package me.williamhester.ui.fragments;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -32,16 +33,21 @@ import me.williamhester.models.Comment;
 import me.williamhester.models.GenericResponseRedditWrapper;
 import me.williamhester.models.Listing;
 import me.williamhester.models.ResponseRedditWrapper;
+import me.williamhester.models.Submission;
 import me.williamhester.models.User;
 import me.williamhester.models.Votable;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
+import me.williamhester.ui.activities.SubmissionActivity;
 import me.williamhester.ui.views.CommentViewHolder;
 import me.williamhester.ui.views.DividerItemDecoration;
 import me.williamhester.ui.views.SubmissionViewHolder;
 import me.williamhester.ui.views.VotableViewHolder;
 
-public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemClickListener {
+public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemClickListener,
+        SubmissionViewHolder.SubmissionCallbacks, CommentViewHolder.CommentClickCallbacks {
+
+    public static final int VOTE_REQUEST_CODE = 1;
 
     private String mUsername;
     private User mUser;
@@ -57,6 +63,7 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
     private ProgressBar mProgressBar;
     private RecyclerView mVotableRecyclerView;
     private SwipeRefreshLayout mRefreshLayout;
+    private VotableViewHolder mFocusedVotable;
     private TextView mCakeDay;
     private TextView mCommentKarma;
     private TextView mLinkKarma;
@@ -321,6 +328,62 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
         }
     };
 
+    @Override
+    public void onCardClicked(Submission submission) {
+        Intent i = new Intent(getActivity(), SubmissionActivity.class);
+        Bundle args = new Bundle();
+        args.putParcelable(SubmissionActivity.SUBMISSION, submission);
+        args.putParcelable("media", submission.getMedia());
+        i.putExtras(args);
+        startActivityForResult(i, VOTE_REQUEST_CODE);
+    }
+
+    @Override
+    public void onCardLongPressed(SubmissionViewHolder holder) {
+        holder.expandOptions();
+        if (mFocusedVotable != null) {
+            mFocusedVotable.collapseOptions();
+            if (mFocusedVotable == holder) {
+                mFocusedVotable = null;
+                return;
+            }
+        }
+        mFocusedVotable = holder;
+    }
+
+    @Override
+    public void onOptionsRowItemSelected(View view, Submission submission) {
+
+    }
+
+    @Override
+    public boolean isFrontPage() {
+        return false;
+    }
+
+    @Override
+    public void onBodyClick(CommentViewHolder viewHolder, Comment comment) {
+        // Do nothing
+    }
+
+    @Override
+    public void onCommentLongPressed(CommentViewHolder holder) {
+        holder.expandOptions();
+        if (mFocusedVotable != null) {
+            mFocusedVotable.collapseOptions();
+            if (mFocusedVotable == holder) {
+                mFocusedVotable = null;
+                return;
+            }
+        }
+        mFocusedVotable = holder;
+    }
+
+    @Override
+    public void onOptionsRowItemSelected(View view, Comment comment) {
+
+    }
+
     private class VotableAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         public static final int HEADER_SPACER = 0;
@@ -345,12 +408,12 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
                 case SUBMISSION: {
                     return new SubmissionViewHolder(
                             inflater.inflate(R.layout.list_item_submission, parent, false),
-                            null);
+                            UserFragment.this);
                 }
                 case COMMENT: {
                     return new CommentViewHolder(
                             inflater.inflate(R.layout.list_item_comment_card, parent, false),
-                            null);
+                            UserFragment.this);
                 }
             }
             return null;
