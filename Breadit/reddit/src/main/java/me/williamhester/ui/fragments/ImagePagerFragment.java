@@ -82,7 +82,10 @@ public class ImagePagerFragment extends Fragment {
     }
 
     public static ImagePagerFragment newInstance(Submission submission) {
-        return ImagePagerFragment.newInstance(submission.getImgurData());
+        if (submission.getImgurData() != null) {
+            return newInstance(submission.getImgurData());
+        }
+        return newInstance(submission.getUrl());
     }
 
     public static ImagePagerFragment newInstance(Object object) {
