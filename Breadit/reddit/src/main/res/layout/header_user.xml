@@ -1,53 +1,100 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    style="@style/CardView.Dark"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="8dp"
-    android:background="@color/blackish">
-
-    <TextView android:id="@+id/username"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/auburn_orange"
-        android:textSize="30sp"
-        android:fontFamily="sans-serif-condensed"
-        android:paddingBottom="8dp"/>
-
-    <TextView android:id="@+id/link_karma"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingBottom="8dp"
-        android:textColor="@color/mid_gray"/>
-
-    <TextView android:id="@+id/comment_karma"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingBottom="8dp"
-        android:textColor="@color/mid_gray"/>
-
-    <TextView android:id="@+id/cakeday"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/mid_gray"
-        android:paddingBottom="8dp"/>
+    android:layout_height="wrap_content"
+    card_view:cardCornerRadius="2dp">
 
     <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent"
+        android:padding="8dp">
 
-        <TextView
+        <TextView android:id="@+id/username"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/filter"
-            android:textColor="@color/mid_gray"
-            android:paddingRight="8dp"/>
+            android:textColor="@color/auburn_orange"
+            android:textSize="30sp"
+            android:fontFamily="sans-serif-condensed"
+            android:text="/u/Shockwave_"
+            android:paddingBottom="8dp"/>
 
-        <Spinner android:id="@+id/filter"
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="8dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:gravity="start"
+                android:orientation="vertical">
+
+                <TextView android:id="@+id/link_karma"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="8dp"
+                    android:text="1,000,000"/>
+
+                <TextView android:id="@+id/link_karma_static"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/link_karma"
+                    android:text="@string/link_karma"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:gravity="start"
+                android:orientation="vertical">
+
+                <TextView android:id="@+id/comment_karma"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="8dp"
+                    android:text="1,000,000"/>
+
+                <TextView android:id="@+id/comment_karma_static"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/comment_karma"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <TextView android:id="@+id/cakeday"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:text="Cake Day on December 18th"
+            android:paddingBottom="8dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button android:id="@+id/message"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="@string/message"/>
+
+            <Button android:id="@+id/friends"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="@string/friend"/>
+
+        </LinearLayout>
 
     </LinearLayout>
 
-</LinearLayout>
+</android.support.v7.widget.CardView>

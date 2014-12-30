@@ -254,8 +254,8 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
                         spinner.setAdapter(adapter);
                     }
                     DecimalFormat format = new DecimalFormat("###,###,###,##0");
-                    mLinkKarma.setText(format.format(mUser.getLinkKarma()) + " Link karma");
-                    mCommentKarma.setText(format.format(mUser.getCommentKarma()) + " Comment karma");
+                    mLinkKarma.setText(format.format(mUser.getLinkKarma()));
+                    mCommentKarma.setText(format.format(mUser.getCommentKarma()));
                     mCakeDay.setText(mUser.calculateCakeDay());
                 }
             });

@@ -3,19 +3,10 @@ package me.williamhester.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.Spannable;
-import android.util.Log;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.annotations.SerializedName;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import me.williamhester.models.utils.Utilities;
 
 /**
  * Created by William on 4/12/14.

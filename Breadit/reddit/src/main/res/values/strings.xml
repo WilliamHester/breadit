@@ -267,5 +267,9 @@
     <!-- UserFragment -->
     <string name="theres_nothing_here">There\'s nothing here.</string>
     <string name="user">User</string>
+    <string name="link_karma">Link Karma</string>
+    <string name="comment_karma">Comment Karma</string>
+    <string name="message">Message</string>
+    <string name="friend">Friend</string>
 
 </resources>

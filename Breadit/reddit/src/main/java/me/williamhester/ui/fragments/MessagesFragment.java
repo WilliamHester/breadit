@@ -34,7 +34,6 @@ import java.util.ArrayList;
 import me.williamhester.models.GenericListing;
 import me.williamhester.models.GenericResponseRedditWrapper;
 import me.williamhester.models.Message;
-import me.williamhester.models.utils.Utilities;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 import me.williamhester.tools.HtmlParser;
@@ -473,7 +472,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
             }
 
             mAuthor.setText(mMessage.getAuthor());
-            mMetadata.setText(" " + Utilities.calculateTimeShort(mMessage.getCreatedUtc()));
+            mMetadata.setText(" " + calculateTimeShort(mMessage.getCreatedUtc()));
             String unescaped = Html.fromHtml(mMessage.getBodyHtml()).toString();
             HtmlParser parser = new HtmlParser(unescaped);
             mBody.setText(parser.getSpannableString());

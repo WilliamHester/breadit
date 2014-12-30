@@ -1,22 +1,10 @@
 package me.williamhester.models;
 
 import android.database.Cursor;
-import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
-
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-
-import me.williamhester.models.utils.Utilities;
 
 public class Account implements Parcelable {
 

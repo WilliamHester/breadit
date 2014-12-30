@@ -1,7 +1,6 @@
 package me.williamhester.ui.views;
 
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
@@ -9,7 +8,6 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import me.williamhester.models.Votable;
-import me.williamhester.models.utils.Utilities;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 
@@ -72,7 +70,7 @@ public abstract class VotableViewHolder extends RecyclerView.ViewHolder {
             mVotable = (Votable) object;
             mSwipeView.recycle(mVotable);
             if (mTime != null) {
-                mTime.setText(Utilities.calculateTimeShort(mVotable.getCreatedUtc()));
+                mTime.setText(calculateTimeShort(mVotable.getCreatedUtc()));
             }
             setVoteStatus();
         } else {
@@ -151,4 +149,27 @@ public abstract class VotableViewHolder extends RecyclerView.ViewHolder {
                 / v.getContext().getResources().getDisplayMetrics().density, 300));
         v.startAnimation(a);
     }
+
+    protected static String calculateTimeShort(long postTime) {
+        long currentTime = System.currentTimeMillis() / 1000;
+        long difference = currentTime - postTime;
+        String time;
+        if (difference / 31536000 > 0) {
+            time = difference / 31536000 + "y";
+        } else if (difference / 2592000 > 0) {
+            time = difference / 2592000 + "mo";
+        } else if (difference / 604800 > 0) {
+            time = difference / 604800 + "w";
+        } else if (difference / 86400 > 0) {
+            time = difference / 86400 + "d";
+        } else if (difference / 3600 > 0) {
+            time = difference / 3600 + "h";
+        } else if (difference / 60 > 0) {
+            time = difference / 60 + "m";
+        } else {
+            time = difference + "s";
+        }
+        return time;
+    }
+
 }
