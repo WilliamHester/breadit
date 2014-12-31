@@ -19,7 +19,6 @@
             android:textColor="@color/auburn_orange"
             android:textSize="30sp"
             android:fontFamily="sans-serif-condensed"
-            android:text="/u/Shockwave_"
             android:paddingBottom="8dp"/>
 
         <LinearLayout
@@ -38,7 +37,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingBottom="8dp"
-                    android:text="1,000,000"/>
+                    android:text="@string/zero"/>
 
                 <TextView android:id="@+id/link_karma_static"
                     android:layout_width="wrap_content"
@@ -59,7 +58,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingBottom="8dp"
-                    android:text="1,000,000"/>
+                    android:text="@string/zero"/>
 
                 <TextView android:id="@+id/comment_karma_static"
                     android:layout_width="wrap_content"
@@ -73,7 +72,6 @@
         <TextView android:id="@+id/cakeday"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Cake Day on December 18th"
             android:paddingBottom="8dp"/>
 
         <LinearLayout
@@ -85,13 +83,15 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text="@string/message"/>
+                android:text="@string/message"
+                android:visibility="gone"/>
 
             <Button android:id="@+id/friends"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text="@string/friend"/>
+                android:text="@string/friend"
+                android:visibility="gone"/>
 
         </LinearLayout>
 

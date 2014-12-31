@@ -271,5 +271,6 @@
     <string name="comment_karma">Comment Karma</string>
     <string name="message">Message</string>
     <string name="friend">Friend</string>
+    <string name="zero">0</string>
 
 </resources>

@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
@@ -30,6 +31,7 @@ import com.koushikdutta.async.future.FutureCallback;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
+import me.williamhester.models.AccountManager;
 import me.williamhester.models.Comment;
 import me.williamhester.models.GenericResponseRedditWrapper;
 import me.williamhester.models.Listing;
@@ -72,6 +74,7 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
     private TextView mLinkKarma;
     private Toolbar mToolbar;
     private View mHeaderBar;
+    private View mUserHeader;
 
     private boolean mLoading;
     private boolean mRefreshing;
@@ -256,10 +259,7 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
                                 getResources().getStringArray(R.array.my_account_data_types));
                         spinner.setAdapter(adapter);
                     }
-                    DecimalFormat format = new DecimalFormat("###,###,###,##0");
-                    mLinkKarma.setText(format.format(mUser.getLinkKarma()));
-                    mCommentKarma.setText(format.format(mUser.getCommentKarma()));
-                    mCakeDay.setText(mUser.calculateCakeDay());
+                    updateHeaderView();
                 }
             });
         }
@@ -299,13 +299,50 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
     }
 
     private View createHeaderView(LayoutInflater inflater, ViewGroup parent) {
-        View v = inflater.inflate(R.layout.header_user, parent, false);
-        TextView username = (TextView) v.findViewById(R.id.username);
-        mCommentKarma = (TextView) v.findViewById(R.id.comment_karma);
-        mLinkKarma = (TextView) v.findViewById(R.id.link_karma);
-        mCakeDay = (TextView) v.findViewById(R.id.cakeday);
+        mUserHeader = inflater.inflate(R.layout.header_user, parent, false);
+        TextView username = (TextView) mUserHeader.findViewById(R.id.username);
+        mCommentKarma = (TextView) mUserHeader.findViewById(R.id.comment_karma);
+        mLinkKarma = (TextView) mUserHeader.findViewById(R.id.link_karma);
+        mCakeDay = (TextView) mUserHeader.findViewById(R.id.cakeday);
         username.setText("/u/" + mUsername);
-        return v;
+
+        View friend = mUserHeader.findViewById(R.id.friends);
+        friend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                RedditApi.friend
+            }
+        });
+        View message = mUserHeader.findViewById(R.id.message);
+        message.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Fragment f = ComposeMessageFragment.newInstance(mUsername);
+                getFragmentManager().beginTransaction()
+                        .replace(R.id.main_container, f, "message")
+                        .addToBackStack("message")
+                        .commit();
+            }
+        });
+
+        updateHeaderView();
+        return mUserHeader;
+    }
+
+    private void updateHeaderView() {
+        if (mUser != null) {
+            DecimalFormat format = new DecimalFormat("###,###,###,##0");
+            mLinkKarma.setText(format.format(mUser.getLinkKarma()));
+            mCommentKarma.setText(format.format(mUser.getCommentKarma()));
+            mCakeDay.setText(mUser.calculateCakeDay());
+
+            View message = mUserHeader.findViewById(R.id.message);
+            message.setVisibility(!mUser.isLoggedInAccount() && AccountManager.isLoggedIn() ?
+                    View.VISIBLE : View.GONE);
+            View friend = mUserHeader.findViewById(R.id.friends);
+            friend.setVisibility(!mUser.isLoggedInAccount() && AccountManager.isLoggedIn() ?
+                    View.VISIBLE : View.GONE);
+        }
     }
 
     private FutureCallback<JsonObject> mThingsCallback = new FutureCallback<JsonObject>() {

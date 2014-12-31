@@ -639,7 +639,9 @@ public class RedditApi {
                 .setCallback(callback);
     }
 
-    public static void getMe(Context context, final FutureCallback<JsonObject> callback) {
+//    public static void friend(Context context, )
+
+    public static void getMe(final FutureCallback<JsonObject> callback) {
         AsyncHttpRequest request = new AsyncHttpGet(REDDIT_URL + "/api/me.json");
         Account account = AccountManager.getAccount();
         request.addHeader("Cookie", "reddit_session=\"" + account.getCookie() + "\"");

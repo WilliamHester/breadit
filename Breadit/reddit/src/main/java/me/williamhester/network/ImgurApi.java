@@ -6,7 +6,7 @@ import android.widget.ImageView;
 import com.google.gson.reflect.TypeToken;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.async.http.AsyncHttpClientMiddleware;
-import com.koushikdutta.async.http.ResponseCacheMiddleware;
+import com.koushikdutta.async.http.cache.ResponseCacheMiddleware;
 import com.koushikdutta.ion.Ion;
 
 import java.util.ArrayList;

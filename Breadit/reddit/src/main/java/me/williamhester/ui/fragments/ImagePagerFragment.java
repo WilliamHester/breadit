@@ -157,6 +157,7 @@ public class ImagePagerFragment extends Fragment {
                 ImgurApi.getAlbumDetails(imgurId, getActivity(), new FutureCallback<ResponseImgurWrapper<ImgurAlbum>>() {
                     @Override
                     public void onCompleted(Exception e, ResponseImgurWrapper<ImgurAlbum> result) {
+                        if (e != null) return;
                         mAdapter = new ImgurAlbumAdapter(getChildFragmentManager(), result.getData());
                         setUpAdapter(v);
                     }
@@ -165,6 +166,7 @@ public class ImagePagerFragment extends Fragment {
                 ImgurApi.getImageDetails(imgurId, getActivity(), new FutureCallback<ResponseImgurWrapper<ImgurImage>>() {
                     @Override
                     public void onCompleted(Exception e, ResponseImgurWrapper<ImgurImage> result) {
+                        if (e != null) return;
                         mAdapter = new ImgurAlbumAdapter(getChildFragmentManager(), result.getData());
                         setUpAdapter(v);
                     }
