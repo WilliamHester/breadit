@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/submission_data"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:background="?android:attr/selectableItemBackground"
+        tools:ignore="SmallSp">
+
+        <TextView android:id="@+id/link_subreddit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-light"
+            android:textSize="11sp"/>
+
+        <TextView
+            android:id="@+id/link_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:fontFamily="sans-serif-light"
+            android:textColor="@color/ghostwhite"
+            android:layout_below="@id/link_subreddit"/>
+
+        <TextView android:id="@+id/link_metadata"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="11sp"
+            android:fontFamily="sans-serif-light"
+            android:textColor="@color/auburn_orange"
+            android:layout_below="@id/link_title"/>
+
+    </RelativeLayout>
+
+    <include layout="@layout/list_item_comment" />
+
+</LinearLayout>

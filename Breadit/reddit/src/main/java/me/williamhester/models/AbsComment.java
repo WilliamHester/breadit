@@ -31,7 +31,7 @@ public abstract class AbsComment implements Thing {
         mLevel = level;
     }
 
-    public abstract String getParentName();
+    public abstract String getParentId();
 
     public static class CommentIterator implements Iterator<AbsComment> {
 

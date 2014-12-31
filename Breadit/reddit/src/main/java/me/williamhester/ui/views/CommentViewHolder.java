@@ -2,15 +2,8 @@ package me.williamhester.ui.views;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.support.annotation.NonNull;
 import android.text.Html;
-import android.text.Layout;
-import android.text.Selection;
-import android.text.Spannable;
 import android.text.TextUtils;
-import android.text.method.LinkMovementMethod;
-import android.text.style.ClickableSpan;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 
@@ -28,8 +21,8 @@ import me.williamhester.ui.text.ClickableLinkMovementMethod;
  */
 public class CommentViewHolder extends VotableViewHolder {
 
-    private Comment mComment;
-    private CommentClickCallbacks mCallback;
+    protected Comment mComment;
+    private CommentCallbacks mCallback;
     private TextView mAuthor;
     private TextView mFlairText;
     private View mContent;
@@ -37,7 +30,7 @@ public class CommentViewHolder extends VotableViewHolder {
     private View mGoldIndicator;
     private View mOptionsRow;
 
-    public CommentViewHolder(View itemView, CommentClickCallbacks callbacks) {
+    public CommentViewHolder(View itemView, CommentCallbacks callbacks) {
         super(itemView);
         mCallback = callbacks;
         mBody.setMovementMethod(new ClickableLinkMovementMethod());
@@ -164,7 +157,7 @@ public class CommentViewHolder extends VotableViewHolder {
 
         mGoldIndicator.setVisibility(mComment.isGilded() ? View.VISIBLE : View.INVISIBLE);
 
-        if (mComment.getAuthor().equals(mComment.getSubmissionAuthor())) {
+        if (mComment.getAuthor().equals(mComment.getLinkAuthor())) {
             mAuthor.setBackgroundResource(R.drawable.author_background);
             mAuthor.setTextColor(itemView.getResources().getColor(R.color.ghostwhite));
         } else if (mComment.getDistinguished() != null) {
@@ -176,6 +169,7 @@ public class CommentViewHolder extends VotableViewHolder {
                 case "admin":
                     mAuthor.setBackgroundResource(R.drawable.admin_background);
                     mAuthor.setTextColor(itemView.getResources().getColor(R.color.ghostwhite));
+                    break;
                 default:
                     mAuthor.setBackground(null);
                     mAuthor.setTextColor(itemView.getResources().getColor(R.color.comment_metadata_gray));
@@ -210,7 +204,7 @@ public class CommentViewHolder extends VotableViewHolder {
         }
     };
 
-    public interface CommentClickCallbacks {
+    public interface CommentCallbacks {
         public void onBodyClick(CommentViewHolder viewHolder, Comment comment);
         public void onCommentLongPressed(CommentViewHolder holder);
         public void onOptionsRowItemSelected(View view, Comment comment);

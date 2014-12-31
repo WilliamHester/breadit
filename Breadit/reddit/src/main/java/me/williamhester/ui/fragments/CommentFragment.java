@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -348,7 +347,7 @@ public class CommentFragment extends AccountFragment implements Toolbar.OnMenuIt
         }
     };
 
-    private CommentViewHolder.CommentClickCallbacks mCommentCallbacks = new CommentViewHolder.CommentClickCallbacks() {
+    private CommentViewHolder.CommentCallbacks mCommentCallbacks = new CommentViewHolder.CommentCallbacks() {
 
         private CommentViewHolder mFocusedViewHolder;
 

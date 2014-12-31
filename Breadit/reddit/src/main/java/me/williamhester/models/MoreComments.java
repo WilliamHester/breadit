@@ -48,7 +48,7 @@ public class MoreComments extends AbsComment implements Thing {
         return mName;
     }
 
-    public String getParentName() {
+    public String getParentId() {
         return mParentName;
     }
 

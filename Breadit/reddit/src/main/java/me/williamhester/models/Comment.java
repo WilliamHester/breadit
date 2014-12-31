@@ -90,6 +90,7 @@ public class Comment extends AbsComment implements Votable, Parcelable {
         if (!object.get("link_id").isJsonNull()) {
             mLinkId = object.get("link_id").getAsString();
         }
+
         if (!object.get("distinguished").isJsonNull()) {
             mDistinguished = object.get("distinguished").getAsString();
         }
@@ -107,6 +108,15 @@ public class Comment extends AbsComment implements Votable, Parcelable {
             mVoteStatus = object.get("likes").getAsBoolean() ? UPVOTED : DOWNVOTED;
         } catch (UnsupportedOperationException e) {
             mVoteStatus = 0;
+        }
+        if (object.get("link_author") != null) {
+            mLinkAuthor = object.get("link_author").getAsString();
+        }
+        if (object.get("link_title") != null) {
+            mLinkTitle = object.get("link_title").getAsString();
+        }
+        if (object.get("link_url") != null) {
+            mLinkUrl = object.get("link_url").getAsString();
         }
         try {
             JsonObject replies = object.get("replies").getAsJsonObject();
@@ -156,7 +166,7 @@ public class Comment extends AbsComment implements Votable, Parcelable {
         return mSubreddit;
     }
 
-    public String getParentName() {
+    public String getParentId() {
         return mParentName;
     }
 
@@ -168,7 +178,7 @@ public class Comment extends AbsComment implements Votable, Parcelable {
         return mSubredditId;
     }
 
-    public String getSubmissionAuthor() {
+    public String getLinkAuthor() {
         return mLinkAuthor;
     }
 

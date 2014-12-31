@@ -364,7 +364,7 @@ public class RedditApi {
                             continue;
                         }
                         Comment c = (Comment) thing;
-                        if (c.getName().equals(((AbsComment) data).getParentName())) {
+                        if (c.getName().equals(((AbsComment) data).getParentId())) {
                             ((AbsComment) data).setLevel(c.getLevel() + 1);
                             foundParent = true;
                         }

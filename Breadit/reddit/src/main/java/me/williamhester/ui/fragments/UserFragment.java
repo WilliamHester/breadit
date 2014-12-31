@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -41,11 +42,13 @@ import me.williamhester.reddit.R;
 import me.williamhester.ui.activities.SubmissionActivity;
 import me.williamhester.ui.views.CommentViewHolder;
 import me.williamhester.ui.views.DividerItemDecoration;
+import me.williamhester.ui.views.SubmissionCommentViewHolder;
 import me.williamhester.ui.views.SubmissionViewHolder;
 import me.williamhester.ui.views.VotableViewHolder;
 
 public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemClickListener,
-        SubmissionViewHolder.SubmissionCallbacks, CommentViewHolder.CommentClickCallbacks {
+        SubmissionViewHolder.SubmissionCallbacks,
+        SubmissionCommentViewHolder.SubmissionCommentCallbacks {
 
     public static final int VOTE_REQUEST_CODE = 1;
 
@@ -363,7 +366,15 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
 
     @Override
     public void onBodyClick(CommentViewHolder viewHolder, Comment comment) {
-        // Do nothing
+        String permalink = "/r/" + comment.getSubreddit() + "/comments/"
+                + comment.getLinkId().substring(3) + "/breadit/"
+                + comment.getParentId().substring(3) + "?context=3";
+        Bundle extras = new Bundle();
+        extras.putString("permalink", permalink);
+        extras.putBoolean("isSingleThread", true);
+        Intent i = new Intent(getActivity(), SubmissionActivity.class);
+        i.putExtras(extras);
+        startActivity(i);
     }
 
     @Override
@@ -382,6 +393,16 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
     @Override
     public void onOptionsRowItemSelected(View view, Comment comment) {
 
+    }
+
+    @Override
+    public void onLinkClicked(Comment comment) {
+        String permalink = "/r/" + comment.getSubreddit() + "/comments/" + comment.getLinkId().substring(3);
+        Bundle extras = new Bundle();
+        extras.putString("permalink", permalink);
+        Intent i = new Intent(getActivity(), SubmissionActivity.class);
+        i.putExtras(extras);
+        startActivity(i);
     }
 
     private class VotableAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -411,8 +432,9 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
                             UserFragment.this);
                 }
                 case COMMENT: {
-                    return new CommentViewHolder(
-                            inflater.inflate(R.layout.list_item_comment_card, parent, false),
+                    CardView cardView = (CardView) inflater.inflate(R.layout.view_content_card, parent, false);
+                    return new SubmissionCommentViewHolder(
+                            inflater.inflate(R.layout.list_item_submission_comment, cardView, true),
                             UserFragment.this);
                 }
             }
