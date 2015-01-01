@@ -138,7 +138,7 @@ public class Url implements Parcelable {
     }
 
     private void generateRedditDetails() {
-        int i = mUrl.indexOf("/", 17);
+        int i = mUrl.indexOf("/", mUrl.indexOf("reddit.com/r/") + 13);
         if (i == -1 || i == mUrl.length()) { // definitely a subreddit or the frontpage
             int slashR = mUrl.indexOf("/r/");
             if (slashR != -1) {

@@ -3,11 +3,8 @@ package me.williamhester.ui.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.view.Menu;
-import android.view.MenuItem;
 
 import me.williamhester.reddit.R;
-import me.williamhester.ui.fragments.ComposeMessageFragment;
 import me.williamhester.ui.fragments.UserFragment;
 
 /**
@@ -20,7 +17,7 @@ public class UserActivity extends ActionBarActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_user);
+        setContentView(R.layout.activity_container);
         if (getIntent() != null && getIntent().getAction() != null
                 && getIntent().getAction().equals(Intent.ACTION_VIEW)) {
             mUsername = getIntent().getDataString();

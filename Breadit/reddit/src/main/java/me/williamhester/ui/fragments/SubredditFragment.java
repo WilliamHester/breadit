@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.CardView;
@@ -77,6 +78,7 @@ public class SubredditFragment extends AccountFragment implements Toolbar.OnMenu
 
     private boolean mLoading = true;
     private boolean mSubredditExists = true;
+    private boolean mHasLoadedOriginal;
 
     /**
      * The primary sort type is set, by default to hot, Reddit's default sort for subreddits.
@@ -143,7 +145,6 @@ public class SubredditFragment extends AccountFragment implements Toolbar.OnMenu
 
         mHeaderBar = v.findViewById(R.id.header_bar);
         mToolbar = (Toolbar) v.findViewById(R.id.toolbar_actionbar);
-        onCreateOptionsMenu(mToolbar.getMenu(), getActivity().getMenuInflater());
 
         mToolbar.setOnMenuItemClickListener(this);
         mToolbar.setNavigationIcon(R.drawable.ic_drawer);
@@ -195,23 +196,32 @@ public class SubredditFragment extends AccountFragment implements Toolbar.OnMenu
     }
 
     @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        onCreateOptionsMenu(mToolbar.getMenu(), getActivity().getMenuInflater());
+    }
+
+    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.subreddit, menu);
 
         View anchor = mToolbar.findViewById(R.id.action_sort);
-        PopupMenu popupMenu = new PopupMenu(getActivity(), anchor);
-        anchor.setTag(popupMenu);
-        anchor.setOnTouchListener(popupMenu.getDragToOpenListener());
-        popupMenu.setOnMenuItemClickListener(mSortClickListener);
-        popupMenu.inflate(R.menu.primary_sorts);
+        if (anchor != null) {
+            PopupMenu popupMenu = new PopupMenu(getActivity(), anchor);
+            anchor.setTag(popupMenu);
+            anchor.setOnTouchListener(popupMenu.getDragToOpenListener());
+            popupMenu.setOnMenuItemClickListener(mSortClickListener);
+            popupMenu.inflate(R.menu.primary_sorts);
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
         String title;
-        if (getActivity() != null
+        if (getActivity() instanceof ActionBarActivity
                 && ((ActionBarActivity) getActivity()).getSupportActionBar() != null) {
             if (!TextUtils.isEmpty(mSubredditName)) {
                 title = "/r/" + mSubredditName;
@@ -409,7 +419,10 @@ public class SubredditFragment extends AccountFragment implements Toolbar.OnMenu
                 spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     @Override
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        loadSubreddit(position == 0 ? "" : mSubredditList.get(position - 1).getDisplayName());
+                        if (mHasLoadedOriginal) {
+                            loadSubreddit(position == 0 ? "" : mSubredditList.get(position - 1).getDisplayName());
+                        }
+                        mHasLoadedOriginal = true;
                     }
 
                     @Override
@@ -423,7 +436,10 @@ public class SubredditFragment extends AccountFragment implements Toolbar.OnMenu
                 spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     @Override
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        loadSubreddit(position == 0 ? "" : subs[position - 1]);
+                        if (mHasLoadedOriginal) {
+                            loadSubreddit(position == 0 ? "" : subs[position - 1]);
+                        }
+                        mHasLoadedOriginal = true;
                     }
 
                     @Override

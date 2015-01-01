@@ -48,20 +48,11 @@ public class MainActivity extends ActionBarActivity implements ImageFragment.Ima
     private SubredditFragment mSubredditFragment;
     private UserFragment mMyAccountFragment;
     private SidebarFragment mSidebarFragment;
-    private String mSubredditTitle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        if (Intent.ACTION_VIEW.equals(getIntent().getAction())) {
-            if (getIntent().getExtras() != null) {
-                mSubredditTitle = getIntent().getExtras().getString(SUBREDDIT);
-            }
-        } else {
-            mSubredditTitle = "";
-        }
 
         String startFrom;
         if (getIntent().getExtras() != null) {
@@ -80,7 +71,7 @@ public class MainActivity extends ActionBarActivity implements ImageFragment.Ima
 
         Fragment sub = getSupportFragmentManager().findFragmentByTag("subreddit");
         if (sub == null) {
-            mSubredditFragment = SubredditFragment.newInstance(mSubredditTitle);
+            mSubredditFragment = SubredditFragment.newInstance("");
         } else {
             mSubredditFragment = (SubredditFragment) sub;
         }
@@ -101,7 +92,7 @@ public class MainActivity extends ActionBarActivity implements ImageFragment.Ima
 
         Fragment side = getSupportFragmentManager().findFragmentById(R.id.right_drawer);
         if (side == null) {
-            mSidebarFragment = SidebarFragment.newInstance(mSubredditTitle);
+            mSidebarFragment = SidebarFragment.newInstance("");
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.right_drawer, mSidebarFragment, "sidebar")
                     .commit();

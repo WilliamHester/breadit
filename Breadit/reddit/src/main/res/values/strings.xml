@@ -273,4 +273,7 @@
     <string name="friend">Friend</string>
     <string name="zero">0</string>
 
+    <!-- BrowseActivity -->
+    <string name="browse">Browse</string>
+
 </resources>
