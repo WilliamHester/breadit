@@ -4,10 +4,13 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.ActionBarActivity;
 
 import me.williamhester.reddit.R;
 import me.williamhester.tools.Url;
 import me.williamhester.ui.fragments.CommentFragment;
+import me.williamhester.ui.fragments.ComposeMessageFragment;
+import me.williamhester.ui.fragments.MessagesFragment;
 import me.williamhester.ui.fragments.SubredditFragment;
 import me.williamhester.ui.fragments.UserFragment;
 import me.williamhester.ui.fragments.WebViewFragment;
@@ -16,7 +19,7 @@ import me.williamhester.ui.fragments.WebViewFragment;
  * This Activity handles the external link requests then proceeds to open the proper Activity with
  * the proper content displaying.
  */
-public class BrowseActivity extends FragmentActivity {
+public class BrowseActivity extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +45,12 @@ public class BrowseActivity extends FragmentActivity {
                 break;
             case Url.SUBMISSION:
                 f = CommentFragment.newInstance(url.getUrl(), false);
+                break;
+            case Url.MESSAGES:
+                f = MessagesFragment.newInstance(url.getLinkId());
+                break;
+            case Url.COMPOSE:
+                f = ComposeMessageFragment.newInstance();
                 break;
             default:
                 f = WebViewFragment.newInstance(url.getUrl());

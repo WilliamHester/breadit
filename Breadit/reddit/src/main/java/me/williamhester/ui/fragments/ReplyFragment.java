@@ -83,7 +83,7 @@ public class ReplyFragment extends AsyncSendFragment {
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getFragmentManager().popBackStack();
+                getActivity().onBackPressed();
             }
         });
         toolbar.setTitle(R.string.reply);
@@ -150,7 +150,7 @@ public class ReplyFragment extends AsyncSendFragment {
                         getTargetFragment().onActivityResult(getTargetRequestCode(),
                                 Activity.RESULT_OK, i);
                         if (isResumed()) {
-                            getFragmentManager().popBackStack();
+                            getActivity().onBackPressed();
                         } else {
                             mKillOnStart = true;
                         }

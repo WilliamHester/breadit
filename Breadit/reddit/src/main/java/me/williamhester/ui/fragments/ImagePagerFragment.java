@@ -181,7 +181,7 @@ public class ImagePagerFragment extends Fragment {
         t.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getFragmentManager().popBackStack();
+                getActivity().onBackPressed();
             }
         });
 

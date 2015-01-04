@@ -54,7 +54,7 @@ public class YouTubeFragment extends Fragment implements YouTubePlayer.OnInitial
         mLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                getFragmentManager().popBackStack();
+                getActivity().onBackPressed();
             }
         });
 

@@ -197,7 +197,7 @@ public class CommentFragment extends AccountFragment implements Toolbar.OnMenuIt
             case R.id.action_view_link:
                 Fragment f = getFragmentManager().findFragmentByTag("content");
                 if (f != null) {
-                    getFragmentManager().popBackStack();
+                    getActivity().onBackPressed();
                 } else {
                     getFragmentManager().beginTransaction()
                             .add(R.id.main_container, ((SubmissionActivity) getActivity()).getContentFragment(), "content")

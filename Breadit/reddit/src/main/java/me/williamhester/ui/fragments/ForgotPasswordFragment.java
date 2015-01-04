@@ -100,7 +100,7 @@ public class ForgotPasswordFragment extends Fragment {
             if (errors.size() == 0) {
                 if (isResumed()) {
                     Toast.makeText(getActivity(), R.string.email_sent, Toast.LENGTH_SHORT).show();
-                    getFragmentManager().popBackStack();
+                    getActivity().onBackPressed();
                 } else {
                     mKillOnStart = true;
                 }

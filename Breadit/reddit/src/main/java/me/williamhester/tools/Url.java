@@ -23,6 +23,8 @@ public class Url implements Parcelable {
     public static final int GFYCAT_LINK = 11;
     public static final int GIF = 12;
     public static final int DIRECT_GFY = 13;
+    public static final int MESSAGES = 14;
+    public static final int COMPOSE = 15;
 
     private Uri mUri;
     private String mUrl;
@@ -154,11 +156,25 @@ public class Url implements Parcelable {
             mId = mUrl.substring(mUrl.indexOf("/user/") + 6);
             mType = USER;
         } else { // found a link to another post
-            try {
+            int r = mUrl.indexOf("/r/");
+            if (r != -1) {
                 mId = mUrl.substring(mUrl.indexOf("/r/"));
                 mType = SUBMISSION;
-            } catch (StringIndexOutOfBoundsException e) {
-                Log.e("Url", "Could not properly parse: " + mUrl);
+            } else if (mUrl.contains("reddit.com/message/")) {
+                mId = mUrl.substring(mUrl.indexOf("reddit.com/message/") + 19);
+                int slash = mId.indexOf('/');
+                mId = mId.substring(0, slash == -1 ? mId.length() : slash).toLowerCase();
+                if (mId.equals("inbox") || mId.equals("unread") || mId.equals("messages")
+                        || mId.equals("comments") || mId.equals("selfreply") || mId.equals("sent")
+                        || mId.equals("moderator")) {
+                    mType = MESSAGES;
+                } else if (mId.equals("compose")) {
+                    mType = COMPOSE;
+                } else {
+                    mType = NOT_SPECIAL;
+                    mId = null;
+                }
+            } else {
                 mType = NOT_SPECIAL;
                 mId = null;
             }

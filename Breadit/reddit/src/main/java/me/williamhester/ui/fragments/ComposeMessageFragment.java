@@ -77,7 +77,7 @@ public class ComposeMessageFragment extends AsyncSendFragment {
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getFragmentManager().popBackStack();
+                getActivity().onBackPressed();
             }
         });
         toolbar.setTitle(R.string.compose_message);
@@ -196,7 +196,7 @@ public class ComposeMessageFragment extends AsyncSendFragment {
 
     private void onMessageSent() {
         Toast.makeText(getActivity(), R.string.message_sent, Toast.LENGTH_SHORT).show();
-        getFragmentManager().popBackStack();
+        getActivity().onBackPressed();
     }
 
     private void showCaptchaDialog() {

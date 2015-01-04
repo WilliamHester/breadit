@@ -98,7 +98,7 @@ public abstract class AsyncSendFragment extends Fragment {
         super.onResume();
 
         if (mKillOnStart) {
-            getFragmentManager().popBackStack();
+            getActivity().onBackPressed();
         }
     }
 
@@ -112,7 +112,7 @@ public abstract class AsyncSendFragment extends Fragment {
     protected void kill() {
         mKillOnStart = true;
         if (isResumed()) {
-            getFragmentManager().popBackStack();
+            getActivity().onBackPressed();
             InputMethodManager imm =  (InputMethodManager) getActivity().getSystemService(
                     Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);

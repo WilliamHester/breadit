@@ -11,6 +11,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -64,14 +65,20 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
         return new MessagesFragment();
     }
 
+    public static MessagesFragment newInstance(String filterType) {
+        Bundle args = new Bundle();
+        args.putString("filter_by", filterType);
+        MessagesFragment fragment = new MessagesFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
 
-        try {
+        if (activity instanceof MessageFragmentCallbacks) {
             mCallback = (MessageFragmentCallbacks) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException("Parent activity must implement MessageFragmentCallbacks.");
         }
     }
 
@@ -96,13 +103,23 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
         View v = inflater.inflate(R.layout.fragment_messages, root, false);
 
         mToolbar = (Toolbar) v.findViewById(R.id.toolbar_actionbar);
-        mToolbar.setNavigationIcon(R.drawable.ic_drawer);
-        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mCallback.onHomeClicked();
-            }
-        });
+        if (mCallback == null) {
+            mToolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
+            mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    getActivity().onBackPressed();
+                }
+            });
+        } else {
+            mToolbar.setNavigationIcon(R.drawable.ic_drawer);
+            mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mCallback.onHomeClicked();
+                }
+            });
+        }
         mToolbar.setOnMenuItemClickListener(this);
         onCreateOptionsMenu(mToolbar.getMenu(), getActivity().getMenuInflater());
 
@@ -215,6 +232,10 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
             GenericResponseRedditWrapper<GenericListing<Message>> wrapper =
                     gson.fromJson(result, token.getType());
             GenericListing<Message> listing = wrapper.getData();
+            if (listing == null) {
+                Log.d("MessagesFragment", result.toString());
+                return;
+            }
             ArrayList<Message> messages = new ArrayList<>();
             for (GenericResponseRedditWrapper<Message> message : listing.getChildren()) {
                 messages.add(message.getData());
@@ -251,6 +272,9 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
     }
 
     private void countUnreadAndNotify() {
+        if (mCallback == null) {
+            return;
+        }
         int count = 0;
         for (Message m : mMessages) {
             if (m.isUnread()) {
