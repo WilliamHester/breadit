@@ -421,6 +421,11 @@ public class CommentFragment extends AccountFragment implements Toolbar.OnMenuIt
                     break;
             }
         }
+
+        @Override
+        public String getSubmissionAuthor() {
+            return mSubmission.getAuthor();
+        }
     };
 
     private class CommentArrayAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {

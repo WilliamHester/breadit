@@ -1,7 +1,7 @@
 package me.williamhester.ui.activities;
 
-import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
 
 import me.williamhester.reddit.R;
@@ -12,21 +12,22 @@ import me.williamhester.ui.fragments.UserFragment;
  */
 public class UserActivity extends ActionBarActivity {
 
-    private String mUsername;
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_container);
-        if (getIntent() != null && getIntent().getAction() != null
-                && getIntent().getAction().equals(Intent.ACTION_VIEW)) {
-            mUsername = getIntent().getDataString();
-            mUsername = mUsername.substring(mUsername.indexOf("/user/") + 6);
-        } else if (getIntent().getExtras() != null) {
-            mUsername = getIntent().getExtras().getString("username");
+
+        Fragment f = getSupportFragmentManager().findFragmentById(R.id.main_container);
+        if (f != null) {
+            return;
+        }
+
+        String username = null;
+        if (getIntent().getExtras() != null) {
+            username = getIntent().getExtras().getString("username");
         }
         getSupportFragmentManager().beginTransaction()
-                .replace(R.id.main_container, UserFragment.newInstance(mUsername))
+                .replace(R.id.main_container, UserFragment.newInstance(username))
                 .commit();
     }
 }

@@ -157,7 +157,8 @@ public class CommentViewHolder extends VotableViewHolder {
 
         mGoldIndicator.setVisibility(mComment.isGilded() ? View.VISIBLE : View.INVISIBLE);
 
-        if (mComment.getAuthor().equals(mComment.getLinkAuthor())) {
+        if (mComment.getAuthor().equals(mCallback.getSubmissionAuthor())
+                || mComment.getAuthor().equals(mComment.getLinkAuthor())) {
             mAuthor.setBackgroundResource(R.drawable.author_background);
             mAuthor.setTextColor(itemView.getResources().getColor(R.color.ghostwhite));
         } else if (mComment.getDistinguished() != null) {
@@ -208,5 +209,6 @@ public class CommentViewHolder extends VotableViewHolder {
         public void onBodyClick(CommentViewHolder viewHolder, Comment comment);
         public void onCommentLongPressed(CommentViewHolder holder);
         public void onOptionsRowItemSelected(View view, Comment comment);
+        public String getSubmissionAuthor();
     }
 }

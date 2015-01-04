@@ -51,7 +51,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
     private ArrayList<Message> mMessages;
     private InfiniteLoadingScrollListener mScrollListener;
     private MessageArrayAdapter mMessageAdapter;
-    private TopLevelFragmentCallbacks mCallback;
+    private MessageFragmentCallbacks mCallback;
     private MessageViewHolder mFocusedViewHolder;
     private LinearLayoutManager mLayoutManager;
     private ProgressBar mProgressBar;
@@ -69,7 +69,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
         super.onAttach(activity);
 
         try {
-            mCallback = (TopLevelFragmentCallbacks) activity;
+            mCallback = (MessageFragmentCallbacks) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException("Parent activity must implement MessageFragmentCallbacks.");
         }
@@ -250,6 +250,16 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
         return false;
     }
 
+    private void countUnreadAndNotify() {
+        int count = 0;
+        for (Message m : mMessages) {
+            if (m.isUnread()) {
+                count++;
+            }
+        }
+        mCallback.onMessageReadCountChanged(count);
+    }
+
     public class InfiniteLoadingScrollListener extends RecyclerView.OnScrollListener {
 
         private final int VISIBLE_THRESHOLD = 5;
@@ -414,6 +424,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
                     if (mMessage.isUnread()) {
                         mMessage.setUnread(false);
                         mReadStatus.setVisibility(View.GONE);
+                        countUnreadAndNotify();
                         RedditApi.markMessageRead(getActivity(), true, mMessage.getName(),
                                 new FutureCallback<String>() {
                                     @Override
@@ -501,6 +512,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
                     case R.id.option_mark_unread: {
                         mMessage.setUnread(true);
                         mReadStatus.setVisibility(View.VISIBLE);
+                        countUnreadAndNotify();
                         RedditApi.markMessageRead(getActivity(), false, mMessage.getName(),
                                 new FutureCallback<String>() {
                                     @Override
@@ -537,5 +549,9 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
                 }
             }
         };
+    }
+
+    public static interface MessageFragmentCallbacks extends TopLevelFragmentCallbacks {
+        public void onMessageReadCountChanged(int newCount);
     }
 }

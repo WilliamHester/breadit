@@ -37,7 +37,7 @@ import me.williamhester.ui.fragments.YouTubeFragment;
 
 public class MainActivity extends ActionBarActivity implements ImageFragment.ImageTapCallbacks,
         NavigationDrawerFragment.NavigationDrawerCallbacks, ImagePagerFragment.ImagePagerCallbacks,
-        SubredditFragment.SubredditFragmentCallbacks {
+        SubredditFragment.SubredditFragmentCallbacks, MessagesFragment.MessageFragmentCallbacks {
 
     public static final String SUBREDDIT = "subreddit";
 
@@ -45,6 +45,7 @@ public class MainActivity extends ActionBarActivity implements ImageFragment.Ima
     private DrawerLayout mDrawerLayout;
     private Fragment mCurrentFragment;
     private MessagesFragment mMessagesFragment;
+    private NavigationDrawerFragment mNavigationFragment;
     private SubredditFragment mSubredditFragment;
     private UserFragment mMyAccountFragment;
     private SidebarFragment mSidebarFragment;
@@ -61,12 +62,14 @@ public class MainActivity extends ActionBarActivity implements ImageFragment.Ima
             startFrom = "subreddit";
         }
 
-        Fragment f = getSupportFragmentManager().findFragmentById(R.id.left_drawer);
-        if (f == null) {
-            NavigationDrawerFragment ndf = NavigationDrawerFragment.newInstance();
+        Fragment ndf = getSupportFragmentManager().findFragmentById(R.id.left_drawer);
+        if (ndf == null) {
+            mNavigationFragment = NavigationDrawerFragment.newInstance();
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.left_drawer, ndf, "drawer")
+                    .replace(R.id.left_drawer, mNavigationFragment, "drawer")
                     .commit();
+        } else {
+            mNavigationFragment = (NavigationDrawerFragment) ndf;
         }
 
         Fragment sub = getSupportFragmentManager().findFragmentByTag("subreddit");
@@ -165,8 +168,9 @@ public class MainActivity extends ActionBarActivity implements ImageFragment.Ima
         if (SettingsManager.getNotificationInterval() == -1) {
             alarmManager.cancel(pendingIntent);
         } else {
-            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),
-                    SettingsManager.getNotificationInterval() * 60 * 1000, pendingIntent);
+            long interval = SettingsManager.getNotificationInterval() * 60 * 1000;
+            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
+                    System.currentTimeMillis() + interval, interval, pendingIntent);
         }
     }
 
@@ -296,5 +300,12 @@ public class MainActivity extends ActionBarActivity implements ImageFragment.Ima
     @Override
     public void onImageTapped() {
         getSupportFragmentManager().popBackStack();
+    }
+
+    @Override
+    public void onMessageReadCountChanged(int newCount) {
+        if (mNavigationFragment != null) {
+            mNavigationFragment.setUnreadCount(newCount);
+        }
     }
 }

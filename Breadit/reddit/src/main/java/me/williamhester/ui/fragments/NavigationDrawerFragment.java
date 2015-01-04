@@ -2,7 +2,6 @@ package me.williamhester.ui.fragments;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -13,8 +12,19 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
+import com.koushikdutta.async.future.FutureCallback;
+
+import java.util.ArrayList;
+
 import me.williamhester.models.Account;
 import me.williamhester.models.AccountManager;
+import me.williamhester.models.GenericListing;
+import me.williamhester.models.GenericResponseRedditWrapper;
+import me.williamhester.models.Message;
+import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.activities.SettingsActivity;
 import me.williamhester.ui.activities.SubmitActivity;
@@ -116,6 +126,34 @@ public class NavigationDrawerFragment extends AccountFragment {
                 mCallback.onMyAccountSelected();
             }
         });
+
+        final TextView unreadCount = (TextView) v.findViewById(R.id.unread_count);
+        RedditApi.getMessages(getActivity(), Message.UNREAD, null, new FutureCallback<JsonObject>() {
+            @Override
+            public void onCompleted(Exception e, JsonObject result) {
+                if (e != null) {
+                    // do something?
+                    return;
+                }
+                Gson gson = new Gson();
+
+                // Generics are just beautiful.
+                TypeToken<GenericResponseRedditWrapper<GenericListing<Message>>> token =
+                        new TypeToken<GenericResponseRedditWrapper<GenericListing<Message>>>() {
+                        };
+
+                GenericResponseRedditWrapper<GenericListing<Message>> wrapper =
+                        gson.fromJson(result, token.getType());
+                GenericListing<Message> listing = wrapper.getData();
+                ArrayList<Message> messages = new ArrayList<>();
+
+                for (GenericResponseRedditWrapper<Message> message : listing.getChildren()) {
+                    messages.add(message.getData());
+                }
+
+                unreadCount.setText(String.valueOf(messages.size()));
+            }
+        });
         return v;
     }
 
@@ -159,15 +197,16 @@ public class NavigationDrawerFragment extends AccountFragment {
         }
     }
 
-    private void selectItem(String subreddit) {
-        if (mCallback != null) {
+    public void setSubreddit(String subreddit) {
+        if (!TextUtils.isEmpty(subreddit)) {
             mCallback.onSubredditSelected(subreddit);
         }
     }
 
-    public void setSubreddit(String subreddit) {
-        if (!TextUtils.isEmpty(subreddit)) {
-            mCallback.onSubredditSelected(subreddit);
+    public void setUnreadCount(int count) {
+        if (getView() != null) {
+            TextView unreadCount = (TextView) getView().findViewById(R.id.unread_count);
+            unreadCount.setText(String.valueOf(count));
         }
     }
 
@@ -179,9 +218,13 @@ public class NavigationDrawerFragment extends AccountFragment {
 
     public static interface NavigationDrawerCallbacks {
         public void onSubredditSelected(String subreddit);
+
         public void onAccountChanged();
+
         public void onHomeSelected();
+
         public void onMessagesSelected();
+
         public void onMyAccountSelected();
     }
 

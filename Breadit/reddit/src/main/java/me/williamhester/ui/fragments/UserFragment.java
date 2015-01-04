@@ -433,6 +433,11 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
     }
 
     @Override
+    public String getSubmissionAuthor() {
+        return null;
+    }
+
+    @Override
     public void onLinkClicked(Comment comment) {
         String permalink = "/r/" + comment.getSubreddit() + "/comments/" + comment.getLinkId().substring(3);
         Bundle extras = new Bundle();

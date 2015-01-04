@@ -54,6 +54,17 @@
             style="@style/NavigationItemText"
             android:text="@string/inbox"/>
 
+        <TextView android:id="@+id/unread_count"
+            android:layout_width="32dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="@dimen/keyline_1"
+            android:layout_centerVertical="true"
+            android:padding="8dp"
+            android:background="@color/nsfw_red"
+            android:text="@string/zero"
+            android:gravity="center"/>
+
     </RelativeLayout>
 
     <RelativeLayout style="@style/NavigationItemRelativeLayout"
