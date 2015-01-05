@@ -15,6 +15,7 @@ import me.williamhester.reddit.R;
 import me.williamhester.tools.Url;
 import me.williamhester.ui.activities.BrowseActivity;
 import me.williamhester.ui.fragments.ImagePagerFragment;
+import me.williamhester.ui.fragments.MessagesFragment;
 import me.williamhester.ui.fragments.WebViewFragment;
 import me.williamhester.ui.fragments.YouTubeFragment;
 
@@ -51,6 +52,7 @@ public class LinkSpan extends ClickableSpan {
             case Url.YOUTUBE:
                 ds.setColor(RED);
                 break;
+            case Url.MESSAGES:
             case Url.SUBMISSION:
             case Url.SUBREDDIT:
             case Url.USER:
@@ -79,6 +81,11 @@ public class LinkSpan extends ClickableSpan {
                 break;
             case Url.USER:
                 args.putString("type", "user");
+                i = new Intent(view.getContext(), BrowseActivity.class);
+                break;
+            case Url.MESSAGES:
+                args.putString("type", "messages");
+                args.putString("filterType", mUrl.getLinkId());
                 i = new Intent(view.getContext(), BrowseActivity.class);
                 break;
             case Url.IMGUR_GALLERY: // For now, we're going to go to a WebView because weird things happen with galleries

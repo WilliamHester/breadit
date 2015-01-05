@@ -261,7 +261,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
             case R.id.action_compose_message: {
                 ComposeMessageFragment fragment = ComposeMessageFragment.newInstance();
                 getFragmentManager().beginTransaction()
-                        .replace(R.id.container, fragment, "composeMessage")
+                        .replace(R.id.main_container, fragment, "composeMessage")
                         .addToBackStack("composeMessage")
                         .commit();
             }
@@ -527,7 +527,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
                     case R.id.option_reply: {
                         Fragment reply = ReplyFragment.newInstance(mMessage);
                         getFragmentManager().beginTransaction()
-                                .replace(R.id.container, reply, "ReplyFragment")
+                                .replace(R.id.main_container, reply, "ReplyFragment")
                                 .addToBackStack("ReplyFragment")
                                 .commit();
                         break;
