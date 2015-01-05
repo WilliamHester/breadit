@@ -15,7 +15,6 @@ import me.williamhester.reddit.R;
 import me.williamhester.tools.Url;
 import me.williamhester.ui.activities.BrowseActivity;
 import me.williamhester.ui.fragments.ImagePagerFragment;
-import me.williamhester.ui.fragments.MessagesFragment;
 import me.williamhester.ui.fragments.WebViewFragment;
 import me.williamhester.ui.fragments.YouTubeFragment;
 

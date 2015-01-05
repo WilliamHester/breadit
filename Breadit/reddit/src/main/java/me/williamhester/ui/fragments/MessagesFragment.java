@@ -11,7 +11,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -231,7 +230,6 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
                     gson.fromJson(result, token.getType());
             GenericListing<Message> listing = wrapper.getData();
             if (listing == null) {
-                Log.d("MessagesFragment", result.toString());
                 return;
             }
             ArrayList<Message> messages = new ArrayList<>();

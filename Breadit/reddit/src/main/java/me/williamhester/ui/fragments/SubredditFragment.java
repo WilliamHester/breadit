@@ -146,13 +146,23 @@ public class SubredditFragment extends AccountFragment implements Toolbar.OnMenu
         mToolbar = (Toolbar) v.findViewById(R.id.toolbar_actionbar);
 
         mToolbar.setOnMenuItemClickListener(this);
-        mToolbar.setNavigationIcon(R.drawable.ic_drawer);
-        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mCallback.onHomeClicked();
-            }
-        });
+        if (mCallback != null) {
+            mToolbar.setNavigationIcon(R.drawable.ic_drawer);
+            mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mCallback.onHomeClicked();
+                }
+            });
+        } else {
+            mToolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
+            mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    getActivity().onBackPressed();
+                }
+            });
+        }
 
         mScrollListener = new InfiniteLoadingScrollListener();
         mProgressBar = (ProgressBar) v.findViewById(R.id.progress_bar);
