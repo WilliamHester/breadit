@@ -37,8 +37,6 @@ public class MainActivity extends BaseActivity implements
         NavigationDrawerFragment.NavigationDrawerCallbacks,
         ContentFragment.ContentFragmentCallbacks {
 
-    public static final String SUBREDDIT = "subreddit";
-
     private ActionBarDrawerToggle mDrawerToggle;
     private DrawerLayout mDrawerLayout;
     private Fragment mCurrentFragment;

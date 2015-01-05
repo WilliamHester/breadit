@@ -23,9 +23,9 @@ import me.williamhester.ui.fragments.YouTubeFragment;
  */
 public class LinkSpan extends ClickableSpan {
 
-    private static final int ORANGE = -622554;
-    private static final int RED = -5041641;
-    private static final int GREEN = -8011739;
+    private static final int ORANGE = 0xfff68026;
+    private static final int RED = 0xffb31217;
+    private static final int GREEN = 0xff85c025;
 
     private String mLink;
     private Url mUrl;
