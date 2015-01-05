@@ -111,11 +111,11 @@ public abstract class AsyncSendFragment extends Fragment {
 
     protected void kill() {
         mKillOnStart = true;
-        if (isResumed()) {
-            getActivity().onBackPressed();
+        if (isResumed() && getView() != null) {
             InputMethodManager imm =  (InputMethodManager) getActivity().getSystemService(
                     Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);
+            getActivity().onBackPressed();
         }
     }
 }

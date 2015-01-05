@@ -18,7 +18,7 @@ import me.williamhester.ui.views.ActionBarPaddedFrameLayout;
 /**
  * Created by william on 9/15/14.
  */
-public class YouTubeFragment extends Fragment implements YouTubePlayer.OnInitializedListener {
+public class YouTubeFragment extends Fragment implements YouTubePlayer.OnInitializedListener, BackableFragment {
 
     private static final String VIDEO_ID = "videoId";
 
@@ -81,10 +81,13 @@ public class YouTubeFragment extends Fragment implements YouTubePlayer.OnInitial
 
     }
 
-    public boolean onBackPressed() {
-        if (mIsFullscreen) {
-            mPlayer.setFullscreen(false);
-        }
+    @Override
+    public boolean canGoBack() {
         return mIsFullscreen;
+    }
+
+    @Override
+    public void goBack() {
+        mPlayer.setFullscreen(false);
     }
 }

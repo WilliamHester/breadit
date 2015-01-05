@@ -1,11 +1,9 @@
 package me.williamhester.ui.activities;
 
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v7.app.ActionBarActivity;
 
+import me.williamhester.models.Submission;
 import me.williamhester.reddit.R;
 import me.williamhester.tools.Url;
 import me.williamhester.ui.fragments.CommentFragment;
@@ -19,7 +17,7 @@ import me.williamhester.ui.fragments.WebViewFragment;
  * This Activity handles the external link requests then proceeds to open the proper Activity with
  * the proper content displaying.
  */
-public class BrowseActivity extends ActionBarActivity {
+public class BrowseActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,33 +30,54 @@ public class BrowseActivity extends ActionBarActivity {
             return;
         }
 
-        // get the data from the intent and figure out where it goes.
-        Uri uri = getIntent().getData();
-        Url url = new Url(uri.toString());
-
-        switch (url.getType()) {
-            case Url.USER:
-                f = UserFragment.newInstance(url.getLinkId());
-                break;
-            case Url.SUBREDDIT:
-                f = SubredditFragment.newInstance(url.getLinkId());
-                break;
-            case Url.SUBMISSION:
-                f = CommentFragment.newInstance(url.getUrl(), false);
-                break;
-            case Url.MESSAGES:
-                f = MessagesFragment.newInstance(url.getLinkId());
-                break;
-            case Url.COMPOSE:
-                f = ComposeMessageFragment.newInstance();
-                break;
-            default:
-                f = WebViewFragment.newInstance(url.getUrl());
-                break;
+        if (getIntent().getData() != null) {
+            f = getMainFragmentFromIntentData();
+        } else {
+            f = getMainFragmentFromIntentExtras();
         }
 
         getSupportFragmentManager().beginTransaction()
                 .add(R.id.main_container, f, "content")
                 .commit();
+    }
+
+    private Fragment getMainFragmentFromIntentData() {
+        Url url = new Url(getIntent().getDataString());
+        switch (url.getType()) {
+            case Url.USER:
+                return UserFragment.newInstance(url.getLinkId());
+            case Url.SUBREDDIT:
+                return SubredditFragment.newInstance(url.getLinkId());
+            case Url.SUBMISSION:
+                return CommentFragment.newInstance(url.getUrl(), false);
+            case Url.MESSAGES:
+                return MessagesFragment.newInstance(url.getLinkId());
+            case Url.COMPOSE:
+                return ComposeMessageFragment.newInstance();
+            default:
+                return WebViewFragment.newInstance(url.getUrl());
+        }
+    }
+
+    private Fragment getMainFragmentFromIntentExtras() {
+        Bundle extras = getIntent().getExtras();
+        String type = extras.getString("type");
+        switch (type) {
+            case "user":
+                return UserFragment.newInstance(extras.getString("username"));
+            case "subreddit":
+                return SubredditFragment.newInstance(extras.getString("subreddit"));
+            case "messages":
+                return MessagesFragment.newInstance();
+            case "comments":
+                if (extras.containsKey("permalink")) {
+                    boolean isSingleThread = getIntent().getExtras() != null &&
+                            getIntent().getExtras().getBoolean("isSingleThread");
+                    return CommentFragment.newInstance(extras.getString("permalink"), isSingleThread);
+                } else {
+                    return CommentFragment.newInstance((Submission) extras.getParcelable("submission"));
+                }
+        }
+        return null;
     }
 }

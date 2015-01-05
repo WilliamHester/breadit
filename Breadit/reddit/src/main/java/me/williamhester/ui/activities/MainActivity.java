@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.text.TextUtils;
 import android.view.Gravity;
@@ -31,10 +30,8 @@ import me.williamhester.ui.fragments.NavigationDrawerFragment;
 import me.williamhester.ui.fragments.SidebarFragment;
 import me.williamhester.ui.fragments.SubredditFragment;
 import me.williamhester.ui.fragments.UserFragment;
-import me.williamhester.ui.fragments.WebViewFragment;
-import me.williamhester.ui.fragments.YouTubeFragment;
 
-public class MainActivity extends ActionBarActivity implements
+public class MainActivity extends BaseActivity implements
         MessagesFragment.MessageFragmentCallbacks,
         SubredditFragment.SubredditFragmentCallbacks,
         NavigationDrawerFragment.NavigationDrawerCallbacks,
@@ -268,13 +265,6 @@ public class MainActivity extends ActionBarActivity implements
 
     @Override
     public void onBackPressed()  {
-        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.main_container);
-        if (fragment instanceof YouTubeFragment && ((YouTubeFragment) fragment).onBackPressed()) {
-            return;
-        }
-        if (fragment instanceof WebViewFragment && ((WebViewFragment) fragment).onBackPressed()) {
-            return;
-        }
         if (mDrawerLayout.isDrawerOpen(Gravity.START) || mDrawerLayout.isDrawerOpen(Gravity.END)) {
             mDrawerLayout.closeDrawers();
         } else {

@@ -32,6 +32,8 @@ import me.williamhester.models.AbsComment;
 import me.williamhester.models.Account;
 import me.williamhester.models.AccountManager;
 import me.williamhester.models.Comment;
+import me.williamhester.models.ImgurAlbum;
+import me.williamhester.models.ImgurImage;
 import me.williamhester.models.MoreComments;
 import me.williamhester.models.Submission;
 import me.williamhester.models.Subreddit;
@@ -40,9 +42,7 @@ import me.williamhester.models.Votable;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 import me.williamhester.tools.Url;
-import me.williamhester.ui.activities.MainActivity;
-import me.williamhester.ui.activities.SubmissionActivity;
-import me.williamhester.ui.activities.UserActivity;
+import me.williamhester.ui.activities.BrowseActivity;
 import me.williamhester.ui.views.CommentViewHolder;
 import me.williamhester.ui.views.DividerItemDecoration;
 import me.williamhester.ui.views.SubmissionViewHolder;
@@ -200,7 +200,7 @@ public class CommentFragment extends AccountFragment implements Toolbar.OnMenuIt
                     getActivity().onBackPressed();
                 } else {
                     getFragmentManager().beginTransaction()
-                            .add(R.id.main_container, ((SubmissionActivity) getActivity()).getContentFragment(), "content")
+                            .add(R.id.main_container, getContentFragment(), "content")
                             .addToBackStack("content")
                             .commit();
                 }
@@ -302,6 +302,53 @@ public class CommentFragment extends AccountFragment implements Toolbar.OnMenuIt
         return children.size();
     }
 
+    /**
+     * Gets the proper fragment to display the content that the submission is showing.
+     *
+     * @return returns the fragment needed to display the content
+     */
+    private Fragment getContentFragment() {
+        Url parser = mSubmission.getLinkDetails();
+        if (!mSubmission.isSelf()) {
+            switch (parser.getType()) {
+                case Url.NOT_SPECIAL:
+                    return WebViewFragment.newInstance(parser.getUrl());
+                case Url.IMGUR_IMAGE:
+                    if (mSubmission.getImgurData() != null)
+                        return ImagePagerFragment
+                                .newInstance((ImgurImage) mSubmission.getImgurData());
+                    else
+                        return ImagePagerFragment
+                                .newInstanceLazyLoaded(parser.getLinkId(), false);
+                case Url.IMGUR_ALBUM:
+                    if (mSubmission.getImgurData() != null)
+                        return ImagePagerFragment
+                                .newInstance((ImgurAlbum) mSubmission.getImgurData());
+                    else
+                        return ImagePagerFragment
+                                .newInstanceLazyLoaded(parser.getLinkId(), true);
+                case Url.IMGUR_GALLERY:
+                    return WebViewFragment.newInstance(parser.getUrl());
+                case Url.YOUTUBE:
+                    return YouTubeFragment.newInstance(parser.getLinkId());
+                case Url.GFYCAT_LINK:
+                case Url.GIF:
+                case Url.NORMAL_IMAGE:
+                    return ImagePagerFragment.newInstance(parser);
+                case Url.SUBMISSION:
+                    return CommentFragment.newInstance(parser.getUrl(),
+                            parser.getUrl().contains("?context="));
+                case Url.SUBREDDIT:
+                    return SubredditFragment.newInstance(parser.getLinkId());
+                case Url.USER:
+                    break;
+                case Url.REDDIT_LIVE:
+                    return RedditLiveFragment.newInstance(mSubmission);
+            }
+        }
+        return null;
+    }
+
     @Override
     public void onVoted(Submission submission) {
         Bundle data = new Bundle();
@@ -377,8 +424,9 @@ public class CommentFragment extends AccountFragment implements Toolbar.OnMenuIt
             switch (view.getId()) {
                 case R.id.option_view_user:
                     Bundle b = new Bundle();
+                    b.putString("type", "user");
                     b.putString("username", comment.getAuthor());
-                    Intent i = new Intent(getActivity(), UserActivity.class);
+                    Intent i = new Intent(getActivity(), BrowseActivity.class);
                     i.putExtras(b);
                     getActivity().startActivity(i);
                     break;
@@ -568,10 +616,11 @@ public class CommentFragment extends AccountFragment implements Toolbar.OnMenuIt
         public void onOptionsRowItemSelected(View view, Submission submission) {
             switch (view.getId()) {
                 case R.id.option_go_to_subreddit: {
-                    Intent i = new Intent(view.getContext(), MainActivity.class);
+                    Intent i = new Intent(view.getContext(), BrowseActivity.class);
                     i.setAction(Intent.ACTION_VIEW);
                     Bundle args = new Bundle();
-                    args.putString(MainActivity.SUBREDDIT, submission.getSubredditName());
+                    args.putString("subreddit", submission.getSubredditName());
+                    args.putString("type", "subreddit");
                     i.putExtras(args);
                     startActivity(i);
                     break;
@@ -596,8 +645,9 @@ public class CommentFragment extends AccountFragment implements Toolbar.OnMenuIt
                 }
                 case R.id.option_view_user:
                     Bundle b = new Bundle();
+                    b.putString("type", "user");
                     b.putString("username", submission.getAuthor());
-                    Intent i = new Intent(getActivity(), UserActivity.class);
+                    Intent i = new Intent(getActivity(), BrowseActivity.class);
                     i.putExtras(b);
                     getActivity().startActivity(i);
                     break;

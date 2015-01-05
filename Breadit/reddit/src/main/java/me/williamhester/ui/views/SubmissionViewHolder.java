@@ -30,9 +30,7 @@ import me.williamhester.network.ImgurApi;
 import me.williamhester.reddit.R;
 import me.williamhester.tools.HtmlParser;
 import me.williamhester.tools.Url;
-import me.williamhester.ui.activities.MainActivity;
-import me.williamhester.ui.activities.SubmissionActivity;
-import me.williamhester.ui.activities.UserActivity;
+import me.williamhester.ui.activities.BrowseActivity;
 import me.williamhester.ui.fragments.ImagePagerFragment;
 import me.williamhester.ui.fragments.WebViewFragment;
 import me.williamhester.ui.fragments.YouTubeFragment;
@@ -385,15 +383,18 @@ public class SubmissionViewHolder extends VotableViewHolder {
         Fragment f = null;
         switch (link.getType()) {
             case Url.SUBMISSION:
-                i = new Intent(mCallback.getActivity(), SubmissionActivity.class);
+                args.putString("type", "comments");
+                i = new Intent(mCallback.getActivity(), BrowseActivity.class);
                 break;
             case Url.SUBREDDIT:
-                i = new Intent(mCallback.getActivity(), MainActivity.class);
+                args.putString("type", "subreddit");
+                i = new Intent(mCallback.getActivity(), BrowseActivity.class);
                 i.setAction(Intent.ACTION_VIEW);
-                args.putString(MainActivity.SUBREDDIT, link.getLinkId());
+                args.putString("subreddit", link.getLinkId());
                 break;
             case Url.USER:
-                i = new Intent(mCallback.getActivity(), UserActivity.class);
+                args.putString("type", "user");
+                i = new Intent(mCallback.getActivity(), BrowseActivity.class);
                 break;
             case Url.IMGUR_GALLERY: // For now, we're going to go to a WebView because weird things happen with galleries
             case Url.NOT_SPECIAL: // Go to a WebView

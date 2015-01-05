@@ -13,9 +13,7 @@ import android.view.View;
 
 import me.williamhester.reddit.R;
 import me.williamhester.tools.Url;
-import me.williamhester.ui.activities.MainActivity;
-import me.williamhester.ui.activities.SubmissionActivity;
-import me.williamhester.ui.activities.UserActivity;
+import me.williamhester.ui.activities.BrowseActivity;
 import me.williamhester.ui.fragments.ImagePagerFragment;
 import me.williamhester.ui.fragments.WebViewFragment;
 import me.williamhester.ui.fragments.YouTubeFragment;
@@ -70,15 +68,18 @@ public class LinkSpan extends ClickableSpan {
         Fragment f = null;
         switch (mUrl.getType()) {
             case Url.SUBMISSION:
-                i = new Intent(view.getContext(), SubmissionActivity.class);
+                args.putString("type", "comments");
+                i = new Intent(view.getContext(), BrowseActivity.class);
                 break;
             case Url.SUBREDDIT:
-                i = new Intent(view.getContext(), MainActivity.class);
+                args.putString("type", "subreddit");
+                i = new Intent(view.getContext(), BrowseActivity.class);
                 i.setAction(Intent.ACTION_VIEW);
-                args.putString(MainActivity.SUBREDDIT, mUrl.getLinkId());
+                args.putString("subreddit", mUrl.getLinkId());
                 break;
             case Url.USER:
-                i = new Intent(view.getContext(), UserActivity.class);
+                args.putString("type", "user");
+                i = new Intent(view.getContext(), BrowseActivity.class);
                 break;
             case Url.IMGUR_GALLERY: // For now, we're going to go to a WebView because weird things happen with galleries
             case Url.NOT_SPECIAL: // Go to a webview

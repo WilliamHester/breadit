@@ -25,7 +25,8 @@ import me.williamhester.models.AccountManager;
 import me.williamhester.models.Submission;
 import me.williamhester.reddit.R;
 
-public class WebViewFragment extends ContentFragment implements Toolbar.OnMenuItemClickListener {
+public class WebViewFragment extends ContentFragment implements Toolbar.OnMenuItemClickListener,
+        BackableFragment {
 
     public static final String URI = "uri";
 
@@ -161,11 +162,13 @@ public class WebViewFragment extends ContentFragment implements Toolbar.OnMenuIt
         return headers;
     }
 
-    public boolean onBackPressed() {
-        if (mWebView.canGoBack()) {
-            mWebView.goBack();
-            return true;
-        }
-        return false;
+    @Override
+    public boolean canGoBack() {
+        return mWebView.canGoBack();
+    }
+
+    @Override
+    public void goBack() {
+        mWebView.goBack();
     }
 }

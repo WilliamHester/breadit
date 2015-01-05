@@ -136,8 +136,9 @@ public class SubmitActivity extends ActionBarActivity implements
                     JsonObject data = json.get("data").getAsJsonObject();
                     String permalink = data.get("url").getAsString();
                     Bundle extras = new Bundle();
+                    extras.putString("type", "comments");
                     extras.putString("permalink", permalink);
-                    Intent i = new Intent(SubmitActivity.this, SubmissionActivity.class);
+                    Intent i = new Intent(SubmitActivity.this, BrowseActivity.class);
                     i.putExtras(extras);
                     startActivity(i);
                     finish();
@@ -201,8 +202,9 @@ public class SubmitActivity extends ActionBarActivity implements
                             JsonObject data = json.get("data").getAsJsonObject();
                             String permalink = data.get("url").getAsString();
                             Bundle extras = new Bundle();
+                            extras.putString("type", "comments");
                             extras.putString("permalink", permalink);
-                            Intent i = new Intent(SubmitActivity.this, SubmissionActivity.class);
+                            Intent i = new Intent(SubmitActivity.this, BrowseActivity.class);
                             i.putExtras(extras);
                             startActivity(i);
                             finish();

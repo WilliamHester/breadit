@@ -48,8 +48,7 @@ import me.williamhester.models.Submission;
 import me.williamhester.models.Subreddit;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
-import me.williamhester.ui.activities.SubmissionActivity;
-import me.williamhester.ui.activities.UserActivity;
+import me.williamhester.ui.activities.BrowseActivity;
 import me.williamhester.ui.views.DividerItemDecoration;
 import me.williamhester.ui.views.SubmissionViewHolder;
 
@@ -461,9 +460,10 @@ public class SubredditFragment extends AccountFragment implements Toolbar.OnMenu
 
     @Override
     public void onCardClicked(Submission submission) {
-        Intent i = new Intent(getActivity(), SubmissionActivity.class);
+        Intent i = new Intent(getActivity(), BrowseActivity.class);
         Bundle args = new Bundle();
-        args.putParcelable(SubmissionActivity.SUBMISSION, submission);
+        args.putString("type", "comments");
+        args.putParcelable("submission", submission);
         args.putParcelable("media", submission.getMedia());
         i.putExtras(args);
         startActivityForResult(i, VOTE_REQUEST_CODE);
@@ -490,8 +490,9 @@ public class SubredditFragment extends AccountFragment implements Toolbar.OnMenu
                 break;
             case R.id.option_view_user:
                 Bundle b = new Bundle();
+                b.putString("type", "user");
                 b.putString("username", submission.getAuthor());
-                Intent i = new Intent(getActivity(), UserActivity.class);
+                Intent i = new Intent(getActivity(), BrowseActivity.class);
                 i.putExtras(b);
                 getActivity().startActivity(i);
                 break;

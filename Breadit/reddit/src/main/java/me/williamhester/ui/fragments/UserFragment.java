@@ -41,7 +41,7 @@ import me.williamhester.models.User;
 import me.williamhester.models.Votable;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
-import me.williamhester.ui.activities.SubmissionActivity;
+import me.williamhester.ui.activities.BrowseActivity;
 import me.williamhester.ui.views.CommentViewHolder;
 import me.williamhester.ui.views.DividerItemDecoration;
 import me.williamhester.ui.views.SubmissionCommentViewHolder;
@@ -370,9 +370,10 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
 
     @Override
     public void onCardClicked(Submission submission) {
-        Intent i = new Intent(getActivity(), SubmissionActivity.class);
+        Intent i = new Intent(getActivity(), BrowseActivity.class);
         Bundle args = new Bundle();
-        args.putParcelable(SubmissionActivity.SUBMISSION, submission);
+        args.putString("type", "comments");
+        args.putParcelable("submission", submission);
         args.putParcelable("media", submission.getMedia());
         i.putExtras(args);
         startActivityForResult(i, VOTE_REQUEST_CODE);
@@ -407,9 +408,10 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
                 + comment.getLinkId().substring(3) + "/breadit/"
                 + comment.getParentId().substring(3) + "?context=3";
         Bundle extras = new Bundle();
+        extras.putString("type", "comments");
         extras.putString("permalink", permalink);
         extras.putBoolean("isSingleThread", true);
-        Intent i = new Intent(getActivity(), SubmissionActivity.class);
+        Intent i = new Intent(getActivity(), BrowseActivity.class);
         i.putExtras(extras);
         startActivity(i);
     }
@@ -442,7 +444,8 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
         String permalink = "/r/" + comment.getSubreddit() + "/comments/" + comment.getLinkId().substring(3);
         Bundle extras = new Bundle();
         extras.putString("permalink", permalink);
-        Intent i = new Intent(getActivity(), SubmissionActivity.class);
+        extras.putString("type", "comments");
+        Intent i = new Intent(getActivity(), BrowseActivity.class);
         i.putExtras(extras);
         startActivity(i);
     }

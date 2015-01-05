@@ -38,9 +38,7 @@ import me.williamhester.models.Message;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 import me.williamhester.tools.HtmlParser;
-import me.williamhester.ui.activities.MainActivity;
-import me.williamhester.ui.activities.SubmissionActivity;
-import me.williamhester.ui.activities.UserActivity;
+import me.williamhester.ui.activities.BrowseActivity;
 import me.williamhester.ui.text.ClickableLinkMovementMethod;
 import me.williamhester.ui.views.DividerItemDecoration;
 import me.williamhester.ui.views.VotableViewHolder;
@@ -462,7 +460,8 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
                                 });
                     } else if (mMessage.isComment()) {
                         Bundle extras = new Bundle();
-                        Intent i = new Intent(getActivity(), SubmissionActivity.class);
+                        Intent i = new Intent(getActivity(), BrowseActivity.class);
+                        extras.putString("type", "comments");
                         extras.putBoolean("isSingleThread", true);
                         extras.putString("permalink", mMessage.getContext());
                         i.putExtras(extras);
@@ -552,17 +551,19 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
                     }
                     case R.id.option_view_user: {
                         Bundle b = new Bundle();
+                        b.putString("type", "user");
                         b.putString("username", mMessage.getAuthor());
-                        Intent i = new Intent(getActivity(), UserActivity.class);
+                        Intent i = new Intent(getActivity(), BrowseActivity.class);
                         i.putExtras(b);
                         getActivity().startActivity(i);
                         break;
                     }
                     case R.id.option_go_to_subreddit: {
-                        Intent i = new Intent(getActivity(), MainActivity.class);
-                        i.setAction(Intent.ACTION_VIEW);
+                        Intent i = new Intent(getActivity(), BrowseActivity.class);
                         Bundle args = new Bundle();
-                        args.putString(MainActivity.SUBREDDIT, mMessage.getSubreddit());
+                        i.setAction(Intent.ACTION_VIEW);
+                        args.putString("type", "subreddit");
+                        args.putString("subreddit", mMessage.getSubreddit());
                         i.putExtras(args);
                         startActivity(i);
                         break;
