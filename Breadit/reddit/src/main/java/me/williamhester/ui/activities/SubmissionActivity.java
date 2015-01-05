@@ -4,11 +4,8 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
 import me.williamhester.models.ImgurAlbum;
@@ -17,14 +14,13 @@ import me.williamhester.models.Submission;
 import me.williamhester.reddit.R;
 import me.williamhester.tools.Url;
 import me.williamhester.ui.fragments.CommentFragment;
-import me.williamhester.ui.fragments.ImageFragment;
 import me.williamhester.ui.fragments.ImagePagerFragment;
 import me.williamhester.ui.fragments.RedditLiveFragment;
 import me.williamhester.ui.fragments.SubredditFragment;
 import me.williamhester.ui.fragments.WebViewFragment;
 import me.williamhester.ui.fragments.YouTubeFragment;
 
-public class SubmissionActivity extends ActionBarActivity implements ImageFragment.ImageTapCallbacks {
+public class SubmissionActivity extends ActionBarActivity {
 
     public static final String SUBMISSION = "submission";
     public static final String PERMALINK = "permalink";
@@ -57,17 +53,6 @@ public class SubmissionActivity extends ActionBarActivity implements ImageFragme
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelable("urlParser", mParser);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                onBackPressed();
-                // return true here so we don't call the default android.R.id.home action.
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     private void setUpContent() {
@@ -154,10 +139,5 @@ public class SubmissionActivity extends ActionBarActivity implements ImageFragme
         } else {
             super.onBackPressed();
         }
-    }
-
-    @Override
-    public void onImageTapped() {
-        getSupportFragmentManager().popBackStack();
     }
 }

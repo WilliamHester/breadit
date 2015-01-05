@@ -273,4 +273,7 @@
     <string name="friend">Friend</string>
     <string name="zero">0</string>
 
+    <!-- WebViewFragment -->
+    <string name="go_forward">Go forward</string>
+
 </resources>

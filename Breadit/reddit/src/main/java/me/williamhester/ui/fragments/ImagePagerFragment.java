@@ -1,9 +1,7 @@
 package me.williamhester.ui.fragments;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
@@ -29,7 +27,7 @@ import me.williamhester.ui.adapters.SingleImageAdapter;
 /**
  * Created by william on 6/24/14.
  */
-public class ImagePagerFragment extends Fragment {
+public class ImagePagerFragment extends ContentFragment {
 
     private static final String IMAGE = "image";
     private static final String ALBUM = "album";
@@ -46,8 +44,6 @@ public class ImagePagerFragment extends Fragment {
     private Runnable mAnimRunnable;
     private String mTitle;
     private int mCurrentPosition;
-
-    private ImagePagerCallbacks mCallback;
 
     public static ImagePagerFragment newInstance(ImgurImage image) {
         Bundle args = new Bundle();
@@ -108,21 +104,8 @@ public class ImagePagerFragment extends Fragment {
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-
-        if (activity instanceof ImagePagerCallbacks) {
-            mCallback = (ImagePagerCallbacks) activity;
-        }
-    }
-
-    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        if (mCallback != null) {
-            mCallback.onImagePagerFragmentCreated();
-        }
 
         if (getArguments() != null) {
             if (getArguments().containsKey(IMAGE)) {
@@ -149,6 +132,12 @@ public class ImagePagerFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
         final View v = inflater.inflate(R.layout.fragment_image_pager, root, false);
 
+        v.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getActivity().onBackPressed();
+            }
+        });
         TextView title = (TextView) v.findViewById(R.id.album_title);
         title.setText(mTitle);
         if (getArguments().containsKey(IMGUR_ID)) {
@@ -264,20 +253,6 @@ public class ImagePagerFragment extends Fragment {
         super.onDestroyView();
 
         mAnimHandler.removeCallbacks(mAnimRunnable);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-
-        if (mCallback != null) {
-            mCallback.onImagePagerFragmentDestroyed();
-        }
-    }
-
-    public interface ImagePagerCallbacks {
-        public void onImagePagerFragmentCreated();
-        public void onImagePagerFragmentDestroyed();
     }
 
 }

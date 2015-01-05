@@ -1,23 +1,31 @@
 package me.williamhester.ui.fragments;
 
 import android.annotation.SuppressLint;
-import android.support.v4.app.Fragment;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import me.williamhester.models.AccountManager;
 import me.williamhester.models.Submission;
 import me.williamhester.reddit.R;
 
-public class WebViewFragment extends Fragment {
+public class WebViewFragment extends ContentFragment implements Toolbar.OnMenuItemClickListener {
 
     public static final String URI = "uri";
 
@@ -51,8 +59,27 @@ public class WebViewFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_webview, root, false);
+        Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar_actionbar);
+        toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getActivity().onBackPressed();
+            }
+        });
+        toolbar.setOnMenuItemClickListener(this);
+        final TextView link = (TextView) v.findViewById(R.id.url);
+        link.setText(mUri);
+        onCreateOptionsMenu(toolbar.getMenu(), getActivity().getMenuInflater());
+
         mWebView = (WebView) v.findViewById(R.id.content);
-        mWebView.setWebViewClient(new WebViewClient());
+        mWebView.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageStarted(WebView view, String url, Bitmap favicon) {
+                super.onPageStarted(view, url, favicon);
+                link.setText(url);
+            }
+        });
         mWebView.getSettings().setBuiltInZoomControls(true);
         mWebView.getSettings().setDisplayZoomControls(false);
         mWebView.getSettings().setJavaScriptEnabled(true);
@@ -65,7 +92,7 @@ public class WebViewFragment extends Fragment {
         if (savedInstanceState != null) {
             mWebView.restoreState(savedInstanceState);
         } else if (mUri != null) {
-            mWebView.loadUrl(imgurOptimize(mUri));
+            mWebView.loadUrl(mUri, getHeaders());
             mWebView.setWebChromeClient(new WebChromeClient() {
                 @Override
                 public void onProgressChanged(WebView view, int progress) {
@@ -79,36 +106,41 @@ public class WebViewFragment extends Fragment {
                 }
             });
         }
-        mWebView.setOnTouchListener(new View.OnTouchListener() {
-            private boolean mHandle;
+        return v;
+    }
 
-            @Override
-            public boolean onTouch(View view, MotionEvent event) {
-                int action = event.getAction();
-                switch (action) {
-                    case MotionEvent.ACTION_DOWN:
-                        mHandle = true;
-                        // Disallow Drawer to intercept touch events.
-                        view.getParent().requestDisallowInterceptTouchEvent(true);
-                        break;
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
 
-                    case MotionEvent.ACTION_UP:
-                        // Allow Drawer to intercept touch events.
-                        view.getParent().requestDisallowInterceptTouchEvent(false);
-                        break;
-                }
-                if (!mHandle) {
-                    view.getParent().requestDisallowInterceptTouchEvent(false);
-                }
+        inflater.inflate(R.menu.fragment_web_view, menu);
+    }
 
-                // Handle seekbar touch events.
-                if (!view.onTouchEvent(event)) {
-                    mHandle = false;
+    @Override
+    public boolean onMenuItemClick(MenuItem menuItem) {
+        switch (menuItem.getItemId()) {
+            case R.id.go_forward: {
+                if (mWebView.canGoForward()) {
+                    mWebView.goForward();
                 }
                 return true;
             }
-        });
-        return v;
+            case R.id.open_in_browser: {
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(mWebView.getOriginalUrl()));
+                startActivity(browserIntent);
+                return true;
+            }
+            case R.id.share_link: {
+                Intent sendIntent = new Intent();
+                sendIntent.setAction(Intent.ACTION_SEND);
+                sendIntent.putExtra(Intent.EXTRA_TEXT, mWebView.getUrl());
+                sendIntent.setType("text/plain");
+                startActivity(Intent.createChooser(sendIntent,
+                        getResources().getText(R.string.share_with)));
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -119,6 +151,16 @@ public class WebViewFragment extends Fragment {
             mWebView.saveState(outState);
     }
 
+    private Map<String, String> getHeaders() {
+        Map<String, String> headers = new HashMap<>();
+        if (AccountManager.isLoggedIn()) {
+            headers.put("Cookie",
+                    "reddit_session=\"" + AccountManager.getAccount().getCookie() + "\"");
+            headers.put("X-Modhash", AccountManager.getAccount().getModhash());
+        }
+        return headers;
+    }
+
     public boolean onBackPressed() {
         if (mWebView.canGoBack()) {
             mWebView.goBack();
@@ -126,13 +168,4 @@ public class WebViewFragment extends Fragment {
         }
         return false;
     }
-
-    private String imgurOptimize(String s) {
-        if (s.contains("imgur.com")
-                && !(s.contains("imgur.com/a/") || s.contains("imgur.com/gallery/"))) {
-            s += ".png";
-        }
-        return s;
-    }
-
 }

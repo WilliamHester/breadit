@@ -25,8 +25,7 @@ import me.williamhester.models.Subreddit;
 import me.williamhester.network.RedditApi;
 import me.williamhester.notifications.MessageNotificationBroadcastReceiver;
 import me.williamhester.reddit.R;
-import me.williamhester.ui.fragments.ImageFragment;
-import me.williamhester.ui.fragments.ImagePagerFragment;
+import me.williamhester.ui.fragments.ContentFragment;
 import me.williamhester.ui.fragments.MessagesFragment;
 import me.williamhester.ui.fragments.NavigationDrawerFragment;
 import me.williamhester.ui.fragments.SidebarFragment;
@@ -35,9 +34,11 @@ import me.williamhester.ui.fragments.UserFragment;
 import me.williamhester.ui.fragments.WebViewFragment;
 import me.williamhester.ui.fragments.YouTubeFragment;
 
-public class MainActivity extends ActionBarActivity implements ImageFragment.ImageTapCallbacks,
-        NavigationDrawerFragment.NavigationDrawerCallbacks, ImagePagerFragment.ImagePagerCallbacks,
-        SubredditFragment.SubredditFragmentCallbacks, MessagesFragment.MessageFragmentCallbacks {
+public class MainActivity extends ActionBarActivity implements
+        MessagesFragment.MessageFragmentCallbacks,
+        SubredditFragment.SubredditFragmentCallbacks,
+        NavigationDrawerFragment.NavigationDrawerCallbacks,
+        ContentFragment.ContentFragmentCallbacks {
 
     public static final String SUBREDDIT = "subreddit";
 
@@ -282,30 +283,19 @@ public class MainActivity extends ActionBarActivity implements ImageFragment.Ima
     }
 
     @Override
-    public void onImagePagerFragmentCreated() {
-        DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawerLayout != null) {
-            drawerLayout.setEnabled(false);
-            drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-        }
-    }
-
-    @Override
-    public void onImagePagerFragmentDestroyed() {
-        DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawerLayout.setEnabled(true);
-        drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-    }
-
-    @Override
-    public void onImageTapped() {
-        getSupportFragmentManager().popBackStack();
-    }
-
-    @Override
     public void onMessageReadCountChanged(int newCount) {
         if (mNavigationFragment != null) {
             mNavigationFragment.setUnreadCount(newCount);
         }
+    }
+
+    @Override
+    public void onContentFragmentOpened() {
+        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+    }
+
+    @Override
+    public void onContentFragmentClosed() {
+        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
     }
 }
