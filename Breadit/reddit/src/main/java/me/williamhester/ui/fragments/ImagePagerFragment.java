@@ -226,6 +226,9 @@ public class ImagePagerFragment extends ContentFragment {
                 @Override
                 public void onPageSelected(int i) {
                     mCurrentPosition = i;
+                    if (mAlbum != null) {
+                        mAlbum.setLastViewedPosition(mCurrentPosition);
+                    }
                 }
 
                 @Override

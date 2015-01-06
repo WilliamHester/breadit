@@ -2,7 +2,11 @@ package me.williamhester.ui.fragments;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 /**
  * An abstraction for the fragments that show content on top of the regular top-level fragments.
@@ -22,21 +26,19 @@ public abstract class ContentFragment extends Fragment {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         if (mCallback != null) {
             mCallback.onContentFragmentOpened();
         }
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-
+    public void onDestroyView() {
         if (mCallback != null) {
             mCallback.onContentFragmentClosed();
         }
+        super.onDestroyView();
     }
 
     public interface ContentFragmentCallbacks {

@@ -49,6 +49,7 @@ public class GifFragment extends Fragment {
 
         if (savedInstanceState != null) {
             mParser = savedInstanceState.getParcelable("parser");
+            mImage = savedInstanceState.getParcelable("image");
         } else {
             if (getArguments().containsKey("url")) {
                 mParser = new Url(getArguments().getString("url"));
@@ -130,6 +131,7 @@ public class GifFragment extends Fragment {
         super.onSaveInstanceState(outState);
 
         outState.putParcelable("parser", mParser);
+        outState.putParcelable("image", mImage);
     }
 
     private void setUrl(String url) {
