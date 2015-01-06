@@ -109,6 +109,12 @@ public class GifFragment extends Fragment {
                 }
             });
         }
+        view.findViewById(R.id.clickable_view).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getActivity().onBackPressed();
+            }
+        });
     }
 
     @Override
