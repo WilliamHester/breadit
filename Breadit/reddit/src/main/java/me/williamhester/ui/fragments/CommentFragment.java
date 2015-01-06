@@ -118,6 +118,11 @@ public class CommentFragment extends AccountFragment implements Toolbar.OnMenuIt
         setRetainInstance(true);
     }
 
+    @Override
+    public void onAccountChanged() {
+
+    }
+
     @SuppressLint("ResourceAsColor")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {

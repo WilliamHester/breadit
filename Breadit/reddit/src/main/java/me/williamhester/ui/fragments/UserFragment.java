@@ -124,6 +124,11 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
         }
     }
 
+    @Override
+    public void onAccountChanged() {
+
+    }
+
     @SuppressLint("ResourceAsColor")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
@@ -167,6 +172,15 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
                 mAdapter.notifyDataSetChanged();
                 mScrollListener.resetState();
                 RedditApi.getUserContent(getActivity(), mUsername, null, mFilterType, mThingsCallback);
+            }
+        });
+        mToolbar.post(new Runnable() {
+            @Override
+            public void run() {
+                float density = getResources().getDisplayMetrics().density;
+                int startAt = mToolbar.getHeight() - (int) (40 * density);
+                int endAt = startAt + (int) (64 * density);
+                mRefreshLayout.setProgressViewOffset(false, startAt, endAt);
             }
         });
 

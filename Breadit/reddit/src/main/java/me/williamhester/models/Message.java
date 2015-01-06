@@ -4,8 +4,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.Spannable;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 
 /**
@@ -135,7 +133,6 @@ public class Message implements Votable, Parcelable {
     }
 
     public int getVoteStatus() {
-//        Log.d("Message.getVoteStatus()", "" + mVoteStatus);
         return mVoteStatus == null ? NEUTRAL : (mVoteStatus ? UPVOTED : DOWNVOTED);
     }
 

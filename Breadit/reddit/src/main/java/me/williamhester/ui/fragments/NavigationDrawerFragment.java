@@ -177,7 +177,6 @@ public class NavigationDrawerFragment extends AccountFragment {
 
     @Override
     public void onAccountChanged() {
-        super.onAccountChanged();
         selectCurrentAccount(getView());
     }
 

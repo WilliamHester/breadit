@@ -185,6 +185,15 @@ public class SubredditFragment extends AccountFragment implements Toolbar.OnMenu
                 refreshData();
             }
         });
+        mHeaderBar.post(new Runnable() {
+            @Override
+            public void run() {
+                float density = getResources().getDisplayMetrics().density;
+                int startAt = mHeaderBar.getHeight() - (int) (40 * density);
+                int endAt = startAt + (int) (64 * density);
+                mSwipeRefreshLayout.setProgressViewOffset(false, startAt, endAt);
+            }
+        });
 
         mSubredditAdapter = new SubredditAdapter();
         Spinner subreddits = (Spinner) v.findViewById(R.id.user_spinner);
@@ -268,7 +277,6 @@ public class SubredditFragment extends AccountFragment implements Toolbar.OnMenu
 
     @Override
     public void onAccountChanged() {
-        super.onAccountChanged();
         refreshData();
         loadSubreddits(getView());
     }

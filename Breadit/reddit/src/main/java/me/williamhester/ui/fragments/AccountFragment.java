@@ -29,6 +29,7 @@ public abstract class AccountFragment extends Fragment {
                 && (mAccount == null
                 || account == null
                 || !account.equals(mAccount))) {
+            mAccount = AccountManager.getAccount();
             onAccountChanged();
         }
     }
@@ -36,8 +37,6 @@ public abstract class AccountFragment extends Fragment {
     /**
      * This method is called when the account is changed.
      */
-    public void onAccountChanged() {
-        mAccount = AccountManager.getAccount();
-    }
+    public abstract void onAccountChanged();
 
 }

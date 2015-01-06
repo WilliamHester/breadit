@@ -94,6 +94,11 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
         }
     }
 
+    @Override
+    public void onAccountChanged() {
+
+    }
+
     @SuppressLint("ResourceAsColor")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
@@ -130,6 +135,15 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
             public void onRefresh() {
                 mRefreshing = true;
                 RedditApi.getMessages(getActivity(), mFilterType, null, mMessageCallback);
+            }
+        });
+        mToolbar.post(new Runnable() {
+            @Override
+            public void run() {
+                float density = getResources().getDisplayMetrics().density;
+                int startAt = mToolbar.getHeight() - (int) (40 * density);
+                int endAt = startAt + (int) (64 * density);
+                mRefreshLayout.setProgressViewOffset(false, startAt, endAt);
             }
         });
         mMessagesRecyclerView = (RecyclerView) v.findViewById(R.id.inbox);
