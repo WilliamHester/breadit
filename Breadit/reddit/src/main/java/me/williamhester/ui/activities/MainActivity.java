@@ -33,7 +33,6 @@ import me.williamhester.ui.fragments.UserFragment;
 
 public class MainActivity extends BaseActivity implements
         MessagesFragment.MessageFragmentCallbacks,
-        SubredditFragment.SubredditFragmentCallbacks,
         NavigationDrawerFragment.NavigationDrawerCallbacks,
         ContentFragment.ContentFragmentCallbacks {
 

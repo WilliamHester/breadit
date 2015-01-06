@@ -1,6 +1,5 @@
 package me.williamhester.ui.fragments;
 
-import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
@@ -47,10 +46,12 @@ import me.williamhester.ui.views.DividerItemDecoration;
 import me.williamhester.ui.views.SubmissionCommentViewHolder;
 import me.williamhester.ui.views.SubmissionViewHolder;
 import me.williamhester.ui.views.VotableViewHolder;
+import me.williamhester.ui.widget.InfiniteLoadToolbarHideScrollListener;
 
 public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemClickListener,
         SubmissionViewHolder.SubmissionCallbacks,
-        SubmissionCommentViewHolder.SubmissionCommentCallbacks {
+        SubmissionCommentViewHolder.SubmissionCommentCallbacks,
+        InfiniteLoadToolbarHideScrollListener.OnLoadMoreListener {
 
     public static final int VOTE_REQUEST_CODE = 1;
 
@@ -63,17 +64,14 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
     private TopLevelFragmentCallbacks mCallback;
     private VotableAdapter mAdapter;
 
-    private InfiniteLoadingScrollListener mScrollListener;
-    private LinearLayoutManager mLayoutManager;
+    private InfiniteLoadToolbarHideScrollListener mScrollListener;
     private ProgressBar mProgressBar;
-    private RecyclerView mVotableRecyclerView;
     private SwipeRefreshLayout mRefreshLayout;
     private VotableViewHolder mFocusedVotable;
     private TextView mCakeDay;
     private TextView mCommentKarma;
     private TextView mLinkKarma;
     private Toolbar mToolbar;
-    private View mHeaderBar;
     private View mUserHeader;
 
     private boolean mLoading;
@@ -134,7 +132,7 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_user, root, false);
 
-        mHeaderBar = v.findViewById(R.id.header_bar);
+        View headerBar = v.findViewById(R.id.header_bar);
         mToolbar = (Toolbar) v.findViewById(R.id.toolbar_actionbar);
         if (mCallback != null) {
             mToolbar.setNavigationIcon(R.drawable.ic_drawer);
@@ -184,16 +182,17 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
             }
         });
 
-        mLayoutManager = new LinearLayoutManager(getActivity());
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         mAdapter = new VotableAdapter();
-        mScrollListener = new InfiniteLoadingScrollListener();
-        mVotableRecyclerView = (RecyclerView) v.findViewById(R.id.content_list);
-        mVotableRecyclerView.setOnScrollListener(mScrollListener);
-        mVotableRecyclerView.setLayoutManager(mLayoutManager);
-        mVotableRecyclerView.addItemDecoration(new DividerItemDecoration(
+        RecyclerView votableRecyclerView = (RecyclerView) v.findViewById(R.id.content_list);
+        votableRecyclerView.setOnScrollListener(mScrollListener);
+        votableRecyclerView.setLayoutManager(layoutManager);
+        votableRecyclerView.addItemDecoration(new DividerItemDecoration(
                 getResources().getDrawable(R.drawable.card_divider)));
-        mVotableRecyclerView.setAdapter(mAdapter);
-        mVotableRecyclerView.setOnScrollListener(new InfiniteLoadingScrollListener());
+        votableRecyclerView.setAdapter(mAdapter);
+        mScrollListener = new InfiniteLoadToolbarHideScrollListener(mAdapter, headerBar,
+                votableRecyclerView, mVotables, layoutManager, this);
+        votableRecyclerView.setOnScrollListener(mScrollListener);
 
         final Spinner spinner = (Spinner) v.findViewById(R.id.user_spinner);
         int array = R.array.user_data_types;
@@ -464,6 +463,18 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
         startActivity(i);
     }
 
+    @Override
+    public void onLoadMore() {
+        mProgressBar.setVisibility(View.VISIBLE);
+        String after;
+        if (mVotables.size() == 0) {
+            after = null;
+        } else {
+            after = mVotables.get(mVotables.size() - 1).getName();
+        }
+        RedditApi.getUserContent(getActivity(), mUsername, after, mFilterType, mThingsCallback);
+    }
+
     private class VotableAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         public static final int HEADER_SPACER = 0;
@@ -521,71 +532,6 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
                 return USER_HEADER;
             }
             return mVotables.get(position - 2) instanceof Comment ? COMMENT : SUBMISSION;
-        }
-    }
-
-    public class InfiniteLoadingScrollListener extends RecyclerView.OnScrollListener {
-
-        private final int VISIBLE_THRESHOLD = 5;
-        private int mPreviousTotal = 0;
-        private boolean mLoading = true;
-
-        @Override
-        public void onScrolled(RecyclerView absListView, int dx, int dy) {
-            if (mLoading) {
-                if (mAdapter.getItemCount() > mPreviousTotal) {
-                    mPreviousTotal = mAdapter.getItemCount();
-                    mLoading = false;
-                    mProgressBar.setVisibility(View.GONE);
-                }
-            } else if (mVotables.size() > 0
-                    && (mAdapter.getItemCount() - mVotableRecyclerView.getChildCount())
-                    <= (mLayoutManager.findFirstVisibleItemPosition() + VISIBLE_THRESHOLD)) {
-                loadMoreVotables();
-                mLoading = true;
-                mProgressBar.setVisibility(View.VISIBLE);
-            }
-
-            float prevY = mHeaderBar.getTranslationY();
-            mHeaderBar.setTranslationY(Math.min(Math.max(-mHeaderBar.getHeight(), prevY - dy), 0));
-        }
-
-        @Override
-        public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-            switch (newState) {
-                case RecyclerView.SCROLL_STATE_IDLE:
-                    if (Math.abs(mHeaderBar.getTranslationY()) < mHeaderBar.getHeight() / 2
-                            || mLayoutManager.findFirstVisibleItemPosition() == 0) {
-                        // Need to move it back to completely visible.
-                        ObjectAnimator objectAnimator =
-                                ObjectAnimator.ofFloat(mHeaderBar, "translationY", mHeaderBar.getTranslationY(), 0.0F);
-                        objectAnimator.setDuration((int) -mHeaderBar.getTranslationY());
-                        objectAnimator.start();
-                    } else {
-                        // Hide the header bar.
-                        ObjectAnimator objectAnimator =
-                                ObjectAnimator.ofFloat(mHeaderBar, "translationY", mHeaderBar.getTranslationY(), -mHeaderBar.getHeight());
-                        objectAnimator.setDuration(mHeaderBar.getHeight() - (long) mHeaderBar.getTranslationY());
-                        objectAnimator.start();
-                    }
-                    break;
-            }
-        }
-
-        public void resetState() {
-            mPreviousTotal = mAdapter.getItemCount();
-            mLoading = false;
-            mProgressBar.setVisibility(View.GONE);
-        }
-
-        private void loadMoreVotables() {
-            String after;
-            if (mVotables.size() == 0) {
-                after = null;
-            } else {
-                after = mVotables.get(mVotables.size() - 1).getName();
-            }
-            RedditApi.getUserContent(getActivity(), mUsername, after, mFilterType, mThingsCallback);
         }
     }
 
