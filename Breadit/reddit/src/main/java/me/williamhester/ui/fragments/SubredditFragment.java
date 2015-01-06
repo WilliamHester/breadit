@@ -125,6 +125,8 @@ public class SubredditFragment extends AccountFragment implements Toolbar.OnMenu
             Collections.addAll(mNames, array);
             mLoading = savedInstanceState.getBoolean("loading");
             mSubredditExists = savedInstanceState.getBoolean("subredditExists", true);
+            ArrayList<Subreddit> subs = savedInstanceState.getParcelableArrayList("subreddits");
+            mSubredditList.addAll(subs);
         } else if (getArguments() != null) {
             mSubredditName = getArguments().getString("subreddit");
             mNames = new HashSet<>();
@@ -139,7 +141,7 @@ public class SubredditFragment extends AccountFragment implements Toolbar.OnMenu
 
     @SuppressLint("ResourceAsColor")
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle bundle) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_subreddit, root, false);
 
         mHeaderBar = v.findViewById(R.id.header_bar);
@@ -187,7 +189,9 @@ public class SubredditFragment extends AccountFragment implements Toolbar.OnMenu
         mSubredditAdapter = new SubredditAdapter();
         Spinner subreddits = (Spinner) v.findViewById(R.id.user_spinner);
         subreddits.setAdapter(mSubredditAdapter);
-        loadSubreddits(v);
+        if (savedInstanceState == null) {
+            loadSubreddits(v);
+        }
 
         if (!mSubredditExists) {
             v.findViewById(R.id.subreddit_does_not_exist).setVisibility(View.VISIBLE);
@@ -278,6 +282,7 @@ public class SubredditFragment extends AccountFragment implements Toolbar.OnMenu
         outState.putStringArray("names", array);
         outState.putBoolean("loading", mLoading);
         outState.putBoolean("subredditExists", mSubredditExists);
+        outState.putParcelableArrayList("subreddits", mSubredditList);
         super.onSaveInstanceState(outState);
     }
 
