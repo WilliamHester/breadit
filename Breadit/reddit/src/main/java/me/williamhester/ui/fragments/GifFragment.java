@@ -122,8 +122,10 @@ public class GifFragment extends Fragment {
     public void onStop() {
         super.onStop();
 
-        VideoView gif = (VideoView) getView().findViewById(R.id.gif_view);
-        gif.stopPlayback();
+        if (getView() != null) {
+            VideoView gif = (VideoView) getView().findViewById(R.id.gif_view);
+            gif.stopPlayback();
+        }
     }
 
     @Override

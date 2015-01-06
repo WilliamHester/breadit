@@ -367,7 +367,7 @@ public class SubmissionViewHolder extends VotableViewHolder {
         }
     }
 
-    public void onImageViewClicked() {
+    private void onImageViewClicked() {
         mCallback.getFragmentManager().beginTransaction()
                 .add(R.id.main_container, ImagePagerFragment.newInstance(mSubmission),
                         "ImagePagerFragment")
@@ -375,7 +375,7 @@ public class SubmissionViewHolder extends VotableViewHolder {
                 .commit();
     }
 
-    public void onLinkClicked() {
+    private void onLinkClicked() {
         Url link = mSubmission.getLinkDetails();
         Bundle args = new Bundle();
         args.putString("permalink", link.getUrl());
@@ -432,7 +432,7 @@ public class SubmissionViewHolder extends VotableViewHolder {
         }
     }
 
-    public void onYouTubeVideoClicked(String videoId) {
+    private void onYouTubeVideoClicked(String videoId) {
         // TODO: fix this when YouTube updates their Android API
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             mCallback.getFragmentManager().beginTransaction()
