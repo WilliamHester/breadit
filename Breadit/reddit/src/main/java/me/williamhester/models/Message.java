@@ -58,37 +58,6 @@ public class Message implements Votable, Parcelable {
     @SerializedName("first_message")
     private String mFirstMessage;
 
-    public Message(JsonObject data) {
-        mCreated = data.get("created").getAsLong();
-        mCreatedUtc = data.get("created_utc").getAsLong();
-        mAuthor = data.get("author").getAsString();
-        mBody = data.get("body").getAsString();
-        mBodyHtml = data.get("body_html").getAsString();
-        mContext = data.get("context").getAsString();
-        mDestination = data.get("dest").getAsString();
-        if (data.get("link_title") != null)
-            mLinkTitle = data.get("link_title").getAsString();
-        mName = data.get("name").getAsString();
-        if (!data.get("parent_id").isJsonNull())
-            mParentId = data.get("parent_id").getAsString();
-//        if (!data.get("replies").isJsonNull())
-//            mReplies = data.get("replies").getAsString();
-        mId = data.get("id").getAsString();
-        mSubject = data.get("subject").getAsString();
-        mWasComment = data.get("was_comment").getAsBoolean();
-        if (mWasComment) {
-            mSubreddit = data.get("subreddit").getAsString();
-            JsonElement je = data.getAsJsonObject().get("likes");
-            if (je.isJsonNull()) {
-                mVoteStatus = null;
-            } else {
-                mVoteStatus = je.getAsBoolean();
-            }
-        }
-        mUnread = data.get("new").getAsBoolean();
-
-    }
-
     public long getCreated() {
         return mCreated;
     }

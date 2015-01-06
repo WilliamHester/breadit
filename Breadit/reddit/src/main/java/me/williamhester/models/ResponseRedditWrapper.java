@@ -32,7 +32,8 @@ public class ResponseRedditWrapper {
                 }
                 mData = s;
             } else if (mKind.equals("t4")) {
-                mData = new Message(object.get("data").getAsJsonObject());
+                TypeToken<Message> token = new TypeToken<Message>() { };
+                mData = gson.fromJson(object.get("data"), token.getType());
             } else if (mKind.equals("t5")) {
                 mData = gson.fromJson(object.get("data"), Subreddit.class);
             } else if (mKind.equals("t6")) {
