@@ -128,14 +128,14 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
         }
 
         if (mSubmissionList.size() == 0) {
-            refreshData();
+            onRefreshList();
         }
         return v;
     }
 
     @Override
     public void onAccountChanged() {
-        refreshData();
+        onRefreshList();
         loadSubreddits(getView());
     }
 
@@ -170,7 +170,7 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
     /**
      * Reloads the data for the fragment. This should be called after the account has changed.
      */
-    public void refreshData() {
+    public void onRefreshList() {
         if (mSwipeRefreshLayout != null) {
             mSwipeRefreshLayout.setRefreshing(true);
             loadAndClear();

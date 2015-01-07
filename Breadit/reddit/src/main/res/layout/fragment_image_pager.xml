@@ -1,21 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="@color/transparent_gray">
-
-    <android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:breadit="http://schemas.android.com/apk/res-auto"
-        breadit:theme="@style/ActionBarThemeOverlay"
-        breadit:popupTheme="@style/ActionBarPopupThemeOverlay"
-        android:id="@+id/toolbar_actionbar"
-        android:background="@color/transparent_gray"
-        breadit:titleTextAppearance="@style/ActionBar.TitleText"
-        breadit:contentInsetStart="@dimen/keyline_2"
-        android:layout_width="match_parent"
-        android:layout_height="?actionBarSize" />
 
     <FrameLayout
         android:orientation="vertical" android:layout_width="match_parent"
@@ -49,4 +37,15 @@
 
     </FrameLayout>
 
-</LinearLayout>
+    <android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:breadit="http://schemas.android.com/apk/res-auto"
+        breadit:theme="@style/ActionBarThemeOverlay"
+        breadit:popupTheme="@style/ActionBarPopupThemeOverlay"
+        android:id="@+id/toolbar_actionbar"
+        android:background="@color/transparent_gray"
+        breadit:titleTextAppearance="@style/ActionBar.TitleText"
+        breadit:contentInsetStart="@dimen/keyline_2"
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize" />
+
+</FrameLayout>

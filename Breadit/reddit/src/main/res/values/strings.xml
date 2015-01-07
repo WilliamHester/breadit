@@ -158,6 +158,9 @@
     <!-- ImgurImageFragment -->
     <string name="toggle_description">Toggle description</string>
 
+    <!-- ImageFragment -->
+    <string name="load_high_quality">Load high quality image</string>
+
     <!-- RedditLiveFragment -->
     <string name="say_something">Say something</string>
 

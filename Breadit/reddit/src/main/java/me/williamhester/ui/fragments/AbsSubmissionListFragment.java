@@ -67,7 +67,7 @@ public abstract class AbsSubmissionListFragment extends AccountFragment implemen
     private View mHeaderBar;
     protected boolean mLoading = true;
 
-    protected abstract void refreshData();
+    protected abstract void onRefreshList();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -100,7 +100,7 @@ public abstract class AbsSubmissionListFragment extends AccountFragment implemen
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                refreshData();
+                onRefreshList();
             }
         });
         mHeaderBar.post(new Runnable() {
@@ -303,7 +303,7 @@ public abstract class AbsSubmissionListFragment extends AccountFragment implemen
             mPrimarySortType = primary;
             mSecondarySortType = secondary;
             mProgressBar.setVisibility(View.VISIBLE);
-            refreshData();
+            onRefreshList();
         }
     }
 

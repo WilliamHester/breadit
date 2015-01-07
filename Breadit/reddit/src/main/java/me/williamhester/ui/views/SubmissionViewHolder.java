@@ -470,8 +470,6 @@ public class SubmissionViewHolder extends VotableViewHolder {
                 Intent i = new Intent(mCallback.getActivity(), BrowseActivity.class);
                 i.putExtras(b);
                 mCallback.getActivity().startActivity(i);
-                // TODO: Change this so that it opens a BrowseActivity that's hosting a
-                // SubredditFragment
                 break;
             }
             case R.id.option_view_user: {

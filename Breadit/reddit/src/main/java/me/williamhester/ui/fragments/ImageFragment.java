@@ -68,10 +68,36 @@ public class ImageFragment extends Fragment {
         final View v = inflater.inflate(R.layout.fragment_imgur_image, root, false);
         final ImageView imageView = (ImageView) v.findViewById(R.id.image);
         TextView description = (TextView) v.findViewById(R.id.description);
-        if (mImgurImage != null && mImgurImage.getDescription() != null) {
-            description.setText(mImgurImage.getDescription());
-            description.setVisibility(View.VISIBLE);
+        View loadHq = v.findViewById(R.id.load_high_quality);
+        if (mImgurImage != null) {
+            if (mImgurImage.getDescription() != null) {
+                description.setText(mImgurImage.getDescription());
+                description.setVisibility(View.VISIBLE);
+            }
+            loadHq.setVisibility(View.VISIBLE);
+            loadHq.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    mUrl = mImgurImage.getUrl();
+                    ProgressBar progressBar = (ProgressBar) v.findViewById(R.id.progress_bar);
+                    progressBar.setVisibility(View.VISIBLE);
+                    loadImage(v, imageView);
+                }
+            });
+        } else {
+            loadHq.setVisibility(View.GONE);
         }
+        loadImage(v, imageView);
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getActivity().onBackPressed();
+            }
+        });
+        return v;
+    }
+
+    public void loadImage(final View v, final ImageView imageView) {
         ImgurApi.loadImage(mUrl, imageView, new FutureCallback<ImageView>() {
             @Override
             public void onCompleted(Exception e, ImageView result) {
@@ -87,13 +113,6 @@ public class ImageFragment extends Fragment {
                 });
             }
         });
-        imageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                getActivity().onBackPressed();
-            }
-        });
-        return v;
     }
 
     @Override
