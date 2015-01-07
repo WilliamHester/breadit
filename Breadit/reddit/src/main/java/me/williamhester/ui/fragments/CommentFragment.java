@@ -388,12 +388,13 @@ public class CommentFragment extends Fragment implements Toolbar.OnMenuItemClick
         public void onBodyClick(CommentViewHolder viewHolder, Comment comment) {
             comment.setHidden(!comment.isHidden());
             final int position = mCommentsList.indexOf(comment);
-            mCommentAdapter.notifyItemChanged(position + 1);
+            mCommentAdapter.notifyItemChanged(position + mCommentAdapter.getHeaderViewCount());
             if (comment.isHidden()) {
-                mCommentAdapter.notifyItemRangeRemoved(position + 2,
-                        hideComment(position));
+                mCommentAdapter.notifyItemRangeRemoved(position + 1
+                        + mCommentAdapter.getHeaderViewCount(), hideComment(position));
             } else {
-                mCommentAdapter.notifyItemRangeInserted(position + 2, showComment(position));
+                mCommentAdapter.notifyItemRangeInserted(position + 1
+                        + mCommentAdapter.getHeaderViewCount(), showComment(position));
             }
         }
 
