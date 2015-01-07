@@ -431,7 +431,9 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
 
     @Override
     public void onCommentLongPressed(CommentViewHolder holder) {
-        holder.expandOptions();
+        if (holder != null) {
+            holder.expandOptions();
+        }
         if (mFocusedVotable != null) {
             mFocusedVotable.collapseOptions();
             if (mFocusedVotable == holder) {
