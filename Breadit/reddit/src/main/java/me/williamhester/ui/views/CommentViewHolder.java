@@ -182,8 +182,10 @@ public class CommentViewHolder extends VotableViewHolder {
         mAuthor.setText(mComment.getAuthor());
         StringBuilder sb = new StringBuilder();
         sb.append(String.valueOf(mComment.getScore()))
-                .append(" ")
-                .append(itemView.getResources().getQuantityString(R.plurals.points, mComment.getScore()));
+                .append(' ')
+                .append(itemView.getResources().getQuantityString(R.plurals.points, mComment.getScore()))
+                .append(' ')
+                .append(calculateTimeShort(mComment.getCreatedUtc()));
         mMetadata.setText(sb);
         if (!TextUtils.isEmpty(mComment.getFlairText())) {
             mFlairText.setVisibility(View.VISIBLE);
