@@ -406,8 +406,8 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
     }
 
     @Override
-    public void onOptionsRowItemSelected(View view, Submission submission) {
-
+    public boolean onOptionsRowItemSelected(int itemId, Submission submission) {
+        return false;
     }
 
     @Override

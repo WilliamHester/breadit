@@ -1,6 +1,7 @@
 package me.williamhester.ui.fragments;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -23,12 +24,8 @@ import com.koushikdutta.async.future.FutureCallback;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import me.williamhester.models.Account;
-import me.williamhester.models.AccountManager;
 import me.williamhester.models.Submission;
-import me.williamhester.models.Subreddit;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.activities.BrowseActivity;
@@ -37,13 +34,15 @@ import me.williamhester.ui.views.SubmissionViewHolder;
 import me.williamhester.ui.widget.InfiniteLoadToolbarHideScrollListener;
 
 /**
- * Created by william on 1/6/15.
+ * This Fragment contains a RecyclerView and a Toolbar and fetches Submissions by its subclasses.
  */
 public abstract class AbsSubmissionListFragment extends AccountFragment implements
-        Toolbar.OnMenuItemClickListener, InfiniteLoadToolbarHideScrollListener.OnLoadMoreListener,
+        Toolbar.OnMenuItemClickListener,
+        InfiniteLoadToolbarHideScrollListener.OnLoadMoreListener,
         SubmissionViewHolder.SubmissionCallbacks {
 
     public static final int VOTE_REQUEST_CODE = 1;
+    public static final int REMOVE_RESULT_CODE = 2;
 
     protected ArrayList<Submission> mSubmissionList;
 
@@ -163,18 +162,44 @@ public abstract class AbsSubmissionListFragment extends AccountFragment implemen
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == VOTE_REQUEST_CODE) {
-            if (data == null)
-                return;
-            Bundle b = data.getExtras();
-            String name = b.getString("name");
-            int status = b.getInt("status");
-            if (name != null) {
-                for (int i = 0; i < mSubmissionList.size(); i++) {
-                    if (mSubmissionList.get(i).getName().equals(name)) {
-                        mSubmissionList.get(i).setVoteStatus(status);
-                        mSubmissionsAdapter.notifyItemChanged(i);
-                        return;
+        if (requestCode != VOTE_REQUEST_CODE) {
+            super.onActivityResult(requestCode, resultCode, data);
+            return;
+        }
+        switch (resultCode) {
+            case Activity.RESULT_OK: {
+                if (data == null)
+                    return;
+                Bundle b = data.getExtras();
+                String name = b.getString("name");
+                int status = b.getInt("status");
+                if (name != null) {
+                    for (int i = 0; i < mSubmissionList.size(); i++) {
+                        if (mSubmissionList.get(i).getName().equals(name)) {
+                            mSubmissionList.get(i).setVoteStatus(status);
+                            mSubmissionsAdapter.notifyItemChanged(i + 1);
+                            return;
+                        }
+                    }
+                }
+            }
+            case REMOVE_RESULT_CODE: {
+                if (data == null) {
+                    return;
+                }
+                Bundle b = data.getExtras();
+                String name = b.getString("name");
+                if (name != null) {
+                    int position = -1;
+                    for (int i = 0; i < mSubmissionList.size(); i++) {
+                        if (mSubmissionList.get(i).getName().equals(name)) {
+                            position = i;
+                            break;
+                        }
+                    }
+                    if (position > -1) {
+                        mSubmissionList.remove(position);
+                        mSubmissionsAdapter.notifyItemRemoved(position + 1);
                     }
                 }
             }
@@ -212,55 +237,56 @@ public abstract class AbsSubmissionListFragment extends AccountFragment implemen
     }
 
     @Override
-    public void onOptionsRowItemSelected(View view, final Submission submission) {
-        switch (view.getId()) {
-            case R.id.option_go_to_subreddit: {
-                Intent i = new Intent(getActivity(), BrowseActivity.class);
-                // TODO: Change this so that it opens a BrowseActivity that's hosting a
-                // SubredditFragment
-                break;
+    public boolean onOptionsRowItemSelected(int itemId, final Submission submission) {
+        FutureCallback<String> removeCallback = new FutureCallback<String>() {
+            @Override
+            public void onCompleted(Exception e, String result) {
+                if (e != null) {
+                    e.printStackTrace();
+                    return;
+                }
+                int i = mSubmissionList.indexOf(submission);
+                mSubmissionList.remove(i);
+                mSubmissionsAdapter.notifyItemRemoved(i);
             }
-            case R.id.option_view_user: {
-                Bundle b = new Bundle();
-                b.putString("type", "user");
-                b.putString("username", submission.getAuthor());
-                Intent i = new Intent(getActivity(), BrowseActivity.class);
-                i.putExtras(b);
-                getActivity().startActivity(i);
-                break;
-            }
-            case R.id.option_share: {
-                PopupMenu menu = new PopupMenu(getActivity(), view);
-                menu.inflate(R.menu.share);
-                menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+        };
+        switch (itemId) {
+            case R.id.overflow_hide: {
+                FutureCallback<String> callback = new FutureCallback<String>() {
                     @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        Intent sendIntent = new Intent();
-                        sendIntent.setAction(Intent.ACTION_SEND);
-                        if (item.getItemId() == R.id.share_link) {
-                            sendIntent.putExtra(Intent.EXTRA_TEXT, submission.getUrl());
-                        } else {
-                            String link = RedditApi.PUBLIC_REDDIT_URL + submission.getPermalink();
-                            sendIntent.putExtra(Intent.EXTRA_TEXT, link);
+                    public void onCompleted(Exception e, String result) {
+                        if (e != null) {
+                            e.printStackTrace();
+                            return;
                         }
-                        sendIntent.setType("text/plain");
-                        startActivity(Intent.createChooser(sendIntent,
-                                getResources().getText(R.string.share_with)));
-                        return false;
+                        if (!submission.isHidden()) {
+                            int i = mSubmissionList.indexOf(submission);
+                            mSubmissionList.remove(i);
+                            mSubmissionsAdapter.notifyItemRemoved(i);
+                        }
                     }
-                });
-                menu.show();
+                };
+                if (submission.isHidden()) {
+                    RedditApi.unhide(getActivity(), submission, callback);
+                } else {
+                    RedditApi.hide(getActivity(), submission, callback);
+                }
                 break;
             }
-            case R.id.option_save: {
-                // TODO: actually save it
+            case R.id.overflow_delete: {
+                RedditApi.delete(getActivity(), submission, removeCallback);
                 break;
             }
-            case R.id.option_overflow: {
-                inflateOverflowPopupMenu(view, submission);
+            case R.id.overflow_remove: {
+                RedditApi.remove(getActivity(), submission, false, removeCallback);
+                break;
+            }
+            case R.id.overflow_spam: {
+                RedditApi.remove(getActivity(), submission, true, removeCallback);
                 break;
             }
         }
+        return false;
     }
 
     /**
@@ -279,121 +305,6 @@ public abstract class AbsSubmissionListFragment extends AccountFragment implemen
             mProgressBar.setVisibility(View.VISIBLE);
             refreshData();
         }
-    }
-
-    private void inflateOverflowPopupMenu(View view, final Submission submission) {
-        PopupMenu popupMenu = new PopupMenu(getActivity(), view);
-
-        Account account = AccountManager.getAccount();
-        Map<String, Subreddit> subscriptions = account.getSubscriptions();
-        boolean isMod = subscriptions.containsKey(submission.getSubredditName().toLowerCase())
-                && subscriptions.get(submission.getSubredditName().toLowerCase()).userIsModerator();
-        boolean isOp = submission.getAuthor().equalsIgnoreCase(account.getUsername());
-
-        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                FutureCallback<String> removeCallback = new FutureCallback<String>() {
-                    @Override
-                    public void onCompleted(Exception e, String result) {
-                        if (e != null) {
-                            e.printStackTrace();
-                            return;
-                        }
-                        int i = mSubmissionList.indexOf(submission);
-                        mSubmissionList.remove(i);
-                        mSubmissionsAdapter.notifyItemRemoved(i);
-                    }
-                };
-                switch (item.getItemId()) {
-                    case R.id.overflow_hide: {
-                        FutureCallback<String> callback = new FutureCallback<String>() {
-                            @Override
-                            public void onCompleted(Exception e, String result) {
-                                if (e != null) {
-                                    e.printStackTrace();
-                                    return;
-                                }
-                                if (!submission.isHidden()) {
-                                    int i = mSubmissionList.indexOf(submission);
-                                    mSubmissionList.remove(i);
-                                    mSubmissionsAdapter.notifyItemRemoved(i);
-                                }
-                            }
-                        };
-                        if (submission.isHidden()) {
-                            RedditApi.unhide(getActivity(), submission, callback);
-                        } else {
-                            RedditApi.hide(getActivity(), submission, callback);
-                        }
-                        break;
-                    }
-                    case R.id.overflow_mark_nsfw: {
-                        FutureCallback<String> callback = new FutureCallback<String>() {
-                            @Override
-                            public void onCompleted(Exception e, String result) {
-                                if (e != null) {
-                                    e.printStackTrace();
-                                }
-                                submission.setIsNsfw(!submission.isNsfw());
-                                int i = mSubmissionList.indexOf(submission);
-                                mSubmissionsAdapter.notifyItemChanged(i);
-                            }
-                        };
-                        if (submission.isNsfw()) {
-                            RedditApi.unmarkNsfw(getActivity(), submission, callback);
-                        } else {
-                            RedditApi.markNsfw(getActivity(), submission, callback);
-                        }
-                        break;
-                    }
-                    case R.id.overflow_report:
-                        break; // TODO: Make a form for this
-                    case R.id.overflow_delete: {
-                        RedditApi.delete(getActivity(), submission, removeCallback);
-                        break;
-                    }
-                    case R.id.overflow_approve: {
-                        FutureCallback<String> callback = new FutureCallback<String>() {
-                            @Override
-                            public void onCompleted(Exception e, String result) {
-                                if (e != null) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        };
-                        RedditApi.approve(getActivity(), submission, callback);
-                        break;
-                    }
-                    case R.id.overflow_remove: {
-                        RedditApi.remove(getActivity(), submission, false, removeCallback);
-                        break;
-                    }
-                    case R.id.overflow_spam: {
-                        RedditApi.remove(getActivity(), submission, true, removeCallback);
-                        break;
-                    }
-                }
-                return true;
-            }
-        });
-        popupMenu.inflate(R.menu.submission_overflow);
-
-        Menu menu = popupMenu.getMenu();
-        if ((isOp || isMod) && submission.isNsfw()) {
-            menu.findItem(R.id.overflow_mark_nsfw).setTitle(R.string.unmark_nsfw);
-        }
-        if (submission.isHidden()) {
-            menu.findItem(R.id.overflow_hide).setTitle(R.string.unhide);
-        }
-        menu.findItem(R.id.overflow_report).setVisible(!isMod);
-        menu.findItem(R.id.overflow_mark_nsfw).setVisible(isOp || isMod);
-        menu.findItem(R.id.overflow_delete).setVisible(isOp);
-        menu.findItem(R.id.overflow_approve).setVisible(isMod);
-        menu.findItem(R.id.overflow_remove).setVisible(isMod);
-        menu.findItem(R.id.overflow_spam).setVisible(isMod);
-
-        popupMenu.show();
     }
 
     @Override

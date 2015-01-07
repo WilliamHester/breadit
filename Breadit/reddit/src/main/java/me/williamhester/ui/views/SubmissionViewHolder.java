@@ -8,9 +8,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.widget.PopupMenu;
 import android.text.Html;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
@@ -20,13 +23,17 @@ import android.widget.TextView;
 import com.koushikdutta.async.future.FutureCallback;
 
 import java.util.List;
+import java.util.Map;
 
 import me.williamhester.SettingsManager;
+import me.williamhester.models.Account;
 import me.williamhester.models.AccountManager;
 import me.williamhester.models.ImgurAlbum;
 import me.williamhester.models.ImgurImage;
 import me.williamhester.models.Submission;
+import me.williamhester.models.Subreddit;
 import me.williamhester.network.ImgurApi;
+import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 import me.williamhester.tools.HtmlParser;
 import me.williamhester.tools.Url;
@@ -84,7 +91,10 @@ public class SubmissionViewHolder extends VotableViewHolder {
         View.OnClickListener mOptionsOnClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mCallback.onOptionsRowItemSelected(v, mSubmission);
+                if (mCallback.onOptionsRowItemSelected(v.getId(), mSubmission)) {
+                    return;
+                }
+                onOptionsRowItemSelected(v, mSubmission);
             }
         };
         optionShare.setOnClickListener(mOptionsOnClickListener);
@@ -176,7 +186,7 @@ public class SubmissionViewHolder extends VotableViewHolder {
                 + itemView.getResources().getQuantityString(R.plurals.points,
                 mSubmission.getScore()));
 
-        mNsfwWarning.setVisibility(mSubmission.isNsfw() ? View.VISIBLE : View.GONE);
+        setUpNsfw();
 
         if (mSubmission.isSelf()) {
             if (TextUtils.isEmpty(mSubmission.getRawMarkdown())) {
@@ -212,6 +222,10 @@ public class SubmissionViewHolder extends VotableViewHolder {
                     break;
             }
         }
+    }
+
+    public void setUpNsfw() {
+        mNsfwWarning.setVisibility(mSubmission.isNsfw() ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -447,6 +461,133 @@ public class SubmissionViewHolder extends VotableViewHolder {
         }
     }
 
+    private void onOptionsRowItemSelected(final View view, final Submission submission) {
+        switch (view.getId()) {
+            case R.id.option_go_to_subreddit: {
+                Bundle b = new Bundle();
+                b.putString("type", "subreddit");
+                b.putString("subreddit", submission.getSubredditName());
+                Intent i = new Intent(mCallback.getActivity(), BrowseActivity.class);
+                i.putExtras(b);
+                mCallback.getActivity().startActivity(i);
+                // TODO: Change this so that it opens a BrowseActivity that's hosting a
+                // SubredditFragment
+                break;
+            }
+            case R.id.option_view_user: {
+                Bundle b = new Bundle();
+                b.putString("type", "user");
+                b.putString("username", submission.getAuthor());
+                Intent i = new Intent(mCallback.getActivity(), BrowseActivity.class);
+                i.putExtras(b);
+                mCallback.getActivity().startActivity(i);
+                break;
+            }
+            case R.id.option_share: {
+                PopupMenu menu = new PopupMenu(mCallback.getActivity(), view);
+                menu.inflate(R.menu.share);
+                menu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        Intent sendIntent = new Intent();
+                        sendIntent.setAction(Intent.ACTION_SEND);
+                        if (item.getItemId() == R.id.share_link) {
+                            sendIntent.putExtra(Intent.EXTRA_TEXT, submission.getUrl());
+                        } else {
+                            String link = RedditApi.PUBLIC_REDDIT_URL + submission.getPermalink();
+                            sendIntent.putExtra(Intent.EXTRA_TEXT, link);
+                        }
+                        sendIntent.setType("text/plain");
+                        mCallback.getActivity().startActivity(Intent.createChooser(sendIntent,
+                                view.getResources().getText(R.string.share_with)));
+                        return false;
+                    }
+                });
+                menu.show();
+                break;
+            }
+            case R.id.option_save: {
+                // TODO: actually save it
+                break;
+            }
+            case R.id.option_overflow: {
+                inflateOverflowPopupMenu(view, submission);
+                break;
+            }
+        }
+    }
+
+    private void inflateOverflowPopupMenu(View view, final Submission submission) {
+        PopupMenu popupMenu = new PopupMenu(mCallback.getActivity(), view);
+
+        Account account = AccountManager.getAccount();
+        Map<String, Subreddit> subscriptions = account.getSubscriptions();
+        boolean isMod = subscriptions.containsKey(submission.getSubredditName().toLowerCase())
+                && subscriptions.get(submission.getSubredditName().toLowerCase()).userIsModerator();
+        boolean isOp = submission.getAuthor().equalsIgnoreCase(account.getUsername());
+
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                if (mCallback.onOptionsRowItemSelected(item.getItemId(), mSubmission)) {
+                    return true;
+                }
+                switch (item.getItemId()) {
+                    case R.id.overflow_mark_nsfw: {
+                        FutureCallback<String> callback = new FutureCallback<String>() {
+                            @Override
+                            public void onCompleted(Exception e, String result) {
+                                if (e != null) {
+                                    e.printStackTrace();
+                                }
+                                submission.setIsNsfw(!submission.isNsfw());
+                                setUpNsfw();
+                            }
+                        };
+                        if (submission.isNsfw()) {
+                            RedditApi.unmarkNsfw(mCallback.getActivity(), submission, callback);
+                        } else {
+                            RedditApi.markNsfw(mCallback.getActivity(), submission, callback);
+                        }
+                        break;
+                    }
+                    case R.id.overflow_report:
+                        break; // TODO: Make a form for this
+                    case R.id.overflow_approve: {
+                        FutureCallback<String> callback = new FutureCallback<String>() {
+                            @Override
+                            public void onCompleted(Exception e, String result) {
+                                if (e != null) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        };
+                        RedditApi.approve(mCallback.getActivity(), submission, callback);
+                        break;
+                    }
+                }
+                return true;
+            }
+        });
+        popupMenu.inflate(R.menu.submission_overflow);
+
+        Menu menu = popupMenu.getMenu();
+        if ((isOp || isMod) && submission.isNsfw()) {
+            menu.findItem(R.id.overflow_mark_nsfw).setTitle(R.string.unmark_nsfw);
+        }
+        if (submission.isHidden()) {
+            menu.findItem(R.id.overflow_hide).setTitle(R.string.unhide);
+        }
+        menu.findItem(R.id.overflow_report).setVisible(!isMod);
+        menu.findItem(R.id.overflow_mark_nsfw).setVisible(isOp || isMod);
+        menu.findItem(R.id.overflow_delete).setVisible(isOp);
+        menu.findItem(R.id.overflow_approve).setVisible(isMod);
+        menu.findItem(R.id.overflow_remove).setVisible(isMod);
+        menu.findItem(R.id.overflow_spam).setVisible(isMod);
+
+        popupMenu.show();
+    }
+
     public void disableClicks() {
         View subData = itemView.findViewById(R.id.submission_data);
         subData.setOnClickListener(null);
@@ -497,7 +638,7 @@ public class SubmissionViewHolder extends VotableViewHolder {
         public Activity getActivity();
         public void onCardClicked(Submission submission);
         public void onCardLongPressed(SubmissionViewHolder holder);
-        public void onOptionsRowItemSelected(View view, Submission submission);
+        public boolean onOptionsRowItemSelected(int itemId, Submission submission);
         public boolean isFrontPage();
     }
 }
