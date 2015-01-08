@@ -273,4 +273,7 @@
     <!-- WebViewFragment -->
     <string name="go_forward">Go forward</string>
 
+    <!-- FriendsFragment -->
+    <string name="friends_since">Friends since</string>
+
 </resources>

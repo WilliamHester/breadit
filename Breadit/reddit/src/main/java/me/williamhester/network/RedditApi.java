@@ -1,10 +1,13 @@
 package me.williamhester.network;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
@@ -26,8 +29,11 @@ import me.williamhester.models.AbsComment;
 import me.williamhester.models.Account;
 import me.williamhester.models.AccountManager;
 import me.williamhester.models.Comment;
+import me.williamhester.models.Friend;
+import me.williamhester.models.GenericListing;
 import me.williamhester.models.GenericResponseRedditWrapper;
 import me.williamhester.models.Listing;
+import me.williamhester.models.Message;
 import me.williamhester.models.ResponseRedditWrapper;
 import me.williamhester.models.Submission;
 import me.williamhester.models.Subreddit;
@@ -656,6 +662,52 @@ public class RedditApi {
                     @Override
                     public void run() {
                         callback.onCompleted(e, new JsonParser().parse(result).getAsJsonObject());
+                    }
+                });
+            }
+        });
+    }
+
+    public static void getFriends(final FutureCallback<ArrayList<Friend>> callback) {
+        AsyncHttpRequest request = new AsyncHttpGet(REDDIT_URL + "/api/v1/me/friends");
+        Account account = AccountManager.getAccount();
+        request.addHeader("Cookie", "reddit_session=\"" + account.getCookie() + "\"");
+        request.addHeader("X-Modhash", account.getModhash());
+        request.addHeader("User-Agent", USER_AGENT);
+        request.addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+
+        AsyncHttpClient.getDefaultInstance().executeString(request, new AsyncHttpClient.StringCallback() {
+            @Override
+            public void onCompleted(final Exception e, AsyncHttpResponse source, String result) {
+                Handler handler = new Handler(Looper.getMainLooper());
+                if (e != null) {
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            callback.onCompleted(e, null);
+                        }
+                    });
+                    return;
+                }
+
+                Gson gson = new Gson();
+                JsonObject object = new JsonParser().parse(result).getAsJsonObject();
+                JsonArray children = object.get("data")
+                        .getAsJsonObject()
+                        .get("children")
+                        .getAsJsonArray();
+
+                final ArrayList<Friend> friends = new ArrayList<>();
+                for (JsonElement element : children) {
+                    TypeToken<Friend> token = new TypeToken<Friend>() { };
+                    Friend f = gson.fromJson(element, token.getType());
+                    friends.add(f);
+                }
+
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        callback.onCompleted(null, friends);
                     }
                 });
             }

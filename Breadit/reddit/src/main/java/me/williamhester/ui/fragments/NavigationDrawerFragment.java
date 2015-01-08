@@ -127,6 +127,14 @@ public class NavigationDrawerFragment extends AccountFragment {
             }
         });
 
+        View friends = v.findViewById(R.id.friends);
+        friends.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mCallback.onFriendsSelected();
+            }
+        });
+
         final TextView unreadCount = (TextView) v.findViewById(R.id.unread_count);
         RedditApi.getMessages(getActivity(), Message.UNREAD, null, new FutureCallback<JsonObject>() {
             @Override
@@ -225,6 +233,8 @@ public class NavigationDrawerFragment extends AccountFragment {
         public void onMessagesSelected();
 
         public void onMyAccountSelected();
+
+        public void onFriendsSelected();
     }
 
     private class AccountAdapter extends ArrayAdapter<String> {

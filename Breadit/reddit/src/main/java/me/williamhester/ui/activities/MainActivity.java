@@ -19,12 +19,14 @@ import com.koushikdutta.async.future.FutureCallback;
 
 import me.williamhester.SettingsManager;
 import me.williamhester.models.AccountManager;
+import me.williamhester.models.Friend;
 import me.williamhester.models.ResponseRedditWrapper;
 import me.williamhester.models.Subreddit;
 import me.williamhester.network.RedditApi;
 import me.williamhester.notifications.MessageNotificationBroadcastReceiver;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.fragments.ContentFragment;
+import me.williamhester.ui.fragments.FriendsFragment;
 import me.williamhester.ui.fragments.MessagesFragment;
 import me.williamhester.ui.fragments.NavigationDrawerFragment;
 import me.williamhester.ui.fragments.SidebarFragment;
@@ -39,6 +41,7 @@ public class MainActivity extends BaseActivity implements
     private ActionBarDrawerToggle mDrawerToggle;
     private DrawerLayout mDrawerLayout;
     private Fragment mCurrentFragment;
+    private FriendsFragment mFriendsFragment;
     private MessagesFragment mMessagesFragment;
     private NavigationDrawerFragment mNavigationFragment;
     private SubredditFragment mSubredditFragment;
@@ -86,6 +89,13 @@ public class MainActivity extends BaseActivity implements
             mMyAccountFragment = UserFragment.newInstance();
         } else {
             mMyAccountFragment = (UserFragment) myAccount;
+        }
+
+        Fragment friends = getSupportFragmentManager().findFragmentByTag("friends");
+        if (friends == null) {
+            mFriendsFragment = FriendsFragment.newInstance();
+        } else {
+            mFriendsFragment = (FriendsFragment) friends;
         }
 
         Fragment side = getSupportFragmentManager().findFragmentById(R.id.right_drawer);
@@ -261,8 +271,24 @@ public class MainActivity extends BaseActivity implements
     }
 
     @Override
+    public void onFriendsSelected() {
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        if (mFriendsFragment.isDetached()) {
+            ft.attach(mFriendsFragment)
+                    .detach(mCurrentFragment)
+                    .commit();
+        } else if (!mFriendsFragment.isAdded()) {
+            ft.add(R.id.main_container, mFriendsFragment, "friends")
+                    .detach(mCurrentFragment)
+                    .commit();
+        }
+        mDrawerLayout.closeDrawer(Gravity.START);
+        mCurrentFragment = mFriendsFragment;
+    }
+
+    @Override
     public void onBackPressed()  {
-        if (mDrawerLayout.isDrawerOpen(Gravity.START) || mDrawerLayout.isDrawerOpen(Gravity.END)) {
+        if (mDrawerLayout.isDrawerOpen(Gravity.HORIZONTAL_GRAVITY_MASK)) {
             mDrawerLayout.closeDrawers();
         } else {
             super.onBackPressed();
