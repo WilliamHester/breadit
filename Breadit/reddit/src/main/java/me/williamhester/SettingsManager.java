@@ -17,17 +17,16 @@ public class SettingsManager {
     private static boolean mLowBandwidthMode;
 
     private static String mCommentSort;
-    private static SharedPreferences mPrefs;
     private static int mNotificationInterval;
 
     private SettingsManager() { }
 
     public static void init(Context context) {
-        mPrefs = context.getSharedPreferences("preferences", Context.MODE_PRIVATE);
-        mCommentSort = mPrefs.getString("pref_default_comment_sort", RedditApi.COMMENT_SORT_BEST);
-        mShowThumbnails = mPrefs.getBoolean("pref_show_thumbnails", true);
-        mLowBandwidthMode = mPrefs.getBoolean("pref_low_bandwidth_mode", false);
-        mNotificationInterval = Integer.parseInt(mPrefs.getString("pref_notification_interval", "60"));
+        SharedPreferences prefs = context.getSharedPreferences("preferences", Context.MODE_PRIVATE);
+        mCommentSort = prefs.getString("pref_default_comment_sort", RedditApi.COMMENT_SORT_BEST);
+        mShowThumbnails = prefs.getBoolean("pref_show_thumbnails", true);
+        mLowBandwidthMode = prefs.getBoolean("pref_low_bandwidth_mode", false);
+        mNotificationInterval = Integer.parseInt(prefs.getString("pref_notification_interval", "60"));
     }
 
     public static void setDefaultCommentSort(String string) {

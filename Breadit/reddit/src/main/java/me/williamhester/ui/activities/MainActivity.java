@@ -164,8 +164,8 @@ public class MainActivity extends BaseActivity implements
             alarmManager.cancel(pendingIntent);
         } else {
             long interval = SettingsManager.getNotificationInterval() * 60 * 1000;
-            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
-                    System.currentTimeMillis() + interval, interval, pendingIntent);
+            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), interval,
+                    pendingIntent);
         }
     }
 

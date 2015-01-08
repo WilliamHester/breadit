@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -53,7 +52,7 @@ public class ReplyFragment extends AsyncSendFragment {
         if (parent != null) {
             return getResources().getString(R.string.reply_hint) + " /u/" + parent.getAuthor();
         } else {
-            return getResources().getString(R.string.enter_self_text);
+            return getResources().getString(R.string.enter_reply_text);
         }
     }
 
