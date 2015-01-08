@@ -6,6 +6,7 @@ import android.app.TaskStackBuilder;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.RingtoneManager;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
@@ -52,11 +53,20 @@ public class MessageNotificationBroadcastReceiver extends BroadcastReceiver {
                 GenericListing<Message> listing = wrapper.getData();
                 ArrayList<Message> messages = new ArrayList<>();
 
+                SharedPreferences prefs = context.getSharedPreferences("preferences", Context.MODE_PRIVATE);
+                long oldLatestTime = prefs.getLong("latestMessage", 0);
+                long latestTime = 0;
                 for (GenericResponseRedditWrapper<Message> message : listing.getChildren()) {
+                    if (message.getData().getCreatedUtc() > latestTime) {
+                        latestTime = message.getData().getCreatedUtc();
+                    }
                     messages.add(message.getData());
                 }
 
-                if (messages.size() > 0) {
+                if (messages.size() > 0 && latestTime > oldLatestTime) {
+                    SharedPreferences.Editor editor = prefs.edit();
+                    editor.putLong("latestMessage", latestTime);
+                    editor.apply();
                     NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
                             .setSmallIcon(R.drawable.ic_breadit)
                             .setContentTitle(messages.size() + " " + context.getResources()
@@ -78,8 +88,7 @@ public class MessageNotificationBroadcastReceiver extends BroadcastReceiver {
                                     .setColor(context.getResources().getColor(R.color.auburn_orange))
                                     .build());
 
-                    NotificationCompat.InboxStyle inboxStyle =
-                            new NotificationCompat.InboxStyle();
+                    NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
                     String[] messageTexts = new String[Math.min(6, messages.size())];
                     for (int i = 0; i < Math.min(6, messages.size()); i++) {
                         Message m = messages.get(i);

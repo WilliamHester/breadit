@@ -147,8 +147,10 @@ public class ReplyFragment extends AsyncSendFragment {
                         InputMethodManager imm =  (InputMethodManager) getActivity()
                                 .getSystemService(Context.INPUT_METHOD_SERVICE);
                         imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);
-                        getTargetFragment().onActivityResult(getTargetRequestCode(),
-                                Activity.RESULT_OK, i);
+                        if (getTargetFragment() != null) {
+                            getTargetFragment().onActivityResult(getTargetRequestCode(),
+                                    Activity.RESULT_OK, i);
+                        }
                         if (isResumed()) {
                             getActivity().onBackPressed();
                         } else {
