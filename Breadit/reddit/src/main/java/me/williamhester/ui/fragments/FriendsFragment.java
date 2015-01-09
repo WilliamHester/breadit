@@ -34,7 +34,7 @@ import me.williamhester.ui.widget.InfiniteLoadToolbarHideScrollListener;
 public class FriendsFragment extends AccountFragment {
 
     private final ArrayList<Friend> mFriends = new ArrayList<>();
-    private FriendsAdapter mFreindsAdapter;
+    private FriendsAdapter mFriendsAdapter;
     private ProgressBar mProgressBar;
     private Toolbar mToolbar;
     private TopLevelFragmentCallbacks mCallback;
@@ -80,12 +80,12 @@ public class FriendsFragment extends AccountFragment {
                 mCallback.onHomeClicked();
             }
         });
-        mFreindsAdapter = new FriendsAdapter();
+        mFriendsAdapter = new FriendsAdapter();
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         RecyclerView recyclerView = (RecyclerView) v.findViewById(R.id.friends);
         recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(mFreindsAdapter);
-        recyclerView.setOnScrollListener(new InfiniteLoadToolbarHideScrollListener(mFreindsAdapter,
+        recyclerView.setAdapter(mFriendsAdapter);
+        recyclerView.setOnScrollListener(new InfiniteLoadToolbarHideScrollListener(mFriendsAdapter,
                 mToolbar, recyclerView, mFriends, layoutManager, null));
         recyclerView.addItemDecoration(
                 new DividerItemDecoration(getResources().getDrawable(R.drawable.card_divider)));
@@ -113,7 +113,7 @@ public class FriendsFragment extends AccountFragment {
                 }
                 mHasFetchedFriends = true;
                 mFriends.addAll(result);
-                mFreindsAdapter.notifyDataSetChanged();
+                mFriendsAdapter.notifyDataSetChanged();
             }
         });
     }
@@ -121,7 +121,7 @@ public class FriendsFragment extends AccountFragment {
     @Override
     public void onAccountChanged() {
         mFriends.clear();
-        mFreindsAdapter.notifyDataSetChanged();
+        mFriendsAdapter.notifyDataSetChanged();
         loadFriends();
     }
 

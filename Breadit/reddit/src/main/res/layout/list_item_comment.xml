@@ -40,7 +40,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textStyle="bold"
-                android:textSize="13sp"
+                android:textSize="12sp"
                 android:singleLine="true"
                 android:layout_marginEnd="4dp"/>
 
@@ -50,7 +50,7 @@
                 android:layout_toEndOf="@id/author"
                 android:maxWidth="120dp"
                 android:fontFamily="sans-serif-light"
-                android:textSize="13sp"
+                android:textSize="12sp"
                 android:layout_marginEnd="4dp"
                 android:background="@drawable/flair_background"
                 android:singleLine="true"
@@ -62,7 +62,7 @@
                 android:layout_toEndOf="@id/flair"
                 android:layout_marginEnd="4dp"
                 android:fontFamily="sans-serif-light"
-                android:textSize="13sp"
+                android:textSize="12sp"
                 android:textColor="@color/comment_metadata_gray"
                 android:singleLine="true"
                 android:ellipsize="none"/>

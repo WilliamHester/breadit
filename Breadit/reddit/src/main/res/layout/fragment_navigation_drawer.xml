@@ -86,7 +86,8 @@
     </RelativeLayout>
 
     <RelativeLayout style="@style/NavigationItemRelativeLayout"
-        android:id="@+id/saved">
+        android:id="@+id/saved"
+        android:visibility="gone">
 
         <TextView
             style="@style/NavigationItemText"
