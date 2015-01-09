@@ -152,7 +152,7 @@ public abstract class VotableViewHolder extends RecyclerView.ViewHolder {
 
     protected static String calculateTimeShort(long postTime) {
         long currentTime = System.currentTimeMillis() / 1000;
-        long difference = currentTime - postTime;
+        long difference = Math.max(currentTime - postTime, 0);
         String time;
         if (difference / 31536000 > 0) {
             time = difference / 31536000 + "y";
