@@ -253,7 +253,7 @@ public class SubmissionViewHolder extends VotableViewHolder {
         mImagePreviewView.setVisibility(View.GONE);
         mSelfTextView.setVisibility(View.GONE);
 
-        if (SettingsManager.isShowingThumbnails()
+        if ((!SettingsManager.isLowBandwidth() || SettingsManager.isShowingThumbnails())
                 && !TextUtils.isEmpty(mSubmission.getThumbnailUrl())) {
             ImgurApi.loadImage(mSubmission.getThumbnailUrl(), mThumbnail, null);
         } else {
