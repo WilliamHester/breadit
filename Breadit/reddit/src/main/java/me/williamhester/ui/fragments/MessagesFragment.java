@@ -255,8 +255,8 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
             if (mMessages.size() == messages.size()) {
                 mMessageAdapter.notifyDataSetChanged();
             } else {
-                mMessageAdapter.notifyItemRangeInserted(mMessages.size() - messages.size(),
-                        messages.size());
+                mMessageAdapter.notifyItemRangeInserted(mMessages.size() - messages.size() + 1,
+                        messages.size() + 1);
             }
         }
     };
