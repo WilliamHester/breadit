@@ -49,7 +49,9 @@ public class InfiniteLoadToolbarHideScrollListener extends RecyclerView.OnScroll
                 && (mAdapter.getItemCount() - mRecyclerView.getChildCount())
                 <= (mLayoutManager.findFirstVisibleItemPosition() + VISIBLE_THRESHOLD)) {
             mLoading = true;
-            mCallback.onLoadMore();
+            if (mCallback != null) {
+                mCallback.onLoadMore();
+            }
         }
 
         float prevY = mHeaderBar.getTranslationY();
@@ -76,10 +78,6 @@ public class InfiniteLoadToolbarHideScrollListener extends RecyclerView.OnScroll
                 }
                 break;
         }
-    }
-
-    public void onFinishedLoading() {
-        mLoading = false;
     }
 
     public void resetState() {

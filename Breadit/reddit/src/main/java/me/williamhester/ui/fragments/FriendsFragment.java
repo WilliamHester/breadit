@@ -7,9 +7,11 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -24,6 +26,7 @@ import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.activities.BrowseActivity;
 import me.williamhester.ui.views.DividerItemDecoration;
+import me.williamhester.ui.widget.InfiniteLoadToolbarHideScrollListener;
 
 /**
  * FriendsFragment is a simple fragment that shows the currently logged in user's friends.
@@ -33,6 +36,7 @@ public class FriendsFragment extends AccountFragment {
     private final ArrayList<Friend> mFriends = new ArrayList<>();
     private FriendsAdapter mFreindsAdapter;
     private ProgressBar mProgressBar;
+    private Toolbar mToolbar;
     private TopLevelFragmentCallbacks mCallback;
     private boolean mHasFetchedFriends;
     private boolean mLoading;
@@ -67,10 +71,10 @@ public class FriendsFragment extends AccountFragment {
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_friends, container, false);
 
-        Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar_actionbar);
-        toolbar.setTitle(R.string.friends);
-        toolbar.setNavigationIcon(R.drawable.ic_drawer);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+        mToolbar = (Toolbar) v.findViewById(R.id.toolbar_actionbar);
+        mToolbar.setTitle(R.string.friends);
+        mToolbar.setNavigationIcon(R.drawable.ic_drawer);
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mCallback.onHomeClicked();
@@ -81,6 +85,8 @@ public class FriendsFragment extends AccountFragment {
         RecyclerView recyclerView = (RecyclerView) v.findViewById(R.id.friends);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(mFreindsAdapter);
+        recyclerView.setOnScrollListener(new InfiniteLoadToolbarHideScrollListener(mFreindsAdapter,
+                mToolbar, recyclerView, mFriends, layoutManager, null));
         recyclerView.addItemDecoration(
                 new DividerItemDecoration(getResources().getDrawable(R.drawable.card_divider)));
 
@@ -128,22 +134,48 @@ public class FriendsFragment extends AccountFragment {
         outState.putParcelableArrayList("friends", mFriends);
     }
 
-    private class FriendsAdapter extends RecyclerView.Adapter<FriendViewHolder> {
+    private class FriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+
+        private static final int VIEW_TYPE_HEADER = 0;
+        private static final int VIEW_TYPE_FRIEND = 1;
 
         @Override
-        public FriendViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             LayoutInflater inflater = LayoutInflater.from(getActivity());
-            return new FriendViewHolder(inflater.inflate(R.layout.list_item_friend, parent, false));
+            switch (viewType) {
+                case VIEW_TYPE_HEADER:
+                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT, mToolbar.getHeight());
+                    Log.d("FriendsFragment", "mToolbar height = " + mToolbar.getHeight());
+                    View header = new View(getActivity());
+                    header.setLayoutParams(params);
+                    return new RecyclerView.ViewHolder(header) { };
+                case VIEW_TYPE_FRIEND:
+                    return new FriendViewHolder(inflater.inflate(R.layout.list_item_friend, parent,
+                            false));
+            }
+            return null;
         }
 
         @Override
-        public void onBindViewHolder(FriendViewHolder holder, int position) {
-            holder.setContent(mFriends.get(position));
+        public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+            if (position > 0) {
+                ((FriendViewHolder) holder).setContent(mFriends.get(position - 1));
+            }
         }
 
         @Override
         public int getItemCount() {
-            return mFriends.size();
+            return mFriends.size() + 1;
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            if (position == 0) {
+                return VIEW_TYPE_HEADER;
+            } else {
+                return VIEW_TYPE_FRIEND;
+            }
         }
     }
 
