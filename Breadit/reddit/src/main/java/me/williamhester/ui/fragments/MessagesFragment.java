@@ -3,6 +3,7 @@ package me.williamhester.ui.fragments;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -10,6 +11,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -204,6 +208,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
         });
 
         if (mMessages.size() == 0) {
+            mProgressBar.setVisibility(View.VISIBLE);
             RedditApi.getMessages(getActivity(), mFilterType, null, mMessageCallback);
         } else {
             mProgressBar.setVisibility(View.GONE);
@@ -351,8 +356,6 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
         private Message mMessage;
         private TextView mSubject;
         private TextView mToFrom;
-        private TextView mAuthor;
-        private TextView mMetadata;
         private TextView mBody;
         private View mOptionsRow;
         private View mReadStatus;
@@ -362,8 +365,6 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
 
             mSubject = (TextView) itemView.findViewById(R.id.subject);
             mToFrom = (TextView) itemView.findViewById(R.id.to_from);
-            mAuthor = (TextView) itemView.findViewById(R.id.author);
-            mMetadata = (TextView) itemView.findViewById(R.id.metadata);
             mBody = (TextView) itemView.findViewById(R.id.body);
             mBody.setMovementMethod(new ClickableLinkMovementMethod());
 
@@ -453,31 +454,51 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
             mMessage = (Message) object;
             
             collapse(mOptionsRow);
+            mSwipeView.setEnabled(mMessage.isComment());
+            mReadStatus.setVisibility(mMessage.isUnread() ? View.VISIBLE : View.GONE);
+
+            SpannableStringBuilder toFrom = new SpannableStringBuilder();
             if (mMessage.getAuthor().equalsIgnoreCase(mAccount.getUsername())) {
-                mToFrom.setText(getResources().getString(R.string.to) + " ");
+                toFrom.append(getResources().getString(R.string.to))
+                        .append(' ')
+                        .append(mMessage.getDestination());
             } else {
-                mToFrom.setText(getResources().getString(R.string.from) + " ");
+                toFrom.append(getResources().getString(R.string.from))
+                        .append(' ')
+                        .append(mMessage.getAuthor());
             }
-
             if (mMessage.isComment()) {
-                mSwipeView.setEnabled(true);
-            } else {
-                mSwipeView.setEnabled(false);
+                toFrom.append(' ')
+                        .append(getResources().getString(R.string.via))
+                        .append(" /r/")
+                        .append(mMessage.getSubreddit());
             }
+            toFrom.append(' ')
+                    .append(calculateTimeShort(mMessage.getCreatedUtc()));
+            mToFrom.setText(toFrom);
 
-            mAuthor.setText(mMessage.getAuthor());
-            mMetadata.setText(" " + calculateTimeShort(mMessage.getCreatedUtc()));
             String unescaped = Html.fromHtml(mMessage.getBodyHtml()).toString();
             HtmlParser parser = new HtmlParser(unescaped);
             mBody.setText(parser.getSpannableString());
 
-            if (mMessage.isUnread()) {
-                mReadStatus.setVisibility(View.VISIBLE);
+            SpannableStringBuilder ssb = new SpannableStringBuilder();
+            if (mMessage.isComment()) {
+                ssb.append(getResources().getString(R.string.comment_reply))
+                        .setSpan(new StyleSpan(Typeface.BOLD), 0, ssb.length(),
+                                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                ssb.append(' ')
+                        .append(getResources().getString(R.string.on));
+                String linkTitle = Html.fromHtml(mMessage.getLinkTitle()).toString();
+                ssb.append(' ')
+                        .append(linkTitle)
+                        .setSpan(new StyleSpan(Typeface.ITALIC), ssb.length() - linkTitle.length(),
+                                ssb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             } else {
-                mReadStatus.setVisibility(View.GONE);
+                ssb.append(Html.fromHtml(mMessage.getSubject()).toString())
+                        .setSpan(new StyleSpan(Typeface.BOLD), 0, ssb.length(),
+                                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
-
-            mSubject.setText(mMessage.getSubject());
+            mSubject.setText(ssb);
         }
 
         private View.OnClickListener mOptionsClickListener = new View.OnClickListener() {

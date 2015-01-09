@@ -42,8 +42,7 @@
 
     <android.support.v4.widget.SwipeRefreshLayout android:id="@+id/swipe_refresh"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@+id/progress_bar">
+        android:layout_height="match_parent">
 
         <android.support.v7.widget.RecyclerView android:id="@+id/inbox"
             android:layout_width="match_parent"
@@ -57,11 +56,10 @@
 
     <ProgressBar android:id="@+id/progress_bar"
         style="?android:progressBarStyleHorizontal"
-        android:layout_marginTop="-7dp"
-        android:layout_marginBottom="-7dp"
+        android:indeterminate="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:indeterminate="true"/>
+        android:layout_marginTop="-7dp"
+        android:layout_marginBottom="-7dp" />
 
 </RelativeLayout>

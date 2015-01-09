@@ -58,8 +58,6 @@
 
     <!-- Account -->
     <string name="action_compose_message">Compose message</string>
-    <string name="to">To</string>
-    <string name="from">From</string>
     <string name="filter">Filter by</string>
 
     <!-- SubmissionDialogFragment -->
@@ -130,6 +128,11 @@
     <string name="view_context">View context</string>
     <string name="report">Report</string>
     <string name="full_comments">Full comments</string>
+    <string name="comment_reply">Comment reply</string>
+    <string name="on">on</string>
+    <string name="to">to</string>
+    <string name="from">from</string>
+    <string name="via">via</string>
 
     <!-- AccountActivity -->
     <string name="inbox">Inbox</string>

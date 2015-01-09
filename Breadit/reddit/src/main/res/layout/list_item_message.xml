@@ -25,42 +25,22 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif-light"
-                android:textStyle="bold"
-                android:textColor="@color/mid_gray"/>
+                android:textColor="@color/ghostwhite"
+                android:textSize="12sp"/>
 
-            <LinearLayout
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/to_from"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/to_from"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-light"
-                    android:textColor="@color/mid_gray"/>
-
-                <TextView
-                    android:id="@+id/author"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-light"
-                    android:textColor="@color/mid_gray"/>
-
-                <TextView
-                    android:id="@+id/metadata"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-light"
-                    android:textColor="@color/mid_gray"/>
-
-            </LinearLayout>
+                android:fontFamily="sans-serif-light"
+                android:textColor="@color/ghostwhite"
+                android:textSize="12sp"/>
 
             <TextView
                 android:id="@+id/body"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/mid_gray"/>
+                android:textColor="@color/ghostwhite"/>
 
         </LinearLayout>
 
