@@ -153,7 +153,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
         mMessagesRecyclerView = (RecyclerView) v.findViewById(R.id.inbox);
         mMessageAdapter = new MessageArrayAdapter();
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        mScrollListener = new InfiniteLoadToolbarHideScrollListener(mMessageAdapter, mProgressBar,
+        mScrollListener = new InfiniteLoadToolbarHideScrollListener(mMessageAdapter, mToolbar,
                 mMessagesRecyclerView, mMessages, layoutManager, this);
         mMessagesRecyclerView.setLayoutManager(layoutManager);
         mMessagesRecyclerView.setAdapter(mMessageAdapter);
