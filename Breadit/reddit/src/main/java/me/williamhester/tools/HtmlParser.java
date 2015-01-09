@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.BulletSpan;
+import android.text.style.LeadingMarginSpan;
 import android.text.style.QuoteSpan;
 import android.text.style.StrikethroughSpan;
 import android.text.style.StyleSpan;
@@ -73,7 +74,12 @@ public class HtmlParser {
         }
 
         if (ssb.length() > 0) {
-            ssb.setSpan(getSpanFromTag(node, ssb), 0, ssb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            Object span = getSpanFromTag(node, ssb);
+            if (span instanceof LeadingMarginSpan) {
+                ssb.setSpan(getSpanFromTag(node, ssb), 1, ssb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            } else {
+                ssb.setSpan(getSpanFromTag(node, ssb), 0, ssb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
         }
 
         return ssb;
@@ -111,7 +117,7 @@ public class HtmlParser {
                     mLinks.add(new Link(ssb.toString(), url));
                     return new LinkSpan(url);
                 case "li":
-                    return new BulletSpan(BulletSpan.STANDARD_GAP_WIDTH, 0xfff68026);
+                    return new BulletSpan(BulletSpan.STANDARD_GAP_WIDTH * 4, 0xfff68026);
                 default:
 //                    Log.e("HtmlParser", "Unhandled tag: " + tag);
             }

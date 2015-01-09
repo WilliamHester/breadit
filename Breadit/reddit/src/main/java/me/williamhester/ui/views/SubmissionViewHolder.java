@@ -21,6 +21,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.koushikdutta.async.future.FutureCallback;
+import com.koushikdutta.ion.Ion;
 
 import java.util.List;
 import java.util.Map;
@@ -255,7 +256,10 @@ public class SubmissionViewHolder extends VotableViewHolder {
 
         if ((!SettingsManager.isLowBandwidth() || SettingsManager.isShowingThumbnails())
                 && !TextUtils.isEmpty(mSubmission.getThumbnailUrl())) {
-            ImgurApi.loadImage(mSubmission.getThumbnailUrl(), mThumbnail, null);
+            Ion.with(mThumbnail)
+                    .animateIn(android.R.anim.fade_in)
+                    .placeholder(R.drawable.ic_action_web_site)
+                    .load(mSubmission.getThumbnailUrl());
         } else {
             mThumbnail.setImageDrawable(mThumbnail.getResources().getDrawable(
                     R.drawable.ic_action_web_site));
