@@ -25,6 +25,7 @@ import me.williamhester.models.Subreddit;
 import me.williamhester.network.RedditApi;
 import me.williamhester.notifications.MessageNotificationBroadcastReceiver;
 import me.williamhester.reddit.R;
+import me.williamhester.ui.fragments.AccountFragment;
 import me.williamhester.ui.fragments.ContentFragment;
 import me.williamhester.ui.fragments.FriendsFragment;
 import me.williamhester.ui.fragments.MessagesFragment;
@@ -223,7 +224,9 @@ public class MainActivity extends BaseActivity implements
 
     @Override
     public void onAccountChanged() {
-        mSubredditFragment.onAccountChanged();
+        if (mCurrentFragment instanceof AccountFragment) {
+            ((AccountFragment) mCurrentFragment).onAccountChanged();
+        }
     }
 
     @Override

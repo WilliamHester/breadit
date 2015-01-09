@@ -29,7 +29,7 @@ import me.williamhester.ui.views.DividerItemDecoration;
 /**
  * FriendsFragment is a simple fragment that shows the currently logged in user's friends.
  */
-public class FriendsFragment extends Fragment {
+public class FriendsFragment extends AccountFragment {
 
     private final ArrayList<Friend> mFriends = new ArrayList<>();
     private FriendsAdapter mFreindsAdapter;
@@ -91,22 +91,33 @@ public class FriendsFragment extends Fragment {
             mProgressBar.setVisibility(View.GONE);
         }
         if (!mHasFetchedFriends && !mLoading) {
-            mLoading = true;
-            RedditApi.getFriends(new FutureCallback<ArrayList<Friend>>() {
-                @Override
-                public void onCompleted(Exception e, ArrayList<Friend> result) {
-                    mLoading = false;
-                    mProgressBar.setVisibility(View.GONE);
-                    if (e != null) {
-                        return;
-                    }
-                    mHasFetchedFriends = true;
-                    mFriends.addAll(result);
-                    mFreindsAdapter.notifyDataSetChanged();
-                }
-            });
+            loadFriends();
         }
         return v;
+    }
+
+    public void loadFriends() {
+        mLoading = true;
+        RedditApi.getFriends(new FutureCallback<ArrayList<Friend>>() {
+            @Override
+            public void onCompleted(Exception e, ArrayList<Friend> result) {
+                mLoading = false;
+                mProgressBar.setVisibility(View.GONE);
+                if (e != null) {
+                    return;
+                }
+                mHasFetchedFriends = true;
+                mFriends.addAll(result);
+                mFreindsAdapter.notifyDataSetChanged();
+            }
+        });
+    }
+
+    @Override
+    public void onAccountChanged() {
+        mFriends.clear();
+        mFreindsAdapter.notifyDataSetChanged();
+        loadFriends();
     }
 
     @Override
