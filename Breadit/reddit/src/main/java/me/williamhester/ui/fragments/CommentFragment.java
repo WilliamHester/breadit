@@ -190,13 +190,13 @@ public class CommentFragment extends Fragment implements Toolbar.OnMenuItemClick
                 return true;
             }
             case R.id.action_view_link:
-                Fragment f = getFragmentManager().findFragmentByTag("content");
+                Fragment f = getFragmentManager().findFragmentByTag("contentPreview");
                 if (f != null) {
                     getActivity().onBackPressed();
                 } else {
                     getFragmentManager().beginTransaction()
-                            .add(R.id.main_container, getContentFragment(), "content")
-                            .addToBackStack("content")
+                            .add(R.id.main_container, getContentFragment(), "contentPreview")
+                            .addToBackStack("contentPreview")
                             .commit();
                 }
                 break;

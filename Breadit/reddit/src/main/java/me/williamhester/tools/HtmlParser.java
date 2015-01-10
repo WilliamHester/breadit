@@ -8,6 +8,7 @@ import android.text.Spanned;
 import android.text.style.BulletSpan;
 import android.text.style.LeadingMarginSpan;
 import android.text.style.QuoteSpan;
+import android.text.style.RelativeSizeSpan;
 import android.text.style.StrikethroughSpan;
 import android.text.style.StyleSpan;
 import android.text.style.SuperscriptSpan;
@@ -93,6 +94,9 @@ public class HtmlParser {
                     return new TypefaceSpan("monospace");
                 case "del":
                     return new StrikethroughSpan();
+                case "h1":
+                    ssb.setSpan(new RelativeSizeSpan(1.2F), 0, ssb.length(),
+                            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                 case "strong":
                     return new StyleSpan(Typeface.BOLD);
                 case "em":
@@ -132,7 +136,8 @@ public class HtmlParser {
                     || !((Element) node.childNode(0)).tagName().equalsIgnoreCase("p"))) {
                 sb.append("\n");
             } else if (((Element) node).tagName().equalsIgnoreCase("p")
-                    || ((Element) node).tagName().equalsIgnoreCase("pre")) {
+                    || ((Element) node).tagName().equalsIgnoreCase("pre")
+                    || ((Element) node).tagName().equalsIgnoreCase("h1")) {
                 sb.append("\n");
             }
         }
