@@ -2,6 +2,7 @@ package me.williamhester.ui.fragments;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -101,6 +102,10 @@ public class ImageFragment extends Fragment {
         ImgurApi.loadImage(mUrl, imageView, new FutureCallback<ImageView>() {
             @Override
             public void onCompleted(Exception e, ImageView result) {
+                if (e != null) {
+                    e.printStackTrace();
+                    return;
+                }
                 mAttacher = new PhotoViewAttacher(result);
                 ProgressBar progressBar = (ProgressBar) v.findViewById(R.id.progress_bar);
                 progressBar.setVisibility(View.GONE);
