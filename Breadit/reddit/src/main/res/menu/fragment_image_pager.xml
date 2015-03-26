@@ -4,7 +4,17 @@
     xmlns:breadit="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/action_toggle_description"
         android:title="@string/toggle_description"
-        android:icon="@android:drawable/ic_menu_info_details"
+        android:icon="@drawable/ic_info_white_24dp"
         android:orderInCategory="1"
-        breadit:showAsAction="always" />
+        breadit:showAsAction="ifRoom" />
+    <item android:id="@+id/action_share"
+        android:title="@string/share"
+        android:icon="@drawable/ic_share_white_24dp"
+        android:orderInCategory="2"
+        breadit:showAsAction="ifRoom" />
+    <item android:id="@+id/action_load_hq"
+        android:title="@string/load_high_quality"
+        android:icon="@drawable/ic_high_quality_white_24dp"
+        android:orderInCategory="3"
+        breadit:showAsAction="ifRoom" />
 </menu>

@@ -6,6 +6,9 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -27,7 +30,7 @@ import me.williamhester.ui.adapters.SingleImageAdapter;
 /**
  * Created by william on 6/24/14.
  */
-public class ImagePagerFragment extends ContentFragment {
+public class ImagePagerFragment extends ContentFragment implements Toolbar.OnMenuItemClickListener {
 
     private static final String IMAGE = "image";
     private static final String ALBUM = "album";
@@ -171,6 +174,10 @@ public class ImagePagerFragment extends ContentFragment {
             setUpAdapter(v);
         }
 
+        Toolbar options = (Toolbar) v.findViewById(R.id.options);
+        options.setOnMenuItemClickListener(this);
+        onCreateOptionsMenu(options.getMenu(), getActivity().getMenuInflater());
+
         return v;
     }
 
@@ -249,10 +256,21 @@ public class ImagePagerFragment extends ContentFragment {
     }
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+
+        inflater.inflate(R.menu.fragment_image_pager, menu);
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem menuItem) {
+        return false;
+    }
+
+    @Override
     public void onDestroyView() {
         super.onDestroyView();
 
         mAnimHandler.removeCallbacks(mAnimRunnable);
     }
-
 }
