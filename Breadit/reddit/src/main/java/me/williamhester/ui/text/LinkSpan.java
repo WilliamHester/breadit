@@ -1,5 +1,6 @@
 package me.williamhester.ui.text;
 
+import android.app.ActivityOptions;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -14,6 +15,7 @@ import android.view.View;
 import me.williamhester.reddit.R;
 import me.williamhester.tools.Url;
 import me.williamhester.ui.activities.BrowseActivity;
+import me.williamhester.ui.activities.OverlayContentActivity;
 import me.williamhester.ui.fragments.ImagePagerFragment;
 import me.williamhester.ui.fragments.WebViewFragment;
 import me.williamhester.ui.fragments.YouTubeFragment;
@@ -65,8 +67,7 @@ public class LinkSpan extends ClickableSpan {
     public void onClick(View view) {
         Bundle args = new Bundle();
         args.putString("permalink", mUrl.getUrl());
-        Intent i = null;
-        Fragment f = null;
+        Intent i;
         switch (mUrl.getType()) {
             case Url.SUBMISSION:
                 args.putString("type", "comments");
@@ -87,41 +88,23 @@ public class LinkSpan extends ClickableSpan {
                 args.putString("filterType", mUrl.getLinkId());
                 i = new Intent(view.getContext(), BrowseActivity.class);
                 break;
-            case Url.IMGUR_GALLERY: // For now, we're going to go to a WebView because weird things happen with galleries
-            case Url.NOT_SPECIAL: // Go to a webview
-                f = WebViewFragment.newInstance(mLink);
-                break;
-            case Url.IMGUR_ALBUM:
-                f = ImagePagerFragment.newInstanceLazyLoaded(mUrl.getLinkId(), true);
-                break;
-            case Url.IMGUR_IMAGE:
-                f = ImagePagerFragment.newInstanceLazyLoaded(mUrl.getLinkId(), false);
-                break;
             case Url.YOUTUBE:
                 // TODO: fix this when YouTube updates their Android API
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                    f = YouTubeFragment.newInstance(mUrl.getLinkId());
-                } else {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     i = new Intent(Intent.ACTION_VIEW, Uri.parse(mLink));
+                    break;
                 }
+            default:
+                i = new Intent(view.getContext(), OverlayContentActivity.class);
+                args.putInt("type", OverlayContentActivity.TYPE_LINK);
+                args.putParcelable("url", mUrl);
                 break;
-            case Url.DIRECT_GFY:
-            case Url.GFYCAT_LINK:
-            case Url.GIF:
-            case Url.NORMAL_IMAGE:
-                f = ImagePagerFragment.newInstance(mUrl);
-                break;
+
         }
-        if (i != null) {
-            i.putExtras(args);
-            view.getContext().startActivity(i);
-        } else if (f != null) {
-            ActionBarActivity activity = (ActionBarActivity) view.getContext();
-            activity.getSupportFragmentManager().beginTransaction()
-                    .add(R.id.main_container, f, "Link")
-                    .addToBackStack("Link")
-                    .commit();
-        }
+        i.putExtras(args);
+        Bundle anim = ActivityOptions.makeCustomAnimation(view.getContext(), R.anim.fade_in,
+                R.anim.fade_out).toBundle();
+        view.getContext().startActivity(i, anim);
     }
 
     protected String getLink() {

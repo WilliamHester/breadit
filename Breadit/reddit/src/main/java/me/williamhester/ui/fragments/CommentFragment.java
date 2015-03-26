@@ -39,6 +39,7 @@ import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 import me.williamhester.tools.Url;
 import me.williamhester.ui.activities.BrowseActivity;
+import me.williamhester.ui.activities.OverlayContentActivity;
 import me.williamhester.ui.views.CommentViewHolder;
 import me.williamhester.ui.views.DividerItemDecoration;
 import me.williamhester.ui.views.SubmissionViewHolder;
@@ -194,10 +195,16 @@ public class CommentFragment extends Fragment implements Toolbar.OnMenuItemClick
                 if (f != null) {
                     getActivity().onBackPressed();
                 } else {
-                    getFragmentManager().beginTransaction()
-                            .add(R.id.main_container, getContentFragment(), "contentPreview")
-                            .addToBackStack("contentPreview")
-                            .commit();
+                    Intent i = new Intent(getActivity(), OverlayContentActivity.class);
+                    Bundle args = new Bundle();
+                    args.putInt("type", OverlayContentActivity.TYPE_SUBMISSION);
+                    args.putParcelable("submission", mSubmission);
+                    i.putExtras(args);
+                    startActivity(i);
+//                    getFragmentManager().beginTransaction()
+//                            .add(R.id.main_container, getContentFragment(), "contentPreview")
+//                            .addToBackStack("contentPreview")
+//                            .commit();
                 }
                 break;
             case R.id.action_open_link_in_browser:

@@ -38,8 +38,7 @@
             android:layout_height="56dp"
             android:padding="8dp"
             android:contentDescription="@string/load_high_quality"
-            android:src="@drawable/ic_action_expand"
-            android:background="?selectableItemBackground"/>
+            android:src="@drawable/ic_action_expand"/>
 
     </LinearLayout>
 

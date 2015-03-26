@@ -2,12 +2,14 @@ package me.williamhester.ui.views;
 
 import android.animation.ObjectAnimator;
 import android.app.Activity;
+import android.app.ActivityOptions;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.internal.VersionUtils;
 import android.support.v7.widget.PopupMenu;
 import android.text.Html;
 import android.text.TextUtils;
@@ -39,6 +41,7 @@ import me.williamhester.reddit.R;
 import me.williamhester.tools.HtmlParser;
 import me.williamhester.tools.Url;
 import me.williamhester.ui.activities.BrowseActivity;
+import me.williamhester.ui.activities.OverlayContentActivity;
 import me.williamhester.ui.fragments.ImagePagerFragment;
 import me.williamhester.ui.fragments.WebViewFragment;
 import me.williamhester.ui.fragments.YouTubeFragment;
@@ -386,11 +389,19 @@ public class SubmissionViewHolder extends VotableViewHolder {
     }
 
     private void onImageViewClicked() {
-        mCallback.getFragmentManager().beginTransaction()
-                .add(R.id.main_container, ImagePagerFragment.newInstance(mSubmission),
-                        "ImagePagerFragment")
-                .addToBackStack("ImagePagerFragment")
-                .commit();
+        Bundle args = new Bundle();
+        args.putInt("type", OverlayContentActivity.TYPE_SUBMISSION);
+        args.putParcelable("submission", mSubmission);
+        Intent i = new Intent(mCallback.getActivity(), OverlayContentActivity.class);
+        i.putExtras(args);
+        Bundle anim = ActivityOptions.makeCustomAnimation(mCallback.getActivity(), R.anim.fade_in,
+                R.anim.fade_out).toBundle();
+        mCallback.getActivity().startActivity(i, anim);
+//        mCallback.getFragmentManager().beginTransaction()
+//                .add(R.id.main_container, ImagePagerFragment.newInstance(mSubmission),
+//                        "ImagePagerFragment")
+//                .addToBackStack("ImagePagerFragment")
+//                .commit();
     }
 
     private void onLinkClicked() {
@@ -398,7 +409,6 @@ public class SubmissionViewHolder extends VotableViewHolder {
         Bundle args = new Bundle();
         args.putString("permalink", link.getUrl());
         Intent i = null;
-        Fragment f = null;
         switch (link.getType()) {
             case Url.SUBMISSION:
                 args.putString("type", "comments");
@@ -416,37 +426,28 @@ public class SubmissionViewHolder extends VotableViewHolder {
                 break;
             case Url.IMGUR_GALLERY: // For now, we're going to go to a WebView because weird things happen with galleries
             case Url.NOT_SPECIAL: // Go to a WebView
-                f = WebViewFragment.newInstance(link.getUrl());
-                break;
-            case Url.IMGUR_ALBUM:
-                f = ImagePagerFragment.newInstanceLazyLoaded(link.getLinkId(), true);
-                break;
-            case Url.IMGUR_IMAGE:
-                f = ImagePagerFragment.newInstanceLazyLoaded(link.getLinkId(), false);
+//                f = WebViewFragment.newInstance(link.getUrl());
                 break;
             case Url.YOUTUBE:
                 // TODO: fix this when YouTube updates their Android API
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                    f = YouTubeFragment.newInstance(link.getLinkId());
-                } else {
+//                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+//                    f = YouTubeFragment.newInstance(link.getLinkId());
+//                } else {
                     i = new Intent(Intent.ACTION_VIEW, Uri.parse(mSubmission.getUrl()));
-                }
+//                }
                 break;
-            case Url.DIRECT_GFY:
-            case Url.GFYCAT_LINK:
-            case Url.GIF:
-            case Url.NORMAL_IMAGE:
-                f = ImagePagerFragment.newInstance(link);
+            case Url.IMGUR_ALBUM:
+            case Url.IMGUR_IMAGE:
+                // TODO: add content transition using VersionUtils.isAtLeastL()
+            default:
+                args.putInt("type", OverlayContentActivity.TYPE_SUBMISSION);
+                args.putParcelable("submission", mSubmission);
+                i = new Intent(mCallback.getActivity(), OverlayContentActivity.class);
                 break;
         }
         if (i != null) {
             i.putExtras(args);
             mCallback.getActivity().startActivity(i);
-        } else if (f != null) {
-            mCallback.getFragmentManager().beginTransaction()
-                    .add(R.id.main_container, f, "Link")
-                    .addToBackStack("Link")
-                    .commit();
         }
     }
 
