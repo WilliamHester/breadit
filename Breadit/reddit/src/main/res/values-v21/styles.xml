@@ -31,4 +31,8 @@
         <item name="android:transitionName">sharedImage</item>
     </style>
 
+    <style name="Elevated">
+        <item name="android:elevation">@dimen/headerbar_elevation</item>
+    </style>
+
 </resources>

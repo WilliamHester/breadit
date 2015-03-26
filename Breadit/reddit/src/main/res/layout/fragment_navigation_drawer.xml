@@ -39,7 +39,7 @@
             android:layout_height="24dp"
             android:layout_centerVertical="true"
             android:layout_marginStart="@dimen/keyline_1"
-            android:src="@drawable/ic_home"/>
+            android:src="@drawable/ic_home_white_24dp"/>
 
         <TextView
             style="@style/NavigationItemText"
@@ -49,6 +49,13 @@
 
     <RelativeLayout style="@style/NavigationItemRelativeLayout"
         android:id="@+id/inbox">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/keyline_1"
+            android:src="@drawable/ic_inbox_white_24dp"/>
 
         <TextView
             style="@style/NavigationItemText"
@@ -70,6 +77,13 @@
     <RelativeLayout style="@style/NavigationItemRelativeLayout"
         android:id="@+id/my_account">
 
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/keyline_1"
+            android:src="@drawable/ic_person_white_24dp"/>
+
         <TextView
             style="@style/NavigationItemText"
             android:text="@string/my_account"/>
@@ -78,6 +92,13 @@
 
     <RelativeLayout style="@style/NavigationItemRelativeLayout"
         android:id="@+id/friends">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/keyline_1"
+            android:src="@drawable/ic_people_white_24dp"/>
 
         <TextView
             style="@style/NavigationItemText"
@@ -98,6 +119,13 @@
     <RelativeLayout style="@style/NavigationItemRelativeLayout"
         android:id="@+id/submit">
 
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/keyline_1"
+            android:src="@drawable/ic_create_white_24dp"/>
+
         <TextView
             style="@style/NavigationItemText"
             android:text="@string/submit"/>
@@ -106,6 +134,13 @@
 
     <RelativeLayout style="@style/NavigationItemRelativeLayout"
         android:id="@+id/search">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/keyline_1"
+            android:src="@drawable/ic_search_white_24dp"/>
 
         <TextView
             style="@style/NavigationItemText"
@@ -122,6 +157,13 @@
 
     <RelativeLayout style="@style/NavigationItemRelativeLayout"
         android:id="@+id/settings">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/keyline_1"
+            android:src="@drawable/ic_settings_white_24dp"/>
 
         <TextView
             style="@style/NavigationItemText"
