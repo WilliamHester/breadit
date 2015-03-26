@@ -165,15 +165,6 @@ public class ImagePagerFragment extends ContentFragment {
             setUpAdapter(v);
         }
 
-        Toolbar t = (Toolbar) v.findViewById(R.id.toolbar_actionbar);
-        t.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
-        t.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getActivity().onBackPressed();
-            }
-        });
-
         return v;
     }
 
