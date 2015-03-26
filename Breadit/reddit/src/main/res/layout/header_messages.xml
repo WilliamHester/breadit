@@ -5,12 +5,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="8dp"
-    android:background="@color/blackish">
+    android:background="@color/background">
 
     <TextView android:id="@+id/username"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/auburn_orange"
         android:textSize="30sp"
         android:fontFamily="sans-serif-condensed"
         android:paddingBottom="8dp"/>
@@ -18,19 +17,16 @@
     <TextView android:id="@+id/link_karma"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingBottom="8dp"
-        android:textColor="@color/mid_gray"/>
+        android:paddingBottom="8dp"/>
 
     <TextView android:id="@+id/comment_karma"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingBottom="8dp"
-        android:textColor="@color/mid_gray"/>
+        android:paddingBottom="8dp"/>
 
     <TextView android:id="@+id/cakeday"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/mid_gray"
         android:paddingBottom="8dp"/>
 
     <LinearLayout
@@ -41,7 +37,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/filter"
-            android:textColor="@color/mid_gray"
             android:paddingRight="8dp"/>
 
         <Spinner android:id="@+id/filter"

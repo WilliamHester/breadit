@@ -140,7 +140,7 @@ public class CommentViewHolder extends VotableViewHolder {
                     break;
             }
         } else {
-            mLevelIndicator.setBackgroundColor(mLevelIndicator.getResources().getColor(R.color.card_view_gray));
+            mLevelIndicator.setBackgroundColor(mLevelIndicator.getResources().getColor(R.color.primary_dark));
         }
         mContent.setOnClickListener(mHideCommentsClickListener);
         if (mComment.getSpannableBody() == null && mComment.getBodyHtml() != null) {

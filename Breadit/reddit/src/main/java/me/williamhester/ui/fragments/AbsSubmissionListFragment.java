@@ -95,7 +95,7 @@ public abstract class AbsSubmissionListFragment extends AccountFragment implemen
         mProgressBar = (ProgressBar) v.findViewById(R.id.progress_bar);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.swipe_refresh);
-        mSwipeRefreshLayout.setProgressBackgroundColor(R.color.darkest_gray);
+        mSwipeRefreshLayout.setProgressBackgroundColor(R.color.primary);
         mSwipeRefreshLayout.setColorSchemeResources(R.color.orangered);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override

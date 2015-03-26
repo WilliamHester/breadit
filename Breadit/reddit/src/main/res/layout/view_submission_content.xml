@@ -39,7 +39,6 @@
         android:layout_height="wrap_content"
         android:textSize="11sp"
         android:fontFamily="sans-serif-light"
-        android:textColor="@color/auburn_orange"
         android:layout_below="@id/body"/>
 
     <TextView android:id="@+id/time"
@@ -48,7 +47,6 @@
         android:layout_alignParentEnd="true"
         android:textSize="11sp"
         android:fontFamily="sans-serif-light"
-        android:textColor="@color/auburn_orange"
         android:layout_below="@id/body"/>
 
     <TextView android:id="@+id/domain"

@@ -64,7 +64,7 @@ public class SubmitActivity extends ActionBarActivity implements
         tabs.setCustomTabColorizer(new SlidingTabLayout.TabColorizer() {
             @Override
             public int getIndicatorColor(int position) {
-                return getResources().getColor(R.color.auburn_orange);
+                return getResources().getColor(R.color.app_highlight);
             }
         });
         tabs.setViewPager(mViewPager);

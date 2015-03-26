@@ -2,13 +2,12 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/card_view_gray">
+    android:background="@color/list_item_background">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:fontFamily="sans-serif-condensed"
-        android:textColor="@color/auburn_orange"
         android:textStyle="bold"
         android:textSize="16sp"
         android:text="@string/viewing_single_thread"
@@ -17,7 +16,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/darker_gray"
+        android:background="@color/dark_gray_1"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"/>
 
@@ -33,7 +32,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/darker_gray"
+        android:background="@color/dark_gray_1"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"/>
 

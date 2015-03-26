@@ -1,5 +1,5 @@
 <resources>
-
+    <dimen name="status_bar_height">0dp</dimen>
     <dimen name="headerbar_elevation">4dp</dimen>
     <dimen name="drawer_inset">48dp</dimen>
     <dimen name="keyline_1">16dp</dimen>
@@ -12,12 +12,10 @@
         <!-- Per the design guidelines, navigation drawers should be between 240dp and 320dp:
          https://developer.android.com/design/patterns/navigation-drawer.html -->
     <dimen name="navigation_drawer_width">300dp</dimen>
-
     <dimen name="clear_button_font_size">20sp</dimen>
-
     <dimen name="tab_host_default_height">48dp</dimen>
-
     <dimen name="submission_view_padding">4dp</dimen>
-
     <dimen name="submission_list_divider_height">0dp</dimen>
+
+    <dimen name="content_preview_height">150dp</dimen>
 </resources>

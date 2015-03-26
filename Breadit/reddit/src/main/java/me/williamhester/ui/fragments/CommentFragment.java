@@ -132,7 +132,7 @@ public class CommentFragment extends Fragment implements Toolbar.OnMenuItemClick
 
         RecyclerView commentsView = (RecyclerView) v.findViewById(R.id.comments);
         mRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.swipe_refresh);
-        mRefreshLayout.setProgressBackgroundColor(R.color.darkest_gray);
+        mRefreshLayout.setProgressBackgroundColor(R.color.primary);
         mRefreshLayout.setColorSchemeResources(R.color.orangered);
         mRefreshLayout.setRefreshing(mRefreshing);
         mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -771,7 +771,7 @@ public class CommentFragment extends Fragment implements Toolbar.OnMenuItemClick
                         break;
                 }
             } else {
-                mLevelIndicator.setBackgroundColor(mLevelIndicator.getResources().getColor(R.color.card_view_gray));
+                mLevelIndicator.setBackgroundColor(mLevelIndicator.getResources().getColor(R.color.primary_dark));
             }
         }
     }

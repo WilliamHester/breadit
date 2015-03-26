@@ -6,7 +6,7 @@
 
     <ImageView android:id="@+id/image"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="@dimen/content_preview_height"
         android:scaleType="centerCrop"
         android:visibility="gone"/>
 
@@ -18,7 +18,7 @@
 
     <View android:id="@+id/nsfw_blocker"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="@dimen/content_preview_height"
         android:background="@android:color/black"
         android:visibility="gone"/>
 

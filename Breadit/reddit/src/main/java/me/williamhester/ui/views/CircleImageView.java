@@ -52,7 +52,7 @@ public class CircleImageView extends ImageView {
     private int mShadowRadius;
 
     public CircleImageView(Context context, AttributeSet attrs) {
-        this(context, attrs, context.getResources().getColor(R.color.card_view_gray), 50f);
+        this(context, attrs, context.getResources().getColor(R.color.primary_dark), 50f);
     }
 
     public CircleImageView(Context context, AttributeSet attrs, int color, final float radius) {

@@ -5,5 +5,5 @@
     <corners android:radius="2dp" />
     <padding android:left="2dp"
         android:right="2dp"/>
-    <solid android:color="@color/dark_gray"/>
+    <solid android:color="@color/dark_gray_0"/>
 </shape>

@@ -32,7 +32,6 @@
             android:layout_height="wrap_content"
             android:textSize="11sp"
             android:fontFamily="sans-serif-light"
-            android:textColor="@color/auburn_orange"
             android:layout_below="@id/link_title"/>
 
     </RelativeLayout>

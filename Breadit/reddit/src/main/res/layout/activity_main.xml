@@ -1,22 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <me.williamhester.ui.views.HackyDrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="false">
+    android:fitsSystemWindows="false"
+    tools:context="me.williamhester.ui.activities.MainActivity">
 
-    <FrameLayout
-        android:id="@+id/main_container"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fitsSystemWindows="true"/>
+        android:fitsSystemWindows="false"
+        android:orientation="vertical">
+
+        <View android:layout_width="match_parent"
+            android:layout_height="@dimen/status_bar_height"
+            android:background="?colorPrimary"/>
+
+        <FrameLayout android:id="@+id/main_container"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+    </LinearLayout>
 
     <FrameLayout android:id="@+id/left_drawer"
         android:layout_width="@dimen/navigation_drawer_width"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:background="?colorPrimaryDark"
+        android:background="@color/background"
         android:fitsSystemWindows="false"/>
 
     <FrameLayout android:id="@+id/right_drawer"

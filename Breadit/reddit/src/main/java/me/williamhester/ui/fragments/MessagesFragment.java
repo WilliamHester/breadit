@@ -131,7 +131,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
 
         mProgressBar = (ProgressBar) v.findViewById(R.id.progress_bar);
         mRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.swipe_refresh);
-        mRefreshLayout.setProgressBackgroundColor(R.color.darkest_gray);
+        mRefreshLayout.setProgressBackgroundColor(R.color.primary);
         mRefreshLayout.setColorSchemeResources(R.color.orangered);
         mRefreshLayout.setRefreshing(mRefreshing);
         mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {

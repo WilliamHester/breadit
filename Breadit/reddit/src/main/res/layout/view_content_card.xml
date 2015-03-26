@@ -4,4 +4,5 @@
     style="@style/CardView.Dark"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    card_view:cardBackgroundColor="@color/list_item_background"
     card_view:cardCornerRadius="2dp"/>

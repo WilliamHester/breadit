@@ -77,7 +77,7 @@ public class MessageNotificationBroadcastReceiver extends BroadcastReceiver {
                             .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
                             .setVibrate(new long[] {0, 300, 200, 300})
                             .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-                            .setColor(context.getResources().getColor(R.color.auburn_orange))
+                            .setColor(context.getResources().getColor(R.color.app_highlight))
                             .setLights(0xffffff, 1000, 5000)
                             .setAutoCancel(true)
                             .setPublicVersion(new NotificationCompat.Builder(context)
@@ -85,7 +85,7 @@ public class MessageNotificationBroadcastReceiver extends BroadcastReceiver {
                                     .setContentTitle(messages.size() + " " + context.getResources()
                                             .getQuantityString(R.plurals.new_messages, messages.size()))
                                     .setContentText(messages.size() + " " + context.getString(R.string.unread_messages))
-                                    .setColor(context.getResources().getColor(R.color.auburn_orange))
+                                    .setColor(context.getResources().getColor(R.color.app_highlight))
                                     .build());
 
                     NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();

@@ -1,10 +1,11 @@
 <resources>
     <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
-        <item name="colorAccent">@color/auburn_orange</item>
-        <item name="colorPrimary">@color/darkest_gray</item>
-        <item name="colorPrimaryDark">@color/card_view_gray</item>
-        <item name="android:windowBackground">@color/blackish</item>
+        <item name="colorAccent">@color/app_highlight</item>
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <item name="android:windowBackground">@color/background</item>
         <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
         <item name="windowActionBar">false</item>
 
         <!--<item name="actionBarIconColor">#fff</item>-->
@@ -12,7 +13,7 @@
     </style>
 
     <style name="HeaderBar">
-        <item name="android:background">?colorPrimaryDark</item>
+        <item name="android:background">?colorPrimary</item>
         <item name="android:elevation">@dimen/headerbar_elevation</item>
     </style>
 
