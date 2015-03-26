@@ -5,6 +5,7 @@
     android:layout_height="wrap_content">
 
     <ImageView android:id="@+id/image"
+        style="@style/SharedImage"
         android:layout_width="match_parent"
         android:layout_height="@dimen/content_preview_height"
         android:scaleType="centerCrop"

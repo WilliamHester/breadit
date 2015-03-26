@@ -14,10 +14,12 @@ import android.support.v7.widget.PopupMenu;
 import android.text.Html;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
+import android.transition.Fade;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -388,14 +390,23 @@ public class SubmissionViewHolder extends VotableViewHolder {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void onImageViewClicked() {
         Bundle args = new Bundle();
         args.putInt("type", OverlayContentActivity.TYPE_SUBMISSION);
         args.putParcelable("submission", mSubmission);
         Intent i = new Intent(mCallback.getActivity(), OverlayContentActivity.class);
         i.putExtras(args);
-        Bundle anim = ActivityOptions.makeCustomAnimation(mCallback.getActivity(), R.anim.fade_in,
-                R.anim.fade_out).toBundle();
+        Bundle anim;
+        if (VersionUtils.isAtLeastL()) {
+            Activity a = mCallback.getActivity();
+            a.getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
+            a.getWindow().setExitTransition(new Fade());
+            anim = ActivityOptions.makeSceneTransitionAnimation(a).toBundle();
+        } else {
+            anim = ActivityOptions.makeCustomAnimation(mCallback.getActivity(), R.anim.fade_in,
+                    R.anim.fade_out).toBundle();
+        }
         mCallback.getActivity().startActivity(i, anim);
 //        mCallback.getFragmentManager().beginTransaction()
 //                .add(R.id.main_container, ImagePagerFragment.newInstance(mSubmission),
