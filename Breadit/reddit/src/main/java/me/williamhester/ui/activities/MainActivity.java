@@ -19,7 +19,6 @@ import com.koushikdutta.async.future.FutureCallback;
 
 import me.williamhester.SettingsManager;
 import me.williamhester.models.AccountManager;
-import me.williamhester.models.Friend;
 import me.williamhester.models.ResponseRedditWrapper;
 import me.williamhester.models.Subreddit;
 import me.williamhester.network.RedditApi;
@@ -231,14 +230,18 @@ public class MainActivity extends BaseActivity implements
 
     @Override
     public void onHomeSelected() {
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         if (mSubredditFragment.isDetached()) {
-            getSupportFragmentManager().beginTransaction()
-                    .attach(mSubredditFragment)
+            ft.attach(mSubredditFragment)
                     .detach(mCurrentFragment)
                     .commit();
-            mCurrentFragment = mSubredditFragment;
+        } else if (!mSubredditFragment.isAdded()) {
+            ft.add(R.id.main_container, mSubredditFragment, "subreddit")
+                    .detach(mCurrentFragment)
+                    .commit();
         }
         mDrawerLayout.closeDrawer(Gravity.START);
+        mCurrentFragment = mSubredditFragment;
     }
 
     @Override

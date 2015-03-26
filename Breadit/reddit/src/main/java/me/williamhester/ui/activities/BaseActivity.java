@@ -9,7 +9,7 @@ import me.williamhester.ui.fragments.BackableFragment;
 /**
  * Created by william on 1/4/15.
  */
-public class BaseActivity extends ActionBarActivity {
+public abstract class BaseActivity extends ActionBarActivity {
 
     @Override
     public void onBackPressed() {
