@@ -138,6 +138,12 @@ public class ImagePagerFragment extends ContentFragment {
                 getActivity().onBackPressed();
             }
         });
+        v.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                return true;
+            }
+        });
         TextView title = (TextView) v.findViewById(R.id.album_title);
         title.setText(mTitle);
         if (getArguments().containsKey(IMGUR_ID)) {
