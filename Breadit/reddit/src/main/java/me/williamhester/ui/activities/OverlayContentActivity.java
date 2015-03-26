@@ -4,14 +4,10 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 
-import me.williamhester.models.ImgurAlbum;
-import me.williamhester.models.ImgurImage;
 import me.williamhester.models.Submission;
 import me.williamhester.reddit.R;
 import me.williamhester.tools.Url;
 import me.williamhester.ui.fragments.ImagePagerFragment;
-import me.williamhester.ui.fragments.RedditLiveFragment;
-import me.williamhester.ui.fragments.SubredditFragment;
 import me.williamhester.ui.fragments.WebViewFragment;
 import me.williamhester.ui.fragments.YouTubeFragment;
 
@@ -54,45 +50,7 @@ public class OverlayContentActivity extends FragmentActivity {
      * @return returns the fragment needed to display the content
      */
     private Fragment getContentFragment(Submission submission) {
-        Url parser = submission.getLinkDetails();
-        if (!submission.isSelf()) {
-            switch (parser.getType()) {
-                case Url.NOT_SPECIAL:
-                    return WebViewFragment.newInstance(parser.getUrl());
-                case Url.IMGUR_IMAGE:
-                    if (submission.getImgurData() != null)
-                        return ImagePagerFragment
-                                .newInstance((ImgurImage) submission.getImgurData());
-                    else
-                        return ImagePagerFragment
-                                .newInstanceLazyLoaded(parser.getLinkId(), false);
-                case Url.IMGUR_ALBUM:
-                    if (submission.getImgurData() != null)
-                        return ImagePagerFragment
-                                .newInstance((ImgurAlbum) submission.getImgurData());
-                    else
-                        return ImagePagerFragment
-                                .newInstanceLazyLoaded(parser.getLinkId(), true);
-                case Url.IMGUR_GALLERY:
-                    return WebViewFragment.newInstance(parser.getUrl());
-                case Url.YOUTUBE:
-                    return YouTubeFragment.newInstance(parser.getLinkId());
-                case Url.GFYCAT_LINK:
-                case Url.GIF:
-                case Url.NORMAL_IMAGE:
-                    return ImagePagerFragment.newInstance(parser);
-//                case Url.SUBMISSION:
-//                    return CommentFragment.newInstance(parser.getUrl(),
-//                            parser.getUrl().contains("?context="));
-                case Url.SUBREDDIT:
-                    return SubredditFragment.newInstance(parser.getLinkId());
-                case Url.USER:
-                    break;
-                case Url.REDDIT_LIVE:
-                    return RedditLiveFragment.newInstance(submission);
-            }
-        }
-        return null;
+        return getContentFragment(submission.getLinkDetails());
     }
 
     private Fragment getContentFragment(Url url) {

@@ -1,25 +1,20 @@
 package me.williamhester.ui.views;
 
 import android.animation.ObjectAnimator;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.content.Intent;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v7.internal.VersionUtils;
 import android.support.v7.widget.PopupMenu;
 import android.text.Html;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
-import android.transition.Fade;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -44,9 +39,6 @@ import me.williamhester.tools.HtmlParser;
 import me.williamhester.tools.Url;
 import me.williamhester.ui.activities.BrowseActivity;
 import me.williamhester.ui.activities.OverlayContentActivity;
-import me.williamhester.ui.fragments.ImagePagerFragment;
-import me.williamhester.ui.fragments.WebViewFragment;
-import me.williamhester.ui.fragments.YouTubeFragment;
 
 /**
  * This class is intended to be used with the RecyclerView class; however, it can be used nearly
@@ -331,7 +323,7 @@ public class SubmissionViewHolder extends VotableViewHolder {
                 mImageButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        onYouTubeVideoClicked(linkDetails.getLinkId());
+                        onLinkClicked();
                     }
                 });
                 break;
@@ -390,6 +382,7 @@ public class SubmissionViewHolder extends VotableViewHolder {
         }
     }
 
+    @SuppressLint("InlinedApi")
     @SuppressWarnings("unchecked")
     private void onImageViewClicked() {
         Bundle args = new Bundle();
@@ -398,28 +391,16 @@ public class SubmissionViewHolder extends VotableViewHolder {
         Intent i = new Intent(mCallback.getActivity(), OverlayContentActivity.class);
         i.putExtras(args);
         Bundle anim;
-        if (VersionUtils.isAtLeastL()) {
-            Activity a = mCallback.getActivity();
-            a.getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
-            a.getWindow().setExitTransition(new Fade());
-            anim = ActivityOptions.makeSceneTransitionAnimation(a).toBundle();
-        } else {
-            anim = ActivityOptions.makeCustomAnimation(mCallback.getActivity(), R.anim.fade_in,
-                    R.anim.fade_out).toBundle();
-        }
+        anim = ActivityOptions.makeCustomAnimation(mCallback.getActivity(), R.anim.fade_in,
+                R.anim.fade_out).toBundle();
         mCallback.getActivity().startActivity(i, anim);
-//        mCallback.getFragmentManager().beginTransaction()
-//                .add(R.id.main_container, ImagePagerFragment.newInstance(mSubmission),
-//                        "ImagePagerFragment")
-//                .addToBackStack("ImagePagerFragment")
-//                .commit();
     }
 
     private void onLinkClicked() {
         Url link = mSubmission.getLinkDetails();
         Bundle args = new Bundle();
         args.putString("permalink", link.getUrl());
-        Intent i = null;
+        Intent i;
         switch (link.getType()) {
             case Url.SUBMISSION:
                 args.putString("type", "comments");
@@ -436,17 +417,6 @@ public class SubmissionViewHolder extends VotableViewHolder {
                 i = new Intent(mCallback.getActivity(), BrowseActivity.class);
                 break;
             case Url.IMGUR_GALLERY: // For now, we're going to go to a WebView because weird things happen with galleries
-            case Url.NOT_SPECIAL: // Go to a WebView
-//                f = WebViewFragment.newInstance(link.getUrl());
-                break;
-            case Url.YOUTUBE:
-                // TODO: fix this when YouTube updates their Android API
-//                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-//                    f = YouTubeFragment.newInstance(link.getLinkId());
-//                } else {
-                    i = new Intent(Intent.ACTION_VIEW, Uri.parse(mSubmission.getUrl()));
-//                }
-                break;
             case Url.IMGUR_ALBUM:
             case Url.IMGUR_IMAGE:
                 // TODO: add content transition using VersionUtils.isAtLeastL()
@@ -456,25 +426,10 @@ public class SubmissionViewHolder extends VotableViewHolder {
                 i = new Intent(mCallback.getActivity(), OverlayContentActivity.class);
                 break;
         }
-        if (i != null) {
-            i.putExtras(args);
-            mCallback.getActivity().startActivity(i);
-        }
-    }
-
-    private void onYouTubeVideoClicked(String videoId) {
-        // TODO: fix this when YouTube updates their Android API
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            mCallback.getFragmentManager().beginTransaction()
-                    .add(R.id.main_container, YouTubeFragment.newInstance(videoId),
-                            "YouTubeFragment")
-                    .addToBackStack("YouTubeFragment")
-                    .commit();
-        } else {
-            Intent i = new Intent(Intent.ACTION_VIEW,
-                    Uri.parse("http://www.youtube.com/watch?v=" + videoId));
-            mCallback.getActivity().startActivity(i);
-        }
+        Bundle anim = ActivityOptions.makeCustomAnimation(mCallback.getActivity(), R.anim.fade_in,
+                R.anim.fade_out).toBundle();
+        i.putExtras(args);
+        mCallback.getActivity().startActivity(i, anim);
     }
 
     private void onOptionsRowItemSelected(final View view, final Submission submission) {
