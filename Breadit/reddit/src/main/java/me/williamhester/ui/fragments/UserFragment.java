@@ -482,7 +482,7 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
         public static final int SUBMISSION = 1;
         public static final int COMMENT = 2;
         public static final int VOTABLE_MASK = 3;
-        public static final int USER_HEADER = 5;
+        public static final int USER_HEADER = 6;
         public static final int FOOTER = 4;
         public static final int HEADER_SPACER = 8;
 
@@ -511,7 +511,6 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
                             inflater.inflate(R.layout.list_item_submission_comment, cardView, true),
                             UserFragment.this);
                 }
-
                 case FOOTER: {
                     return new RecyclerView.ViewHolder(inflater.inflate(R.layout.footer_spacer, parent,
                             false)) {};
