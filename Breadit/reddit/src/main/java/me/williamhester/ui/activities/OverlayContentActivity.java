@@ -27,21 +27,19 @@ public class OverlayContentActivity extends FragmentActivity {
 
         Bundle extras = getIntent().getExtras();
         Fragment f = getSupportFragmentManager().findFragmentById(R.id.main_container);
-        if (f != null) {
-            return;
+        if (f == null) {
+            switch (extras.getInt("type")) {
+                case TYPE_SUBMISSION:
+                    f = getContentFragment((Submission) extras.getParcelable("submission"));
+                    break;
+                case TYPE_LINK:
+                    f = getContentFragment((Url) extras.getParcelable("url"));
+                    break;
+            }
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.main_container, f, "Content")
+                    .commit();
         }
-
-        switch (extras.getInt("type")) {
-            case TYPE_SUBMISSION:
-                f = getContentFragment((Submission) extras.getParcelable("submission"));
-                break;
-            case TYPE_LINK:
-                f = getContentFragment((Url) extras.getParcelable("url"));
-                break;
-        }
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.main_container, f, "Content")
-                .commit();
     }
 
     /**
