@@ -626,6 +626,15 @@ public class CommentFragment extends Fragment implements Toolbar.OnMenuItemClick
                 }
             };
             switch (itemId) {
+                case R.id.option_reply: {
+                    Fragment reply = ReplyFragment.newInstance(submission);
+                    reply.setTargetFragment(CommentFragment.this, REPLY_REQUEST);
+                    getFragmentManager().beginTransaction()
+                            .replace(R.id.main_container, reply, "ReplyFragment")
+                            .addToBackStack("ReplyFragment")
+                            .commit();
+                    break;
+                }
                 case R.id.overflow_hide: {
                     FutureCallback<String> callback = new FutureCallback<String>() {
                         @Override
