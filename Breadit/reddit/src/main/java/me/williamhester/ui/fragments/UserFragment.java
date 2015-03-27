@@ -479,10 +479,12 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
 
     private class VotableAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-        public static final int HEADER_SPACER = 0;
-        public static final int USER_HEADER = 1;
-        public static final int SUBMISSION = 2;
-        public static final int COMMENT = 3;
+        public static final int SUBMISSION = 1;
+        public static final int COMMENT = 2;
+        public static final int VOTABLE_MASK = 3;
+        public static final int USER_HEADER = 5;
+        public static final int FOOTER = 4;
+        public static final int HEADER_SPACER = 8;
 
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -509,24 +511,32 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
                             inflater.inflate(R.layout.list_item_submission_comment, cardView, true),
                             UserFragment.this);
                 }
+
+                case FOOTER: {
+                    return new RecyclerView.ViewHolder(inflater.inflate(R.layout.footer_spacer, parent,
+                            false)) {};
+                }
             }
             return null;
         }
 
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-            if (position > 1) {
+            if (holder instanceof VotableViewHolder) {
                 ((VotableViewHolder) holder).setContent(mVotables.get(position - 2));
             }
         }
 
         @Override
         public int getItemCount() {
-            return mVotables.size() + 2;
+            return mVotables.size() + 3;
         }
 
         @Override
         public int getItemViewType(int position) {
+            if (position == getItemCount() - 1) {
+                return FOOTER;
+            }
             if (position == 0) {
                 return HEADER_SPACER;
             }

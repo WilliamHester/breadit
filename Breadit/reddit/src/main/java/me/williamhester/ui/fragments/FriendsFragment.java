@@ -138,6 +138,7 @@ public class FriendsFragment extends AccountFragment {
 
         private static final int VIEW_TYPE_HEADER = 0;
         private static final int VIEW_TYPE_FRIEND = 1;
+        private static final int VIEW_TYPE_FOOTER = 2;
 
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -146,32 +147,36 @@ public class FriendsFragment extends AccountFragment {
                 case VIEW_TYPE_HEADER:
                     LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                             ViewGroup.LayoutParams.MATCH_PARENT, mToolbar.getHeight());
-                    Log.d("FriendsFragment", "mToolbar height = " + mToolbar.getHeight());
                     View header = new View(getActivity());
                     header.setLayoutParams(params);
                     return new RecyclerView.ViewHolder(header) { };
                 case VIEW_TYPE_FRIEND:
                     return new FriendViewHolder(inflater.inflate(R.layout.list_item_friend, parent,
                             false));
+                case VIEW_TYPE_FOOTER:
+                    return new RecyclerView.ViewHolder(inflater.inflate(R.layout.footer_spacer,
+                            parent, false)) {};
             }
             return null;
         }
 
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-            if (position > 0) {
+            if (getItemViewType(position) == VIEW_TYPE_FRIEND) {
                 ((FriendViewHolder) holder).setContent(mFriends.get(position - 1));
             }
         }
 
         @Override
         public int getItemCount() {
-            return mFriends.size() + 1;
+            return mFriends.size() + 2;
         }
 
         @Override
         public int getItemViewType(int position) {
-            if (position == 0) {
+            if (position == getItemCount() - 1) {
+                return VIEW_TYPE_FOOTER;
+            } else if (position == 0) {
                 return VIEW_TYPE_HEADER;
             } else {
                 return VIEW_TYPE_FRIEND;

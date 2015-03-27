@@ -7,6 +7,7 @@
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    card_view:cardBackgroundColor="@color/foreground"
     card_view:cardCornerRadius="2dp">
 
     <me.williamhester.ui.views.SwipeView android:id="@+id/swipe_view"

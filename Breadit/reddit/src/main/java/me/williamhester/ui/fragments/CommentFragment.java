@@ -201,10 +201,6 @@ public class CommentFragment extends Fragment implements Toolbar.OnMenuItemClick
                     args.putParcelable("submission", mSubmission);
                     i.putExtras(args);
                     startActivity(i);
-//                    getFragmentManager().beginTransaction()
-//                            .add(R.id.main_container, getContentFragment(), "contentPreview")
-//                            .addToBackStack("contentPreview")
-//                            .commit();
                 }
                 break;
             case R.id.action_open_link_in_browser:
@@ -476,6 +472,7 @@ public class CommentFragment extends Fragment implements Toolbar.OnMenuItemClick
         private static final int COMMENT = 2;
         private static final int MORE_COMMENTS = 3;
         private static final int SINGLE_THREAD_HEADER = 4;
+        private static final int FOOTER = 5;
 
         @SuppressLint("InflateParams")
         @Override
@@ -496,6 +493,9 @@ public class CommentFragment extends Fragment implements Toolbar.OnMenuItemClick
                             inflater.inflate(R.layout.list_item_more_comments, parent, false));
                 case SINGLE_THREAD_HEADER:
                     return new SingleThreadHeader(inflater, parent);
+                case FOOTER:
+                    return new RecyclerView.ViewHolder(inflater.inflate(R.layout.footer_spacer,
+                            parent, false)) {};
             }
             return null; // Should never hit this case
         }
@@ -521,7 +521,9 @@ public class CommentFragment extends Fragment implements Toolbar.OnMenuItemClick
 
         @Override
         public int getItemViewType(int position) {
-            if (position == 0) {
+            if (position == getItemCount() - 1) {
+                return FOOTER;
+            } else if (position == 0) {
                 if (mSubmission != null) {
                     return SUBMISSION;
                 } else if (mIsSingleThread) {
@@ -544,7 +546,7 @@ public class CommentFragment extends Fragment implements Toolbar.OnMenuItemClick
 
         @Override
         public int getItemCount() {
-            return mCommentsList.size() + getHeaderViewCount();
+            return mCommentsList.size() + getHeaderViewCount() + 1;
         }
 
         public int getHeaderViewCount() {

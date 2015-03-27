@@ -402,6 +402,7 @@ public abstract class AbsSubmissionListFragment extends AccountFragment implemen
 
         private static final int SUBMISSION = 1;
         private static final int HEADER = 2;
+        private static final int FOOTER = 3;
 
         private List<Submission> mSubmissions;
         private SubmissionViewHolder.SubmissionCallbacks mCallback;
@@ -421,6 +422,9 @@ public abstract class AbsSubmissionListFragment extends AccountFragment implemen
                 View header = new View(getActivity());
                 header.setLayoutParams(params);
                 return new RecyclerView.ViewHolder(header) { };
+            } else if (viewType == FOOTER) {
+                return new RecyclerView.ViewHolder(inflater.inflate(R.layout.footer_spacer, parent,
+                        false)) {};
             }
             CardView cardView = (CardView) inflater.inflate(R.layout.view_content_card, parent, false);
             inflater.inflate(R.layout.view_submission, cardView, true);
@@ -429,19 +433,21 @@ public abstract class AbsSubmissionListFragment extends AccountFragment implemen
 
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder submissionViewHolder, int position) {
-            if (position > 0) {
+            if (getItemViewType(position) == SUBMISSION) {
                 ((SubmissionViewHolder) submissionViewHolder).setContent(mSubmissions.get(position - 1));
             }
         }
 
         @Override
         public int getItemCount() {
-            return mSubmissions.size() + 1;
+            return mSubmissions.size() + 2;
         }
 
         @Override
         public int getItemViewType(int position) {
-            if (position == 0) {
+            if (position == getItemCount() - 1) {
+                return FOOTER;
+            } else if (position == 0) {
                 return HEADER;
             } else {
                 return SUBMISSION;

@@ -316,35 +316,42 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
         
         private static final int MESSAGE = 1;
         private static final int HEADER = 2;
+        private static final int FOOTER = 3;
         
         @Override
-        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            LayoutInflater inflater = LayoutInflater.from(getActivity());
             if (viewType == HEADER) {
                 LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT, mToolbar.getHeight());
                 View header = new View(getActivity());
                 header.setLayoutParams(params);
                 return new RecyclerView.ViewHolder(header) { };
+            } else if (viewType == FOOTER) {
+                return new RecyclerView.ViewHolder(inflater.inflate(R.layout.footer_spacer, parent,
+                        false)) {};
             }
-            return new MessageViewHolder(LayoutInflater.from(getActivity())
-                    .inflate(R.layout.list_item_message, mMessagesRecyclerView, false));
+            return new MessageViewHolder(inflater.inflate(R.layout.list_item_message,
+                    mMessagesRecyclerView, false));
         }
 
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int position) {
-            if (position > 0) {
+            if (getItemViewType(position) == MESSAGE) {
                 ((MessageViewHolder) viewHolder).setContent(mMessages.get(position - 1));
             }
         }
 
         @Override
         public int getItemCount() {
-            return mMessages.size() + 1;
+            return mMessages.size() + 2;
         }
 
         @Override
         public int getItemViewType(int position) {
-            if (position == 0) {
+            if (position == getItemCount() - 1) {
+                return FOOTER;
+            } else if (position == 0) {
                 return HEADER;
             }
             return MESSAGE;
