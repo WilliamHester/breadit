@@ -29,8 +29,6 @@ import java.util.List;
 import me.williamhester.SettingsManager;
 import me.williamhester.models.AbsComment;
 import me.williamhester.models.Comment;
-import me.williamhester.models.ImgurAlbum;
-import me.williamhester.models.ImgurImage;
 import me.williamhester.models.MoreComments;
 import me.williamhester.models.Submission;
 import me.williamhester.models.Thing;
@@ -289,53 +287,6 @@ public class CommentFragment extends Fragment implements Toolbar.OnMenuItemClick
             mCommentsList.add(++position, c);
         }
         return children.size();
-    }
-
-    /**
-     * Gets the proper fragment to display the content that the submission is showing.
-     *
-     * @return returns the fragment needed to display the content
-     */
-    private Fragment getContentFragment() {
-        Url parser = mSubmission.getLinkDetails();
-        if (!mSubmission.isSelf()) {
-            switch (parser.getType()) {
-                case Url.NOT_SPECIAL:
-                    return WebViewFragment.newInstance(parser.getUrl());
-                case Url.IMGUR_IMAGE:
-                    if (mSubmission.getImgurData() != null)
-                        return ImagePagerFragment
-                                .newInstance((ImgurImage) mSubmission.getImgurData());
-                    else
-                        return ImagePagerFragment
-                                .newInstanceLazyLoaded(parser.getLinkId(), false);
-                case Url.IMGUR_ALBUM:
-                    if (mSubmission.getImgurData() != null)
-                        return ImagePagerFragment
-                                .newInstance((ImgurAlbum) mSubmission.getImgurData());
-                    else
-                        return ImagePagerFragment
-                                .newInstanceLazyLoaded(parser.getLinkId(), true);
-                case Url.IMGUR_GALLERY:
-                    return WebViewFragment.newInstance(parser.getUrl());
-                case Url.YOUTUBE:
-                    return YouTubeFragment.newInstance(parser.getLinkId());
-                case Url.GFYCAT_LINK:
-                case Url.GIF:
-                case Url.NORMAL_IMAGE:
-                    return ImagePagerFragment.newInstance(parser);
-                case Url.SUBMISSION:
-                    return CommentFragment.newInstance(parser.getUrl(),
-                            parser.getUrl().contains("?context="));
-                case Url.SUBREDDIT:
-                    return SubredditFragment.newInstance(parser.getLinkId());
-                case Url.USER:
-                    break;
-                case Url.REDDIT_LIVE:
-                    return RedditLiveFragment.newInstance(mSubmission);
-            }
-        }
-        return null;
     }
 
     @Override
