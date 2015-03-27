@@ -12,6 +12,8 @@ import android.text.TextPaint;
 import android.text.style.ClickableSpan;
 import android.view.View;
 
+import com.google.android.youtube.player.YouTubeApiServiceUtil;
+
 import me.williamhester.reddit.R;
 import me.williamhester.tools.Url;
 import me.williamhester.ui.activities.BrowseActivity;
@@ -88,12 +90,6 @@ public class LinkSpan extends ClickableSpan {
                 args.putString("filterType", mUrl.getLinkId());
                 i = new Intent(view.getContext(), BrowseActivity.class);
                 break;
-            case Url.YOUTUBE:
-                // TODO: fix this when YouTube updates their Android API
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    i = new Intent(Intent.ACTION_VIEW, Uri.parse(mLink));
-                    break;
-                }
             default:
                 i = new Intent(view.getContext(), OverlayContentActivity.class);
                 args.putInt("type", OverlayContentActivity.TYPE_LINK);
