@@ -30,6 +30,10 @@
         <activity android:name="me.williamhester.ui.activities.LogInActivity"
             android:label="@string/login">
         </activity>
+        <activity android:name="me.williamhester.ui.activities.LogInActivity2"
+            android:theme="@style/Theme.Transparent"
+            android:label="@string/login">
+        </activity>
         <activity android:name="me.williamhester.ui.activities.SubmitActivity"
             android:label="@string/submit"
             android:windowSoftInputMode="adjustPan">

@@ -23,7 +23,7 @@ import me.williamhester.models.Account;
 import me.williamhester.models.AccountManager;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
-import me.williamhester.ui.activities.LogInActivity;
+import me.williamhester.ui.activities.LogInActivity2;
 
 public class SettingsFragment extends PreferenceFragment {
 
@@ -97,7 +97,7 @@ public class SettingsFragment extends PreferenceFragment {
             });
             builder.show();
         } else if (preference == mLogIn) {
-            Intent i = new Intent(getActivity(), LogInActivity.class);
+            Intent i = new Intent(getActivity(), LogInActivity2.class);
             getActivity().startActivityForResult(i, LOG_IN_REQUEST);
         } else if (preference == mLogOut) {
             final List<Account> accounts;
