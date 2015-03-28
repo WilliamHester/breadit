@@ -96,7 +96,7 @@ public abstract class AbsSubmissionListFragment extends AccountFragment implemen
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.swipe_refresh);
         mSwipeRefreshLayout.setProgressBackgroundColor(R.color.primary);
-        mSwipeRefreshLayout.setColorSchemeResources(R.color.orangered);
+        mSwipeRefreshLayout.setColorSchemeResources(R.color.white);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
