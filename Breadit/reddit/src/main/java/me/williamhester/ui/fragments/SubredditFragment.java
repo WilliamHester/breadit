@@ -2,7 +2,9 @@ package me.williamhester.ui.fragments;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -35,6 +37,8 @@ import me.williamhester.reddit.R;
 public class SubredditFragment extends AbsSubmissionListFragment implements
         Toolbar.OnMenuItemClickListener {
 
+    private static final int SELECT_SUBREDDIT = 1;
+
     private String mSubredditName;
     private ArrayList<Subreddit> mSubredditList = new ArrayList<>();
     private HashSet<String> mNames;
@@ -58,6 +62,16 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
         b.putString("subreddit", subredditName);
         sf.setArguments(b);
         return sf;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == SELECT_SUBREDDIT) {
+            String subreddit = data.getStringExtra(SubredditListFragment.SELECTED_SUBREDDIT);
+            loadSubreddit(subreddit);
+            return;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -94,10 +108,22 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
         View v = super.onCreateView(inflater, root, savedInstanceState);
 
         if (mCallback != null) {
-            inflater.inflate(R.layout.toolbar_spinner, mToolbar, true);
-            Spinner subs = (Spinner) mToolbar.findViewById(R.id.spinner);
+//            inflater.inflate(R.layout.toolbar_spinner, mToolbar, true);
+//            Spinner subs = (Spinner) mToolbar.findViewById(R.id.spinner);
+            TextView currentSubreddit = (TextView) v.findViewById(R.id.current_subreddit);
+            currentSubreddit.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Fragment listFragment = SubredditListFragment.newInstance(mSubredditName);
+                    listFragment.setTargetFragment(SubredditFragment.this, SELECT_SUBREDDIT);
+                    getFragmentManager().beginTransaction()
+                            .add(R.id.main_container, listFragment, "ListFragment")
+                            .addToBackStack("ListFragment")
+                            .commit();
+                }
+            });
             mSubredditAdapter = new SubredditAdapter();
-            subs.setAdapter(mSubredditAdapter);
+//            subs.setAdapter(mSubredditAdapter);
             if (savedInstanceState == null) {
                 loadSubreddits(v);
             }
@@ -219,7 +245,7 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
     private void loadSubreddits(View view) {
         mSubredditList.clear();
         if (view != null) {
-            Spinner spinner = (Spinner) view.findViewById(R.id.spinner);
+//            Spinner spinner = (Spinner) view.findViewById(R.id.spinner);
             if (mAccount != null) {
                 mSubredditList.clear();
                 AccountDataSource dataSource = new AccountDataSource(getActivity());
@@ -276,37 +302,37 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
                     }
                 });
                 mSubredditAdapter.notifyDataSetChanged();
-                spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        if (mHasLoadedOriginal) {
-                            loadSubreddit(position == 0 ? "" : mSubredditList.get(position - 1).getDisplayName());
-                        }
-                        mHasLoadedOriginal = true;
-                    }
-
-                    @Override
-                    public void onNothingSelected(AdapterView<?> parent) {
-
-                    }
-                });
+//                spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//                    @Override
+//                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+//                        if (mHasLoadedOriginal) {
+//                            loadSubreddit(position == 0 ? "" : mSubredditList.get(position - 1).getDisplayName());
+//                        }
+//                        mHasLoadedOriginal = true;
+//                    }
+//
+//                    @Override
+//                    public void onNothingSelected(AdapterView<?> parent) {
+//
+//                    }
+//                });
             } else {
                 final String[] subs = getResources().getStringArray(R.array.default_subreddits);
-                spinner.setAdapter(new SubredditStringAdapter(subs));
-                spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        if (mHasLoadedOriginal) {
-                            loadSubreddit(position == 0 ? "" : subs[position - 1]);
-                        }
-                        mHasLoadedOriginal = true;
-                    }
-
-                    @Override
-                    public void onNothingSelected(AdapterView<?> parent) {
-
-                    }
-                });
+//                spinner.setAdapter(new SubredditStringAdapter(subs));
+//                spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//                    @Override
+//                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+//                        if (mHasLoadedOriginal) {
+//                            loadSubreddit(position == 0 ? "" : subs[position - 1]);
+//                        }
+//                        mHasLoadedOriginal = true;
+//                    }
+//
+//                    @Override
+//                    public void onNothingSelected(AdapterView<?> parent) {
+//
+//                    }
+//                });
             }
         }
     }

@@ -279,4 +279,7 @@
     <!-- FriendsFragment -->
     <string name="friends_since">Friends since</string>
 
+    <!-- SubredditListFragment -->
+    <string name="go_to_subreddit">Go to subreddit</string>
+
 </resources>
