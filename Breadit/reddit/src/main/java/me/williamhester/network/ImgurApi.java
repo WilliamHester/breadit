@@ -33,6 +33,7 @@ public class ImgurApi {
 
     public static void init(Context context) {
         mImgurClient = Ion.getInstance(context, "imgur");
+        mImgurClient.getHttpClient().getSSLSocketMiddleware().setSpdyEnabled(false);
         ArrayList<AsyncHttpClientMiddleware> middlewares = mImgurClient.getHttpClient().getMiddleware();
         for (AsyncHttpClientMiddleware middleware : middlewares) { // Set the cache size to 1MB. That's a lot of Imgur data
             if (middleware instanceof ResponseCacheMiddleware) {

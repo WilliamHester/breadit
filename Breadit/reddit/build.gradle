@@ -39,7 +39,7 @@ android {
 dependencies {
     compile 'com.koushikdutta.async:androidasync:2.+'             // AndroidAsync
     compile 'com.github.chrisbanes.photoview:library:1.2.3'       // PhotoView
-    compile 'com.koushikdutta.ion:ion:2.+'                        // Ion
+    compile 'com.koushikdutta.ion:ion:2.0.4'                      // Ion
     compile 'org.jsoup:jsoup:1.7.3'                               // Jsoup
     compile 'com.google.code.gson:gson:2.2.4'                     // Gson
     compile 'com.android.support:support-v4:+'                    // Support Library

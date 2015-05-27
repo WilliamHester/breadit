@@ -223,18 +223,18 @@ public class NavigationDrawerFragment extends AccountFragment {
         mCallback = null;
     }
 
-    public static interface NavigationDrawerCallbacks {
-        public void onSubredditSelected(String subreddit);
+    public interface NavigationDrawerCallbacks {
+        void onSubredditSelected(String subreddit);
 
-        public void onAccountChanged();
+        void onAccountChanged();
 
-        public void onHomeSelected();
+        void onHomeSelected();
 
-        public void onMessagesSelected();
+        void onMessagesSelected();
 
-        public void onMyAccountSelected();
+        void onMyAccountSelected();
 
-        public void onFriendsSelected();
+        void onFriendsSelected();
     }
 
     private class AccountAdapter extends ArrayAdapter<String> {

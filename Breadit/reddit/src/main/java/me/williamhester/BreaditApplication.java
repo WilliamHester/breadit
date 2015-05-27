@@ -2,6 +2,8 @@ package me.williamhester;
 
 import android.app.Application;
 
+import com.koushikdutta.ion.Ion;
+
 import me.williamhester.models.AccountManager;
 import me.williamhester.network.GfycatApi;
 import me.williamhester.network.ImgurApi;
@@ -18,6 +20,7 @@ public class BreaditApplication extends Application {
         AccountManager.init(this);
         GfycatApi.init(this);
         ImgurApi.init(this);
+        Ion.getDefault(this).getHttpClient().getSSLSocketMiddleware().setSpdyEnabled(false);
         SettingsManager.init(this);
     }
 }
