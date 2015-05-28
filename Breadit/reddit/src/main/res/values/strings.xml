@@ -281,5 +281,12 @@
 
     <!-- SubredditListFragment -->
     <string name="go_to_subreddit">Go to subreddit</string>
+    <string name="subscriptions">Subscriptions</string>
+    <string name="special">Special</string>
+    <string name="recents">Recents</string>
+    <string name="trending">Trending</string>
+
+    <!-- SelectSubredditActivity -->
+    <string name="select_subreddit">Select Subreddit</string>
 
 </resources>

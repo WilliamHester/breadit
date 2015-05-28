@@ -4,15 +4,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
@@ -33,6 +30,7 @@ import me.williamhester.models.Submission;
 import me.williamhester.models.Subreddit;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
+import me.williamhester.ui.activities.SelectSubredditActivity;
 
 public class SubredditFragment extends AbsSubmissionListFragment implements
         Toolbar.OnMenuItemClickListener {
@@ -45,7 +43,6 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
     private SubredditAdapter mSubredditAdapter;
 
     private boolean mSubredditExists = true;
-    private boolean mHasLoadedOriginal;
 
     private TopLevelFragmentCallbacks mCallback;
 
@@ -108,22 +105,18 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
         View v = super.onCreateView(inflater, root, savedInstanceState);
 
         if (mCallback != null) {
-//            inflater.inflate(R.layout.toolbar_spinner, mToolbar, true);
-//            Spinner subs = (Spinner) mToolbar.findViewById(R.id.spinner);
             TextView currentSubreddit = (TextView) v.findViewById(R.id.current_subreddit);
             currentSubreddit.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Fragment listFragment = SubredditListFragment.newInstance(mSubredditName);
-                    listFragment.setTargetFragment(SubredditFragment.this, SELECT_SUBREDDIT);
-                    getFragmentManager().beginTransaction()
-                            .add(R.id.main_container, listFragment, "ListFragment")
-                            .addToBackStack("ListFragment")
-                            .commit();
+                    Intent i = new Intent(getActivity(), SelectSubredditActivity.class);
+                    Bundle args = new Bundle();
+                    args.putString(SubredditListFragment.SELECTED_SUBREDDIT, mSubredditName);
+                    i.putExtras(args);
+                    startActivityForResult(i, SELECT_SUBREDDIT);
                 }
             });
             mSubredditAdapter = new SubredditAdapter();
-//            subs.setAdapter(mSubredditAdapter);
             if (savedInstanceState == null) {
                 loadSubreddits(v);
             }

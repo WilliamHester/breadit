@@ -3,8 +3,40 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ListView android:id="@+id/list"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        style="@style/HeaderBar">
+
+        <android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:breadit="http://schemas.android.com/apk/res-auto"
+            breadit:theme="@style/ActionBarThemeOverlay"
+            breadit:popupTheme="@style/ActionBarPopupThemeOverlay"
+            android:id="@+id/toolbar_actionbar"
+            android:background="@null"
+            breadit:titleTextAppearance="@style/ActionBar.TitleText"
+            breadit:contentInsetStart="@dimen/drawer_inset"
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize">
+
+
+            <EditText android:id="@+id/subreddit_search"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+        </android.support.v7.widget.Toolbar>
+
+        <me.williamhester.ui.views.SlidingTabLayout
+            android:id="@+id/sliding_tabs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+    <android.support.v4.view.ViewPager android:id="@+id/pager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
 
 </LinearLayout>
