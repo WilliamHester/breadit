@@ -101,6 +101,20 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
             if (savedInstanceState == null) {
                 loadSubreddits(v);
             }
+            subs.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                    if (mHasLoadedOriginal) {
+                        loadSubreddit(position == 0 ? "" : mSubredditList.get(position - 1).getDisplayName());
+                    }
+                    mHasLoadedOriginal = true;
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {
+
+                }
+            });
             mToolbar.setNavigationIcon(R.drawable.ic_drawer);
             mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
                 @Override
@@ -276,20 +290,6 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
                     }
                 });
                 mSubredditAdapter.notifyDataSetChanged();
-                spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        if (mHasLoadedOriginal) {
-                            loadSubreddit(position == 0 ? "" : mSubredditList.get(position - 1).getDisplayName());
-                        }
-                        mHasLoadedOriginal = true;
-                    }
-
-                    @Override
-                    public void onNothingSelected(AdapterView<?> parent) {
-
-                    }
-                });
             } else {
                 final String[] subs = getResources().getStringArray(R.array.default_subreddits);
                 spinner.setAdapter(new SubredditStringAdapter(subs));
