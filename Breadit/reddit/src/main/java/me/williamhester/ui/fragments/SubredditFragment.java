@@ -100,6 +100,9 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
         View v = super.onCreateView(inflater, root, savedInstanceState);
+        if (v == null) {
+            return null;
+        }
 
         if (mCallback != null) {
             mTitle = (TextView) v.findViewById(R.id.current_subreddit);
