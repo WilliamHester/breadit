@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,9 +18,12 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.koushikdutta.async.future.FutureCallback;
+
 import java.util.ArrayList;
 
 import me.williamhester.models.Subreddit;
+import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.views.SlidingTabLayout;
 
@@ -81,18 +85,18 @@ public class SubredditListFragment extends AccountFragment {
         });
         tabs.setViewPager(pager);
 
-//        ListView listView = (ListView) v.findViewById(R.id.list);
-//        mHeader = inflater.inflate(R.layout.header_subreddit_list, null, false);
-//        setUpHeader();
-//        listView.addHeaderView(mHeader);
-//        final SubredditAdapter adapter = new SubredditAdapter();
-//        listView.setAdapter(adapter);
-//        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                selectSubreddit(adapter.getItem(position).getDisplayName());
-//            }
-//        });
+        RedditApi.getTrendingSubreddits(getActivity(), new FutureCallback<ArrayList<String>>() {
+            @Override
+            public void onCompleted(Exception e, ArrayList<String> result) {
+                if (e != null) {
+
+                } else {
+                    for (String s : result) {
+                        Log.d("trending", s);
+                    }
+                }
+            }
+        });
 
         return v;
     }
