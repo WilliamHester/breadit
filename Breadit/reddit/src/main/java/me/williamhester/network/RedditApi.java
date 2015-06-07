@@ -140,18 +140,24 @@ public class RedditApi {
                 .setCallback(callback);
     }
 
-    public static void getSubscribedSubreddits(FutureCallback<ArrayList<Subreddit>> callback) {
-        getSubscribedSubreddits(callback, "", new ArrayList<Subreddit>(), new Gson());
+    public static void getDefaultSubreddits(FutureCallback<ArrayList<Subreddit>> callback) {
+        getSubreddits(callback, "default", null, new ArrayList<Subreddit>(), new Gson());
     }
 
-    private static void getSubscribedSubreddits(final FutureCallback<ArrayList<Subreddit>> callback,
-                                               String after, final ArrayList<Subreddit> subreddits,
-                                               final Gson gson) {
-        AsyncHttpRequest request = new AsyncHttpGet(REDDIT_URL
-                        + "/subreddits/mine/.json?after=" + after);
-        Account account = AccountManager.getAccount();
-        request.addHeader("Cookie", "reddit_session=\"" + account.getCookie() + "\"");
-        request.addHeader("X-Modhash", account.getModhash());
+    public static void getSubscribedSubreddits(FutureCallback<ArrayList<Subreddit>> callback) {
+        getSubreddits(callback, "mine", "", new ArrayList<Subreddit>(), new Gson());
+    }
+
+    private static void getSubreddits(final FutureCallback<ArrayList<Subreddit>> callback,
+                                      final String type, String after,
+                                      final ArrayList<Subreddit> subreddits, final Gson gson) {
+        String requestUrl = String.format(REDDIT_URL + "/subreddits/%s/?after=%s", type, after);
+        AsyncHttpRequest request = new AsyncHttpGet(requestUrl);
+        if (AccountManager.isLoggedIn()) {
+            Account account = AccountManager.getAccount();
+            request.addHeader("Cookie", "reddit_session=\"" + account.getCookie() + "\"");
+            request.addHeader("X-Modhash", account.getModhash());
+        }
         request.addHeader("User-Agent", USER_AGENT);
         request.addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
 
@@ -173,7 +179,7 @@ public class RedditApi {
                             }
                         }
                         if (listing.getAfter() != null) {
-                            getSubscribedSubreddits(callback, listing.getAfter(), subreddits, gson);
+                            getSubreddits(callback, type, listing.getAfter(), subreddits, gson);
                         } else {
                             callback.onCompleted(null, subreddits);
                         }
@@ -646,8 +652,6 @@ public class RedditApi {
                 .asJsonObject()
                 .setCallback(callback);
     }
-
-//    public static void friend(Context context, )
 
     public static void getMe(final FutureCallback<JsonObject> callback) {
         AsyncHttpRequest request = new AsyncHttpGet(REDDIT_URL + "/api/me.json");

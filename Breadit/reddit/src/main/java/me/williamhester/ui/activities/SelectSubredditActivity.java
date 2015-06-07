@@ -3,6 +3,7 @@ package me.williamhester.ui.activities;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.PersistableBundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 
@@ -24,9 +25,18 @@ import me.williamhester.ui.fragments.SubredditListFragment;
  */
 public class SelectSubredditActivity extends AppCompatActivity {
 
+    public static final String SUBREDDITS = "subreddits";
+
+    private final ArrayList<Subreddit> mSubreddits = new ArrayList<>();
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (savedInstanceState != null) {
+            ArrayList<Subreddit> subs = savedInstanceState.getParcelableArrayList(SUBREDDITS);
+            mSubreddits.addAll(subs);
+        }
 
         setContentView(R.layout.activity_container);
 
@@ -38,7 +48,16 @@ public class SelectSubredditActivity extends AppCompatActivity {
                     .commit();
         }
 
-        loadSubreddits();
+        if (mSubreddits.size() == 0) {
+            loadSubreddits();
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putParcelableArrayList(SUBREDDITS, mSubreddits);
     }
 
     private void loadSubreddits() {
@@ -56,7 +75,7 @@ public class SelectSubredditActivity extends AppCompatActivity {
 
             RedditApi.getSubscribedSubreddits(new FutureCallback<ArrayList<Subreddit>>() {
                 @Override
-                public void onCompleted(Exception e, ArrayList<Subreddit> result) {
+                public void onCompleted(Exception e, final ArrayList<Subreddit> result) {
                     if (e != null) {
                         e.printStackTrace();
                         return;
@@ -89,8 +108,30 @@ public class SelectSubredditActivity extends AppCompatActivity {
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
-                            if (isNew) {
-                                Collections.sort(subredditList);
+                            Fragment f = getSupportFragmentManager().findFragmentById(R.id.main_container);
+                            if (f instanceof SubredditListFragment) {
+                                mSubreddits.addAll(result);
+                                ((SubredditListFragment) f).setSubreddits(mSubreddits);
+                            }
+                        }
+                    });
+                }
+            });
+        } else {
+            RedditApi.getDefaultSubreddits(new FutureCallback<ArrayList<Subreddit>>() {
+                @Override
+                public void onCompleted(Exception e, final ArrayList<Subreddit> result) {
+                    if (e != null) {
+                        return;
+                    }
+                    Handler handler = new Handler(Looper.getMainLooper());
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            Fragment f = getSupportFragmentManager().findFragmentById(R.id.main_container);
+                            if (f instanceof SubredditListFragment) {
+                                mSubreddits.addAll(result);
+                                ((SubredditListFragment) f).setSubreddits(mSubreddits);
                             }
                         }
                     });

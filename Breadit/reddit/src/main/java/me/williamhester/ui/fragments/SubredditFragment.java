@@ -103,6 +103,11 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
 
         if (mCallback != null) {
             mTitle = (TextView) v.findViewById(R.id.current_subreddit);
+            if (TextUtils.isEmpty(mSubredditName)) {
+                mTitle.setText(R.string.front_page);
+            } else {
+                mTitle.setText("/r/" + mSubredditName);
+            }
             mTitle.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -234,7 +239,11 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
             return;
         }
         if (mTitle != null) {
-            mTitle.setText(subredditTitle);
+            if (TextUtils.isEmpty(mSubredditName)) {
+                mTitle.setText(R.string.front_page);
+            } else {
+                mTitle.setText("/r/" + mSubredditName);
+            }
         }
         mSubmissionsAdapter.notifyDataSetChanged();
         mProgressBar.setVisibility(View.VISIBLE);

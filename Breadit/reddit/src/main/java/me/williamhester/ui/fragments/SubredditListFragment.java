@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +20,7 @@ import com.koushikdutta.async.future.FutureCallback;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import me.williamhester.models.AccountManager;
 import me.williamhester.models.Subreddit;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
@@ -33,6 +35,7 @@ public class SubredditListFragment extends AccountFragment {
     public static final String SUBSCRIPTIONS = "subscriptions";
 
     private final ArrayList<String> mTrendingSubreddits = new ArrayList<>();
+    private final ArrayList<Subreddit> mSubscriptions = new ArrayList<>();
     private SubredditsExpandableListAdapter mAdapter;
 
     /**
@@ -92,7 +95,7 @@ public class SubredditListFragment extends AccountFragment {
                         selectSubreddit(mTrendingSubreddits.get(childPosition));
                         return true;
                     case SubredditsExpandableListAdapter.SUBSCRIPTIONS_GROUP_INDEX:
-                        selectSubreddit(mAdapter.mSubscriptions.get(childPosition).getDisplayName());
+                        selectSubreddit(mSubscriptions.get(childPosition).getDisplayName());
                         return true;
                 }
                 return false;
@@ -103,7 +106,14 @@ public class SubredditListFragment extends AccountFragment {
         return v;
     }
 
-    private void setUpHeader(View toolbar) {
+    private void setUpHeader(View v) {
+        Toolbar toolbar = (Toolbar) v;
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getActivity().onBackPressed();
+            }
+        });
         final EditText subreddit = (EditText) toolbar.findViewById(R.id.go_to_subreddit);
         subreddit.setOnKeyListener(new View.OnKeyListener() {
             @Override
@@ -117,7 +127,23 @@ public class SubredditListFragment extends AccountFragment {
         });
     }
 
+    /**
+     * Sets the list of subreddits that will be displayed in the last section of the
+     * ExpandableListViewAdapter.
+     *
+     * @param subs the list of subreddits to put into the adapter.
+     */
+    public void setSubreddits(ArrayList<Subreddit> subs) {
+        mSubscriptions.clear();
+        mSubscriptions.addAll(subs);
+        Collections.sort(mSubscriptions);
+        mAdapter.notifyDataSetChanged();
+    }
+
     private void selectSubreddit(String subreddit) {
+        if (subreddit.equals(mAdapter.mSpecials[0])) {
+            subreddit = "";
+        }
         Intent i = new Intent();
         i.putExtra(SELECTED_SUBREDDIT, subreddit);
         getActivity().setResult(Activity.RESULT_OK, i);
@@ -131,14 +157,9 @@ public class SubredditListFragment extends AccountFragment {
         public static final int SUBSCRIPTIONS_GROUP_INDEX = 2;
 
         private final String[] mSpecials;
-        private final ArrayList<Subreddit> mSubscriptions = new ArrayList<>();
         private LayoutInflater mLayoutInflater;
 
         public SubredditsExpandableListAdapter() {
-            for (String key : mAccount.getSubscriptions().keySet()) {
-                mSubscriptions.add(mAccount.getSubscriptions().get(key));
-            }
-            Collections.sort(mSubscriptions);
             mSpecials = getResources().getStringArray(R.array.special_subs);
             mLayoutInflater = (LayoutInflater) getActivity()
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -213,7 +234,7 @@ public class SubredditListFragment extends AccountFragment {
                     title = R.string.trending;
                     break;
                 case SUBSCRIPTIONS_GROUP_INDEX:
-                    title = R.string.subscriptions;
+                    title = AccountManager.isLoggedIn() ? R.string.subscriptions : R.string.defaults;
                     break;
             }
             vh.setContent(title);
