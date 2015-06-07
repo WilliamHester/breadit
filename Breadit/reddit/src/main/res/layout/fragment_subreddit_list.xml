@@ -17,26 +17,18 @@
             android:background="@null"
             breadit:titleTextAppearance="@style/ActionBar.TitleText"
             breadit:contentInsetStart="@dimen/drawer_inset"
+            breadit:navigationIcon="@drawable/abc_ic_ab_back_mtrl_am_alpha"
             android:layout_width="match_parent"
             android:layout_height="?actionBarSize">
 
-
-            <EditText android:id="@+id/subreddit_search"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+            <include layout="@layout/header_subreddit_list" />
 
         </android.support.v7.widget.Toolbar>
 
-        <me.williamhester.ui.views.SlidingTabLayout
-            android:id="@+id/sliding_tabs"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
     </LinearLayout>
 
-    <android.support.v4.view.ViewPager android:id="@+id/pager"
+    <ExpandableListView android:id="@+id/expandable_list_view"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"/>
+        android:layout_height="match_parent"/>
 
 </LinearLayout>

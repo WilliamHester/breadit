@@ -1,7 +1,6 @@
 package me.williamhester.ui.fragments;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -9,7 +8,6 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
@@ -18,12 +16,9 @@ import com.koushikdutta.async.future.FutureCallback;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-import me.williamhester.databases.AccountDataSource;
-import me.williamhester.models.AccountManager;
 import me.williamhester.models.Listing;
 import me.williamhester.models.ResponseRedditWrapper;
 import me.williamhester.models.Submission;
@@ -40,7 +35,7 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
     private String mSubredditName;
     private ArrayList<Subreddit> mSubredditList = new ArrayList<>();
     private HashSet<String> mNames;
-    private SubredditAdapter mSubredditAdapter;
+    private TextView mTitle;
 
     private boolean mSubredditExists = true;
 
@@ -64,8 +59,10 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == SELECT_SUBREDDIT) {
-            String subreddit = data.getStringExtra(SubredditListFragment.SELECTED_SUBREDDIT);
-            loadSubreddit(subreddit);
+            if (resultCode == Activity.RESULT_OK) {
+                String subreddit = data.getStringExtra(SubredditListFragment.SELECTED_SUBREDDIT);
+                loadSubreddit(subreddit);
+            }
             return;
         }
         super.onActivityResult(requestCode, resultCode, data);
@@ -105,8 +102,8 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
         View v = super.onCreateView(inflater, root, savedInstanceState);
 
         if (mCallback != null) {
-            TextView currentSubreddit = (TextView) v.findViewById(R.id.current_subreddit);
-            currentSubreddit.setOnClickListener(new View.OnClickListener() {
+            mTitle = (TextView) v.findViewById(R.id.current_subreddit);
+            mTitle.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent i = new Intent(getActivity(), SelectSubredditActivity.class);
@@ -116,10 +113,6 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
                     startActivityForResult(i, SELECT_SUBREDDIT);
                 }
             });
-            mSubredditAdapter = new SubredditAdapter();
-            if (savedInstanceState == null) {
-                loadSubreddits(v);
-            }
             mToolbar.setNavigationIcon(R.drawable.ic_drawer);
             mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
                 @Override
@@ -155,7 +148,6 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
     @Override
     public void onAccountChanged() {
         onRefreshList();
-        loadSubreddits(getView());
     }
 
     @Override
@@ -235,106 +227,17 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
         }
     }
 
-    private void loadSubreddits(View view) {
-        mSubredditList.clear();
-        if (view != null) {
-//            Spinner spinner = (Spinner) view.findViewById(R.id.spinner);
-            if (mAccount != null) {
-                mSubredditList.clear();
-                AccountDataSource dataSource = new AccountDataSource(getActivity());
-                dataSource.open();
-                mSubredditList.addAll(dataSource.getCurrentAccountSubreddits());
-                dataSource.close();
-                HashMap<String, Subreddit> subscriptions = AccountManager.getAccount().getSubscriptions();
-                for (Subreddit s : mSubredditList) {
-                    subscriptions.put(s.getDisplayName().toLowerCase(), s);
-                }
-                Collections.sort(mSubredditList);
-                RedditApi.getSubscribedSubreddits(new FutureCallback<ArrayList<Subreddit>>() {
-                    @Override
-                    public void onCompleted(Exception e, ArrayList<Subreddit> result) {
-                        if (e != null) {
-                            e.printStackTrace();
-                            return;
-                        }
-                        AccountDataSource dataSource = new AccountDataSource(getActivity());
-                        dataSource.open();
-                        ArrayList<Subreddit> allSubs = dataSource.getAllSubreddits();
-                        ArrayList<Subreddit> savedSubscriptions = dataSource.getCurrentAccountSubreddits();
-
-                        for (Subreddit s : result) {
-                            int index = allSubs.indexOf(s); // Get the subreddit WITH the table id
-                            if (index < 0) { // if it doesn't exist, create one with a table id
-                                dataSource.addSubreddit(s);
-                                dataSource.addSubscriptionToCurrentAccount(s);
-                            } else if (!savedSubscriptions.contains(s)) {
-                                dataSource.addSubscriptionToCurrentAccount(allSubs.get(index));
-                            }
-                        }
-
-                        dataSource.close();
-
-                        final boolean isNew = !result.equals(savedSubscriptions);
-
-                        if (isNew) {
-                            mSubredditList.clear();
-                            mSubredditList.addAll(result);
-                        }
-
-                        if (getView() != null) {
-                            getView().post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (isNew) {
-                                        Collections.sort(mSubredditList);
-                                        mSubredditAdapter.notifyDataSetChanged();
-                                    }
-                                }
-                            });
-                        }
-                    }
-                });
-                mSubredditAdapter.notifyDataSetChanged();
-//                spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-//                    @Override
-//                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-//                        if (mHasLoadedOriginal) {
-//                            loadSubreddit(position == 0 ? "" : mSubredditList.get(position - 1).getDisplayName());
-//                        }
-//                        mHasLoadedOriginal = true;
-//                    }
-//
-//                    @Override
-//                    public void onNothingSelected(AdapterView<?> parent) {
-//
-//                    }
-//                });
-            } else {
-                final String[] subs = getResources().getStringArray(R.array.default_subreddits);
-//                spinner.setAdapter(new SubredditStringAdapter(subs));
-//                spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-//                    @Override
-//                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-//                        if (mHasLoadedOriginal) {
-//                            loadSubreddit(position == 0 ? "" : subs[position - 1]);
-//                        }
-//                        mHasLoadedOriginal = true;
-//                    }
-//
-//                    @Override
-//                    public void onNothingSelected(AdapterView<?> parent) {
-//
-//                    }
-//                });
-            }
-        }
-    }
-
     public void loadSubreddit(String subredditTitle) {
         mSubredditName = subredditTitle;
-        mProgressBar.setVisibility(View.VISIBLE);
         mSubmissionList.clear();
+        if (getView() == null) {
+            return;
+        }
+        if (mTitle != null) {
+            mTitle.setText(subredditTitle);
+        }
         mSubmissionsAdapter.notifyDataSetChanged();
+        mProgressBar.setVisibility(View.VISIBLE);
         loadAndClear();
     }
 
@@ -386,68 +289,5 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
         };
         RedditApi.getSubmissions(getActivity(), mSubredditName, mPrimarySortType,
                 mSecondarySortType, null, after, callback);
-    }
-
-    private class SubredditAdapter extends ArrayAdapter<Subreddit> {
-
-        public SubredditAdapter() {
-            super(getActivity(), R.layout.list_item_subreddit, R.id.subreddit_list_item_title, mSubredditList);
-        }
-
-        @Override
-        public View getDropDownView (int position, View convertView, ViewGroup parent) {
-            if (convertView == null) {
-                LayoutInflater inflater =
-                        (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                convertView = inflater.inflate(R.layout.list_item_subreddit, parent, false);
-            }
-            TextView text = (TextView) convertView.findViewById(R.id.subreddit_list_item_title);
-            text.setText(getItem(position) == null ? getResources().getString(R.string.front_page)
-                    : getItem(position).getDisplayName());
-            convertView.findViewById(R.id.mod_indicator).setVisibility(getItem(position) != null
-                    && getItem(position).userIsModerator() ? View.VISIBLE : View.GONE);
-
-            return convertView;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            return getDropDownView(position, convertView, parent);
-        }
-
-        @Override
-        public Subreddit getItem(int position) {
-            if (position == 0) {
-                return null;
-            } else {
-                return super.getItem(position - 1);
-            }
-        }
-
-        @Override
-        public int getCount() {
-            return super.getCount() + 1; // Have to account for the "Front Page" option
-        }
-    }
-
-    private class SubredditStringAdapter extends ArrayAdapter<String> {
-
-        public SubredditStringAdapter(String[] items) {
-            super(getActivity(), R.layout.list_item_subreddit, R.id.subreddit_list_item_title, items);
-        }
-
-        @Override
-        public String getItem(int position) {
-            if (position == 0) {
-                return getResources().getString(R.string.front_page).toLowerCase();
-            } else {
-                return super.getItem(position - 1).toLowerCase();
-            }
-        }
-
-        @Override
-        public int getCount() {
-            return super.getCount() + 1; // Have to account for the "Front Page" option
-        }
     }
 }

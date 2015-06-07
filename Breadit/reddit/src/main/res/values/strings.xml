@@ -285,6 +285,8 @@
     <string name="special">Special</string>
     <string name="recents">Recents</string>
     <string name="trending">Trending</string>
+    <string name="moderator">Moderator</string>
+    <string name="type_a_subreddit_name">Type a subreddit name</string>
 
     <!-- SelectSubredditActivity -->
     <string name="select_subreddit">Select Subreddit</string>

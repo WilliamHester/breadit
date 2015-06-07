@@ -5,27 +5,23 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.widget.BaseExpandableListAdapter;
 import android.widget.EditText;
-import android.widget.ListView;
+import android.widget.ExpandableListView;
 import android.widget.TextView;
 
 import com.koushikdutta.async.future.FutureCallback;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import me.williamhester.models.Subreddit;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
-import me.williamhester.ui.views.SlidingTabLayout;
 
 /**
  * Created by william on 5/26/15.
@@ -33,19 +29,19 @@ import me.williamhester.ui.views.SlidingTabLayout;
 public class SubredditListFragment extends AccountFragment {
 
     public static final String SELECTED_SUBREDDIT = "selectedSubreddit";
+    public static final String TRENDING_SUBREDDITS = "trendingSubreddits";
+    public static final String SUBSCRIPTIONS = "subscriptions";
 
-    private String mSelectedSubreddit;
-    private View mHeader;
+    private final ArrayList<String> mTrendingSubreddits = new ArrayList<>();
+    private SubredditsExpandableListAdapter mAdapter;
 
     /**
      * Creates a new SubredditListFragment in an empty state.
      *
-     * @param selected the currently selected subreddit.
      * @return a new SubredditListFragment.
      */
-    public static SubredditListFragment newInstance(String selected) {
+    public static SubredditListFragment newInstance() {
         Bundle args = new Bundle();
-        args.putString("selected", selected);
         SubredditListFragment fragment = new SubredditListFragment();
         fragment.setArguments(args);
         return fragment;
@@ -55,10 +51,19 @@ public class SubredditListFragment extends AccountFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (savedInstanceState != null) {
-            mSelectedSubreddit = savedInstanceState.getString(SELECTED_SUBREDDIT);
-        } else {
-            mSelectedSubreddit = getArguments().getString(SELECTED_SUBREDDIT);
+        if (mTrendingSubreddits.size() == 0) {
+            RedditApi.getTrendingSubreddits(getActivity(), new FutureCallback<ArrayList<String>>() {
+                @Override
+                public void onCompleted(Exception e, ArrayList<String> result) {
+                    if (e != null) {
+
+                    } else {
+                        mTrendingSubreddits.clear();
+                        mTrendingSubreddits.addAll(result);
+                        mAdapter.notifyTrendingSubredditsLoaded();
+                    }
+                }
+            });
         }
     }
 
@@ -71,38 +76,35 @@ public class SubredditListFragment extends AccountFragment {
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_subreddit_list, container, false);
 
-        ViewPager pager = (ViewPager) v.findViewById(R.id.pager);
-        pager.setAdapter(new SubredditsPagerAdapter());
-
-        SlidingTabLayout tabs = (SlidingTabLayout) v.findViewById(R.id.sliding_tabs);
-        tabs.setCustomTabView(R.layout.tab_indicator, android.R.id.text1);
-        tabs.setDistributeEvenly(true);
-        tabs.setCustomTabColorizer(new SlidingTabLayout.TabColorizer() {
+        ExpandableListView elv = (ExpandableListView) v.findViewById(R.id.expandable_list_view);
+        mAdapter = new SubredditsExpandableListAdapter();
+        elv.setAdapter(mAdapter);
+        elv.expandGroup(SubredditsExpandableListAdapter.SUBSCRIPTIONS_GROUP_INDEX);
+        elv.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
-            public int getIndicatorColor(int position) {
-                return getResources().getColor(R.color.app_highlight);
-            }
-        });
-        tabs.setViewPager(pager);
-
-        RedditApi.getTrendingSubreddits(getActivity(), new FutureCallback<ArrayList<String>>() {
-            @Override
-            public void onCompleted(Exception e, ArrayList<String> result) {
-                if (e != null) {
-
-                } else {
-                    for (String s : result) {
-                        Log.d("trending", s);
-                    }
+            public boolean onChildClick(ExpandableListView parent, View v, int groupPosition,
+                                        int childPosition, long id) {
+                switch (groupPosition) {
+                    case SubredditsExpandableListAdapter.SPECIAL_GROUP_INDEX:
+                        selectSubreddit(mAdapter.mSpecials[childPosition]);
+                        return true;
+                    case SubredditsExpandableListAdapter.TRENDING_GROUP_INDEX:
+                        selectSubreddit(mTrendingSubreddits.get(childPosition));
+                        return true;
+                    case SubredditsExpandableListAdapter.SUBSCRIPTIONS_GROUP_INDEX:
+                        selectSubreddit(mAdapter.mSubscriptions.get(childPosition).getDisplayName());
+                        return true;
                 }
+                return false;
             }
         });
+        setUpHeader(v.findViewById(R.id.toolbar_actionbar));
 
         return v;
     }
 
-    private void setUpHeader() {
-        final EditText subreddit = (EditText) mHeader.findViewById(R.id.go_to_subreddit);
+    private void setUpHeader(View toolbar) {
+        final EditText subreddit = (EditText) toolbar.findViewById(R.id.go_to_subreddit);
         subreddit.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
@@ -118,88 +120,166 @@ public class SubredditListFragment extends AccountFragment {
     private void selectSubreddit(String subreddit) {
         Intent i = new Intent();
         i.putExtra(SELECTED_SUBREDDIT, subreddit);
-        getTargetFragment()
-                .onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, i);
+        getActivity().setResult(Activity.RESULT_OK, i);
+        getActivity().finish();
     }
 
-    private ListView.OnItemClickListener mItemClickListener = new AdapterView.OnItemClickListener() {
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            SubredditAdapter adapter = (SubredditAdapter) parent.getAdapter();
-            Intent i = new Intent();
-            i.putExtra(SELECTED_SUBREDDIT, adapter.getItem(position).getDisplayName());
-            getActivity().setResult(Activity.RESULT_OK, i);
-            getActivity().finish();
-        }
-    };
+    private class SubredditsExpandableListAdapter extends BaseExpandableListAdapter {
 
-    private class SubredditAdapter extends ArrayAdapter<Subreddit> {
-        public SubredditAdapter() {
-            super(getActivity(), R.layout.list_item_subreddit);
+        public static final int SPECIAL_GROUP_INDEX = 0;
+        public static final int TRENDING_GROUP_INDEX = 1;
+        public static final int SUBSCRIPTIONS_GROUP_INDEX = 2;
 
-            ArrayList<Subreddit> subs = new ArrayList<>();
-            for (String key : mAccount.getSubscriptions().keySet()) {
-                subs.add(mAccount.getSubscriptions().get(key));
-            }
-            addAll(subs);
-            notifyDataSetChanged();
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            if (convertView == null) {
-                LayoutInflater inflater = (LayoutInflater) getContext()
-                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                convertView = inflater.inflate(R.layout.list_item_subreddit, parent, false);
-            }
-            TextView subreddit = (TextView) convertView.findViewById(R.id.subreddit_list_item_title);
-            subreddit.setText(getItem(position).getDisplayName());
-            return convertView;
-        }
-    }
-
-    private class SubredditsPagerAdapter extends PagerAdapter {
+        private final String[] mSpecials;
+        private final ArrayList<Subreddit> mSubscriptions = new ArrayList<>();
         private LayoutInflater mLayoutInflater;
 
-        public SubredditsPagerAdapter() {
+        public SubredditsExpandableListAdapter() {
+            for (String key : mAccount.getSubscriptions().keySet()) {
+                mSubscriptions.add(mAccount.getSubscriptions().get(key));
+            }
+            Collections.sort(mSubscriptions);
+            mSpecials = getResources().getStringArray(R.array.special_subs);
             mLayoutInflater = (LayoutInflater) getActivity()
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
 
         @Override
-        public int getCount() {
-            return 4;
+        public int getGroupCount() {
+            return 3;
         }
 
         @Override
-        public boolean isViewFromObject(View view, Object object) {
-            return view == object; // what?
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            switch (position) {
-                case 0: return getResources().getString(R.string.subscriptions);
-                case 1: return getResources().getString(R.string.special);
-                case 2: return getResources().getString(R.string.recents);
-                case 3: return getResources().getString(R.string.trending);
+        public int getChildrenCount(int groupPosition) {
+            switch (groupPosition) {
+                case SPECIAL_GROUP_INDEX:
+                    return mSpecials.length;
+                case TRENDING_GROUP_INDEX:
+                    return mTrendingSubreddits.size();
+                case SUBSCRIPTIONS_GROUP_INDEX:
+                    return mSubscriptions.size();
             }
-            return "";
+            return 0;
         }
 
         @Override
-        public Object instantiateItem(ViewGroup collection, int position) {
-            ListView list = (ListView) mLayoutInflater
-                    .inflate(R.layout.view_subreddits_list, collection, false);
-            list.setAdapter(new SubredditAdapter());
-            list.setOnItemClickListener(mItemClickListener);
-            collection.addView(list, 0);
-            return list;
+        public Object getGroup(int groupPosition) {
+            return null;
         }
 
         @Override
-        public void destroyItem(ViewGroup collection, int position, Object view) {
-            collection.removeView((View) view);
+        public Object getChild(int groupPosition, int childPosition) {
+            return null;
+        }
+
+        @Override
+        public long getGroupId(int groupPosition) {
+            return groupPosition;
+        }
+
+        @Override
+        public long getChildId(int groupPosition, int childPosition) {
+            switch (groupPosition) {
+                case SPECIAL_GROUP_INDEX:
+                    return mSpecials[childPosition].hashCode();
+                case TRENDING_GROUP_INDEX:
+                    return mTrendingSubreddits.get(childPosition).hashCode();
+                case SUBSCRIPTIONS_GROUP_INDEX:
+                    return mSubscriptions.get(childPosition).getName().hashCode();
+            }
+            return 0;
+        }
+
+        @Override
+        public boolean hasStableIds() {
+            return true;
+        }
+
+        @Override
+        public View getGroupView(int groupPosition, boolean isExpanded, View convertView,
+                                 ViewGroup parent) {
+            if (convertView == null) {
+                convertView = mLayoutInflater.inflate(R.layout.list_item_subreddit_group, parent, false);
+                convertView.setTag(new SubredditGroupViewHolder(convertView));
+            }
+            SubredditGroupViewHolder vh = (SubredditGroupViewHolder) convertView.getTag();
+
+            int title = 0;
+            switch (groupPosition) {
+                case SPECIAL_GROUP_INDEX:
+                    title = R.string.special;
+                    break;
+                case TRENDING_GROUP_INDEX:
+                    title = R.string.trending;
+                    break;
+                case SUBSCRIPTIONS_GROUP_INDEX:
+                    title = R.string.subscriptions;
+                    break;
+            }
+            vh.setContent(title);
+
+            return convertView;
+        }
+
+        @Override
+        public View getChildView(int groupPosition, int childPosition, boolean isLastChild,
+                                 View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                convertView = mLayoutInflater.inflate(R.layout.list_item_subreddit, parent, false);
+                convertView.setTag(new SubredditListItemViewHolder(convertView));
+            }
+            SubredditListItemViewHolder vh = (SubredditListItemViewHolder) convertView.getTag();
+
+            switch (groupPosition) {
+                case SPECIAL_GROUP_INDEX:
+                    vh.setContent(mSpecials[childPosition], false);
+                    break;
+                case TRENDING_GROUP_INDEX:
+                    vh.setContent(mTrendingSubreddits.get(childPosition), false);
+                    break;
+                case SUBSCRIPTIONS_GROUP_INDEX:
+                    Subreddit sub = mSubscriptions.get(childPosition);
+                    vh.setContent(sub.getDisplayName(), sub.userIsModerator());
+                    break;
+            }
+
+            return convertView;
+        }
+
+        @Override
+        public boolean isChildSelectable(int groupPosition, int childPosition) {
+            return true;
+        }
+
+        public void notifyTrendingSubredditsLoaded() {
+            notifyDataSetChanged();
+        }
+
+        private class SubredditListItemViewHolder {
+            private TextView mTitle;
+            private TextView mModerator;
+
+            public SubredditListItemViewHolder(View view) {
+                mTitle = (TextView) view.findViewById(R.id.subreddit_list_item_title);
+                mModerator = (TextView) view.findViewById(R.id.moderator_status);
+            }
+
+            public void setContent(String subreddit, boolean isModerator) {
+                mTitle.setText(subreddit);
+                mModerator.setVisibility(isModerator ? View.VISIBLE : View.GONE);
+            }
+        }
+
+        private class SubredditGroupViewHolder {
+            private TextView mTitle;
+
+            public SubredditGroupViewHolder(View view) {
+                mTitle = (TextView) view.findViewById(R.id.subreddit_group_title);
+            }
+
+            public void setContent(int title) {
+                mTitle.setText(title);
+            }
         }
     }
 }
