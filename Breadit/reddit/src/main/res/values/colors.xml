@@ -2,6 +2,7 @@
 <resources>
 
     <!--Dark color scheme colors-->
+    <color name="light_gray_0">#A5A5A5</color>
     <color name="dark_gray_0">#545454</color>
     <color name="dark_gray_1">#ff3b3b3b</color>
     <color name="dark_gray_2">#ff2e2e2e</color>

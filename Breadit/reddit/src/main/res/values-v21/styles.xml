@@ -4,8 +4,7 @@
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryDark">@color/primary_dark</item>
         <item name="android:windowBackground">@color/background</item>
-        <item name="android:windowTranslucentStatus">true</item>
-        <item name="android:windowTranslucentNavigation">true</item>
+
         <item name="windowActionBar">false</item>
 
         <!--<item name="actionBarIconColor">#fff</item>-->

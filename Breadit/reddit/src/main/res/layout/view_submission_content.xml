@@ -12,7 +12,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:fontFamily="sans-serif-light"
-        android:textSize="11sp" />
+        android:textSize="10sp"
+        android:textColor="@color/light_gray_0"
+        tools:text="Android"/>
 
     <TextView android:id="@+id/nsfw_warning"
         android:layout_width="wrap_content"
@@ -23,45 +25,54 @@
         android:fontFamily="sans-serif-light"
         android:text="@string/nsfw"
         android:textColor="@color/nsfw_red"
-        android:textSize="11sp"/>
+        android:textSize="10sp"/>
 
     <TextView
         android:id="@+id/body"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="16sp"
+        android:textSize="17sp"
         android:fontFamily="sans-serif-light"
         android:textColor="@color/ghostwhite"
-        android:layout_below="@id/subreddit_title"/>
+        android:layout_below="@id/subreddit_title"
+        tools:text="Announcing Breadit: A Reddit application for Android 4.1 and up!"/>
 
     <TextView android:id="@+id/metadata"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="11sp"
+        android:textSize="10sp"
+        android:textColor="@color/light_gray_0"
         android:fontFamily="sans-serif-light"
-        android:layout_below="@id/body"/>
+        android:layout_below="@id/body"
+        tools:text="Shockwave_ 3412 points"/>
 
     <TextView android:id="@+id/time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:textSize="11sp"
+        android:textSize="10sp"
+        android:textColor="@color/light_gray_0"
         android:fontFamily="sans-serif-light"
-        android:layout_below="@id/body"/>
+        android:layout_below="@id/body"
+        tools:text="8h"/>
 
     <TextView android:id="@+id/domain"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="11sp"
+        android:textSize="10sp"
+        android:textColor="@color/light_gray_0"
         android:fontFamily="sans-serif-light"
         android:layout_alignParentEnd="true"
-        android:layout_below="@id/metadata"/>
+        android:layout_below="@id/metadata"
+        tools:text="self.Android"/>
 
     <TextView android:id="@+id/num_comments"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="11sp"
+        android:textSize="10sp"
+        android:textColor="@color/light_gray_0"
         android:fontFamily="sans-serif-light"
-        android:layout_below="@id/metadata"/>
+        android:layout_below="@id/metadata"
+        tools:text="1243 comments"/>
 
 </RelativeLayout>

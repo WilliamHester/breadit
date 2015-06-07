@@ -24,12 +24,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import me.williamhester.models.AbsComment;
 import me.williamhester.models.Account;
 import me.williamhester.models.AccountManager;
 import me.williamhester.models.Comment;
 import me.williamhester.models.Friend;
+import me.williamhester.models.GenericListing;
 import me.williamhester.models.GenericResponseRedditWrapper;
 import me.williamhester.models.Listing;
 import me.williamhester.models.ResponseRedditWrapper;
@@ -137,18 +140,24 @@ public class RedditApi {
                 .setCallback(callback);
     }
 
-    public static void getSubscribedSubreddits(FutureCallback<ArrayList<Subreddit>> callback) {
-        getSubscribedSubreddits(callback, "", new ArrayList<Subreddit>(), new Gson());
+    public static void getDefaultSubreddits(FutureCallback<ArrayList<Subreddit>> callback) {
+        getSubreddits(callback, "default", null, new ArrayList<Subreddit>(), new Gson());
     }
 
-    private static void getSubscribedSubreddits(final FutureCallback<ArrayList<Subreddit>> callback,
-                                               String after, final ArrayList<Subreddit> subreddits,
-                                               final Gson gson) {
-        AsyncHttpRequest request = new AsyncHttpGet(REDDIT_URL
-                        + "/subreddits/mine/.json?after=" + after);
-        Account account = AccountManager.getAccount();
-        request.addHeader("Cookie", "reddit_session=\"" + account.getCookie() + "\"");
-        request.addHeader("X-Modhash", account.getModhash());
+    public static void getSubscribedSubreddits(FutureCallback<ArrayList<Subreddit>> callback) {
+        getSubreddits(callback, "mine", "", new ArrayList<Subreddit>(), new Gson());
+    }
+
+    private static void getSubreddits(final FutureCallback<ArrayList<Subreddit>> callback,
+                                      final String type, String after,
+                                      final ArrayList<Subreddit> subreddits, final Gson gson) {
+        String requestUrl = String.format(REDDIT_URL + "/subreddits/%s/?after=%s", type, after);
+        AsyncHttpRequest request = new AsyncHttpGet(requestUrl);
+        if (AccountManager.isLoggedIn()) {
+            Account account = AccountManager.getAccount();
+            request.addHeader("Cookie", "reddit_session=\"" + account.getCookie() + "\"");
+            request.addHeader("X-Modhash", account.getModhash());
+        }
         request.addHeader("User-Agent", USER_AGENT);
         request.addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
 
@@ -170,7 +179,7 @@ public class RedditApi {
                             }
                         }
                         if (listing.getAfter() != null) {
-                            getSubscribedSubreddits(callback, listing.getAfter(), subreddits, gson);
+                            getSubreddits(callback, type, listing.getAfter(), subreddits, gson);
                         } else {
                             callback.onCompleted(null, subreddits);
                         }
@@ -546,7 +555,8 @@ public class RedditApi {
         Ion.with(context)
                 .load(REDDIT_URL + "/user/" + username + "/about.json")
                 .addHeaders(getStandardHeaders())
-                .as(new TypeToken<GenericResponseRedditWrapper<User>>() {})
+                .as(new TypeToken<GenericResponseRedditWrapper<User>>() {
+                })
                 .setCallback(callback);
     }
 
@@ -643,8 +653,6 @@ public class RedditApi {
                 .setCallback(callback);
     }
 
-//    public static void friend(Context context, )
-
     public static void getMe(final FutureCallback<JsonObject> callback) {
         AsyncHttpRequest request = new AsyncHttpGet(REDDIT_URL + "/api/me.json");
         Account account = AccountManager.getAccount();
@@ -697,7 +705,8 @@ public class RedditApi {
 
                 final ArrayList<Friend> friends = new ArrayList<>();
                 for (JsonElement element : children) {
-                    TypeToken<Friend> token = new TypeToken<Friend>() { };
+                    TypeToken<Friend> token = new TypeToken<Friend>() {
+                    };
                     Friend f = gson.fromJson(element, token.getType());
                     friends.add(f);
                 }
@@ -712,6 +721,31 @@ public class RedditApi {
         });
     }
 
+    public static void getTrendingSubreddits(Context context,
+                                             final FutureCallback<ArrayList<String>> callback) {
+        Ion.with(context)
+                .load(REDDIT_URL + "/r/trendingsubreddits/?limit=1")
+                .as(new TypeToken<GenericResponseRedditWrapper<GenericListing<Submission>>>() { })
+                .setCallback(new FutureCallback<GenericResponseRedditWrapper<GenericListing<Submission>>>() {
+                    @Override
+                    public void onCompleted(Exception e, GenericResponseRedditWrapper<GenericListing<Submission>> result) {
+                        if (e != null) {
+                            callback.onCompleted(e, null);
+                        } else {
+                            ArrayList<String> trendingSubs = new ArrayList<>();
+                            Submission trending = result.getData().getChildren().get(0).getData();
+                            String title = trending.getTitle();
+                            Pattern subreddit = Pattern.compile("/r/\\w+");
+                            Matcher m = subreddit.matcher(title);
+                            while (m.find()) {
+                                trendingSubs.add(m.group().substring(3));
+                            }
+                            callback.onCompleted(null, trendingSubs);
+                        }
+                    }
+                });
+    }
+
     public static void printOutLongString(String string) {
         for (int i = 0; i < string.length(); i += 1000) {
             Log.d("RedditApi", string.substring(i, Math.min(string.length(), i + 1000)));
@@ -719,8 +753,6 @@ public class RedditApi {
     }
 
     public static class ArchivedSubmissionException extends Exception {
-        private static final long serialVersionUID = -7235976548822039653L;
-
         public ArchivedSubmissionException() {
             super("Submission is archived. Commenting is disallowed.");
         }

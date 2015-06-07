@@ -11,12 +11,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fitsSystemWindows="false"
+        android:fitsSystemWindows="true"
         android:orientation="vertical">
-
-        <View android:layout_width="match_parent"
-            android:layout_height="@dimen/status_bar_height"
-            android:background="?colorPrimary"/>
 
         <FrameLayout android:id="@+id/main_container"
             android:layout_width="match_parent"

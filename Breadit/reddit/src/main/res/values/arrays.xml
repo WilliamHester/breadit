@@ -1,30 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="default_subreddits">
-        <item>AdviceAnimals</item>
-        <item>AskReddit</item>
-        <item>AskScience</item>
-        <item>Aww</item>
-        <item>BestOf</item>
-        <item>Books</item>
-        <item>EarthPorn</item>
-        <item>ExplainLikeImFive</item>
-        <item>Funny</item>
-        <item>Gaming</item>
-        <item>Gifs</item>
-        <item>IAmA</item>
-        <item>Movies</item>
-        <item>Music</item>
-        <item>News</item>
-        <item>Pics</item>
-        <item>Science</item>
-        <item>Sports</item>
-        <item>Television</item>
-        <item>TodayILearned</item>
-        <item>Videos</item>
-        <item>WorldNews</item>
-    </string-array>
-
     <string-array name="comment_sort_types">
         <item>Best</item>
         <item>Top</item>
@@ -102,5 +77,11 @@
         <item>Disliked</item>
         <item>Hidden</item>
         <item>Saved</item>
+    </string-array>
+
+    <string-array name="special_subs">
+        <item>Front Page</item>
+        <item>All</item>
+        <item>Friends</item>
     </string-array>
 </resources>

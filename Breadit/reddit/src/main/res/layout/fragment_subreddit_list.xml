@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        style="@style/HeaderBar">
+
+        <android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:breadit="http://schemas.android.com/apk/res-auto"
+            breadit:theme="@style/ActionBarThemeOverlay"
+            breadit:popupTheme="@style/ActionBarPopupThemeOverlay"
+            android:id="@+id/toolbar_actionbar"
+            android:background="@null"
+            breadit:titleTextAppearance="@style/ActionBar.TitleText"
+            breadit:contentInsetStart="@dimen/drawer_inset"
+            breadit:navigationIcon="@drawable/abc_ic_ab_back_mtrl_am_alpha"
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize">
+
+            <include layout="@layout/header_subreddit_list" />
+
+        </android.support.v7.widget.Toolbar>
+
+    </LinearLayout>
+
+    <ExpandableListView android:id="@+id/expandable_list_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+</LinearLayout>
