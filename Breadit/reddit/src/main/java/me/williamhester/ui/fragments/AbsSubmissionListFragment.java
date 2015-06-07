@@ -182,6 +182,7 @@ public abstract class AbsSubmissionListFragment extends AccountFragment implemen
                         }
                     }
                 }
+                return;
             }
             case REMOVE_RESULT_CODE: {
                 if (data == null) {
@@ -202,6 +203,7 @@ public abstract class AbsSubmissionListFragment extends AccountFragment implemen
                         mSubmissionsAdapter.notifyItemRemoved(position + 1);
                     }
                 }
+                return;
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
