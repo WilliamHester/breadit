@@ -1,6 +1,7 @@
 package me.williamhester.network;
 
 import android.content.Context;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -17,6 +18,7 @@ import com.koushikdutta.async.http.cache.ResponseCacheMiddleware;
 import com.koushikdutta.ion.Ion;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -85,7 +87,7 @@ public class GfycatApi {
 
     public static void downloadWebmGif(String url,
                                        final ProgressBar progressBar,
-                                       final VideoView videoView) {
+                                       final FutureCallback<File> callback) {
         mGfyClient.executeFile(new AsyncHttpGet(url), mVideoFileName, new AsyncHttpClient.FileCallback() {
             @Override
             public void onProgress(AsyncHttpResponse response, final long downloaded, final long total) {
@@ -100,28 +102,10 @@ public class GfycatApi {
             @Override
             public void onCompleted(Exception e, final AsyncHttpResponse response, final File result) {
                 if (e != null) {
-                    e.printStackTrace();
+                    callback.onCompleted(e, null);
                     return;
                 }
-                videoView.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        videoView.setVideoPath(result.getAbsolutePath());
-                        videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                            @Override
-                            public void onPrepared(MediaPlayer mediaPlayer) {
-                                videoView.start();
-                                result.delete();
-                            }
-                        });
-                        videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                            @Override
-                            public void onCompletion(MediaPlayer mediaPlayer) {
-                                videoView.start();
-                            }
-                        });
-                    }
-                });
+                callback.onCompleted(null, result);
                 progressBar.post(new Runnable() {
                     @Override
                     public void run() {
@@ -134,7 +118,7 @@ public class GfycatApi {
 
     public static void downloadImgurGif(ImgurImage image,
                                        final ProgressBar progressBar,
-                                       final VideoView videoView) {
+                                       final FutureCallback<File> callback) {
         String url = "http://i.imgur.com/" + image.getId() + ".mp4";
         mGfyClient.executeFile(new AsyncHttpGet(url), mVideoFileName, new AsyncHttpClient.FileCallback() {
             @Override
@@ -150,28 +134,10 @@ public class GfycatApi {
             @Override
             public void onCompleted(Exception e, final AsyncHttpResponse response, final File result) {
                 if (e != null) {
-                    e.printStackTrace();
+                    callback.onCompleted(e, null);
                     return;
                 }
-                videoView.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        videoView.setVideoPath(result.getAbsolutePath());
-                        videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                            @Override
-                            public void onPrepared(MediaPlayer mediaPlayer) {
-                                videoView.start();
-                                result.delete();
-                            }
-                        });
-                        videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                            @Override
-                            public void onCompletion(MediaPlayer mediaPlayer) {
-                                videoView.start();
-                            }
-                        });
-                    }
-                });
+                callback.onCompleted(null, result);
                 progressBar.post(new Runnable() {
                     @Override
                     public void run() {
