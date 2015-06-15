@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import me.williamhester.SettingsManager;
+import me.williamhester.knapsack.Knapsack;
+import me.williamhester.knapsack.Save;
 import me.williamhester.models.AbsComment;
 import me.williamhester.models.Comment;
 import me.williamhester.models.MoreComments;
@@ -49,18 +51,18 @@ public class CommentFragment extends Fragment implements Toolbar.OnMenuItemClick
     private static final int REPLY_REQUEST = 1;
     private static final int EDIT_REQUEST = 2;
 
-    private final ArrayList<AbsComment> mCommentsList = new ArrayList<>();
     private CommentArrayAdapter mCommentAdapter;
     private Context mContext;
     private ProgressBar mProgressBar;
-    private String mPermalink;
-    private String mSortType;
     private SwipeRefreshLayout mRefreshLayout;
-    private Submission mSubmission;
 
-    private boolean mLoading = true;
-    private boolean mRefreshing = false;
-    private boolean mIsSingleThread = false;
+    @Save ArrayList<AbsComment> mCommentsList = new ArrayList<>();
+    @Save String mPermalink;
+    @Save String mSortType;
+    @Save Submission mSubmission;
+    @Save boolean mLoading = true;
+    @Save boolean mRefreshing = false;
+    @Save boolean mIsSingleThread = false;
 
     public static CommentFragment newInstance(String permalink, boolean isSingleThread) {
         Bundle args = new Bundle();
@@ -84,16 +86,7 @@ public class CommentFragment extends Fragment implements Toolbar.OnMenuItemClick
         super.onCreate(savedInstanceState);
         Bundle args = getArguments();
         mContext = getActivity();
-        if (savedInstanceState != null) {
-            ArrayList<AbsComment> comments = savedInstanceState.getParcelableArrayList("comments");
-            mCommentsList.addAll(comments);
-            mSubmission = savedInstanceState.getParcelable("submission");
-            mPermalink = savedInstanceState.getString("permalink");
-            mSortType = savedInstanceState.getString("sortType");
-            mLoading = savedInstanceState.getBoolean("loading");
-            mRefreshing = savedInstanceState.getBoolean("refreshing");
-            mIsSingleThread = savedInstanceState.getBoolean("isSingleThread");
-        } else if (args != null) {
+        if (!Knapsack.restore(this, savedInstanceState) && args != null) {
             mSortType = SettingsManager.getDefaultCommentSort();
             mSubmission = args.getParcelable("submission");
             if (mSubmission != null) {
@@ -247,13 +240,8 @@ public class CommentFragment extends Fragment implements Toolbar.OnMenuItemClick
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelableArrayList("comments", mCommentsList);
-        outState.putParcelable("submission", mSubmission);
-        outState.putString("permalink", mPermalink);
-        outState.putString("sortType", mSortType);
-        outState.putBoolean("loading", mLoading);
-        outState.putBoolean("refreshing", mRefreshing);
-        outState.putBoolean("isSingleThread", mIsSingleThread);
+
+        Knapsack.save(this, outState);
     }
 
     /**
