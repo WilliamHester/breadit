@@ -13,6 +13,8 @@ import java.util.Collections;
 import java.util.HashMap;
 
 import me.williamhester.databases.AccountDataSource;
+import me.williamhester.knapsack.Knapsack;
+import me.williamhester.knapsack.Save;
 import me.williamhester.models.AccountManager;
 import me.williamhester.models.Subreddit;
 import me.williamhester.network.RedditApi;
@@ -24,18 +26,13 @@ import me.williamhester.ui.fragments.SubredditListFragment;
  */
 public class SelectSubredditActivity extends AppCompatActivity {
 
-    public static final String SUBREDDITS = "subreddits";
-
-    private final ArrayList<Subreddit> mSubreddits = new ArrayList<>();
+    @Save ArrayList<Subreddit> mSubreddits = new ArrayList<>();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (savedInstanceState != null) {
-            ArrayList<Subreddit> subs = savedInstanceState.getParcelableArrayList(SUBREDDITS);
-            mSubreddits.addAll(subs);
-        }
+        Knapsack.restore(this, savedInstanceState);
 
         setContentView(R.layout.activity_container);
 
@@ -50,13 +47,6 @@ public class SelectSubredditActivity extends AppCompatActivity {
         if (mSubreddits.size() == 0) {
             loadSubreddits();
         }
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        outState.putParcelableArrayList(SUBREDDITS, mSubreddits);
     }
 
     private void loadSubreddits() {

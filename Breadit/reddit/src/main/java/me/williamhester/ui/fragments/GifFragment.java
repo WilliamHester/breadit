@@ -5,19 +5,18 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
-import android.widget.VideoView;
 
 import com.koushikdutta.async.future.FutureCallback;
 
 import java.io.File;
 
+import me.williamhester.knapsack.Save;
 import me.williamhester.models.GfycatResponse;
 import me.williamhester.models.ImgurImage;
 import me.williamhester.models.ResponseGfycatUrlUpload;
@@ -29,10 +28,12 @@ import me.williamhester.tools.Url;
  * Created by william on 6/22/14.
  *
  */
-public class GifFragment extends Fragment implements TextureView.SurfaceTextureListener, MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnPreparedListener, MediaPlayer.OnVideoSizeChangedListener {
+public class GifFragment extends BaseFragment implements TextureView.SurfaceTextureListener,
+        MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnCompletionListener,
+        MediaPlayer.OnPreparedListener, MediaPlayer.OnVideoSizeChangedListener {
 
-    private Url mParser;
-    private ImgurImage mImage;
+    @Save Url mParser;
+    @Save ImgurImage mImage;
     private TextureView mTextureView;
     private MediaPlayer mMediaPlayer;
     private File mFile;
@@ -58,10 +59,7 @@ public class GifFragment extends Fragment implements TextureView.SurfaceTextureL
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (savedInstanceState != null) {
-            mParser = savedInstanceState.getParcelable("parser");
-            mImage = savedInstanceState.getParcelable("image");
-        } else {
+        if (savedInstanceState == null) {
             if (getArguments().containsKey("url")) {
                 mParser = new Url(getArguments().getString("url"));
             }
@@ -165,14 +163,6 @@ public class GifFragment extends Fragment implements TextureView.SurfaceTextureL
         if (mMediaPlayer != null) {
             mMediaPlayer.stop();
         }
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        outState.putParcelable("parser", mParser);
-        outState.putParcelable("image", mImage);
     }
 
     private void setUrl(String url) {

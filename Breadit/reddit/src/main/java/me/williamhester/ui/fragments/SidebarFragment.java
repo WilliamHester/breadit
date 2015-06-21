@@ -3,7 +3,6 @@ package me.williamhester.ui.fragments;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.text.Html;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
@@ -13,16 +12,10 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.koushikdutta.async.future.FutureCallback;
-
 import java.text.DecimalFormat;
 
 import me.williamhester.models.AccountManager;
-import me.williamhester.models.ResponseRedditWrapper;
 import me.williamhester.models.Subreddit;
-import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 import me.williamhester.tools.HtmlParser;
 import me.williamhester.ui.activities.SubmitActivity;
@@ -30,7 +23,7 @@ import me.williamhester.ui.activities.SubmitActivity;
 /**
  * Created by william on 11/13/14.
  */
-public class SidebarFragment extends Fragment {
+public class SidebarFragment extends BaseFragment {
 
     private String mSubredditName;
     private Subreddit mSubreddit = Subreddit.FRONT_PAGE;

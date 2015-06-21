@@ -1,8 +1,6 @@
 package me.williamhester.ui.fragments;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -23,7 +21,7 @@ import uk.co.senab.photoview.PhotoViewAttacher;
 /**
  * Created by William on 6/24/14.
  */
-public class ImageFragment extends Fragment {
+public class ImageFragment extends BaseFragment {
 
     private static final String IMAGE_URL_KEY = "imageUrl";
     private static final String IMGUR_IMAGE_KEY = "imgurImage";

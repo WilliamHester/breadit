@@ -3,7 +3,6 @@ package me.williamhester.ui.fragments;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v4.view.MenuItemCompat;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -12,6 +11,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 
+import me.williamhester.knapsack.Save;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.views.MarkdownBodyView;
 
@@ -23,9 +23,9 @@ import me.williamhester.ui.views.MarkdownBodyView;
  *
  * Created by William on 10/31/14.
  */
-public abstract class AsyncSendFragment extends Fragment {
+public abstract class AsyncSendFragment extends BaseFragment {
 
-    protected boolean mKillOnStart;
+    @Save protected boolean mKillOnStart;
     protected MarkdownBodyView mMarkdownBody;
 
     /**
@@ -60,9 +60,6 @@ public abstract class AsyncSendFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         setHasOptionsMenu(true);
-        if (savedInstanceState != null) {
-            mKillOnStart = savedInstanceState.getBoolean("killOnStart");
-        }
     }
 
     @Override
@@ -100,13 +97,6 @@ public abstract class AsyncSendFragment extends Fragment {
         if (mKillOnStart) {
             getActivity().onBackPressed();
         }
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        outState.putBoolean("killOnStart", mKillOnStart);
     }
 
     protected void kill() {

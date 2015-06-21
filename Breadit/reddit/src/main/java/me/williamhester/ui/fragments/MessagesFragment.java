@@ -34,6 +34,7 @@ import com.koushikdutta.async.future.FutureCallback;
 
 import java.util.ArrayList;
 
+import me.williamhester.knapsack.Save;
 import me.williamhester.models.GenericListing;
 import me.williamhester.models.GenericResponseRedditWrapper;
 import me.williamhester.models.Message;
@@ -49,16 +50,16 @@ import me.williamhester.ui.widget.InfiniteLoadToolbarHideScrollListener;
 public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuItemClickListener,
         InfiniteLoadToolbarHideScrollListener.OnLoadMoreListener {
 
-    private boolean mRefreshing = false;
+    @Save boolean mRefreshing;
+    @Save ArrayList<Message> mMessages;
+    @Save String mFilterType;
 
-    private ArrayList<Message> mMessages;
     private InfiniteLoadToolbarHideScrollListener mScrollListener;
     private MessageArrayAdapter mMessageAdapter;
     private MessageFragmentCallbacks mCallback;
     private MessageViewHolder mFocusedViewHolder;
     private ProgressBar mProgressBar;
     private RecyclerView mMessagesRecyclerView;
-    private String mFilterType;
     private SwipeRefreshLayout mRefreshLayout;
     private Toolbar mToolbar;
 
@@ -87,11 +88,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mMessages = new ArrayList<>();
-        if (savedInstanceState != null) {
-            mFilterType = savedInstanceState.getString("filter_by");
-            mRefreshing = savedInstanceState.getBoolean("refreshing");
-            mMessages = savedInstanceState.getParcelableArrayList("messages");
-        } else if (getArguments() != null) {
+        if (savedInstanceState != null && getArguments() != null) {
             mFilterType = getArguments().getString("filter_by", Message.ALL);
         } else {
             mFilterType = Message.ALL;
@@ -215,15 +212,6 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
         }
 
         return v;
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        outState.putString("filter_by", mFilterType);
-        outState.putBoolean("refreshing", mRefreshing);
-        outState.putParcelableArrayList("messages", mMessages);
     }
 
     private FutureCallback<JsonObject> mMessageCallback = new FutureCallback<JsonObject>() {

@@ -16,7 +16,7 @@ import me.williamhester.models.ImgurImage;
 /**
  * Created by william on 6/22/14.
  */
-public class PreviewImagePagerFragment extends Fragment {
+public class PreviewImagePagerFragment extends BaseFragment {
 
     private ArrayList<ImgurImage> mImages;
 

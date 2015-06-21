@@ -44,7 +44,7 @@ import me.williamhester.ui.views.CommentViewHolder;
 import me.williamhester.ui.views.DividerItemDecoration;
 import me.williamhester.ui.views.SubmissionViewHolder;
 
-public class CommentFragment extends Fragment implements Toolbar.OnMenuItemClickListener,
+public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemClickListener,
         SubmissionViewHolder.OnVotedListener{
 
     private static final String PERMALINK = "permalink";

@@ -1,7 +1,6 @@
 package me.williamhester.ui.fragments;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,7 +28,7 @@ import me.williamhester.reddit.R;
 /**
  * Created by william on 7/29/14.
  */
-public class RedditLiveFragment extends Fragment {
+public class RedditLiveFragment extends BaseFragment {
 
     private static final String SUBMISSION = "submission";
 

@@ -30,6 +30,7 @@ import com.koushikdutta.async.future.FutureCallback;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
+import me.williamhester.knapsack.Save;
 import me.williamhester.models.AccountManager;
 import me.williamhester.models.Comment;
 import me.williamhester.models.GenericResponseRedditWrapper;
@@ -56,10 +57,6 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
     public static final int VOTE_REQUEST_CODE = 1;
 
     private String mUsername;
-    private User mUser;
-
-    private final ArrayList<Votable> mVotables = new ArrayList<>();
-    private String mFilterType = User.OVERVIEW;
 
     private TopLevelFragmentCallbacks mCallback;
     private VotableAdapter mAdapter;
@@ -74,8 +71,11 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
     private Toolbar mToolbar;
     private View mUserHeader;
 
-    private boolean mLoading;
-    private boolean mRefreshing;
+    @Save boolean mLoading;
+    @Save boolean mRefreshing;
+    @Save ArrayList<Votable> mVotables = new ArrayList<>();
+    @Save String mFilterType = User.OVERVIEW;
+    @Save User mUser;
 
     public static UserFragment newInstance() {
         return new UserFragment();
@@ -102,15 +102,6 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mFilterType = "";
-        if (savedInstanceState != null) {
-            mLoading = savedInstanceState.getBoolean("loading");
-            mRefreshing = savedInstanceState.getBoolean("refreshing");
-            mFilterType = savedInstanceState.getString("filterType");
-            mUser = savedInstanceState.getParcelable("user");
-            ArrayList<Votable> votables = savedInstanceState.getParcelableArrayList("votables");
-            mVotables.addAll(votables);
-        }
         if (getArguments() != null) {
             mUsername = getArguments().getString("username");
         }
@@ -298,17 +289,6 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
                 return true;
         }
         return false;
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        outState.putParcelableArrayList("votables", mVotables);
-        outState.putParcelable("user", mUser);
-        outState.putString("filterType", mFilterType);
-        outState.putBoolean("loading", mLoading);
-        outState.putBoolean("refreshing", mRefreshing);
     }
 
     private View createHeaderView(LayoutInflater inflater, ViewGroup parent) {

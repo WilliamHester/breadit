@@ -14,6 +14,8 @@ import android.widget.ImageView;
 import com.google.gson.JsonObject;
 import com.koushikdutta.async.future.FutureCallback;
 
+import me.williamhester.knapsack.Knapsack;
+import me.williamhester.knapsack.Save;
 import me.williamhester.network.ImgurApi;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
@@ -26,7 +28,7 @@ public class CaptchaDialogFragment extends DialogFragment {
     public static final int COMPLETE_CAPTCHA = 1;
 
     private String mCaptchaIden;
-    private boolean mKillOnStart;
+    @Save boolean mKillOnStart;
 
     public static CaptchaDialogFragment newInstance() {
         Bundle args = new Bundle();
@@ -39,9 +41,7 @@ public class CaptchaDialogFragment extends DialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (savedInstanceState != null) {
-            mKillOnStart = savedInstanceState.getBoolean("killOnStart");
-        }
+        Knapsack.restore(this, savedInstanceState);
     }
 
     @Override
@@ -98,7 +98,7 @@ public class CaptchaDialogFragment extends DialogFragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        outState.putBoolean("killOnStart", mKillOnStart);
+        Knapsack.save(this, outState);
     }
 
     public void setKillOnStart() {

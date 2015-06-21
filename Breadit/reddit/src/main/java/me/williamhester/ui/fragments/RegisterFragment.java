@@ -4,7 +4,6 @@ import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -32,7 +31,7 @@ import me.williamhester.ui.activities.LogInActivity;
 /**
  * Created by william on 10/28/14.
  */
-public class RegisterFragment extends Fragment {
+public class RegisterFragment extends BaseFragment {
 
     private EditText mUsername;
     private EditText mPassword;

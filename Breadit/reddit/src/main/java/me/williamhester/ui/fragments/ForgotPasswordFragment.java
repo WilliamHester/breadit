@@ -2,7 +2,6 @@ package me.williamhester.ui.fragments;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,15 +17,16 @@ import com.google.gson.JsonObject;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
 
+import me.williamhester.knapsack.Save;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 
 /**
  * Created by william on 10/28/14.
  */
-public class ForgotPasswordFragment extends Fragment {
+public class ForgotPasswordFragment extends BaseFragment {
 
-    private boolean mKillOnStart;
+    @Save boolean mKillOnStart;
 
     public static ForgotPasswordFragment newInstance(String username) {
         ForgotPasswordFragment fragment = new ForgotPasswordFragment();
@@ -34,15 +34,6 @@ public class ForgotPasswordFragment extends Fragment {
         args.putString("username", username);
         fragment.setArguments(args);
         return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        if (savedInstanceState != null) {
-            mKillOnStart = savedInstanceState.getBoolean("killOnStart");
-        }
     }
 
     @Override
@@ -78,13 +69,6 @@ public class ForgotPasswordFragment extends Fragment {
         if (mKillOnStart) {
             getFragmentManager().popBackStack();
         }
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        outState.putBoolean("killOnStart", mKillOnStart);
     }
 
     private FutureCallback<JsonObject> mForgotPasswordCallback = new FutureCallback<JsonObject>() {

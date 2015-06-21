@@ -25,6 +25,7 @@ import com.koushikdutta.async.future.FutureCallback;
 import java.util.ArrayList;
 import java.util.List;
 
+import me.williamhester.knapsack.Save;
 import me.williamhester.models.Submission;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
@@ -44,7 +45,6 @@ public abstract class AbsSubmissionListFragment extends AccountFragment implemen
     public static final int VOTE_REQUEST_CODE = 1;
     public static final int REMOVE_RESULT_CODE = 2;
 
-    protected ArrayList<Submission> mSubmissionList;
 
     protected InfiniteLoadToolbarHideScrollListener mScrollListener;
 
@@ -65,7 +65,9 @@ public abstract class AbsSubmissionListFragment extends AccountFragment implemen
     protected String mSecondarySortType;
 
     private View mHeaderBar;
-    protected boolean mLoading = true;
+
+    @Save protected boolean mLoading = true;
+    @Save protected ArrayList<Submission> mSubmissionList;
 
     protected abstract void onRefreshList();
 
@@ -73,10 +75,7 @@ public abstract class AbsSubmissionListFragment extends AccountFragment implemen
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (savedInstanceState != null) {
-            mSubmissionList = savedInstanceState.getParcelableArrayList("submissions");
-            mLoading = savedInstanceState.getBoolean("loading");
-        } else if (getArguments() != null) {
+        if (savedInstanceState == null && getArguments() != null) {
             mSubmissionList = new ArrayList<>();
         }
         mSubmissionsAdapter = new SubmissionAdapter(this, mSubmissionList);
@@ -150,14 +149,6 @@ public abstract class AbsSubmissionListFragment extends AccountFragment implemen
             popupMenu.setOnMenuItemClickListener(mSortClickListener);
             popupMenu.inflate(R.menu.primary_sorts);
         }
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        outState.putParcelableArrayList("submissions", mSubmissionList);
-        outState.putBoolean("loading", mLoading);
     }
 
     @Override

@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -17,6 +16,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.koushikdutta.async.future.FutureCallback;
 
+import me.williamhester.knapsack.Save;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 
@@ -25,7 +25,7 @@ import me.williamhester.reddit.R;
  */
 public class ComposeMessageFragment extends AsyncSendFragment {
 
-    private boolean mCaptchaOnStart;
+    @Save boolean mCaptchaOnStart;
 
     private CaptchaDialogFragment mCaptchaDialog;
     private EditText mComposeTo;
@@ -56,15 +56,6 @@ public class ComposeMessageFragment extends AsyncSendFragment {
     @Override
     protected String getButtonText() {
         return getResources().getString(R.string.send);
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        if (savedInstanceState != null) {
-            mCaptchaOnStart = savedInstanceState.getBoolean("captchaOnStart");
-        }
     }
 
     @Override
@@ -103,13 +94,6 @@ public class ComposeMessageFragment extends AsyncSendFragment {
         } else if (mKillOnStart) {
             onMessageSent();
         }
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        outState.putBoolean("captchaOnStart", mCaptchaOnStart);
     }
 
     @Override

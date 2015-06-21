@@ -15,10 +15,10 @@ import com.google.gson.JsonObject;
 import com.koushikdutta.async.future.FutureCallback;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
+import me.williamhester.knapsack.Save;
 import me.williamhester.models.Listing;
 import me.williamhester.models.ResponseRedditWrapper;
 import me.williamhester.models.Submission;
@@ -32,12 +32,12 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
 
     private static final int SELECT_SUBREDDIT = 1;
 
-    private String mSubredditName;
-    private ArrayList<Subreddit> mSubredditList = new ArrayList<>();
-    private HashSet<String> mNames;
-    private TextView mTitle;
+    @Save String mSubredditName;
+    @Save ArrayList<Subreddit> mSubredditList = new ArrayList<>();
+    @Save HashSet<String> mNames;
+    @Save boolean mSubredditExists = true;
 
-    private boolean mSubredditExists = true;
+    private TextView mTitle;
 
     private TopLevelFragmentCallbacks mCallback;
 
@@ -80,15 +80,7 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (savedInstanceState != null) {
-            mSubredditName = savedInstanceState.getString("subreddit");
-            String[] array = savedInstanceState.getStringArray("names");
-            mNames = new HashSet<>();
-            Collections.addAll(mNames, array);
-            mSubredditExists = savedInstanceState.getBoolean("subredditExists", true);
-            ArrayList<Subreddit> subs = savedInstanceState.getParcelableArrayList("subreddits");
-            mSubredditList.addAll(subs);
-        } else if (getArguments() != null) {
+        if (savedInstanceState == null && getArguments() != null) {
             mSubredditName = getArguments().getString("subreddit");
             mNames = new HashSet<>();
         }
@@ -156,17 +148,6 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
     @Override
     public void onAccountChanged() {
         onRefreshList();
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        outState.putString("subreddit", mSubredditName);
-        String[] array = new String[mNames.size()];
-        mNames.toArray(array);
-        outState.putStringArray("names", array);
-        outState.putBoolean("subredditExists", mSubredditExists);
-        outState.putParcelableArrayList("subreddits", mSubredditList);
-        super.onSaveInstanceState(outState);
     }
 
     public void showSubredditDoesNotExist() {

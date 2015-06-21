@@ -1,7 +1,6 @@
 package me.williamhester.ui.fragments;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 
 import me.williamhester.models.Account;
 import me.williamhester.models.AccountManager;
@@ -9,7 +8,7 @@ import me.williamhester.models.AccountManager;
 /**
  * Created by william on 9/5/14.
  */
-public abstract class AccountFragment extends Fragment {
+public abstract class AccountFragment extends BaseFragment {
 
     protected Account mAccount;
 

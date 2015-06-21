@@ -3,7 +3,6 @@ package me.williamhester.ui.fragments;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,7 +28,7 @@ import me.williamhester.ui.activities.LogInActivity;
 /**
  * Created by william on 10/28/14.
  */
-public class LogInFragment extends Fragment {
+public class LogInFragment extends BaseFragment {
 
     private EditText mUsername;
     private EditText mPassword;

@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,7 +26,7 @@ import me.williamhester.ui.adapters.SingleImageAdapter;
 /**
  * Created by william on 6/24/14.
  */
-public class ImagePagerFragment extends ContentFragment {
+public class ImagePagerFragment extends BaseFragment {
 
     private static final String IMAGE = "image";
     private static final String ALBUM = "album";

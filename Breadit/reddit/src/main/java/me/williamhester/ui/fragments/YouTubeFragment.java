@@ -18,7 +18,7 @@ import me.williamhester.ui.views.ActionBarPaddedFrameLayout;
 /**
  * Created by william on 9/15/14.
  */
-public class YouTubeFragment extends Fragment implements YouTubePlayer.OnInitializedListener, BackableFragment {
+public class YouTubeFragment extends BaseFragment implements YouTubePlayer.OnInitializedListener, BackableFragment {
 
     private static final String VIDEO_ID = "videoId";
 

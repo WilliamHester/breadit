@@ -3,16 +3,13 @@ package me.williamhester.ui.fragments;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 
 /**
  * An abstraction for the fragments that show content on top of the regular top-level fragments.
  * It provides callbacks for when the fragments are opened to their hosting activities.
  */
-public abstract class ContentFragment extends Fragment {
+public abstract class ContentFragment extends BaseFragment {
 
     private ContentFragmentCallbacks mCallback;
 

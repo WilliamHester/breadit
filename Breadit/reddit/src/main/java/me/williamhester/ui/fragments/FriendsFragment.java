@@ -20,6 +20,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 
+import me.williamhester.knapsack.Save;
 import me.williamhester.models.Friend;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
@@ -32,13 +33,13 @@ import me.williamhester.ui.widget.InfiniteLoadToolbarHideScrollListener;
  */
 public class FriendsFragment extends AccountFragment {
 
-    private final ArrayList<Friend> mFriends = new ArrayList<>();
     private FriendsAdapter mFriendsAdapter;
     private ProgressBar mProgressBar;
     private Toolbar mToolbar;
     private TopLevelFragmentCallbacks mCallback;
-    private boolean mHasFetchedFriends;
-    private boolean mLoading;
+    @Save ArrayList<Friend> mFriends = new ArrayList<>();
+    @Save boolean mHasFetchedFriends;
+    @Save boolean mLoading;
 
     public static FriendsFragment newInstance() {
         return new FriendsFragment();
@@ -49,18 +50,6 @@ public class FriendsFragment extends AccountFragment {
         super.onAttach(activity);
         if (activity instanceof TopLevelFragmentCallbacks) {
             mCallback = (TopLevelFragmentCallbacks) activity;
-        }
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        if (savedInstanceState != null) {
-            mLoading = savedInstanceState.getBoolean("loading");
-            mHasFetchedFriends = savedInstanceState.getBoolean("hasFetchedFriends");
-            ArrayList<Friend> friends = savedInstanceState.getParcelableArrayList("friends");
-            mFriends.addAll(friends);
         }
     }
 
@@ -122,15 +111,6 @@ public class FriendsFragment extends AccountFragment {
         mFriends.clear();
         mFriendsAdapter.notifyDataSetChanged();
         loadFriends();
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        outState.putBoolean("loading", mLoading);
-        outState.putBoolean("hasFetchedFriends", mHasFetchedFriends);
-        outState.putParcelableArrayList("friends", mFriends);
     }
 
     private class FriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
