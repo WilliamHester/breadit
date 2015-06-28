@@ -2,6 +2,7 @@ package me.williamhester;
 
 import android.app.Application;
 
+import com.crittercism.app.Crittercism;
 import com.koushikdutta.ion.Ion;
 
 import me.williamhester.models.AccountManager;
@@ -17,6 +18,7 @@ public class BreaditApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
+        Crittercism.initialize(this, Auth.CRITTERCISM_APP_ID);
         AccountManager.init(this);
         GfycatApi.init(this);
         ImgurApi.init(this);

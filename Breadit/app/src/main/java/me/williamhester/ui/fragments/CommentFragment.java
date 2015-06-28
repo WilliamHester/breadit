@@ -86,7 +86,7 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
         super.onCreate(savedInstanceState);
         Bundle args = getArguments();
         mContext = getActivity();
-        if (!Knapsack.restore(this, savedInstanceState) && args != null) {
+        if (savedInstanceState == null && args != null) {
             mSortType = SettingsManager.getDefaultCommentSort();
             mSubmission = args.getParcelable("submission");
             if (mSubmission != null) {
