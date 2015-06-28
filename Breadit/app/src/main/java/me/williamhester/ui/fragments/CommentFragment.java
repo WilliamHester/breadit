@@ -124,7 +124,7 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
 
         RecyclerView commentsView = (RecyclerView) v.findViewById(R.id.comments);
         mRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.swipe_refresh);
-        mRefreshLayout.setProgressBackgroundColor(R.color.primary);
+        mRefreshLayout.setProgressBackgroundColorSchemeResource(R.color.primary);
         mRefreshLayout.setColorSchemeResources(R.color.white);
         mRefreshLayout.setRefreshing(mRefreshing);
         mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
