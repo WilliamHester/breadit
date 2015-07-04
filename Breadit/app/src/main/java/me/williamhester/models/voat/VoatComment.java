@@ -1,72 +1,24 @@
 package me.williamhester.models.voat;
 
-import android.text.Spannable;
+import android.os.Parcel;
 
 import me.williamhester.models.bulletin.Comment;
 
 /**
  * Created by william on 7/4/15.
  */
-public class VoatComment implements Comment {
-    private int id;
+public class VoatComment extends VoatContent implements Comment {
     private int submissionID;
-    private int upVotes;
-    private int downVotes;
     private int childCount;
     private int level;
     private int voteValue;
     private String parentID;
-    private String subverse;
-    private String date;
-    private String lastEditDate;
-    private String userName;
-    private String content;
-    private String formattedContent;
-    private Spannable spannableBody;
 
-    @Override
-    public String getAuthor() {
-        return userName;
-    }
-
-    @Override
-    public String getFlair() {
-        return null;
-    }
-
-    @Override
-    public String getBodyMarkdown() {
-        return content;
-    }
-
-    @Override
-    public String getBodyHtml() {
-        return formattedContent;
-    }
-
-    @Override
-    public String getId() {
-        return String.valueOf(id);
-    }
-
-    @Override
-    public String getBulletin() {
-        return subverse;
-    }
+    public VoatComment() { }
 
     @Override
     public String getFormattedRelativeTime() {
         return "5 days ago";
-    }
-
-    @Override
-    public Spannable getSpannableBody() {
-        return spannableBody;
-    }
-
-    @Override
-    public int getScore() {
-        return upVotes - downVotes;
     }
 
     @Override
@@ -80,22 +32,41 @@ public class VoatComment implements Comment {
     }
 
     @Override
-    public void setBodyMarkdown(String markdown) {
-        this.content = markdown;
-    }
-
-    @Override
-    public void setBodyHtml(String html) {
-        this.formattedContent = html;
-    }
-
-    @Override
-    public void setSpannableBody(Spannable body) {
-        spannableBody = body;
-    }
-
-    @Override
     public void setVoteValue(int value) {
         voteValue = value;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
+        dest.writeInt(this.submissionID);
+        dest.writeInt(this.childCount);
+        dest.writeInt(this.level);
+        dest.writeInt(this.voteValue);
+        dest.writeString(this.parentID);
+    }
+
+    protected VoatComment(Parcel in) {
+        super(in);
+        this.submissionID = in.readInt();
+        this.childCount = in.readInt();
+        this.level = in.readInt();
+        this.voteValue = in.readInt();
+        this.parentID = in.readString();
+    }
+
+    public static final Creator<VoatComment> CREATOR = new Creator<VoatComment>() {
+        public VoatComment createFromParcel(Parcel source) {
+            return new VoatComment(source);
+        }
+
+        public VoatComment[] newArray(int size) {
+            return new VoatComment[size];
+        }
+    };
 }

@@ -1,5 +1,6 @@
 package me.williamhester.models.voat;
 
+import android.os.Parcel;
 import android.text.Spannable;
 
 import me.williamhester.models.bulletin.Content;
@@ -19,6 +20,9 @@ public abstract class VoatContent implements Content {
     private String content;
     private String formattedContent;
     private Spannable spannableBody;
+
+    public VoatContent() {
+    }
 
     @Override
     public String getAuthor() {
@@ -76,7 +80,7 @@ public abstract class VoatContent implements Content {
     }
 
     @Override
-    public void setBodyMarkdown(String markdown) {
+    public void setMarkdownBody(String markdown) {
         content = markdown;
     }
 
@@ -89,4 +93,46 @@ public abstract class VoatContent implements Content {
     public void setSpannableBody(Spannable body) {
         spannableBody = body;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(this.id);
+        dest.writeInt(this.upVotes);
+        dest.writeInt(this.downVotes);
+        dest.writeInt(this.voteValue);
+        dest.writeString(this.date);
+        dest.writeString(this.lastEditDate);
+        dest.writeString(this.userName);
+        dest.writeString(this.subverse);
+        dest.writeString(this.content);
+        dest.writeString(this.formattedContent);
+    }
+
+    protected VoatContent(Parcel in) {
+        this.id = in.readInt();
+        this.upVotes = in.readInt();
+        this.downVotes = in.readInt();
+        this.voteValue = in.readInt();
+        this.date = in.readString();
+        this.lastEditDate = in.readString();
+        this.userName = in.readString();
+        this.subverse = in.readString();
+        this.content = in.readString();
+        this.formattedContent = in.readString();
+    }
+
+    public static final Creator<VoatContent> CREATOR = new Creator<VoatContent>() {
+        public VoatContent createFromParcel(Parcel source) {
+            return null;
+        }
+
+        public VoatContent[] newArray(int size) {
+            return null;
+        }
+    };
 }

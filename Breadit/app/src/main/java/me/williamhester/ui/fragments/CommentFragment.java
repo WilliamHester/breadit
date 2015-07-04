@@ -62,8 +62,7 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
     @Bind(R.id.comments) RecyclerView mRecyclerView;
 
     @Save ArrayList<RedditAbsComment> mCommentsList = new ArrayList<>();
-    @Save
-    RedditSubmission mRedditSubmission;
+    @Save RedditSubmission mRedditSubmission;
     @Save String mPermalink;
     @Save String mSortType;
     @Save boolean mLoading = true;
@@ -482,7 +481,7 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
 
         @Override
         public long getItemId(int position) {
-            return Long.parseLong(mCommentsList.get(position - getHeaderViewCount()).getId(), 36);
+            return Long.parseLong(mCommentsList.get(position - getHeaderViewCount()).getId().substring(3), 36);
         }
 
         @Override

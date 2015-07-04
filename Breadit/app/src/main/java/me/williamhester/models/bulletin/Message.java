@@ -1,5 +1,6 @@
 package me.williamhester.models.bulletin;
 
+import android.os.Parcelable;
 import android.text.Spannable;
 
 /**
@@ -8,7 +9,7 @@ import android.text.Spannable;
  *
  * @author William Hester
  */
-public interface Message {
+public interface Message extends Parcelable {
     boolean isComment();
     boolean isUnread();
     void setUnread(boolean unread);

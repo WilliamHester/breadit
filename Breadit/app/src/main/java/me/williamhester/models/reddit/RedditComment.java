@@ -159,11 +159,6 @@ public class RedditComment extends RedditAbsComment implements Comment, RedditVo
     }
 
     @Override
-    public String getId() {
-        return mId;
-    }
-
-    @Override
     public String getBulletin() {
         return mSubreddit;
     }

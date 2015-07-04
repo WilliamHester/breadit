@@ -2,14 +2,13 @@ package me.williamhester.models.reddit;
 
 import android.database.Cursor;
 import android.os.Parcel;
-import android.os.Parcelable;
 import android.util.Log;
 
 import com.google.gson.annotations.SerializedName;
 
 import me.williamhester.models.bulletin.Bulletin;
 
-public class RedditSubreddit implements Bulletin, Parcelable, Comparable<RedditSubreddit> {
+public class RedditSubreddit implements Bulletin, Comparable<RedditSubreddit> {
 
     protected String id;
     protected String name;

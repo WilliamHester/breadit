@@ -25,8 +25,7 @@ public class RedditSubmission implements Submission, RedditVotable, Parcelable {
     private String author_flair_text;
     private String domain;
     private String id;
-    @SerializedName("name")
-    private String mName;
+    private String name;
     private String link_flair_css_class;
     private String link_flair_text;
     private String permalink;
@@ -141,7 +140,7 @@ public class RedditSubmission implements Submission, RedditVotable, Parcelable {
 
     @Override
     public String getId() {
-        return mName;
+        return name;
     }
 
     @Override
@@ -168,11 +167,6 @@ public class RedditSubmission implements Submission, RedditVotable, Parcelable {
         } else {
             return DOWNVOTED;
         }
-    }
-
-    @Override
-    public void setBodyMarkdown(String markdown) {
-
     }
 
     @Override
@@ -374,7 +368,7 @@ public class RedditSubmission implements Submission, RedditVotable, Parcelable {
         dest.writeByte(mSelftextIsOpen ? (byte) 1 : (byte) 0);
         dest.writeByte(mIsNsfwShowing ? (byte) 1 : (byte) 0);
         dest.writeString(this.id);
-        dest.writeString(this.mName);
+        dest.writeString(this.name);
         dest.writeParcelable(mLinkDetails, 0);
         if (mImgurData != null) {
             if (mImgurData instanceof ImgurAlbum) {
@@ -424,7 +418,7 @@ public class RedditSubmission implements Submission, RedditVotable, Parcelable {
         this.mSelftextIsOpen = in.readByte() != 0;
         this.mIsNsfwShowing = in.readByte() != 0;
         this.id = in.readString();
-        this.mName = in.readString();
+        this.name = in.readString();
         this.mLinkDetails = in.readParcelable(Url.class.getClassLoader());
         int flag = in.readInt();
         if (flag != NO_IMGUR_DATA) {
