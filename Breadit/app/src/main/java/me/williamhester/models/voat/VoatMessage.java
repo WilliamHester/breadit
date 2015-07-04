@@ -39,7 +39,7 @@ public class VoatMessage implements Message {
 
     @Override
     public boolean isUnread() {
-        return unread != null || unread;
+        return unread != null && unread;
     }
 
     @Override
