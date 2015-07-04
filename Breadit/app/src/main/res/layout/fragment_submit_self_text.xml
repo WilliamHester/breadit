@@ -16,7 +16,7 @@
         android:gravity="top|start"
         android:maxLines="3"/>
 
-    <me.williamhester.ui.views.MarkdownBodyView android:id="@+id/body"
+    <me.williamhester.ui.views.MarkdownBodyView android:id="@+id/markdown_body"
         android:layout_width="match_parent"
         android:layout_weight="1"
         android:layout_height="0dp"/>

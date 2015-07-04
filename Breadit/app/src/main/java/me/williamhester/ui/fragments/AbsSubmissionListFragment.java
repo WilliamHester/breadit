@@ -1,6 +1,5 @@
 package me.williamhester.ui.fragments;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -25,6 +24,7 @@ import com.koushikdutta.async.future.FutureCallback;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.Bind;
 import me.williamhester.knapsack.Save;
 import me.williamhester.models.Submission;
 import me.williamhester.network.RedditApi;
@@ -50,11 +50,6 @@ public abstract class AbsSubmissionListFragment extends AccountFragment implemen
 
     protected SubmissionAdapter mSubmissionsAdapter;
 
-    protected ProgressBar mProgressBar;
-    protected SwipeRefreshLayout mSwipeRefreshLayout;
-    private SubmissionViewHolder mFocusedSubmission;
-    protected Toolbar mToolbar;
-
     /**
      * The primary sort type is set, by default to hot, Reddit's default sort for subreddits.
      */
@@ -64,10 +59,15 @@ public abstract class AbsSubmissionListFragment extends AccountFragment implemen
      */
     protected String mSecondarySortType;
 
-    private View mHeaderBar;
+    @Bind(R.id.header_bar) View mHeaderBar;
+    @Bind(R.id.content_list) RecyclerView mRecyclerView;
+    @Bind(R.id.progress_bar) protected ProgressBar mProgressBar;
+    @Bind(R.id.swipe_refresh) protected SwipeRefreshLayout mSwipeRefreshLayout;
 
     @Save protected boolean mLoading = true;
     @Save protected ArrayList<Submission> mSubmissionList;
+
+    private SubmissionViewHolder mFocusedSubmission;
 
     protected abstract void onRefreshList();
 
@@ -81,20 +81,19 @@ public abstract class AbsSubmissionListFragment extends AccountFragment implemen
         mSubmissionsAdapter = new SubmissionAdapter(this, mSubmissionList);
     }
 
-    @SuppressLint("ResourceAsColor")
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_subreddit, container, false);
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_subreddit, container, false);
+    }
 
-        mHeaderBar = v.findViewById(R.id.header_bar);
-        mToolbar = (Toolbar) v.findViewById(R.id.toolbar_actionbar);
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         mToolbar.setOnMenuItemClickListener(this);
 
-        mProgressBar = (ProgressBar) v.findViewById(R.id.progress_bar);
-
-        mSwipeRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.swipe_refresh);
-        mSwipeRefreshLayout.setProgressBackgroundColor(R.color.primary);
+        mSwipeRefreshLayout.setProgressBackgroundColorSchemeResource(R.color.primary);
         mSwipeRefreshLayout.setColorSchemeResources(R.color.white);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -115,23 +114,16 @@ public abstract class AbsSubmissionListFragment extends AccountFragment implemen
         if (!mLoading && mSubmissionList.size() > 0) {
             mProgressBar.setVisibility(View.GONE);
         }
-        return v;
-    }
-
-    @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.content_list);
-        recyclerView.addItemDecoration(new DividerItemDecoration(getResources().getDrawable(
+        mRecyclerView.addItemDecoration(new DividerItemDecoration(getResources().getDrawable(
                 R.drawable.card_divider)));
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(mSubmissionsAdapter);
+        mRecyclerView.setLayoutManager(layoutManager);
+        mRecyclerView.setAdapter(mSubmissionsAdapter);
 
         mScrollListener = new InfiniteLoadToolbarHideScrollListener(mSubmissionsAdapter, mHeaderBar,
-                recyclerView, mSubmissionList, layoutManager, this);
-        recyclerView.setOnScrollListener(mScrollListener);
+                mRecyclerView, mSubmissionList, layoutManager, this);
+        mRecyclerView.addOnScrollListener(mScrollListener);
 
         onCreateOptionsMenu(mToolbar.getMenu(), getActivity().getMenuInflater());
     }

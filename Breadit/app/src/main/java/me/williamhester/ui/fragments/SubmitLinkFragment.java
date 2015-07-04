@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import butterknife.Bind;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 
@@ -28,8 +29,8 @@ import me.williamhester.reddit.R;
  */
 public class SubmitLinkFragment extends SubmitFragment {
 
-    private EditText mUrl;
-    private EditText mTitle;
+    @Bind(R.id.url) EditText mUrl;
+    @Bind(R.id.title) EditText mTitle;
 
     public static SubmitLinkFragment newInstance() {
         return new SubmitLinkFragment();
@@ -38,11 +39,14 @@ public class SubmitLinkFragment extends SubmitFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_submit_link, container, false);
-        mTitle = (EditText) v.findViewById(R.id.title);
-        mUrl = (EditText) v.findViewById(R.id.url);
-        Button suggest = (Button) v.findViewById(R.id.suggest_title);
+        return inflater.inflate(R.layout.fragment_submit_link, container, false);
+    }
 
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        Button suggest = (Button) view.findViewById(R.id.suggest_title);
         suggest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -74,8 +78,6 @@ public class SubmitLinkFragment extends SubmitFragment {
                 }
             }
         });
-
-        return v;
     }
 
     private boolean urlIsValid() {

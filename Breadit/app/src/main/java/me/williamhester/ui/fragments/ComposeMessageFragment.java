@@ -5,7 +5,6 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +15,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.koushikdutta.async.future.FutureCallback;
 
+import butterknife.Bind;
 import me.williamhester.knapsack.Save;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
@@ -27,9 +27,10 @@ public class ComposeMessageFragment extends AsyncSendFragment {
 
     @Save boolean mCaptchaOnStart;
 
+    @Bind(R.id.compose_to) EditText mComposeTo;
+    @Bind(R.id.subject) EditText mSubject;
+
     private CaptchaDialogFragment mCaptchaDialog;
-    private EditText mComposeTo;
-    private EditText mSubject;
 
     public static ComposeMessageFragment newInstance() {
         return new ComposeMessageFragment();
@@ -41,11 +42,6 @@ public class ComposeMessageFragment extends AsyncSendFragment {
         ComposeMessageFragment fragment = new ComposeMessageFragment();
         fragment.setArguments(args);
         return fragment;
-    }
-
-    @Override
-    protected int getMarkdownBodyId() {
-        return R.id.body_container;
     }
 
     @Override
@@ -61,28 +57,27 @@ public class ComposeMessageFragment extends AsyncSendFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_message, container, false);
+        return inflater.inflate(R.layout.fragment_message, container, false);
+    }
 
-        Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar_actionbar);
-        toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        mToolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 getActivity().onBackPressed();
             }
         });
-        toolbar.setTitle(R.string.compose_message);
-        onCreateOptionsMenu(toolbar.getMenu(), getActivity().getMenuInflater());
-
-        mComposeTo = (EditText) v.findViewById(R.id.compose_to);
-        mSubject = (EditText) v.findViewById(R.id.subject);
+        mToolbar.setTitle(R.string.compose_message);
+        onCreateOptionsMenu(mToolbar.getMenu(), getActivity().getMenuInflater());
 
         if (getArguments() != null && getArguments().containsKey("to")) {
             mComposeTo.setText(getArguments().getString("to"));
             mComposeTo.setVisibility(View.GONE);
         }
-
-        return v;
     }
 
     @Override

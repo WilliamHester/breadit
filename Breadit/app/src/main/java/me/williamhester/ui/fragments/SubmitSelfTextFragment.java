@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import butterknife.Bind;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.views.MarkdownBodyView;
 
@@ -20,8 +21,8 @@ import me.williamhester.ui.views.MarkdownBodyView;
  */
 public class SubmitSelfTextFragment extends SubmitFragment {
 
-    private MarkdownBodyView mBody;
-    private EditText mTitle;
+    @Bind(R.id.markdown_body) MarkdownBodyView mBody;
+    @Bind(R.id.title) EditText mTitle;
 
     public static SubmitSelfTextFragment newInstance() {
         return new SubmitSelfTextFragment();
@@ -30,12 +31,17 @@ public class SubmitSelfTextFragment extends SubmitFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_submit_self_text, container, false);
-        mTitle = (EditText) v.findViewById(R.id.title);
-        mBody = (MarkdownBodyView) v.findViewById(R.id.body);
-        mBody.setHint(getResources().getString(R.string.self_text));
+        return inflater.inflate(R.layout.fragment_submit_self_text, container, false);
+    }
 
-        return v;
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        if (mBody == null) {
+            mBody = (MarkdownBodyView) view.findViewById(R.id.markdown_body);
+        }
+        mBody.setHint(getResources().getString(R.string.self_text));
     }
 
     public boolean isValid() {

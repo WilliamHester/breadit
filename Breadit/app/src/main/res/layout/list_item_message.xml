@@ -38,7 +38,7 @@
                 android:textSize="12sp"/>
 
             <TextView
-                android:id="@+id/body"
+                android:id="@+id/markdown_body"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textColor="@color/ghostwhite"/>

@@ -13,16 +13,15 @@ import com.google.android.youtube.player.YouTubePlayerSupportFragment;
 
 import me.williamhester.Auth;
 import me.williamhester.reddit.R;
-import me.williamhester.ui.views.ActionBarPaddedFrameLayout;
 
 /**
  * Created by william on 9/15/14.
  */
-public class YouTubeFragment extends BaseFragment implements YouTubePlayer.OnInitializedListener, BackableFragment {
+public class YouTubeFragment extends BaseFragment implements YouTubePlayer.OnInitializedListener,
+        BackableFragment {
 
     private static final String VIDEO_ID = "videoId";
 
-    private ActionBarPaddedFrameLayout mLayout;
     private YouTubePlayerSupportFragment mPlayerFragment;
     private YouTubePlayer mPlayer;
     private boolean mIsFullscreen;
@@ -37,8 +36,14 @@ public class YouTubeFragment extends BaseFragment implements YouTubePlayer.OnIni
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mLayout = (ActionBarPaddedFrameLayout) inflater.inflate(R.layout.fragment_youtube, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_youtube, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         Fragment f = getChildFragmentManager().findFragmentByTag("YouTubePlayerFragment");
         if (f == null) {
@@ -51,14 +56,12 @@ public class YouTubeFragment extends BaseFragment implements YouTubePlayer.OnIni
         }
         mPlayerFragment.initialize(Auth.YOUTUBE_AUTH, this);
 
-        mLayout.setOnClickListener(new View.OnClickListener() {
+        view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 getActivity().onBackPressed();
             }
         });
-
-        return mLayout;
     }
 
     @Override

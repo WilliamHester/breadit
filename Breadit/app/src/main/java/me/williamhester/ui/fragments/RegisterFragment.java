@@ -20,7 +20,9 @@ import com.google.gson.JsonObject;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
 
+import butterknife.Bind;
 import me.williamhester.databases.AccountDataSource;
+import me.williamhester.knapsack.Save;
 import me.williamhester.models.Account;
 import me.williamhester.models.AccountManager;
 import me.williamhester.network.ImgurApi;
@@ -33,17 +35,18 @@ import me.williamhester.ui.activities.LogInActivity;
  */
 public class RegisterFragment extends BaseFragment {
 
-    private EditText mUsername;
-    private EditText mPassword;
-    private EditText mEmail;
-    private EditText mCaptchaText;
-    private Handler mHandler = new Handler();
-    private ImageView mAvailabilityIcon;
-    private ProgressBar mAvailabilityProgress;
-    private ProgressDialog mProgressDialog;
-    private TextView mUserAvailability;
+    @Bind(R.id.username) EditText mUsername;
+    @Bind(R.id.password) EditText mPassword;
+    @Bind(R.id.email) EditText mEmail;
+    @Bind(R.id.captcha_response) EditText mCaptchaText;
+    @Bind(R.id.username_availability) TextView mUserAvailability;
+    @Bind(R.id.availability_icon) ImageView mAvailabilityIcon;
+    @Bind(R.id.progress_bar) ProgressBar mAvailabilityProgress;
 
-    private String mCaptchaIden;
+    @Save String mCaptchaIden;
+
+    private Handler mHandler = new Handler();
+    private ProgressDialog mProgressDialog;
 
     public static RegisterFragment newInstance() {
         return new RegisterFragment();
@@ -52,30 +55,28 @@ public class RegisterFragment extends BaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        final View v = inflater.inflate(R.layout.fragment_register, container, false);
+        return inflater.inflate(R.layout.fragment_register, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         mProgressDialog = new ProgressDialog(getActivity());
         mProgressDialog.setMessage(getResources().getString(R.string.attempting_to_create));
         mProgressDialog.setCancelable(false);
 
-        mUsername = (EditText) v.findViewById(R.id.username);
-        mPassword = (EditText) v.findViewById(R.id.password);
-        mEmail = (EditText) v.findViewById(R.id.email);
-        mCaptchaText = (EditText) v.findViewById(R.id.captcha_response);
-        mUserAvailability = (TextView) v.findViewById(R.id.username_availability);
-        mAvailabilityIcon = (ImageView) v.findViewById(R.id.availability_icon);
-        mAvailabilityProgress = (ProgressBar) v.findViewById(R.id.progress_bar);
         mAvailabilityProgress.setVisibility(View.GONE);
 
-        loadCaptcha(v);
-        View imageButton = v.findViewById(R.id.reload_captcha);
+        loadCaptcha(view);
+        View imageButton = view.findViewById(R.id.reload_captcha);
         imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                loadCaptcha(v);
+                loadCaptcha(view);
             }
         });
-        View register = v.findViewById(R.id.register);
+        View register = view.findViewById(R.id.register);
         register.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -134,8 +135,6 @@ public class RegisterFragment extends BaseFragment {
                 }
             }
         });
-
-        return v;
     }
 
     @Override

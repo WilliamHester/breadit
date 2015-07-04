@@ -1,6 +1,5 @@
 package me.williamhester.ui.fragments;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -30,6 +29,7 @@ import com.koushikdutta.async.future.FutureCallback;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
+import butterknife.Bind;
 import me.williamhester.knapsack.Save;
 import me.williamhester.models.AccountManager;
 import me.williamhester.models.Comment;
@@ -60,16 +60,16 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
 
     private TopLevelFragmentCallbacks mCallback;
     private VotableAdapter mAdapter;
-
-    private InfiniteLoadToolbarHideScrollListener mScrollListener;
-    private ProgressBar mProgressBar;
-    private SwipeRefreshLayout mRefreshLayout;
     private VotableViewHolder mFocusedVotable;
+    private InfiniteLoadToolbarHideScrollListener mScrollListener;
+
     private TextView mCakeDay;
     private TextView mCommentKarma;
     private TextView mLinkKarma;
-    private Toolbar mToolbar;
     private View mUserHeader;
+    @Bind(R.id.toolbar_actionbar) Toolbar mToolbar;
+    @Bind(R.id.progress_bar) ProgressBar mProgressBar;
+    @Bind(R.id.swipe_refresh) SwipeRefreshLayout mRefreshLayout;
 
     @Save boolean mLoading;
     @Save boolean mRefreshing;
@@ -118,13 +118,16 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
 
     }
 
-    @SuppressLint("ResourceAsColor")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_user, root, false);
+        return inflater.inflate(R.layout.fragment_user, root, false);
+    }
 
-        View headerBar = v.findViewById(R.id.header_bar);
-        mToolbar = (Toolbar) v.findViewById(R.id.toolbar_actionbar);
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        View headerBar = view.findViewById(R.id.header_bar);
         if (mCallback != null) {
             mToolbar.setNavigationIcon(R.drawable.ic_drawer);
             mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -146,11 +149,9 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
         mToolbar.setTitle(R.string.user);
         mToolbar.setOnMenuItemClickListener(this);
 
-        mProgressBar = (ProgressBar) v.findViewById(R.id.progress_bar);
         mProgressBar.setVisibility(mLoading ? View.VISIBLE : View.GONE);
 
-        mRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.swipe_refresh);
-        mRefreshLayout.setProgressBackgroundColor(R.color.primary);
+        mRefreshLayout.setProgressBackgroundColorSchemeResource(R.color.primary);
         mRefreshLayout.setColorSchemeResources(R.color.white);
         mRefreshLayout.setRefreshing(mRefreshing);
         mRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -175,17 +176,16 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         mAdapter = new VotableAdapter();
-        RecyclerView votableRecyclerView = (RecyclerView) v.findViewById(R.id.content_list);
-        votableRecyclerView.setOnScrollListener(mScrollListener);
+        RecyclerView votableRecyclerView = (RecyclerView) view.findViewById(R.id.content_list);
         votableRecyclerView.setLayoutManager(layoutManager);
         votableRecyclerView.addItemDecoration(new DividerItemDecoration(
                 getResources().getDrawable(R.drawable.card_divider)));
         votableRecyclerView.setAdapter(mAdapter);
         mScrollListener = new InfiniteLoadToolbarHideScrollListener(mAdapter, headerBar,
                 votableRecyclerView, mVotables, layoutManager, this);
-        votableRecyclerView.setOnScrollListener(mScrollListener);
+        votableRecyclerView.addOnScrollListener(mScrollListener);
 
-        final Spinner spinner = (Spinner) v.findViewById(R.id.user_spinner);
+        final Spinner spinner = (Spinner) view.findViewById(R.id.user_spinner);
         int array = R.array.user_data_types;
         if (mUser != null && mUser.isLoggedInAccount()) {
             array = R.array.my_account_data_types;
@@ -267,7 +267,6 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
                 }
             });
         }
-        return v;
     }
 
     @Override

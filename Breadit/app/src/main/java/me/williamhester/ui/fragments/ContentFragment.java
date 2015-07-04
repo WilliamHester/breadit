@@ -43,12 +43,12 @@ public abstract class ContentFragment extends BaseFragment {
          * Called when the content fragment is created, notifying the hosting activity to do things
          * like lock the drawers so that they cannot be opened from the content fragment.
          */
-        public void onContentFragmentOpened();
+        void onContentFragmentOpened();
 
         /**
          * Called when the content fragment is destroyed, notifying the hosting activity to do things
          * like unlock the drawers so that they can be opened again.
          */
-        public void onContentFragmentClosed();
+        void onContentFragmentClosed();
     }
 }

@@ -64,10 +64,16 @@ public class ImageFragment extends BaseFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
-        final View v = inflater.inflate(R.layout.fragment_imgur_image, root, false);
-        final ImageView imageView = (ImageView) v.findViewById(R.id.image);
-        TextView description = (TextView) v.findViewById(R.id.description);
-        View loadHq = v.findViewById(R.id.load_high_quality);
+        return inflater.inflate(R.layout.fragment_imgur_image, root, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        final ImageView imageView = (ImageView) view.findViewById(R.id.image);
+        TextView description = (TextView) view.findViewById(R.id.description);
+        View loadHq = view.findViewById(R.id.load_high_quality);
         if (mImgurImage != null) {
             if (mImgurImage.getDescription() != null) {
                 description.setText(mImgurImage.getDescription());
@@ -78,22 +84,21 @@ public class ImageFragment extends BaseFragment {
                 @Override
                 public void onClick(View view) {
                     mUrl = mImgurImage.getUrl();
-                    ProgressBar progressBar = (ProgressBar) v.findViewById(R.id.progress_bar);
+                    ProgressBar progressBar = (ProgressBar) view.findViewById(R.id.progress_bar);
                     progressBar.setVisibility(View.VISIBLE);
-                    loadImage(v, imageView);
+                    loadImage(view, imageView);
                 }
             });
         } else {
             loadHq.setVisibility(View.GONE);
         }
-        loadImage(v, imageView);
+        loadImage(view, imageView);
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 getActivity().onBackPressed();
             }
         });
-        return v;
     }
 
     public void loadImage(final View v, final ImageView imageView) {

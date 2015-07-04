@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 
+import butterknife.Bind;
 import me.williamhester.knapsack.Save;
 import me.williamhester.models.Friend;
 import me.williamhester.network.RedditApi;
@@ -34,9 +34,11 @@ import me.williamhester.ui.widget.InfiniteLoadToolbarHideScrollListener;
 public class FriendsFragment extends AccountFragment {
 
     private FriendsAdapter mFriendsAdapter;
-    private ProgressBar mProgressBar;
-    private Toolbar mToolbar;
     private TopLevelFragmentCallbacks mCallback;
+
+    @Bind(R.id.progress_bar) ProgressBar mProgressBar;
+    @Bind(R.id.friends) RecyclerView mFriendsView;
+
     @Save ArrayList<Friend> mFriends = new ArrayList<>();
     @Save boolean mHasFetchedFriends;
     @Save boolean mLoading;
@@ -53,13 +55,24 @@ public class FriendsFragment extends AccountFragment {
         }
     }
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        mFriendsAdapter = new FriendsAdapter();
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_friends, container, false);
+        return inflater.inflate(R.layout.fragment_friends, container, false);
+    }
 
-        mToolbar = (Toolbar) v.findViewById(R.id.toolbar_actionbar);
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
         mToolbar.setTitle(R.string.friends);
         mToolbar.setNavigationIcon(R.drawable.ic_drawer);
         mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -68,17 +81,13 @@ public class FriendsFragment extends AccountFragment {
                 mCallback.onHomeClicked();
             }
         });
-        mFriendsAdapter = new FriendsAdapter();
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        RecyclerView recyclerView = (RecyclerView) v.findViewById(R.id.friends);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(mFriendsAdapter);
-        recyclerView.setOnScrollListener(new InfiniteLoadToolbarHideScrollListener(mFriendsAdapter,
-                mToolbar, recyclerView, mFriends, layoutManager, null));
-        recyclerView.addItemDecoration(
+        mFriendsView.setLayoutManager(layoutManager);
+        mFriendsView.setAdapter(mFriendsAdapter);
+        mFriendsView.addOnScrollListener(new InfiniteLoadToolbarHideScrollListener(mFriendsAdapter,
+                mToolbar, mFriendsView, this.mFriends, layoutManager, null));
+        mFriendsView.addItemDecoration(
                 new DividerItemDecoration(getResources().getDrawable(R.drawable.card_divider)));
-
-        mProgressBar = (ProgressBar) v.findViewById(R.id.progress_bar);
 
         if (!mLoading) {
             mProgressBar.setVisibility(View.GONE);
@@ -86,7 +95,6 @@ public class FriendsFragment extends AccountFragment {
         if (!mHasFetchedFriends && !mLoading) {
             loadFriends();
         }
-        return v;
     }
 
     public void loadFriends() {

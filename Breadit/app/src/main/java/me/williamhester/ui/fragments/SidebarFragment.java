@@ -58,9 +58,14 @@ public class SidebarFragment extends BaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.view_sidebar, container, false);
+        return inflater.inflate(R.layout.view_sidebar, container, false);
+    }
 
-        Button subscribe = (Button) v.findViewById(R.id.subscribe);
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        Button subscribe = (Button) view.findViewById(R.id.subscribe);
         subscribe.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -68,7 +73,7 @@ public class SidebarFragment extends BaseFragment {
             }
         });
 
-        Button submit = (Button) v.findViewById(R.id.submit);
+        Button submit = (Button) view.findViewById(R.id.submit);
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -78,9 +83,7 @@ public class SidebarFragment extends BaseFragment {
             }
         });
 
-        setUpSideBar(v);
-
-        return v;
+        setUpSideBar(view);
     }
 
     @Override

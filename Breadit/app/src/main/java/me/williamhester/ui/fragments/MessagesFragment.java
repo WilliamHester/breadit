@@ -34,6 +34,7 @@ import com.koushikdutta.async.future.FutureCallback;
 
 import java.util.ArrayList;
 
+import butterknife.Bind;
 import me.williamhester.knapsack.Save;
 import me.williamhester.models.GenericListing;
 import me.williamhester.models.GenericResponseRedditWrapper;
@@ -50,18 +51,19 @@ import me.williamhester.ui.widget.InfiniteLoadToolbarHideScrollListener;
 public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuItemClickListener,
         InfiniteLoadToolbarHideScrollListener.OnLoadMoreListener {
 
-    @Save boolean mRefreshing;
-    @Save ArrayList<Message> mMessages;
-    @Save String mFilterType;
-
     private InfiniteLoadToolbarHideScrollListener mScrollListener;
     private MessageArrayAdapter mMessageAdapter;
     private MessageFragmentCallbacks mCallback;
     private MessageViewHolder mFocusedViewHolder;
-    private ProgressBar mProgressBar;
-    private RecyclerView mMessagesRecyclerView;
-    private SwipeRefreshLayout mRefreshLayout;
-    private Toolbar mToolbar;
+
+    @Save boolean mRefreshing;
+    @Save ArrayList<Message> mMessages;
+    @Save String mFilterType;
+
+    @Bind(R.id.toolbar_actionbar) Toolbar mToolbar;
+    @Bind(R.id.progress_bar) ProgressBar mProgressBar;
+    @Bind(R.id.inbox) RecyclerView mMessagesRecyclerView;
+    @Bind(R.id.swipe_refresh) SwipeRefreshLayout mRefreshLayout;
 
     public static MessagesFragment newInstance() {
         return new MessagesFragment();
@@ -103,9 +105,13 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
     @SuppressLint("ResourceAsColor")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_messages, root, false);
+        return inflater.inflate(R.layout.fragment_messages, root, false);
+    }
 
-        mToolbar = (Toolbar) v.findViewById(R.id.toolbar_actionbar);
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
         if (mCallback == null) {
             mToolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
             mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -126,8 +132,6 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
         mToolbar.setOnMenuItemClickListener(this);
         onCreateOptionsMenu(mToolbar.getMenu(), getActivity().getMenuInflater());
 
-        mProgressBar = (ProgressBar) v.findViewById(R.id.progress_bar);
-        mRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.swipe_refresh);
         mRefreshLayout.setProgressBackgroundColor(R.color.primary);
         mRefreshLayout.setColorSchemeResources(R.color.white);
         mRefreshLayout.setRefreshing(mRefreshing);
@@ -147,7 +151,6 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
                 mRefreshLayout.setProgressViewOffset(false, startAt, endAt);
             }
         });
-        mMessagesRecyclerView = (RecyclerView) v.findViewById(R.id.inbox);
         mMessageAdapter = new MessageArrayAdapter();
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         mScrollListener = new InfiniteLoadToolbarHideScrollListener(mMessageAdapter, mToolbar,
@@ -158,7 +161,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
         mMessagesRecyclerView.addItemDecoration(new DividerItemDecoration(getResources()
                 .getDrawable(R.drawable.card_divider)));
 
-        Spinner messagesType = (Spinner) v.findViewById(R.id.messages_type);
+        Spinner messagesType = (Spinner) view.findViewById(R.id.messages_type);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(),
                 R.layout.spinner_item, R.id.spinner_text,
                 getResources().getStringArray(R.array.filter_types));
@@ -210,15 +213,15 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
         } else {
             mProgressBar.setVisibility(View.GONE);
         }
-
-        return v;
     }
 
     private FutureCallback<JsonObject> mMessageCallback = new FutureCallback<JsonObject>() {
         @Override
         public void onCompleted(Exception e, JsonObject result) {
-            mProgressBar.setVisibility(View.GONE);
-            mRefreshLayout.setRefreshing(false);
+            if (getView() == null) {
+                mProgressBar.setVisibility(View.GONE);
+                mRefreshLayout.setRefreshing(false);
+            }
             if (e != null) {
                 // Failed to load
                 return;
@@ -360,7 +363,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
 
             mSubject = (TextView) itemView.findViewById(R.id.subject);
             mToFrom = (TextView) itemView.findViewById(R.id.to_from);
-            mBody = (TextView) itemView.findViewById(R.id.body);
+            mBody = (TextView) itemView.findViewById(R.id.markdown_body);
             mBody.setMovementMethod(new ClickableLinkMovementMethod());
 
             mOptionsRow = itemView.findViewById(R.id.options_row);

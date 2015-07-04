@@ -28,7 +28,7 @@
         android:textSize="10sp"/>
 
     <TextView
-        android:id="@+id/body"
+        android:id="@+id/markdown_body"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="17sp"
@@ -43,7 +43,7 @@
         android:textSize="10sp"
         android:textColor="@color/light_gray_0"
         android:fontFamily="sans-serif-light"
-        android:layout_below="@id/body"
+        android:layout_below="@id/markdown_body"
         tools:text="Shockwave_ 3412 points"/>
 
     <TextView android:id="@+id/time"
@@ -53,7 +53,7 @@
         android:textSize="10sp"
         android:textColor="@color/light_gray_0"
         android:fontFamily="sans-serif-light"
-        android:layout_below="@id/body"
+        android:layout_below="@id/markdown_body"
         tools:text="8h"/>
 
     <TextView android:id="@+id/domain"

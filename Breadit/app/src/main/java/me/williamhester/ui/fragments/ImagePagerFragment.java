@@ -129,21 +129,26 @@ public class ImagePagerFragment extends BaseFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
-        final View v = inflater.inflate(R.layout.fragment_image_pager, root, false);
+        return inflater.inflate(R.layout.fragment_image_pager, root, false);
+    }
 
-        v.setOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onViewCreated(final View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 getActivity().onBackPressed();
             }
         });
-        v.setOnLongClickListener(new View.OnLongClickListener() {
+        view.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
                 return true;
             }
         });
-        TextView title = (TextView) v.findViewById(R.id.album_title);
+        TextView title = (TextView) view.findViewById(R.id.album_title);
         title.setText(mTitle);
         if (getArguments().containsKey(IMGUR_ID)) {
             String imgurId = getArguments().getString(IMGUR_ID);
@@ -153,7 +158,7 @@ public class ImagePagerFragment extends BaseFragment {
                     public void onCompleted(Exception e, ResponseImgurWrapper<ImgurAlbum> result) {
                         if (e != null) return;
                         mAdapter = new ImgurAlbumAdapter(getChildFragmentManager(), result.getData());
-                        setUpAdapter(v);
+                        setUpAdapter(view);
                     }
                 });
             } else {
@@ -162,15 +167,13 @@ public class ImagePagerFragment extends BaseFragment {
                     public void onCompleted(Exception e, ResponseImgurWrapper<ImgurImage> result) {
                         if (e != null) return;
                         mAdapter = new ImgurAlbumAdapter(getChildFragmentManager(), result.getData());
-                        setUpAdapter(v);
+                        setUpAdapter(view);
                     }
                 });
             }
         } else {
-            setUpAdapter(v);
+            setUpAdapter(view);
         }
-
-        return v;
     }
 
     private void setUpAdapter(View v) {

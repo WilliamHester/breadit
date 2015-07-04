@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -77,9 +76,14 @@ public class SubredditListFragment extends AccountFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_subreddit_list, container, false);
+        return inflater.inflate(R.layout.fragment_subreddit_list, container, false);
+    }
 
-        ExpandableListView elv = (ExpandableListView) v.findViewById(R.id.expandable_list_view);
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        ExpandableListView elv = (ExpandableListView) view.findViewById(R.id.expandable_list_view);
         mAdapter = new SubredditsExpandableListAdapter();
         elv.setAdapter(mAdapter);
         elv.expandGroup(SubredditsExpandableListAdapter.SUBSCRIPTIONS_GROUP_INDEX);
@@ -101,20 +105,17 @@ public class SubredditListFragment extends AccountFragment {
                 return false;
             }
         });
-        setUpHeader(v.findViewById(R.id.toolbar_actionbar));
-
-        return v;
+        setUpHeader();
     }
 
-    private void setUpHeader(View v) {
-        Toolbar toolbar = (Toolbar) v;
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+    private void setUpHeader() {
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 getActivity().onBackPressed();
             }
         });
-        final EditText subreddit = (EditText) toolbar.findViewById(R.id.go_to_subreddit);
+        final EditText subreddit = (EditText) mToolbar.findViewById(R.id.go_to_subreddit);
         subreddit.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {

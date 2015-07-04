@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -21,6 +22,7 @@ import android.widget.TextView;
 import java.util.HashMap;
 import java.util.Map;
 
+import butterknife.Bind;
 import me.williamhester.models.AccountManager;
 import me.williamhester.models.Submission;
 import me.williamhester.reddit.R;
@@ -30,7 +32,7 @@ public class WebViewFragment extends ContentFragment implements Toolbar.OnMenuIt
 
     public static final String URI = "uri";
 
-    private WebView mWebView;
+    @Bind(R.id.content) WebView mWebView;
 
     private String mUri;
 
@@ -56,24 +58,28 @@ public class WebViewFragment extends ContentFragment implements Toolbar.OnMenuIt
         mUri = getArguments().getString(URI);
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_webview, root, false);
-        Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar_actionbar);
-        toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+        return inflater.inflate(R.layout.fragment_webview, root, false);
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        mToolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 getActivity().onBackPressed();
             }
         });
-        toolbar.setOnMenuItemClickListener(this);
-        final TextView link = (TextView) v.findViewById(R.id.url);
+        mToolbar.setOnMenuItemClickListener(this);
+        final TextView link = (TextView) view.findViewById(R.id.url);
         link.setText(mUri);
-        onCreateOptionsMenu(toolbar.getMenu(), getActivity().getMenuInflater());
+        onCreateOptionsMenu(mToolbar.getMenu(), getActivity().getMenuInflater());
 
-        mWebView = (WebView) v.findViewById(R.id.content);
         mWebView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
@@ -88,7 +94,7 @@ public class WebViewFragment extends ContentFragment implements Toolbar.OnMenuIt
         mWebView.getSettings().setUseWideViewPort(true);
         mWebView.getSettings().setLoadWithOverviewMode(true);
 
-        final ProgressBar progressBar = (ProgressBar) v.findViewById(R.id.progress_bar);
+        final ProgressBar progressBar = (ProgressBar) view.findViewById(R.id.progress_bar);
 
         if (savedInstanceState != null) {
             mWebView.restoreState(savedInstanceState);
@@ -107,7 +113,6 @@ public class WebViewFragment extends ContentFragment implements Toolbar.OnMenuIt
                 }
             });
         }
-        return v;
     }
 
     @Override

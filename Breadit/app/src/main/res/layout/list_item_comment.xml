@@ -67,7 +67,7 @@
                 android:singleLine="true"
                 android:ellipsize="none"/>
 
-            <TextView android:id="@+id/body"
+            <TextView android:id="@+id/markdown_body"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="14sp"

@@ -18,6 +18,7 @@ import com.koushikdutta.async.future.FutureCallback;
 
 import java.util.List;
 
+import butterknife.Bind;
 import me.williamhester.databases.AccountDataSource;
 import me.williamhester.models.Account;
 import me.williamhester.models.AccountManager;
@@ -30,8 +31,8 @@ import me.williamhester.ui.activities.LogInActivity;
  */
 public class LogInFragment extends BaseFragment {
 
-    private EditText mUsername;
-    private EditText mPassword;
+    @Bind(R.id.username) EditText mUsername;
+    @Bind(R.id.password) EditText mPassword;
     private ProgressDialog mProgressDialog;
 
     public static LogInFragment newInstance() {
@@ -41,11 +42,15 @@ public class LogInFragment extends BaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup root,
                              @Nullable Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_login, root, false);
-        mUsername = (EditText) v.findViewById(R.id.username);
-        mPassword = (EditText) v.findViewById(R.id.password);
-        View forgot = v.findViewById(R.id.forgot_password);
-        Button confirm = (Button) v.findViewById(R.id.login_confirm);
+        return inflater.inflate(R.layout.fragment_login, root, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        View forgot = view.findViewById(R.id.forgot_password);
+        Button confirm = (Button) view.findViewById(R.id.login_confirm);
         forgot.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -81,7 +86,6 @@ public class LogInFragment extends BaseFragment {
                 logIn();
             }
         });
-        return v;
     }
 
     private void logIn() {

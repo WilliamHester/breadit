@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 
+import butterknife.Bind;
 import me.williamhester.knapsack.Save;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.views.MarkdownBodyView;
@@ -26,7 +27,7 @@ import me.williamhester.ui.views.MarkdownBodyView;
 public abstract class AsyncSendFragment extends BaseFragment {
 
     @Save protected boolean mKillOnStart;
-    protected MarkdownBodyView mMarkdownBody;
+    @Bind(R.id.body_container) protected MarkdownBodyView mMarkdownBody;
 
     /**
      * This is called to get the body hint for the MarkdownBodyFragment
@@ -42,13 +43,6 @@ public abstract class AsyncSendFragment extends BaseFragment {
      * @return the string that represents the text on the button
      */
     protected abstract String getButtonText();
-
-    /**
-     * This is called to get the container id to inflate the MarkdownBodyFragment into.
-     *
-     * @return the id of the container.
-     */
-    protected abstract int getMarkdownBodyId();
 
     /**
      * This method is called when the save button in the ActionBar is clicked.
@@ -86,7 +80,6 @@ public abstract class AsyncSendFragment extends BaseFragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mMarkdownBody = (MarkdownBodyView) view.findViewById(getMarkdownBodyId());
         mMarkdownBody.setHint(getBodyHint());
     }
 

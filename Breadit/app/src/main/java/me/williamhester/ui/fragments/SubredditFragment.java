@@ -3,11 +3,10 @@ package me.williamhester.ui.fragments;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
@@ -18,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import butterknife.Bind;
 import me.williamhester.knapsack.Save;
 import me.williamhester.models.Listing;
 import me.williamhester.models.ResponseRedditWrapper;
@@ -37,7 +37,7 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
     @Save HashSet<String> mNames;
     @Save boolean mSubredditExists = true;
 
-    private TextView mTitle;
+    @Bind(R.id.current_subreddit) TextView mTitle;
 
     private TopLevelFragmentCallbacks mCallback;
 
@@ -90,14 +90,10 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
-        View v = super.onCreateView(inflater, root, savedInstanceState);
-        if (v == null) {
-            return null;
-        }
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         if (mCallback != null) {
-            mTitle = (TextView) v.findViewById(R.id.current_subreddit);
             if (TextUtils.isEmpty(mSubredditName)) {
                 mTitle.setText(R.string.front_page);
             } else {
@@ -136,13 +132,12 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
         }
 
         if (!mSubredditExists) {
-            v.findViewById(R.id.loading_error).setVisibility(View.VISIBLE);
+            view.findViewById(R.id.loading_error).setVisibility(View.VISIBLE);
         }
 
         if (mSubmissionList.size() == 0) {
             onRefreshList();
         }
-        return v;
     }
 
     @Override
@@ -184,8 +179,10 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
                         @Override
                         public void onCompleted(Exception e, JsonObject result) {
                             mLoading = false;
-                            mProgressBar.setVisibility(View.GONE);
-                            mSwipeRefreshLayout.setRefreshing(false);
+                            if (getView() != null) {
+                                mProgressBar.setVisibility(View.GONE);
+                                mSwipeRefreshLayout.setRefreshing(false);
+                            }
                             if (e == null) {
                                 mNames.clear();
                                 ResponseRedditWrapper wrapper = new ResponseRedditWrapper(result,

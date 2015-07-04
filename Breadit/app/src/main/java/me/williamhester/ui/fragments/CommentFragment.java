@@ -26,6 +26,7 @@ import com.koushikdutta.async.future.FutureCallback;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.Bind;
 import me.williamhester.SettingsManager;
 import me.williamhester.knapsack.Knapsack;
 import me.williamhester.knapsack.Save;
@@ -44,6 +45,8 @@ import me.williamhester.ui.views.CommentViewHolder;
 import me.williamhester.ui.views.DividerItemDecoration;
 import me.williamhester.ui.views.SubmissionViewHolder;
 
+import static android.view.View.*;
+
 public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemClickListener,
         SubmissionViewHolder.OnVotedListener{
 
@@ -53,13 +56,15 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
 
     private CommentArrayAdapter mCommentAdapter;
     private Context mContext;
-    private ProgressBar mProgressBar;
-    private SwipeRefreshLayout mRefreshLayout;
+
+    @Bind(R.id.progress_bar) ProgressBar mProgressBar;
+    @Bind(R.id.swipe_refresh) SwipeRefreshLayout mRefreshLayout;
+    @Bind(R.id.comments) RecyclerView mRecyclerView;
 
     @Save ArrayList<AbsComment> mCommentsList = new ArrayList<>();
+    @Save Submission mSubmission;
     @Save String mPermalink;
     @Save String mSortType;
-    @Save Submission mSubmission;
     @Save boolean mLoading = true;
     @Save boolean mRefreshing = false;
     @Save boolean mIsSingleThread = false;
@@ -101,29 +106,31 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
                 RedditApi.getSubmissionData(mContext, mPermalink, mSortType, mSubmissionCallback, mCommentCallback);
             }
         }
+        mCommentAdapter = new CommentArrayAdapter();
         setHasOptionsMenu(true);
         setRetainInstance(true);
     }
 
-    @SuppressLint("ResourceAsColor")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup root, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_comment, root, false);
+        return inflater.inflate(R.layout.fragment_comment, root, false);
+    }
 
-        Toolbar toolbar = (Toolbar) v.findViewById(R.id.toolbar_actionbar);
-        toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        onCreateOptionsMenu(mToolbar.getMenu(), getActivity().getMenuInflater());
+        mToolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
+        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 getActivity().onBackPressed();
             }
         });
-        toolbar.setTitle(R.string.comments);
-        toolbar.setOnMenuItemClickListener(this);
-        onCreateOptionsMenu(toolbar.getMenu(), getActivity().getMenuInflater());
+        mToolbar.setTitle(R.string.comments);
+        mToolbar.setOnMenuItemClickListener(this);
 
-        RecyclerView commentsView = (RecyclerView) v.findViewById(R.id.comments);
-        mRefreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.swipe_refresh);
         mRefreshLayout.setProgressBackgroundColorSchemeResource(R.color.primary);
         mRefreshLayout.setColorSchemeResources(R.color.white);
         mRefreshLayout.setRefreshing(mRefreshing);
@@ -134,17 +141,11 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
                 RedditApi.getSubmissionData(mContext, mPermalink, mSortType, mSubmissionCallback, mCommentCallback);
             }
         });
-        mProgressBar = (ProgressBar) v.findViewById(R.id.progress_bar);
-        mCommentAdapter = new CommentArrayAdapter();
-        commentsView.setAdapter(mCommentAdapter);
-        commentsView.addItemDecoration(new DividerItemDecoration(getResources().getDrawable(R.drawable.comments_divider)));
-        commentsView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mRecyclerView.setAdapter(mCommentAdapter);
+        mRecyclerView.addItemDecoration(new DividerItemDecoration(getResources().getDrawable(R.drawable.comments_divider)));
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        if (!mLoading) {
-            mProgressBar.setVisibility(View.GONE);
-        }
-
-        return v;
+        mProgressBar.setVisibility(mLoading ? VISIBLE : GONE);
     }
 
     @Override
@@ -315,7 +316,7 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
             }
             if (!tempSort.equals(mSortType)) {
                 mSortType = tempSort;
-                mProgressBar.setVisibility(View.VISIBLE);
+                mProgressBar.setVisibility(VISIBLE);
                 RedditApi.getSubmissionData(mContext, mPermalink, mSortType, mSubmissionCallback, mCommentCallback);
             }
             return true;
@@ -507,7 +508,7 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
                             mIsSingleThread = false;
                             RedditApi.getSubmissionData(mContext, mPermalink, mSortType,
                                     mSubmissionCallback, mCommentCallback);
-                            mProgressBar.setVisibility(View.VISIBLE);
+                            mProgressBar.setVisibility(VISIBLE);
                         }
                     });
             itemView.findViewById(R.id.view_full_context).setOnClickListener(
@@ -518,7 +519,7 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
                             mRefreshing = true;
                             RedditApi.getSubmissionData(mContext, mPermalink, mSortType,
                                     mSubmissionCallback, mCommentCallback);
-                            mProgressBar.setVisibility(View.VISIBLE);
+                            mProgressBar.setVisibility(VISIBLE);
                         }
                     });
         }
@@ -647,7 +648,7 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
             mCommentsList.addAll(result);
             mCommentAdapter.notifyItemRangeInserted(1, mCommentsList.size());
             mRefreshLayout.setRefreshing(false);
-            mProgressBar.setVisibility(View.GONE);
+            mProgressBar.setVisibility(GONE);
             mRefreshing = mLoading = false;
         }
     };
@@ -667,7 +668,7 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
                 @Override
                 public void onClick(View v) {
                     if (!mComment.isLoading()) {
-                        mProgressBar.setVisibility(View.VISIBLE);
+                        mProgressBar.setVisibility(VISIBLE);
                         mComment.setIsLoading(true);
                         RedditApi.getMoreChildren(mSubmission.getName(),
                                 mSortType, mComment.getChildren(), mComment.getLevel(),
@@ -708,11 +709,11 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
         public void setContent(MoreComments comment) {
             mComment = comment;
 
-            mProgressBar.setVisibility(mComment.isLoading() ? View.VISIBLE : View.GONE);
+            mProgressBar.setVisibility(mComment.isLoading() ? VISIBLE : GONE);
             float dp = itemView.getResources().getDisplayMetrics().density;
             itemView.setPadding(Math.round(4 * dp * mComment.getLevel()), 0, 0, 0);
             if (mComment.getLevel() > 0) {
-                mLevelIndicator.setVisibility(View.VISIBLE);
+                mLevelIndicator.setVisibility(VISIBLE);
                 switch (mComment.getLevel() % 4) {
                     case 1:
                         mLevelIndicator.setBackgroundColor(mLevelIndicator.getResources().getColor(R.color.green));

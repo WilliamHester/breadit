@@ -53,9 +53,14 @@ public class NavigationDrawerFragment extends AccountFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_navigation_drawer, container, false);
+        return inflater.inflate(R.layout.fragment_navigation_drawer, container, false);
+    }
 
-        Spinner accountSpinner = (Spinner) v.findViewById(R.id.account_spinner);
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        Spinner accountSpinner = (Spinner) view.findViewById(R.id.account_spinner);
         accountSpinner.setAdapter(new AccountAdapter());
         accountSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -81,10 +86,10 @@ public class NavigationDrawerFragment extends AccountFragment {
                 // Do nothing
             }
         });
-        selectCurrentAccount(v);
+        selectCurrentAccount(view);
 
-        final View home = v.findViewById(R.id.home);
-        final View messages = v.findViewById(R.id.inbox);
+        final View home = view.findViewById(R.id.home);
+        final View messages = view.findViewById(R.id.inbox);
 
         home.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -99,7 +104,7 @@ public class NavigationDrawerFragment extends AccountFragment {
             }
         });
 
-        View submit = v.findViewById(R.id.submit);
+        View submit = view.findViewById(R.id.submit);
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -108,7 +113,7 @@ public class NavigationDrawerFragment extends AccountFragment {
             }
         });
 
-        View settings = v.findViewById(R.id.settings);
+        View settings = view.findViewById(R.id.settings);
         settings.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -119,7 +124,7 @@ public class NavigationDrawerFragment extends AccountFragment {
             }
         });
 
-        View myAccount = v.findViewById(R.id.my_account);
+        View myAccount = view.findViewById(R.id.my_account);
         myAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -127,7 +132,7 @@ public class NavigationDrawerFragment extends AccountFragment {
             }
         });
 
-        View friends = v.findViewById(R.id.friends);
+        View friends = view.findViewById(R.id.friends);
         friends.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -135,7 +140,7 @@ public class NavigationDrawerFragment extends AccountFragment {
             }
         });
 
-        final TextView unreadCount = (TextView) v.findViewById(R.id.unread_count);
+        final TextView unreadCount = (TextView) view.findViewById(R.id.unread_count);
         RedditApi.getMessages(getActivity(), Message.UNREAD, null, new FutureCallback<JsonObject>() {
             @Override
             public void onCompleted(Exception e, JsonObject result) {
@@ -162,7 +167,6 @@ public class NavigationDrawerFragment extends AccountFragment {
                 unreadCount.setText(String.valueOf(messages.size()));
             }
         });
-        return v;
     }
 
     @Override

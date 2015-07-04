@@ -17,6 +17,7 @@ import com.google.gson.JsonObject;
 import com.koushikdutta.async.future.FutureCallback;
 import com.koushikdutta.ion.Ion;
 
+import butterknife.Bind;
 import me.williamhester.knapsack.Save;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
@@ -28,6 +29,9 @@ public class ForgotPasswordFragment extends BaseFragment {
 
     @Save boolean mKillOnStart;
 
+    @Bind(R.id.username) EditText mUsername;
+    @Bind(R.id.email_me) View mEmailMe;
+
     public static ForgotPasswordFragment newInstance(String username) {
         ForgotPasswordFragment fragment = new ForgotPasswordFragment();
         Bundle args = new Bundle();
@@ -37,16 +41,20 @@ public class ForgotPasswordFragment extends BaseFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_forgot_password, container, false);
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_forgot_password, container, false);
+    }
 
-        final EditText username = (EditText) v.findViewById(R.id.username);
-        username.setText(getArguments().getString("username"));
-        View emailMe = v.findViewById(R.id.email_me);
-        emailMe.setOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        mUsername.setText(getArguments().getString("username"));
+        mEmailMe.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String name = username.getText().toString();
+                String name = mUsername.getText().toString();
                 if (TextUtils.isEmpty(name)) {
                     return;
                 }
@@ -58,8 +66,6 @@ public class ForgotPasswordFragment extends BaseFragment {
                         .setCallback(mForgotPasswordCallback);
             }
         });
-
-        return v;
     }
 
     @Override

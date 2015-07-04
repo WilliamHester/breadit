@@ -16,6 +16,7 @@ import com.koushikdutta.async.future.FutureCallback;
 
 import java.io.File;
 
+import butterknife.Bind;
 import me.williamhester.knapsack.Save;
 import me.williamhester.models.GfycatResponse;
 import me.williamhester.models.ImgurImage;
@@ -34,7 +35,9 @@ public class GifFragment extends BaseFragment implements TextureView.SurfaceText
 
     @Save Url mParser;
     @Save ImgurImage mImage;
-    private TextureView mTextureView;
+
+    @Bind(R.id.gif_view) TextureView mTextureView;
+
     private MediaPlayer mMediaPlayer;
     private File mFile;
     private SurfaceTexture mSurface;
@@ -79,7 +82,6 @@ public class GifFragment extends BaseFragment implements TextureView.SurfaceText
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mTextureView = (TextureView) view.findViewById(R.id.gif_view);
         mTextureView.setSurfaceTextureListener(this);
         final ProgressBar progressBar = (ProgressBar) view.findViewById(R.id.progress_bar);
 

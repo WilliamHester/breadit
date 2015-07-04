@@ -33,7 +33,7 @@ public abstract class VotableViewHolder extends RecyclerView.ViewHolder {
     public VotableViewHolder(final View itemView) {
         super(itemView);
 
-        mBody = (TextView) itemView.findViewById(R.id.body);
+        mBody = (TextView) itemView.findViewById(R.id.markdown_body);
         mTime = (TextView) itemView.findViewById(R.id.time);
         mBackgroundVoteView = itemView.findViewById(R.id.vote_background);
         mForegroundVoteView = itemView.findViewById(R.id.vote_foreground);
