@@ -84,7 +84,7 @@ public class RedditSubmission implements Submission, RedditVotable, Parcelable {
     }
 
     @Override
-    public void setBodyMarkdown(String markdown) {
+    public void setMarkdownBody(String markdown) {
         selftext = markdown;
     }
 
@@ -140,13 +140,8 @@ public class RedditSubmission implements Submission, RedditVotable, Parcelable {
     }
 
     @Override
-    public String getName() {
-        return mName;
-    }
-
-    @Override
     public String getId() {
-        return id;
+        return mName;
     }
 
     @Override
@@ -173,6 +168,11 @@ public class RedditSubmission implements Submission, RedditVotable, Parcelable {
         } else {
             return DOWNVOTED;
         }
+    }
+
+    @Override
+    public void setBodyMarkdown(String markdown) {
+
     }
 
     @Override

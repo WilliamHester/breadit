@@ -153,7 +153,7 @@ public class ReplyFragment extends AsyncSendFragment {
             }
         };
         if (mIsEditing) {
-            redditVotable.setBodyMarkdown(mMarkdownBody.getBody());
+            redditVotable.setMarkdownBody(mMarkdownBody.getBody());
             RedditApi.editThing(redditVotable, callback);
         } else {
             RedditApi.replyToComment(getActivity(), parent, mMarkdownBody.getBody(),

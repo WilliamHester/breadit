@@ -89,7 +89,7 @@ public class RedditApi {
                 .load(REDDIT_URL + "/api/vote")
                 .addHeaders(getStandardHeaders())
                 .setBodyParameter("dir", String.valueOf(v.getVoteValue()))
-                .setBodyParameter("id", v.getName())
+                .setBodyParameter("id", v.getId())
                 .asString();
     }
 
@@ -377,7 +377,7 @@ public class RedditApi {
                             continue;
                         }
                         RedditComment c = (RedditComment) redditThing;
-                        if (c.getName().equals(((RedditAbsComment) data).getParentId())) {
+                        if (c.getId().equals(((RedditAbsComment) data).getParentId())) {
                             ((RedditAbsComment) data).setLevel(c.getLevel() + 1);
                             foundParent = true;
                         }
@@ -401,7 +401,7 @@ public class RedditApi {
         Ion.with(context)
                 .load(REDDIT_URL + "/api/hide")
                 .addHeaders(getStandardHeaders())
-                .setBodyParameter("id", redditSubmission.getName())
+                .setBodyParameter("id", redditSubmission.getId())
                 .asString()
                 .setCallback(callback);
     }
@@ -411,7 +411,7 @@ public class RedditApi {
         Ion.with(context)
                 .load(REDDIT_URL + "/api/unhide")
                 .addHeaders(getStandardHeaders())
-                .setBodyParameter("id", redditSubmission.getName())
+                .setBodyParameter("id", redditSubmission.getId())
                 .asString()
                 .setCallback(callback);
     }
@@ -420,7 +420,7 @@ public class RedditApi {
         Ion.with(context)
                 .load(REDDIT_URL + "/api/del")
                 .addHeaders(getStandardHeaders())
-                .setBodyParameter("id", redditVotable.getName())
+                .setBodyParameter("id", redditVotable.getId())
                 .asString()
                 .setCallback(callback);
     }
@@ -430,7 +430,7 @@ public class RedditApi {
         Ion.with(context)
                 .load(REDDIT_URL + "/api/marknsfw")
                 .addHeaders(getStandardHeaders())
-                .setBodyParameter("id", redditSubmission.getName())
+                .setBodyParameter("id", redditSubmission.getId())
                 .asString()
                 .setCallback(callback);
     }
@@ -440,7 +440,7 @@ public class RedditApi {
         Ion.with(context)
                 .load(REDDIT_URL + "/api/unmarknsfw")
                 .addHeaders(getStandardHeaders())
-                .setBodyParameter("id", redditSubmission.getName())
+                .setBodyParameter("id", redditSubmission.getId())
                 .asString()
                 .setCallback(callback);
     }
@@ -450,7 +450,7 @@ public class RedditApi {
         Ion.with(context)
                 .load(REDDIT_URL + "/api/approve")
                 .addHeaders(getStandardHeaders())
-                .setBodyParameter("id", redditSubmission.getName())
+                .setBodyParameter("id", redditSubmission.getId())
                 .asString()
                 .setCallback(callback);
     }
@@ -460,7 +460,7 @@ public class RedditApi {
         Ion.with(context)
                 .load(REDDIT_URL + "/api/remove")
                 .addHeaders(getStandardHeaders())
-                .setBodyParameter("id", redditSubmission.getName())
+                .setBodyParameter("id", redditSubmission.getId())
                 .setBodyParameter("spam", String.valueOf(spam))
                 .asString()
                 .setCallback(callback);
@@ -472,7 +472,7 @@ public class RedditApi {
                 .load(REDDIT_URL + "/api/set_contest_mode")
                 .addHeaders(getStandardHeaders())
                 .setBodyParameter("api_type", "json")
-                .setBodyParameter("id", redditSubmission.getName())
+                .setBodyParameter("id", redditSubmission.getId())
                 .setBodyParameter("state", String.valueOf(isContest))
                 .asString()
                 .setCallback(callback);
@@ -484,7 +484,7 @@ public class RedditApi {
                 .load(REDDIT_URL + "/api/set_subreddit_sticky")
                 .addHeaders(getStandardHeaders())
                 .setBodyParameter("api_type", "json")
-                .setBodyParameter("id", redditSubmission.getName())
+                .setBodyParameter("id", redditSubmission.getId())
                 .setBodyParameter("state", String.valueOf(isSticky))
                 .asString()
                 .setCallback(callback);
@@ -494,7 +494,7 @@ public class RedditApi {
                              final FutureCallback<ArrayList<RedditThing>> callback) {
         MultipartFormDataBody body = new MultipartFormDataBody();
         body.addStringPart("api_type", "json");
-        body.addStringPart("parent", redditThing.getName());
+        body.addStringPart("parent", redditThing.getId());
         body.addStringPart("text", text);
 
         AsyncHttpRequest request = new AsyncHttpPost(REDDIT_URL + "/api/comment/");
@@ -519,7 +519,7 @@ public class RedditApi {
                                  final FutureCallback<ArrayList<RedditThing>> callback) {
         MultipartFormDataBody body = new MultipartFormDataBody();
         body.addStringPart("api_type", "json");
-        body.addStringPart("thing_id", redditVotable.getName());
+        body.addStringPart("thing_id", redditVotable.getId());
         body.addStringPart("text", redditVotable.getBodyMarkdown());
 
         AsyncHttpRequest request = new AsyncHttpPost(REDDIT_URL + "/api/editusertext/");

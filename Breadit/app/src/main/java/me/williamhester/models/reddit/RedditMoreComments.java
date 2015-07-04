@@ -43,7 +43,7 @@ public class RedditMoreComments extends RedditAbsComment implements RedditThing 
         return "";
     }
 
-    public String getName() {
+    public String getId() {
         return mName;
     }
 

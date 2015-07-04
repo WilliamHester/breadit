@@ -283,7 +283,7 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
     public void onVoted(RedditSubmission redditSubmission) {
         Bundle data = new Bundle();
         Intent i = new Intent();
-        data.putString("name", redditSubmission.getName());
+        data.putString("name", redditSubmission.getId());
         data.putInt("status", redditSubmission.getVoteValue());
         i.putExtras(data);
         getActivity().setResult(Activity.RESULT_OK, i);
@@ -392,7 +392,7 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
                     Intent sendIntent = new Intent();
                     sendIntent.setAction(Intent.ACTION_SEND);
                     String link = RedditApi.PUBLIC_REDDIT_URL + mRedditSubmission.getPermalink()
-                            + redditComment.getName();
+                            + redditComment.getId();
                     sendIntent.putExtra(Intent.EXTRA_TEXT, link);
                     sendIntent.setType("text/plain");
                     startActivity(Intent.createChooser(sendIntent,
@@ -560,7 +560,7 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
                     }
                     Bundle data = new Bundle();
                     Intent i = new Intent();
-                    data.putString("name", redditSubmission.getName());
+                    data.putString("name", redditSubmission.getId());
                     i.putExtras(data);
                     getActivity().setResult(AbsSubmissionListFragment.REMOVE_RESULT_CODE, i);
                     getActivity().finish();
@@ -587,7 +587,7 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
                             if (!redditSubmission.isHidden()) {
                                 Bundle data = new Bundle();
                                 Intent i = new Intent();
-                                data.putString("name", redditSubmission.getName());
+                                data.putString("name", redditSubmission.getId());
                                 i.putExtras(data);
                                 getActivity().setResult(AbsSubmissionListFragment.REMOVE_RESULT_CODE, i);
                                 getActivity().finish();
@@ -671,7 +671,7 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
                     if (!mComment.isLoading()) {
                         mProgressBar.setVisibility(VISIBLE);
                         mComment.setIsLoading(true);
-                        RedditApi.getMoreChildren(mRedditSubmission.getName(),
+                        RedditApi.getMoreChildren(mRedditSubmission.getId(),
                                 mSortType, mComment.getChildren(), mComment.getLevel(),
                                 new FutureCallback<ArrayList<RedditThing>>() {
                                     @Override

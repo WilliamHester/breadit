@@ -189,7 +189,7 @@ public class RedditComment extends RedditAbsComment implements Comment, RedditVo
     }
 
     @Override
-    public void setBodyMarkdown(String markdown) {
+    public void setMarkdownBody(String markdown) {
         mBodyMarkdown = markdown;
     }
 
@@ -199,7 +199,7 @@ public class RedditComment extends RedditAbsComment implements Comment, RedditVo
     }
 
     @Override
-    public String getName() {
+    public String getId() {
         return mName;
     }
 
@@ -303,7 +303,7 @@ public class RedditComment extends RedditAbsComment implements Comment, RedditVo
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof RedditComment && ((RedditComment) o).getName().equals(mName);
+        return o instanceof RedditComment && ((RedditComment) o).getId().equals(mName);
     }
 
     @Override

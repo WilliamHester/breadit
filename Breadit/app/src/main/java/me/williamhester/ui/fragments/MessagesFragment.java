@@ -298,7 +298,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
         if (mRedditMessages == null || mRedditMessages.size() == 0) {
             after = null;
         } else {
-            after = mRedditMessages.get(mRedditMessages.size() - 1).getName();
+            after = mRedditMessages.get(mRedditMessages.size() - 1).getId();
         }
         RedditApi.getMessages(getActivity(), mFilterType, after, mMessageCallback);
     }
@@ -406,7 +406,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
                         mRedditMessage.setUnread(false);
                         mReadStatus.setVisibility(View.GONE);
                         countUnreadAndNotify();
-                        RedditApi.markMessageRead(getActivity(), true, mRedditMessage.getName(),
+                        RedditApi.markMessageRead(getActivity(), true, mRedditMessage.getId(),
                                 new FutureCallback<String>() {
                                     @Override
                                     public void onCompleted(Exception e, String result) {
@@ -459,7 +459,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
             if (mRedditMessage.getAuthor().equalsIgnoreCase(mRedditAccount.getUsername())) {
                 toFrom.append(getResources().getString(R.string.to))
                         .append(' ')
-                        .append(mRedditMessage.getDestination());
+                        .append(mRedditMessage.getRecipient());
             } else {
                 toFrom.append(getResources().getString(R.string.from))
                         .append(' ')
@@ -469,13 +469,13 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
                 toFrom.append(' ')
                         .append(getResources().getString(R.string.via))
                         .append(" /r/")
-                        .append(mRedditMessage.getSubreddit());
+                        .append(mRedditMessage.getBulletin());
             }
             toFrom.append(' ')
                     .append(calculateTimeShort(mRedditMessage.getCreatedUtc()));
             mToFrom.setText(toFrom);
 
-            String unescaped = Html.fromHtml(mRedditMessage.getBodyHtml()).toString();
+            String unescaped = Html.fromHtml(mRedditMessage.getHtmlBody()).toString();
             HtmlParser parser = new HtmlParser(unescaped);
             mBody.setText(parser.getSpannableString());
 
@@ -515,7 +515,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
                         mRedditMessage.setUnread(true);
                         mReadStatus.setVisibility(View.VISIBLE);
                         countUnreadAndNotify();
-                        RedditApi.markMessageRead(getActivity(), false, mRedditMessage.getName(),
+                        RedditApi.markMessageRead(getActivity(), false, mRedditMessage.getId(),
                                 new FutureCallback<String>() {
                                     @Override
                                     public void onCompleted(Exception e, String result) {
@@ -542,7 +542,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
                         Bundle args = new Bundle();
                         i.setAction(Intent.ACTION_VIEW);
                         args.putString("type", "subreddit");
-                        args.putString("subreddit", mRedditMessage.getSubreddit());
+                        args.putString("subreddit", mRedditMessage.getBulletin());
                         i.putExtras(args);
                         startActivity(i);
                         break;

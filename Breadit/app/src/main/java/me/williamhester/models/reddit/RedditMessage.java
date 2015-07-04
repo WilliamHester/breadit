@@ -6,10 +6,12 @@ import android.text.Spannable;
 
 import com.google.gson.annotations.SerializedName;
 
+import me.williamhester.models.bulletin.Message;
+
 /**
  * Created by William on 4/12/14.
  */
-public class RedditMessage implements RedditVotable, Parcelable {
+public class RedditMessage implements Message, RedditVotable, Parcelable {
 
     public static final String ALL = "inbox";
     public static final String UNREAD = "unread";
@@ -55,6 +57,7 @@ public class RedditMessage implements RedditVotable, Parcelable {
     private boolean mWasComment;
     @SerializedName("first_message")
     private String mFirstMessage;
+    private Spannable mSpannable;
 
     public long getCreated() {
         return mCreated;
@@ -65,20 +68,17 @@ public class RedditMessage implements RedditVotable, Parcelable {
     }
 
     @Override
-    public String getBodyMarkdown() {
-        return null;
+    public void setMarkdownBody(String string) {
+        mBody = string;
     }
 
     @Override
-    public void setBodyMarkdown(String string) {
-
-    }
-
-    public String getBody() {
+    public String getBodyMarkdown() {
         return mBody;
     }
 
-    public String getBodyHtml() {
+    @Override
+    public String getHtmlBody() {
         return mBodyHtml;
     }
 
@@ -86,7 +86,8 @@ public class RedditMessage implements RedditVotable, Parcelable {
         return mContext;
     }
 
-    public String getDestination() {
+    @Override
+    public String getRecipient() {
         return mDestination;
     }
 
@@ -102,40 +103,72 @@ public class RedditMessage implements RedditVotable, Parcelable {
         return mReplies;
     }
 
+    @Override
     public String getSubject() {
         return mSubject;
     }
 
-    public String getSubreddit() {
+    @Override
+    public String getSentDate() {
+        return "fixme: sentDate";
+    }
+
+    @Override
+    public String getMarkdownBody() {
+        return mBody;
+    }
+
+    @Override
+    public Spannable getSpannableBody() {
+        return mSpannable;
+    }
+
+    @Override
+    public String getBulletin() {
         return mSubreddit;
     }
 
+    @Override
     public boolean isUnread() {
         return mUnread;
     }
 
+    @Override
     public void setUnread(boolean unread) {
         mUnread = unread;
     }
 
+    @Override
     public boolean isComment() {
         return mWasComment;
     }
 
     @Override
-    public String getName() {
+    public String getId() {
         return mName;
     }
 
     @Override
-    public String getId() {
-        return mId;
+    public String getCommentId() {
+        return mName;
     }
 
+    @Override
+    public String getSubmissionId() {
+        return "fixme: submissionId";
+    }
+
+    @Override
+    public String getSender() {
+        return mAuthor;
+    }
+
+    @Override
     public int getVoteValue() {
         return mVoteStatus == null ? NEUTRAL : (mVoteStatus ? UPVOTED : DOWNVOTED);
     }
 
+    @Override
     public void setVoteValue(int status) {
         if (status == RedditVotable.NEUTRAL) {
             mVoteStatus = null;
@@ -144,17 +177,14 @@ public class RedditMessage implements RedditVotable, Parcelable {
         }
     }
 
-    public int getScore() {
-        return -1;
-    }
-
     @Override
     public String getAuthor() {
         return mAuthor;
     }
 
+    @Override
     public void setSpannableBody(Spannable body) {
-
+        mSpannable = body;
     }
 
     @Override

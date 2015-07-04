@@ -158,7 +158,7 @@ public abstract class AbsSubmissionListFragment extends AccountFragment implemen
                 int status = b.getInt("status");
                 if (name != null) {
                     for (int i = 0; i < mRedditSubmissionList.size(); i++) {
-                        if (mRedditSubmissionList.get(i).getName().equals(name)) {
+                        if (mRedditSubmissionList.get(i).getId().equals(name)) {
                             mRedditSubmissionList.get(i).setVoteValue(status);
                             mSubmissionsAdapter.notifyItemChanged(i + 1);
                             return;
@@ -176,7 +176,7 @@ public abstract class AbsSubmissionListFragment extends AccountFragment implemen
                 if (name != null) {
                     int position = -1;
                     for (int i = 0; i < mRedditSubmissionList.size(); i++) {
-                        if (mRedditSubmissionList.get(i).getName().equals(name)) {
+                        if (mRedditSubmissionList.get(i).getId().equals(name)) {
                             position = i;
                             break;
                         }

@@ -452,7 +452,7 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
         if (mRedditVotables.size() == 0) {
             after = null;
         } else {
-            after = mRedditVotables.get(mRedditVotables.size() - 1).getName();
+            after = mRedditVotables.get(mRedditVotables.size() - 1).getId();
         }
         RedditApi.getUserContent(getActivity(), mUsername, after, mFilterType, mThingsCallback);
     }

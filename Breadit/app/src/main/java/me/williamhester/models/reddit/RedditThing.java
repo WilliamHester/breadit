@@ -8,7 +8,7 @@ import android.os.Parcelable;
 public interface RedditThing extends Parcelable {
 
     public String getAuthor();
-    public String getName();
+    public String getId();
     public String getId();
 
 }

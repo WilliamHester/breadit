@@ -13,6 +13,6 @@ public interface RedditVotable extends RedditThing {
     void setVoteValue(int status);
     long getCreatedUtc();
     String getBodyMarkdown();
-    void setBodyMarkdown(String string);
+    void setMarkdownBody(String string);
 
 }

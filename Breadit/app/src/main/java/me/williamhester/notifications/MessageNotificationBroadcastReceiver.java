@@ -93,7 +93,7 @@ public class MessageNotificationBroadcastReceiver extends BroadcastReceiver {
                     for (int i = 0; i < Math.min(6, redditMessages.size()); i++) {
                         RedditMessage m = redditMessages.get(i);
                         messageTexts[i] = m.getAuthor() + ": "
-                                + Html.fromHtml(Html.fromHtml(m.getBodyHtml()).toString()).toString();
+                                + Html.fromHtml(Html.fromHtml(m.getHtmlBody()).toString()).toString();
                     }
                     // Sets a title for the Inbox in expanded layout
                     inboxStyle.setBigContentTitle(redditMessages.size() + " "

@@ -194,7 +194,7 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
                                     for (RedditResponseWrapper innerWrapper : children) {
                                         if (innerWrapper.getData() instanceof RedditSubmission) {
                                             mNames.add(((RedditSubmission) innerWrapper.getData())
-                                                    .getName());
+                                                    .getId());
                                             redditSubmissions.add((RedditSubmission) innerWrapper.getData());
                                         }
                                     }
@@ -243,7 +243,7 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
         if (mRedditSubmissionList == null || mRedditSubmissionList.size() == 0) {
             after = null;
         } else {
-            after = mRedditSubmissionList.get(mRedditSubmissionList.size() - 1).getName();
+            after = mRedditSubmissionList.get(mRedditSubmissionList.size() - 1).getId();
         }
 //        setFooterLoading();
         FutureCallback<JsonObject> callback = new FutureCallback<JsonObject>() {
@@ -260,9 +260,9 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
                             for (RedditResponseWrapper innerWrapper : children) {
                                 if (innerWrapper.getData() instanceof RedditSubmission &&
                                         !mNames.contains(((RedditSubmission)innerWrapper.getData())
-                                                .getName())) {
+                                                .getId())) {
                                     redditSubmissions.add((RedditSubmission) innerWrapper.getData());
-                                    mNames.add(((RedditSubmission) innerWrapper.getData()).getName());
+                                    mNames.add(((RedditSubmission) innerWrapper.getData()).getId());
                                 }
                             }
                             mRedditSubmissionList.addAll(redditSubmissions);
