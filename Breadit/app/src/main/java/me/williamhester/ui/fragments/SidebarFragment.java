@@ -15,7 +15,7 @@ import android.widget.TextView;
 import java.text.DecimalFormat;
 
 import me.williamhester.models.AccountManager;
-import me.williamhester.models.Subreddit;
+import me.williamhester.models.reddit.RedditSubreddit;
 import me.williamhester.reddit.R;
 import me.williamhester.tools.HtmlParser;
 import me.williamhester.ui.activities.SubmitActivity;
@@ -26,7 +26,7 @@ import me.williamhester.ui.activities.SubmitActivity;
 public class SidebarFragment extends BaseFragment {
 
     private String mSubredditName;
-    private Subreddit mSubreddit = Subreddit.FRONT_PAGE;
+    private RedditSubreddit mRedditSubreddit = RedditSubreddit.FRONT_PAGE;
 
     public static SidebarFragment newInstance(String subredditName) {
         Bundle b = new Bundle();
@@ -36,9 +36,9 @@ public class SidebarFragment extends BaseFragment {
         return fragment;
     }
 
-    public static SidebarFragment newInstance(Subreddit subreddit) {
+    public static SidebarFragment newInstance(RedditSubreddit redditSubreddit) {
         Bundle b = new Bundle();
-        b.putParcelable("subreddit", subreddit);
+        b.putParcelable("redditSubreddit", redditSubreddit);
         SidebarFragment fragment = new SidebarFragment();
         fragment.setArguments(b);
         return fragment;
@@ -51,7 +51,7 @@ public class SidebarFragment extends BaseFragment {
         mSubredditName = getArguments().getString("subredditName");
 
         if (savedInstanceState != null) {
-            mSubreddit = savedInstanceState.getParcelable("subreddit");
+            mRedditSubreddit = savedInstanceState.getParcelable("subreddit");
         }
     }
 
@@ -90,16 +90,16 @@ public class SidebarFragment extends BaseFragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        outState.putParcelable("subreddit", mSubreddit);
+        outState.putParcelable("subreddit", mRedditSubreddit);
     }
 
-    public void setSubreddit(Subreddit subreddit) {
-        mSubreddit = subreddit;
+    public void setSubreddit(RedditSubreddit redditSubreddit) {
+        mRedditSubreddit = redditSubreddit;
         setUpSideBar(getView()); // Refresh the data in the view
     }
 
     /**
-     * This method is called in onCreate (and later after the Subreddit is fetched) to set up the
+     * This method is called in onCreate (and later after the RedditSubreddit is fetched) to set up the
      * sidebar that contains the description HTML and other parts.
      *
      * @param view the currently displayed parent view of the fragment.
@@ -113,8 +113,8 @@ public class SidebarFragment extends BaseFragment {
             TextView subscribers = (TextView) view.findViewById(R.id.subscribers);
             TextView description = (TextView) view.findViewById(R.id.description);
 
-            title.setText("/r/" + mSubreddit.getDisplayName());
-            if (mSubreddit != null) {
+            title.setText("/r/" + mRedditSubreddit.getDisplayName());
+            if (mRedditSubreddit != null) {
                 if (AccountManager.isLoggedIn()) {
                     submit.setVisibility(View.VISIBLE);
                     subscribe.setVisibility(View.VISIBLE);
@@ -126,12 +126,12 @@ public class SidebarFragment extends BaseFragment {
                     subscribe.setVisibility(View.GONE);
                 }
                 DecimalFormat format = new DecimalFormat("###,###,##0");
-                subscribers.setText(format.format(mSubreddit.getSubscriberCount()) + " "
+                subscribers.setText(format.format(mRedditSubreddit.getSubscriberCount()) + " "
                         + getResources().getQuantityString(R.plurals.subscribers,
-                        mSubreddit.getSubscriberCount()));
-                if (!TextUtils.isEmpty(mSubreddit.getDescriptionHtml())) {
+                        mRedditSubreddit.getSubscriberCount()));
+                if (!TextUtils.isEmpty(mRedditSubreddit.getDescriptionHtml())) {
                     HtmlParser parser = new HtmlParser(
-                            Html.fromHtml(mSubreddit.getDescriptionHtml())
+                            Html.fromHtml(mRedditSubreddit.getDescriptionHtml())
                             .toString());
                     description.setText(parser.getSpannableString());
                     description.setMovementMethod(new LinkMovementMethod());

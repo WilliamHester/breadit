@@ -19,8 +19,8 @@ import com.koushikdutta.async.future.FutureCallback;
 
 import me.williamhester.SettingsManager;
 import me.williamhester.models.AccountManager;
-import me.williamhester.models.ResponseRedditWrapper;
-import me.williamhester.models.Subreddit;
+import me.williamhester.models.reddit.RedditResponseWrapper;
+import me.williamhester.models.reddit.RedditSubreddit;
 import me.williamhester.network.RedditApi;
 import me.williamhester.notifications.MessageNotificationBroadcastReceiver;
 import me.williamhester.reddit.R;
@@ -199,9 +199,9 @@ public class MainActivity extends BaseActivity implements
                         e.printStackTrace();
                         return;
                     }
-                    ResponseRedditWrapper response = new ResponseRedditWrapper(result, new Gson());
-                    if (response.getData() instanceof Subreddit) {
-                        mSidebarFragment.setSubreddit((Subreddit) response.getData());
+                    RedditResponseWrapper response = new RedditResponseWrapper(result, new Gson());
+                    if (response.getData() instanceof RedditSubreddit) {
+                        mSidebarFragment.setSubreddit((RedditSubreddit) response.getData());
                         mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED,
                                 Gravity.END);
                     } else {

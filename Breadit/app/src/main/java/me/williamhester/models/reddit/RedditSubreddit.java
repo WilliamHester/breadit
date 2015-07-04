@@ -1,0 +1,309 @@
+package me.williamhester.models.reddit;
+
+import android.database.Cursor;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.util.Log;
+
+import com.google.gson.annotations.SerializedName;
+
+import me.williamhester.models.bulletin.Bulletin;
+
+public class RedditSubreddit implements Bulletin, Parcelable, Comparable<RedditSubreddit> {
+
+    protected String id;
+    protected String name;
+
+    @SerializedName("accounts_active")
+    private int mAccountsActive;
+    @SerializedName("comment_score_hide_mins")
+    private int mCommentScoreHideMins;
+    @SerializedName("subscribers")
+    private int mSubscribers;
+    @SerializedName("created")
+    private long mCreated;
+    @SerializedName("created_utc")
+    private long mCreatedUtc;
+    @SerializedName("description")
+    private String mDescription;
+    @SerializedName("description_html")
+    private String mDescriptionHtml;
+    @SerializedName("display_name")
+    private String mDisplayName;
+    @SerializedName("header_img")
+    private String mHeaderImg;
+    @SerializedName("header_title")
+    private String mHeaderTitle;
+    @SerializedName("public_description")
+    private String mPublicDescription;
+    @SerializedName("submission_type")
+    private String mSubmissionType;
+    @SerializedName("submit_link_label")
+    private String mSubmitLinkLabel;
+    @SerializedName("submit_text_label")
+    private String mSubmitTextLabel;
+    @SerializedName("subreddit_type")
+    private String mSubredditType;
+    @SerializedName("title")
+    private String mTitle;
+    @SerializedName("url")
+    private String mUrl;
+    @SerializedName("over18")
+    private boolean mOver18;
+    @SerializedName("public_traffic")
+    private boolean mPublicTraffic;
+    @SerializedName("user_is_banned")
+    private boolean mUserIsBanned;
+    @SerializedName("user_is_contributor")
+    private boolean mUserIsContributor;
+    @SerializedName("user_is_moderator")
+    private boolean mUserIsModerator;
+    @SerializedName("user_is_subscriber")
+    private boolean mUserIsSubscriber;
+
+    private long mTableId;
+
+    public RedditSubreddit(Cursor cursor) {
+        mTableId = cursor.getLong(0);
+        mDisplayName = cursor.getString(1);
+        mOver18 = cursor.getInt(2) == 1;
+        mPublicTraffic = cursor.getInt(3) == 1;
+        name = cursor.getString(4);
+        mCreated = cursor.getLong(5);
+        mSubmissionType = cursor.getString(6);
+        if (cursor.getColumnCount() > 7) { // In case the cursor does not have the account-related info
+            mUserIsModerator = cursor.getInt(7) == 1;
+            mUserIsBanned = cursor.getInt(8) == 1;
+        }
+    }
+
+    private RedditSubreddit(boolean userIsBanned, String displayName, String title, boolean isNsfw,
+                            boolean userIsModerator, String descriptionHtml, int subscriberCount,
+                            String url, long created, String submissionType, boolean userIsSubscriber,
+                            long tableId, String name) {
+        mUserIsBanned = userIsBanned;
+        mDisplayName = displayName;
+        mTitle = title;
+        mOver18 = isNsfw;
+        mUserIsModerator = userIsModerator;
+        mDescriptionHtml = descriptionHtml;
+        mSubscribers = subscriberCount;
+        mUrl = url;
+        mCreated = created;
+        mSubmissionType = submissionType;
+        mUserIsSubscriber = userIsSubscriber;
+        mTableId = tableId;
+        this.name = name;
+    }
+
+    public static final RedditSubreddit FRONT_PAGE = new RedditSubreddit(false, "Front Page", "Front Page",
+            false, false, "", -1, "", -1, "", false, -1, "Front Page");
+
+    public boolean userIsBanned() {
+        return mUserIsBanned;
+    }
+
+    public String getDisplayName() {
+        return  mDisplayName;
+    }
+
+    public String getHeaderImgUrl() {
+        return  mHeaderImg;
+    }
+
+    public boolean userIsModerator() {
+        return mUserIsModerator;
+    }
+
+    public String getHeaderTitle() {
+        return mHeaderTitle;
+    }
+
+    public String getDescriptionHtml() {
+        return mDescriptionHtml;
+    }
+
+    public String getSubmitLinkLabel() {
+        return mSubmitLinkLabel;
+    }
+
+    public boolean isPublicTraffic() {
+        return mPublicTraffic;
+    }
+
+    public String getSubmitTextLabel() {
+        return  mSubmitTextLabel;
+    }
+
+    public String getUrl() {
+        return  mUrl;
+    }
+
+    public long getCreated() {
+        return  mCreated;
+    }
+
+    public long getCreatedUtc() {
+        return  mCreatedUtc;
+    }
+
+    public boolean userIsContributor() {
+        return mUserIsContributor;
+    }
+
+    public String getPublicDescription() {
+        return  mPublicDescription;
+    }
+
+    public long getCommentScoreHideMins() {
+        return mCommentScoreHideMins;
+    }
+
+    public String getSubredditType() {
+        return  mSubredditType;
+    }
+
+    public String getSubmissionType() {
+        return  mSubmissionType;
+    }
+
+    public boolean userIsSubscriber() {
+        return mUserIsSubscriber;
+    }
+
+    public long getTableId() {
+        return mTableId;
+    }
+
+    public void setTableId(long id) {
+        mTableId = id;
+    }
+
+    @Override
+    public int getSubscriberCount() {
+        return mSubscribers;
+    }
+
+    @Override
+    public boolean isNsfw() {
+        return mOver18;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public String getTitle() {
+        return mTitle;
+    }
+
+    @Override
+    public String getDescription() {
+        return mDescription;
+    }
+
+    @Override
+    public String getCreatedDate() {
+        return "fixme: created date";
+    }
+
+    @Override
+    public String getSidebar() {
+        return "";
+    }
+
+    @Override
+    public String getType() {
+        return mSubmissionType;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof RedditSubreddit && ((RedditSubreddit) o).name == null) {
+            Log.d("RedditSubreddit", "breakpoint");
+        }
+        return o instanceof RedditSubreddit && name != null && (((RedditSubreddit) o).name).equals(name);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(this.mAccountsActive);
+        dest.writeInt(this.mCommentScoreHideMins);
+        dest.writeInt(this.mSubscribers);
+        dest.writeLong(this.mCreated);
+        dest.writeLong(this.mCreatedUtc);
+        dest.writeString(this.mDescription);
+        dest.writeString(this.mDescriptionHtml);
+        dest.writeString(this.mDisplayName);
+        dest.writeString(this.mHeaderImg);
+        dest.writeString(this.mHeaderTitle);
+        dest.writeString(this.mPublicDescription);
+        dest.writeString(this.mSubmissionType);
+        dest.writeString(this.mSubmitLinkLabel);
+        dest.writeString(this.mSubmitTextLabel);
+        dest.writeString(this.mSubredditType);
+        dest.writeString(this.mTitle);
+        dest.writeString(this.mUrl);
+        dest.writeByte(mOver18 ? (byte) 1 : (byte) 0);
+        dest.writeByte(mPublicTraffic ? (byte) 1 : (byte) 0);
+        dest.writeByte(mUserIsBanned ? (byte) 1 : (byte) 0);
+        dest.writeByte(mUserIsContributor ? (byte) 1 : (byte) 0);
+        dest.writeByte(mUserIsModerator ? (byte) 1 : (byte) 0);
+        dest.writeByte(mUserIsSubscriber ? (byte) 1 : (byte) 0);
+        dest.writeString(this.id);
+        dest.writeString(this.name);
+    }
+
+    private RedditSubreddit(Parcel in) {
+        this.mAccountsActive = in.readInt();
+        this.mCommentScoreHideMins = in.readInt();
+        this.mSubscribers = in.readInt();
+        this.mCreated = in.readLong();
+        this.mCreatedUtc = in.readLong();
+        this.mDescription = in.readString();
+        this.mDescriptionHtml = in.readString();
+        this.mDisplayName = in.readString();
+        this.mHeaderImg = in.readString();
+        this.mHeaderTitle = in.readString();
+        this.mPublicDescription = in.readString();
+        this.mSubmissionType = in.readString();
+        this.mSubmitLinkLabel = in.readString();
+        this.mSubmitTextLabel = in.readString();
+        this.mSubredditType = in.readString();
+        this.mTitle = in.readString();
+        this.mUrl = in.readString();
+        this.mOver18 = in.readByte() != 0;
+        this.mPublicTraffic = in.readByte() != 0;
+        this.mUserIsBanned = in.readByte() != 0;
+        this.mUserIsContributor = in.readByte() != 0;
+        this.mUserIsModerator = in.readByte() != 0;
+        this.mUserIsSubscriber = in.readByte() != 0;
+        this.id = in.readString();
+        this.name = in.readString();
+    }
+
+    public static Creator<RedditSubreddit> CREATOR = new Creator<RedditSubreddit>() {
+        public RedditSubreddit createFromParcel(Parcel source) {
+            return new RedditSubreddit(source);
+        }
+
+        public RedditSubreddit[] newArray(int size) {
+            return new RedditSubreddit[size];
+        }
+    };
+
+    @Override
+    public int compareTo(RedditSubreddit redditSubreddit) {
+        if (mDisplayName == null || redditSubreddit == null || redditSubreddit.mDisplayName == null)
+            return -1;
+        return mDisplayName.toLowerCase().compareTo(redditSubreddit.mDisplayName.toLowerCase());
+    }
+}

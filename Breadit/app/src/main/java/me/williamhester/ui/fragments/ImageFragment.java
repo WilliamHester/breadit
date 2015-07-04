@@ -13,7 +13,7 @@ import android.widget.TextView;
 
 import com.koushikdutta.async.future.FutureCallback;
 
-import me.williamhester.models.ImgurImage;
+import me.williamhester.models.imgur.ImgurImage;
 import me.williamhester.network.ImgurApi;
 import me.williamhester.reddit.R;
 import uk.co.senab.photoview.PhotoViewAttacher;

@@ -30,12 +30,12 @@ import butterknife.Bind;
 import me.williamhester.SettingsManager;
 import me.williamhester.knapsack.Knapsack;
 import me.williamhester.knapsack.Save;
-import me.williamhester.models.AbsComment;
-import me.williamhester.models.Comment;
-import me.williamhester.models.MoreComments;
-import me.williamhester.models.Submission;
-import me.williamhester.models.Thing;
-import me.williamhester.models.Votable;
+import me.williamhester.models.reddit.RedditAbsComment;
+import me.williamhester.models.reddit.RedditComment;
+import me.williamhester.models.reddit.RedditMoreComments;
+import me.williamhester.models.reddit.RedditSubmission;
+import me.williamhester.models.reddit.RedditThing;
+import me.williamhester.models.reddit.RedditVotable;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 import me.williamhester.tools.Url;
@@ -61,8 +61,9 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
     @Bind(R.id.swipe_refresh) SwipeRefreshLayout mRefreshLayout;
     @Bind(R.id.comments) RecyclerView mRecyclerView;
 
-    @Save ArrayList<AbsComment> mCommentsList = new ArrayList<>();
-    @Save Submission mSubmission;
+    @Save ArrayList<RedditAbsComment> mCommentsList = new ArrayList<>();
+    @Save
+    RedditSubmission mRedditSubmission;
     @Save String mPermalink;
     @Save String mSortType;
     @Save boolean mLoading = true;
@@ -78,9 +79,9 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
         return fragment;
     }
 
-    public static CommentFragment newInstance(Submission submission) {
+    public static CommentFragment newInstance(RedditSubmission redditSubmission) {
         Bundle args = new Bundle();
-        args.putParcelable("submission", submission);
+        args.putParcelable("redditSubmission", redditSubmission);
         CommentFragment fragment = new CommentFragment();
         fragment.setArguments(args);
         return fragment;
@@ -93,9 +94,9 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
         mContext = getActivity();
         if (savedInstanceState == null && args != null) {
             mSortType = SettingsManager.getDefaultCommentSort();
-            mSubmission = args.getParcelable("submission");
-            if (mSubmission != null) {
-                mPermalink = mSubmission.getPermalink();
+            mRedditSubmission = args.getParcelable("submission");
+            if (mRedditSubmission != null) {
+                mPermalink = mRedditSubmission.getPermalink();
                 RedditApi.getSubmissionData(mContext, mPermalink, mSortType, mSubmissionCallback, mCommentCallback);
             } else {
                 mIsSingleThread = args.getBoolean("isSingleThread", false);
@@ -153,9 +154,9 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.submission_fragment, menu);
 
-        if (mSubmission != null) {
-            Url url = new Url(mSubmission.getUrl());
-            if (mSubmission.isSelf()) {
+        if (mRedditSubmission != null) {
+            Url url = new Url(mRedditSubmission.getUrl());
+            if (mRedditSubmission.isSelf()) {
                 menu.removeItem(R.id.action_view_link);
             } else if (url.getType() == Url.IMGUR_ALBUM
                     || url.getType() == Url.IMGUR_IMAGE
@@ -190,13 +191,13 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
                     Intent i = new Intent(getActivity(), OverlayContentActivity.class);
                     Bundle args = new Bundle();
                     args.putInt("type", OverlayContentActivity.TYPE_SUBMISSION);
-                    args.putParcelable("submission", mSubmission);
+                    args.putParcelable("submission", mRedditSubmission);
                     i.putExtras(args);
                     startActivity(i);
                 }
                 break;
             case R.id.action_open_link_in_browser:
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(mSubmission.getUrl()));
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(mRedditSubmission.getUrl()));
                 startActivity(browserIntent);
                 break;
         }
@@ -208,27 +209,27 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REPLY_REQUEST) {
             Bundle args = data.getExtras();
-            Thing parent = args.getParcelable("parentThing");
-            Comment newComment = args.getParcelable("newComment");
+            RedditThing parent = args.getParcelable("parentThing");
+            RedditComment newRedditComment = args.getParcelable("newRedditComment");
             int index = 0;
-            if (parent instanceof Comment) {
+            if (parent instanceof RedditComment) {
                 index = mCommentsList.indexOf(parent) + 1;
             }
-            mCommentsList.add(index, newComment);
+            mCommentsList.add(index, newRedditComment);
             if (mCommentAdapter != null) {
                 mCommentAdapter.notifyItemInserted(index + mCommentAdapter.getHeaderViewCount());
             }
             return;
         } else if (requestCode == EDIT_REQUEST) {
             Bundle args = data.getExtras();
-            Thing parent = args.getParcelable("parentThing");
-            Votable newThing = args.getParcelable("newComment");
-            Votable oldThing = args.getParcelable("oldThing");
+            RedditThing parent = args.getParcelable("parentThing");
+            RedditVotable newThing = args.getParcelable("newComment");
+            RedditVotable oldThing = args.getParcelable("oldThing");
             if (parent == null) {
-                mSubmissionCallback.onCompleted(null, (Submission) newThing);
+                mSubmissionCallback.onCompleted(null, (RedditSubmission) newThing);
             } else {
                 int index = mCommentsList.indexOf(oldThing);
-                mCommentsList.set(index, (Comment) newThing);
+                mCommentsList.set(index, (RedditComment) newThing);
                 if (mCommentAdapter != null) {
                     mCommentAdapter.notifyItemChanged(index
                             + mCommentAdapter.getHeaderViewCount());
@@ -252,14 +253,14 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
      * @return the number of comments that were hidden
      */
     private int hideComment(int position) {
-        AbsComment comment = mCommentsList.get(position);
+        RedditAbsComment comment = mCommentsList.get(position);
         int level = comment.getLevel();
         position++;
-        ArrayList<AbsComment> children = new ArrayList<>();
+        ArrayList<RedditAbsComment> children = new ArrayList<>();
         while (position < mCommentsList.size() && mCommentsList.get(position).getLevel() > level) {
             children.add(mCommentsList.remove(position));
         }
-        ((Comment) comment).hide(children);
+        ((RedditComment) comment).hide(children);
         return children.size();
     }
 
@@ -270,20 +271,20 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
      * @return the number of comments that were shown
      */
     private int showComment(int position) {
-        AbsComment comment = mCommentsList.get(position);
-        ArrayList<AbsComment> children = ((Comment) comment).unhideComment();
-        for (AbsComment c : children) {
+        RedditAbsComment comment = mCommentsList.get(position);
+        ArrayList<RedditAbsComment> children = ((RedditComment) comment).unhideComment();
+        for (RedditAbsComment c : children) {
             mCommentsList.add(++position, c);
         }
         return children.size();
     }
 
     @Override
-    public void onVoted(Submission submission) {
+    public void onVoted(RedditSubmission redditSubmission) {
         Bundle data = new Bundle();
         Intent i = new Intent();
-        data.putString("name", submission.getName());
-        data.putInt("status", submission.getVoteStatus());
+        data.putString("name", redditSubmission.getName());
+        data.putInt("status", redditSubmission.getVoteValue());
         i.putExtras(data);
         getActivity().setResult(Activity.RESULT_OK, i);
     }
@@ -328,11 +329,11 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
         private CommentViewHolder mFocusedViewHolder;
 
         @Override
-        public void onBodyClick(CommentViewHolder viewHolder, Comment comment) {
-            comment.setHidden(!comment.isHidden());
-            final int position = mCommentsList.indexOf(comment);
+        public void onBodyClick(CommentViewHolder viewHolder, RedditComment redditComment) {
+            redditComment.setHidden(!redditComment.isHidden());
+            final int position = mCommentsList.indexOf(redditComment);
             mCommentAdapter.notifyItemChanged(position + mCommentAdapter.getHeaderViewCount());
-            if (comment.isHidden()) {
+            if (redditComment.isHidden()) {
                 mCommentAdapter.notifyItemRangeRemoved(position + 1
                         + mCommentAdapter.getHeaderViewCount(), hideComment(position));
             } else {
@@ -350,18 +351,18 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
         }
 
         @Override
-        public void onOptionsRowItemSelected(View view, Comment comment) {
+        public void onOptionsRowItemSelected(View view, RedditComment redditComment) {
             switch (view.getId()) {
                 case R.id.option_view_user:
                     Bundle b = new Bundle();
                     b.putString("type", "user");
-                    b.putString("username", comment.getAuthor());
+                    b.putString("username", redditComment.getAuthor());
                     Intent i = new Intent(getActivity(), BrowseActivity.class);
                     i.putExtras(b);
                     getActivity().startActivity(i);
                     break;
                 case R.id.option_reply:
-                    Fragment reply = ReplyFragment.newInstance(comment);
+                    Fragment reply = ReplyFragment.newInstance(redditComment);
                     reply.setTargetFragment(CommentFragment.this, REPLY_REQUEST);
                     getFragmentManager().beginTransaction()
                             .replace(R.id.main_container, reply, "ReplyFragment")
@@ -369,17 +370,17 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
                             .commit();
                     break;
                 case R.id.option_edit: {
-                    Thing parent;
-                    if (comment.getLevel() == 0) {
-                        parent = mSubmission;
+                    RedditThing parent;
+                    if (redditComment.getLevel() == 0) {
+                        parent = mRedditSubmission;
                     } else {
-                        int commentIndex = mCommentsList.indexOf(comment) - 1;
-                        while (mCommentsList.get(commentIndex).getLevel() >= comment.getLevel()) {
+                        int commentIndex = mCommentsList.indexOf(redditComment) - 1;
+                        while (mCommentsList.get(commentIndex).getLevel() >= redditComment.getLevel()) {
                             commentIndex--;
                         }
                         parent = mCommentsList.get(commentIndex);
                     }
-                    ReplyFragment fragment = ReplyFragment.newInstance(parent, comment);
+                    ReplyFragment fragment = ReplyFragment.newInstance(parent, redditComment);
                     fragment.setTargetFragment(CommentFragment.this, EDIT_REQUEST);
                     getFragmentManager().beginTransaction()
                             .replace(R.id.main_container, fragment, "Edit")
@@ -390,8 +391,8 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
                 case R.id.option_share:
                     Intent sendIntent = new Intent();
                     sendIntent.setAction(Intent.ACTION_SEND);
-                    String link = RedditApi.PUBLIC_REDDIT_URL + mSubmission.getPermalink()
-                            + comment.getName();
+                    String link = RedditApi.PUBLIC_REDDIT_URL + mRedditSubmission.getPermalink()
+                            + redditComment.getName();
                     sendIntent.putExtra(Intent.EXTRA_TEXT, link);
                     sendIntent.setType("text/plain");
                     startActivity(Intent.createChooser(sendIntent,
@@ -402,7 +403,7 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
 
         @Override
         public String getSubmissionAuthor() {
-            return mSubmission.getAuthor();
+            return mRedditSubmission.getAuthor();
         }
     };
 
@@ -444,7 +445,7 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
         public void onBindViewHolder(RecyclerView.ViewHolder vh, int position) {
             switch (getItemViewType(position)) {
                 case SUBMISSION:
-                    ((SubmissionViewHolder) vh).setContent(mSubmission);
+                    ((SubmissionViewHolder) vh).setContent(mRedditSubmission);
                     ((SubmissionViewHolder) vh).expandOptionsForComments();
                     ((SubmissionViewHolder) vh).disableClicks();
                     break;
@@ -454,7 +455,7 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
                     break;
                 case MORE_COMMENTS:
                     ((MoreCommentsViewHolder) vh).setContent(
-                            (MoreComments) mCommentsList.get(position - getHeaderViewCount()));
+                            (RedditMoreComments) mCommentsList.get(position - getHeaderViewCount()));
                     break;
             }
         }
@@ -464,14 +465,14 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
             if (position == getItemCount() - 1) {
                 return FOOTER;
             } else if (position == 0) {
-                if (mSubmission != null) {
+                if (mRedditSubmission != null) {
                     return SUBMISSION;
                 } else if (mIsSingleThread) {
                     return SINGLE_THREAD_HEADER;
                 }
             } else if (position == 1 && mIsSingleThread) {
                 return SINGLE_THREAD_HEADER;
-            } else if (mCommentsList.get(position - getHeaderViewCount()) instanceof Comment) {
+            } else if (mCommentsList.get(position - getHeaderViewCount()) instanceof RedditComment) {
                 return COMMENT;
             } else {
                 return MORE_COMMENTS;
@@ -490,7 +491,7 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
         }
 
         public int getHeaderViewCount() {
-            return (mSubmission != null ? 1 : 0) + (mIsSingleThread ? 1 : 0);
+            return (mRedditSubmission != null ? 1 : 0) + (mIsSingleThread ? 1 : 0);
         }
     }
 
@@ -539,7 +540,7 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
         }
 
         @Override
-        public void onCardClicked(Submission submission) {
+        public void onCardClicked(RedditSubmission redditSubmission) {
             // Do nothing
         }
 
@@ -549,7 +550,7 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
         }
 
         @Override
-        public boolean onOptionsRowItemSelected(int itemId, final Submission submission) {
+        public boolean onOptionsRowItemSelected(int itemId, final RedditSubmission redditSubmission) {
             FutureCallback<String> removeCallback = new FutureCallback<String>() {
                 @Override
                 public void onCompleted(Exception e, String result) {
@@ -559,7 +560,7 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
                     }
                     Bundle data = new Bundle();
                     Intent i = new Intent();
-                    data.putString("name", submission.getName());
+                    data.putString("name", redditSubmission.getName());
                     i.putExtras(data);
                     getActivity().setResult(AbsSubmissionListFragment.REMOVE_RESULT_CODE, i);
                     getActivity().finish();
@@ -567,7 +568,7 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
             };
             switch (itemId) {
                 case R.id.option_reply: {
-                    Fragment reply = ReplyFragment.newInstance(submission);
+                    Fragment reply = ReplyFragment.newInstance(redditSubmission);
                     reply.setTargetFragment(CommentFragment.this, REPLY_REQUEST);
                     getFragmentManager().beginTransaction()
                             .replace(R.id.main_container, reply, "ReplyFragment")
@@ -583,33 +584,33 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
                                 e.printStackTrace();
                                 return;
                             }
-                            if (!submission.isHidden()) {
+                            if (!redditSubmission.isHidden()) {
                                 Bundle data = new Bundle();
                                 Intent i = new Intent();
-                                data.putString("name", submission.getName());
+                                data.putString("name", redditSubmission.getName());
                                 i.putExtras(data);
                                 getActivity().setResult(AbsSubmissionListFragment.REMOVE_RESULT_CODE, i);
                                 getActivity().finish();
                             }
                         }
                     };
-                    if (submission.isHidden()) {
-                        RedditApi.unhide(getActivity(), submission, callback);
+                    if (redditSubmission.isHidden()) {
+                        RedditApi.unhide(getActivity(), redditSubmission, callback);
                     } else {
-                        RedditApi.hide(getActivity(), submission, callback);
+                        RedditApi.hide(getActivity(), redditSubmission, callback);
                     }
                     break;
                 }
                 case R.id.overflow_delete: {
-                    RedditApi.delete(getActivity(), submission, removeCallback);
+                    RedditApi.delete(getActivity(), redditSubmission, removeCallback);
                     break;
                 }
                 case R.id.overflow_remove: {
-                    RedditApi.remove(getActivity(), submission, false, removeCallback);
+                    RedditApi.remove(getActivity(), redditSubmission, false, removeCallback);
                     break;
                 }
                 case R.id.overflow_spam: {
-                    RedditApi.remove(getActivity(), submission, true, removeCallback);
+                    RedditApi.remove(getActivity(), redditSubmission, true, removeCallback);
                     break;
                 }
             }
@@ -622,25 +623,25 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
         }
     };
 
-    private FutureCallback<Submission> mSubmissionCallback = new FutureCallback<Submission>() {
+    private FutureCallback<RedditSubmission> mSubmissionCallback = new FutureCallback<RedditSubmission>() {
         @Override
-        public void onCompleted(Exception e, Submission result) {
+        public void onCompleted(Exception e, RedditSubmission result) {
             if (e != null) {
                 return;
             }
-            if (mSubmission != null) {
-                mSubmission.update(result);
+            if (mRedditSubmission != null) {
+                mRedditSubmission.update(result);
             } else {
-                mSubmission = result;
+                mRedditSubmission = result;
             }
             getActivity().invalidateOptionsMenu();
             mCommentAdapter.notifyDataSetChanged();
         }
     };
 
-    private FutureCallback<List<AbsComment>> mCommentCallback = new FutureCallback<List<AbsComment>>() {
+    private FutureCallback<List<RedditAbsComment>> mCommentCallback = new FutureCallback<List<RedditAbsComment>>() {
         @Override
-        public void onCompleted(Exception e, List<AbsComment> result) {
+        public void onCompleted(Exception e, List<RedditAbsComment> result) {
             if (e != null) {
                 return;
             }
@@ -655,7 +656,7 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
 
     private class MoreCommentsViewHolder extends RecyclerView.ViewHolder {
 
-        private MoreComments mComment;
+        private RedditMoreComments mComment;
         private View mProgressBar;
         private View mLevelIndicator;
 
@@ -670,12 +671,12 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
                     if (!mComment.isLoading()) {
                         mProgressBar.setVisibility(VISIBLE);
                         mComment.setIsLoading(true);
-                        RedditApi.getMoreChildren(mSubmission.getName(),
+                        RedditApi.getMoreChildren(mRedditSubmission.getName(),
                                 mSortType, mComment.getChildren(), mComment.getLevel(),
-                                new FutureCallback<ArrayList<Thing>>() {
+                                new FutureCallback<ArrayList<RedditThing>>() {
                                     @Override
                                     public void onCompleted(Exception e,
-                                                            final ArrayList<Thing> comments) {
+                                                            final ArrayList<RedditThing> comments) {
                                         mComment.setIsLoading(false);
                                         if (e != null) {
                                             e.printStackTrace();
@@ -684,9 +685,9 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
                                         int insert = mCommentsList.indexOf(mComment);
                                         final int pos = insert + 1;
                                         mCommentsList.remove(insert);
-                                        for (Thing thing : comments) {
-                                            if (thing instanceof AbsComment) {
-                                                mCommentsList.add(insert++, (AbsComment) thing);
+                                        for (RedditThing redditThing : comments) {
+                                            if (redditThing instanceof RedditAbsComment) {
+                                                mCommentsList.add(insert++, (RedditAbsComment) redditThing);
                                             }
                                         }
                                         if (getView() != null) {
@@ -706,7 +707,7 @@ public class CommentFragment extends BaseFragment implements Toolbar.OnMenuItemC
             });
         }
 
-        public void setContent(MoreComments comment) {
+        public void setContent(RedditMoreComments comment) {
             mComment = comment;
 
             mProgressBar.setVisibility(mComment.isLoading() ? VISIBLE : GONE);

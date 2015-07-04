@@ -16,7 +16,7 @@ import me.williamhester.databases.AccountDataSource;
 import me.williamhester.knapsack.Knapsack;
 import me.williamhester.knapsack.Save;
 import me.williamhester.models.AccountManager;
-import me.williamhester.models.Subreddit;
+import me.williamhester.models.reddit.RedditSubreddit;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.fragments.SubredditListFragment;
@@ -26,7 +26,7 @@ import me.williamhester.ui.fragments.SubredditListFragment;
  */
 public class SelectSubredditActivity extends AppCompatActivity {
 
-    @Save ArrayList<Subreddit> mSubreddits = new ArrayList<>();
+    @Save ArrayList<RedditSubreddit> mRedditSubreddits = new ArrayList<>();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -44,37 +44,37 @@ public class SelectSubredditActivity extends AppCompatActivity {
                     .commit();
         }
 
-        if (mSubreddits.size() == 0) {
+        if (mRedditSubreddits.size() == 0) {
             loadSubreddits();
         }
     }
 
     private void loadSubreddits() {
         if (AccountManager.getAccount() != null) {
-            final ArrayList<Subreddit> subredditList = new ArrayList<>();
+            final ArrayList<RedditSubreddit> redditSubredditList = new ArrayList<>();
             AccountDataSource dataSource = new AccountDataSource(this);
             dataSource.open();
-            subredditList.addAll(dataSource.getCurrentAccountSubreddits());
+            redditSubredditList.addAll(dataSource.getCurrentAccountSubreddits());
             dataSource.close();
-            HashMap<String, Subreddit> subscriptions = AccountManager.getAccount().getSubscriptions();
-            for (Subreddit s : subredditList) {
+            HashMap<String, RedditSubreddit> subscriptions = AccountManager.getAccount().getSubscriptions();
+            for (RedditSubreddit s : redditSubredditList) {
                 subscriptions.put(s.getDisplayName().toLowerCase(), s);
             }
-            Collections.sort(subredditList);
+            Collections.sort(redditSubredditList);
 
-            RedditApi.getSubscribedSubreddits(new FutureCallback<ArrayList<Subreddit>>() {
+            RedditApi.getSubscribedSubreddits(new FutureCallback<ArrayList<RedditSubreddit>>() {
                 @Override
-                public void onCompleted(Exception e, final ArrayList<Subreddit> result) {
+                public void onCompleted(Exception e, final ArrayList<RedditSubreddit> result) {
                     if (e != null) {
                         e.printStackTrace();
                         return;
                     }
                     AccountDataSource dataSource = new AccountDataSource(SelectSubredditActivity.this);
                     dataSource.open();
-                    ArrayList<Subreddit> allSubs = dataSource.getAllSubreddits();
-                    ArrayList<Subreddit> savedSubscriptions = dataSource.getCurrentAccountSubreddits();
+                    ArrayList<RedditSubreddit> allSubs = dataSource.getAllSubreddits();
+                    ArrayList<RedditSubreddit> savedSubscriptions = dataSource.getCurrentAccountSubreddits();
 
-                    for (Subreddit s : result) {
+                    for (RedditSubreddit s : result) {
                         int index = allSubs.indexOf(s); // Get the subreddit WITH the table id
                         if (index < 0) { // if it doesn't exist, create one with a table id
                             dataSource.addSubreddit(s);
@@ -89,8 +89,8 @@ public class SelectSubredditActivity extends AppCompatActivity {
                     final boolean isNew = !result.equals(savedSubscriptions);
 
                     if (isNew) {
-                        subredditList.clear();
-                        subredditList.addAll(result);
+                        redditSubredditList.clear();
+                        redditSubredditList.addAll(result);
                     }
 
                     Handler handler = new Handler(Looper.getMainLooper());
@@ -99,17 +99,17 @@ public class SelectSubredditActivity extends AppCompatActivity {
                         public void run() {
                             Fragment f = getSupportFragmentManager().findFragmentById(R.id.main_container);
                             if (f instanceof SubredditListFragment) {
-                                mSubreddits.addAll(result);
-                                ((SubredditListFragment) f).setSubreddits(mSubreddits);
+                                mRedditSubreddits.addAll(result);
+                                ((SubredditListFragment) f).setSubreddits(mRedditSubreddits);
                             }
                         }
                     });
                 }
             });
         } else {
-            RedditApi.getDefaultSubreddits(new FutureCallback<ArrayList<Subreddit>>() {
+            RedditApi.getDefaultSubreddits(new FutureCallback<ArrayList<RedditSubreddit>>() {
                 @Override
-                public void onCompleted(Exception e, final ArrayList<Subreddit> result) {
+                public void onCompleted(Exception e, final ArrayList<RedditSubreddit> result) {
                     if (e != null) {
                         return;
                     }
@@ -119,8 +119,8 @@ public class SelectSubredditActivity extends AppCompatActivity {
                         public void run() {
                             Fragment f = getSupportFragmentManager().findFragmentById(R.id.main_container);
                             if (f instanceof SubredditListFragment) {
-                                mSubreddits.addAll(result);
-                                ((SubredditListFragment) f).setSubreddits(mSubreddits);
+                                mRedditSubreddits.addAll(result);
+                                ((SubredditListFragment) f).setSubreddits(mRedditSubreddits);
                             }
                         }
                     });

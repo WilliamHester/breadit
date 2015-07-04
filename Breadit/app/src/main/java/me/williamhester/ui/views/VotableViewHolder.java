@@ -7,12 +7,12 @@ import android.view.animation.Transformation;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import me.williamhester.models.Votable;
+import me.williamhester.models.reddit.RedditVotable;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 
 /**
- * This is an abstraction of the ViewHolder that is needed for both the Comment and Submission
+ * This is an abstraction of the ViewHolder that is needed for both the RedditComment and RedditSubmission
  * objects. It sets up the SwipeView and prepares some of the other Views so that others can
  * use them.
  *
@@ -28,7 +28,7 @@ public abstract class VotableViewHolder extends RecyclerView.ViewHolder {
     private View mBackgroundVoteView;
     private View mForegroundVoteView;
     protected SwipeView mSwipeView;
-    private Votable mVotable;
+    private RedditVotable mRedditVotable;
 
     public VotableViewHolder(final View itemView) {
         super(itemView);
@@ -42,15 +42,15 @@ public abstract class VotableViewHolder extends RecyclerView.ViewHolder {
         mSwipeView.setUp(mBackgroundVoteView, mForegroundVoteView, new SwipeView.SwipeListener() {
             @Override
             public void onRightToLeftSwipe() {
-                mVotable.setVoteStatus(mVotable.getVoteStatus() == Votable.DOWNVOTED ? Votable.NEUTRAL : Votable.DOWNVOTED);
-                RedditApi.vote(itemView.getContext(), mVotable);
+                mRedditVotable.setVoteValue(mRedditVotable.getVoteValue() == RedditVotable.DOWNVOTED ? RedditVotable.NEUTRAL : RedditVotable.DOWNVOTED);
+                RedditApi.vote(itemView.getContext(), mRedditVotable);
                 onVoted();
             }
 
             @Override
             public void onLeftToRightSwipe() {
-                mVotable.setVoteStatus(mVotable.getVoteStatus() == Votable.UPVOTED ? Votable.NEUTRAL : Votable.UPVOTED);
-                RedditApi.vote(itemView.getContext(), mVotable);
+                mRedditVotable.setVoteValue(mRedditVotable.getVoteValue() == RedditVotable.UPVOTED ? RedditVotable.NEUTRAL : RedditVotable.UPVOTED);
+                RedditApi.vote(itemView.getContext(), mRedditVotable);
                 onVoted();
             }
         });
@@ -66,11 +66,11 @@ public abstract class VotableViewHolder extends RecyclerView.ViewHolder {
     public abstract void collapseOptions();
 
     public void setContent(Object object) {
-        if (object instanceof Votable) {
-            mVotable = (Votable) object;
-            mSwipeView.recycle(mVotable);
+        if (object instanceof RedditVotable) {
+            mRedditVotable = (RedditVotable) object;
+            mSwipeView.recycle(mRedditVotable);
             if (mTime != null) {
-                mTime.setText(calculateTimeShort(mVotable.getCreatedUtc()));
+                mTime.setText(calculateTimeShort(mRedditVotable.getCreatedUtc()));
             }
             setVoteStatus();
         } else {
@@ -79,14 +79,14 @@ public abstract class VotableViewHolder extends RecyclerView.ViewHolder {
     }
 
     private void setVoteStatus() {
-        switch (mVotable.getVoteStatus()) {
-            case Votable.DOWNVOTED:
+        switch (mRedditVotable.getVoteValue()) {
+            case RedditVotable.DOWNVOTED:
                 mForegroundVoteView.setScaleY(0f);
                 mBackgroundVoteView.setVisibility(View.VISIBLE);
                 mBackgroundVoteView.setBackgroundColor(
                         mBackgroundVoteView.getResources().getColor(R.color.periwinkle));
                 break;
-            case Votable.UPVOTED:
+            case RedditVotable.UPVOTED:
                 mForegroundVoteView.setScaleY(0f);
                 mBackgroundVoteView.setVisibility(View.VISIBLE);
                 mBackgroundVoteView.setBackgroundColor(

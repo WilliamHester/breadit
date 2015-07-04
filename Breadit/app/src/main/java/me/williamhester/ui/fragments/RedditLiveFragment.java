@@ -18,10 +18,10 @@ import com.koushikdutta.async.http.WebSocket;
 
 import java.util.ArrayList;
 
-import me.williamhester.models.LiveResponse;
-import me.williamhester.models.RedditLive;
-import me.williamhester.models.ResponseRedditWrapper;
-import me.williamhester.models.Submission;
+import me.williamhester.models.reddit.RedditLiveResponse;
+import me.williamhester.models.reddit.RedditLive;
+import me.williamhester.models.reddit.RedditSubmission;
+import me.williamhester.models.reddit.RedditResponseWrapper;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 
@@ -32,13 +32,13 @@ public class RedditLiveFragment extends BaseFragment {
 
     private static final String SUBMISSION = "submission";
 
-    private Submission mSubmission;
+    private RedditSubmission mRedditSubmission;
     private LiveAdapter mAdapter;
-    private final ArrayList<LiveResponse> mLiveResponses = new ArrayList<>();
+    private final ArrayList<RedditLiveResponse> mRedditLiveResponses = new ArrayList<>();
 
-    public static RedditLiveFragment newInstance(Submission submission) {
+    public static RedditLiveFragment newInstance(RedditSubmission redditSubmission) {
         Bundle args = new Bundle();
-        args.putParcelable(SUBMISSION, submission);
+        args.putParcelable(SUBMISSION, redditSubmission);
         RedditLiveFragment fragment = new RedditLiveFragment();
         fragment.setArguments(args);
         return fragment;
@@ -49,7 +49,7 @@ public class RedditLiveFragment extends BaseFragment {
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
-            mSubmission = getArguments().getParcelable(SUBMISSION);
+            mRedditSubmission = getArguments().getParcelable(SUBMISSION);
         }
     }
 
@@ -61,7 +61,7 @@ public class RedditLiveFragment extends BaseFragment {
         ListView liveComments = (ListView) v.findViewById(R.id.live_comments);
         liveComments.setAdapter(mAdapter);
 
-        RedditApi.getRedditLiveData(getActivity(), mSubmission, mLiveCallback);
+        RedditApi.getRedditLiveData(getActivity(), mRedditSubmission, mLiveCallback);
         return v;
     }
 
@@ -85,8 +85,8 @@ public class RedditLiveFragment extends BaseFragment {
                     public void onStringAvailable(String s) {
                         if (s.contains("update")) {
                             Gson gson = new Gson();
-                            LiveResponse liveResponse = gson.fromJson(s, LiveResponse.class);
-                            mLiveResponses.add(liveResponse);
+                            RedditLiveResponse redditLiveResponse = gson.fromJson(s, RedditLiveResponse.class);
+                            mRedditLiveResponses.add(redditLiveResponse);
                             if (getView() != null) {
                                 getView().post(new Runnable() {
                                     @Override
@@ -102,10 +102,10 @@ public class RedditLiveFragment extends BaseFragment {
         });
     }
 
-    private FutureCallback<ResponseRedditWrapper> mLiveCallback =
-            new FutureCallback<ResponseRedditWrapper>() {
+    private FutureCallback<RedditResponseWrapper> mLiveCallback =
+            new FutureCallback<RedditResponseWrapper>() {
         @Override
-        public void onCompleted(Exception e, ResponseRedditWrapper result) {
+        public void onCompleted(Exception e, RedditResponseWrapper result) {
             if (e != null) {
                 e.printStackTrace();
                 return;
@@ -116,10 +116,10 @@ public class RedditLiveFragment extends BaseFragment {
         }
     };
 
-    private class LiveAdapter extends ArrayAdapter<LiveResponse> {
+    private class LiveAdapter extends ArrayAdapter<RedditLiveResponse> {
 
         public LiveAdapter() {
-            super(getActivity(), R.layout.list_item_live, mLiveResponses);
+            super(getActivity(), R.layout.list_item_live, mRedditLiveResponses);
         }
 
         @Override

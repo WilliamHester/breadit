@@ -26,7 +26,7 @@ import java.util.List;
 
 import butterknife.Bind;
 import me.williamhester.knapsack.Save;
-import me.williamhester.models.Submission;
+import me.williamhester.models.reddit.RedditSubmission;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.activities.BrowseActivity;
@@ -65,7 +65,7 @@ public abstract class AbsSubmissionListFragment extends AccountFragment implemen
     @Bind(R.id.swipe_refresh) protected SwipeRefreshLayout mSwipeRefreshLayout;
 
     @Save protected boolean mLoading = true;
-    @Save protected ArrayList<Submission> mSubmissionList;
+    @Save protected ArrayList<RedditSubmission> mRedditSubmissionList;
 
     private SubmissionViewHolder mFocusedSubmission;
 
@@ -76,9 +76,9 @@ public abstract class AbsSubmissionListFragment extends AccountFragment implemen
         super.onCreate(savedInstanceState);
 
         if (savedInstanceState == null && getArguments() != null) {
-            mSubmissionList = new ArrayList<>();
+            mRedditSubmissionList = new ArrayList<>();
         }
-        mSubmissionsAdapter = new SubmissionAdapter(this, mSubmissionList);
+        mSubmissionsAdapter = new SubmissionAdapter(this, mRedditSubmissionList);
     }
 
     @Override
@@ -111,7 +111,7 @@ public abstract class AbsSubmissionListFragment extends AccountFragment implemen
             }
         });
 
-        if (!mLoading && mSubmissionList.size() > 0) {
+        if (!mLoading && mRedditSubmissionList.size() > 0) {
             mProgressBar.setVisibility(View.GONE);
         }
 
@@ -122,7 +122,7 @@ public abstract class AbsSubmissionListFragment extends AccountFragment implemen
         mRecyclerView.setAdapter(mSubmissionsAdapter);
 
         mScrollListener = new InfiniteLoadToolbarHideScrollListener(mSubmissionsAdapter, mHeaderBar,
-                mRecyclerView, mSubmissionList, layoutManager, this);
+                mRecyclerView, mRedditSubmissionList, layoutManager, this);
         mRecyclerView.addOnScrollListener(mScrollListener);
 
         onCreateOptionsMenu(mToolbar.getMenu(), getActivity().getMenuInflater());
@@ -157,9 +157,9 @@ public abstract class AbsSubmissionListFragment extends AccountFragment implemen
                 String name = b.getString("name");
                 int status = b.getInt("status");
                 if (name != null) {
-                    for (int i = 0; i < mSubmissionList.size(); i++) {
-                        if (mSubmissionList.get(i).getName().equals(name)) {
-                            mSubmissionList.get(i).setVoteStatus(status);
+                    for (int i = 0; i < mRedditSubmissionList.size(); i++) {
+                        if (mRedditSubmissionList.get(i).getName().equals(name)) {
+                            mRedditSubmissionList.get(i).setVoteValue(status);
                             mSubmissionsAdapter.notifyItemChanged(i + 1);
                             return;
                         }
@@ -175,14 +175,14 @@ public abstract class AbsSubmissionListFragment extends AccountFragment implemen
                 String name = b.getString("name");
                 if (name != null) {
                     int position = -1;
-                    for (int i = 0; i < mSubmissionList.size(); i++) {
-                        if (mSubmissionList.get(i).getName().equals(name)) {
+                    for (int i = 0; i < mRedditSubmissionList.size(); i++) {
+                        if (mRedditSubmissionList.get(i).getName().equals(name)) {
                             position = i;
                             break;
                         }
                     }
                     if (position > -1) {
-                        mSubmissionList.remove(position);
+                        mRedditSubmissionList.remove(position);
                         mSubmissionsAdapter.notifyItemRemoved(position + 1);
                     }
                 }
@@ -198,12 +198,12 @@ public abstract class AbsSubmissionListFragment extends AccountFragment implemen
     }
 
     @Override
-    public void onCardClicked(Submission submission) {
+    public void onCardClicked(RedditSubmission redditSubmission) {
         Intent i = new Intent(getActivity(), BrowseActivity.class);
         Bundle args = new Bundle();
         args.putString("type", "comments");
-        args.putParcelable("submission", submission);
-        args.putParcelable("media", submission.getMedia());
+        args.putParcelable("redditSubmission", redditSubmission);
+        args.putParcelable("media", redditSubmission.getMedia());
         i.putExtras(args);
         startActivityForResult(i, VOTE_REQUEST_CODE);
     }
@@ -222,7 +222,7 @@ public abstract class AbsSubmissionListFragment extends AccountFragment implemen
     }
 
     @Override
-    public boolean onOptionsRowItemSelected(int itemId, final Submission submission) {
+    public boolean onOptionsRowItemSelected(int itemId, final RedditSubmission redditSubmission) {
         FutureCallback<String> removeCallback = new FutureCallback<String>() {
             @Override
             public void onCompleted(Exception e, String result) {
@@ -230,8 +230,8 @@ public abstract class AbsSubmissionListFragment extends AccountFragment implemen
                     e.printStackTrace();
                     return;
                 }
-                int i = mSubmissionList.indexOf(submission);
-                mSubmissionList.remove(i);
+                int i = mRedditSubmissionList.indexOf(redditSubmission);
+                mRedditSubmissionList.remove(i);
                 mSubmissionsAdapter.notifyItemRemoved(i);
             }
         };
@@ -244,30 +244,30 @@ public abstract class AbsSubmissionListFragment extends AccountFragment implemen
                             e.printStackTrace();
                             return;
                         }
-                        if (!submission.isHidden()) {
-                            int i = mSubmissionList.indexOf(submission);
-                            mSubmissionList.remove(i);
+                        if (!redditSubmission.isHidden()) {
+                            int i = mRedditSubmissionList.indexOf(redditSubmission);
+                            mRedditSubmissionList.remove(i);
                             mSubmissionsAdapter.notifyItemRemoved(i);
                         }
                     }
                 };
-                if (submission.isHidden()) {
-                    RedditApi.unhide(getActivity(), submission, callback);
+                if (redditSubmission.isHidden()) {
+                    RedditApi.unhide(getActivity(), redditSubmission, callback);
                 } else {
-                    RedditApi.hide(getActivity(), submission, callback);
+                    RedditApi.hide(getActivity(), redditSubmission, callback);
                 }
                 break;
             }
             case R.id.overflow_delete: {
-                RedditApi.delete(getActivity(), submission, removeCallback);
+                RedditApi.delete(getActivity(), redditSubmission, removeCallback);
                 break;
             }
             case R.id.overflow_remove: {
-                RedditApi.remove(getActivity(), submission, false, removeCallback);
+                RedditApi.remove(getActivity(), redditSubmission, false, removeCallback);
                 break;
             }
             case R.id.overflow_spam: {
-                RedditApi.remove(getActivity(), submission, true, removeCallback);
+                RedditApi.remove(getActivity(), redditSubmission, true, removeCallback);
                 break;
             }
         }
@@ -389,12 +389,12 @@ public abstract class AbsSubmissionListFragment extends AccountFragment implemen
         private static final int HEADER = 2;
         private static final int FOOTER = 3;
 
-        private List<Submission> mSubmissions;
+        private List<RedditSubmission> mRedditSubmissions;
         private SubmissionViewHolder.SubmissionCallbacks mCallback;
 
         public SubmissionAdapter(SubmissionViewHolder.SubmissionCallbacks callbacks,
-                                 List<Submission> submissions) {
-            mSubmissions = submissions;
+                                 List<RedditSubmission> redditSubmissions) {
+            mRedditSubmissions = redditSubmissions;
             mCallback = callbacks;
         }
 
@@ -419,13 +419,13 @@ public abstract class AbsSubmissionListFragment extends AccountFragment implemen
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder submissionViewHolder, int position) {
             if (getItemViewType(position) == SUBMISSION) {
-                ((SubmissionViewHolder) submissionViewHolder).setContent(mSubmissions.get(position - 1));
+                ((SubmissionViewHolder) submissionViewHolder).setContent(mRedditSubmissions.get(position - 1));
             }
         }
 
         @Override
         public int getItemCount() {
-            return mSubmissions.size() + 2;
+            return mRedditSubmissions.size() + 2;
         }
 
         @Override

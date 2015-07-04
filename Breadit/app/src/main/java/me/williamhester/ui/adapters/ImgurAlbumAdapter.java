@@ -9,8 +9,8 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.williamhester.models.ImgurAlbum;
-import me.williamhester.models.ImgurImage;
+import me.williamhester.models.imgur.ImgurAlbum;
+import me.williamhester.models.imgur.ImgurImage;
 import me.williamhester.ui.fragments.GifFragment;
 import me.williamhester.ui.fragments.ImageFragment;
 

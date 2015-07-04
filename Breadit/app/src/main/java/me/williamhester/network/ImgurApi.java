@@ -12,10 +12,10 @@ import com.koushikdutta.ion.Ion;
 import java.util.ArrayList;
 
 import me.williamhester.Auth;
-import me.williamhester.models.ImgurAlbum;
-import me.williamhester.models.ImgurImage;
-import me.williamhester.models.ResponseImgurWrapper;
-import me.williamhester.models.Submission;
+import me.williamhester.models.imgur.ImgurAlbum;
+import me.williamhester.models.imgur.ImgurImage;
+import me.williamhester.models.reddit.RedditSubmission;
+import me.williamhester.models.imgur.ImgurResponseWrapper;
 
 /**
  * Created by William on 6/14/14.
@@ -42,18 +42,18 @@ public class ImgurApi {
         }
     }
 
-    public static void getImageDetails(String id, Context context, final Submission submission,
-                                       final FutureCallback<Submission> callback) {
+    public static void getImageDetails(String id, Context context, final RedditSubmission redditSubmission,
+                                       final FutureCallback<RedditSubmission> callback) {
         mImgurClient.build(context)
                 .load("https://api.imgur.com/3/image/" + id)
                 .addHeader(AUTHORIZATION, CLIENT_ID)
-                .as(new TypeToken<ResponseImgurWrapper<ImgurImage>>(){})
-                .setCallback(new FutureCallback<ResponseImgurWrapper<ImgurImage>>() {
+                .as(new TypeToken<ImgurResponseWrapper<ImgurImage>>(){})
+                .setCallback(new FutureCallback<ImgurResponseWrapper<ImgurImage>>() {
                     @Override
-                    public void onCompleted(Exception e, ResponseImgurWrapper<ImgurImage> result) {
+                    public void onCompleted(Exception e, ImgurResponseWrapper<ImgurImage> result) {
                         if (e == null) {
-                            submission.setImgurData(result.getData());
-                            callback.onCompleted(null, submission);
+                            redditSubmission.setImgurData(result.getData());
+                            callback.onCompleted(null, redditSubmission);
                         } else {
                             callback.onCompleted(e, null);
                         }
@@ -62,26 +62,26 @@ public class ImgurApi {
     }
 
     public static void getImageDetails(String id, Context context,
-                                       final FutureCallback<ResponseImgurWrapper<ImgurImage>> callback) {
+                                       final FutureCallback<ImgurResponseWrapper<ImgurImage>> callback) {
         mImgurClient.build(context)
                 .load("https://api.imgur.com/3/image/" + id)
                 .addHeader(AUTHORIZATION, CLIENT_ID)
-                .as(new TypeToken<ResponseImgurWrapper<ImgurImage>>(){})
+                .as(new TypeToken<ImgurResponseWrapper<ImgurImage>>(){})
                 .setCallback(callback);
     }
 
-    public static void getAlbumDetails(String id, Context context, final Submission submission,
-                                       final FutureCallback<Submission> callback) {
+    public static void getAlbumDetails(String id, Context context, final RedditSubmission redditSubmission,
+                                       final FutureCallback<RedditSubmission> callback) {
         mImgurClient.build(context)
                 .load("https://api.imgur.com/3/album/" + id)
                 .addHeader(AUTHORIZATION, CLIENT_ID)
-                .as(new TypeToken<ResponseImgurWrapper<ImgurAlbum>>(){})
-                .setCallback(new FutureCallback<ResponseImgurWrapper<ImgurAlbum>>() {
+                .as(new TypeToken<ImgurResponseWrapper<ImgurAlbum>>(){})
+                .setCallback(new FutureCallback<ImgurResponseWrapper<ImgurAlbum>>() {
                     @Override
-                    public void onCompleted(Exception e, ResponseImgurWrapper<ImgurAlbum> result) {
+                    public void onCompleted(Exception e, ImgurResponseWrapper<ImgurAlbum> result) {
                         if (e == null) {
-                            submission.setImgurData(result.getData());
-                            callback.onCompleted(null, submission);
+                            redditSubmission.setImgurData(result.getData());
+                            callback.onCompleted(null, redditSubmission);
                         } else {
                             callback.onCompleted(e, null);
                         }
@@ -90,11 +90,11 @@ public class ImgurApi {
     }
 
     public static void getAlbumDetails(String id, Context context,
-                                       final FutureCallback<ResponseImgurWrapper<ImgurAlbum>> callback) {
+                                       final FutureCallback<ImgurResponseWrapper<ImgurAlbum>> callback) {
         mImgurClient.build(context)
                 .load("https://api.imgur.com/3/album/" + id)
                 .addHeader(AUTHORIZATION, CLIENT_ID)
-                .as(new TypeToken<ResponseImgurWrapper<ImgurAlbum>>(){})
+                .as(new TypeToken<ImgurResponseWrapper<ImgurAlbum>>(){})
                 .setCallback(callback);
     }
 

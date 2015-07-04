@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import me.williamhester.models.AccountManager;
-import me.williamhester.models.Subreddit;
+import me.williamhester.models.reddit.RedditSubreddit;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 
@@ -34,7 +34,7 @@ public class SubredditListFragment extends AccountFragment {
     public static final String SUBSCRIPTIONS = "subscriptions";
 
     private final ArrayList<String> mTrendingSubreddits = new ArrayList<>();
-    private final ArrayList<Subreddit> mSubscriptions = new ArrayList<>();
+    private final ArrayList<RedditSubreddit> mSubscriptions = new ArrayList<>();
     private SubredditsExpandableListAdapter mAdapter;
 
     /**
@@ -134,7 +134,7 @@ public class SubredditListFragment extends AccountFragment {
      *
      * @param subs the list of subreddits to put into the adapter.
      */
-    public void setSubreddits(ArrayList<Subreddit> subs) {
+    public void setSubreddits(ArrayList<RedditSubreddit> subs) {
         mSubscriptions.clear();
         mSubscriptions.addAll(subs);
         Collections.sort(mSubscriptions);
@@ -260,7 +260,7 @@ public class SubredditListFragment extends AccountFragment {
                     vh.setContent(mTrendingSubreddits.get(childPosition), false);
                     break;
                 case SUBSCRIPTIONS_GROUP_INDEX:
-                    Subreddit sub = mSubscriptions.get(childPosition);
+                    RedditSubreddit sub = mSubscriptions.get(childPosition);
                     vh.setContent(sub.getDisplayName(), sub.userIsModerator());
                     break;
             }

@@ -3,7 +3,7 @@ package me.williamhester.ui.views;
 import android.view.View;
 import android.widget.TextView;
 
-import me.williamhester.models.Comment;
+import me.williamhester.models.reddit.RedditComment;
 import me.williamhester.reddit.R;
 
 /**
@@ -25,7 +25,7 @@ public class SubmissionCommentViewHolder extends CommentViewHolder {
         itemView.findViewById(R.id.submission_data).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                callbacks.onLinkClicked(mComment);
+                callbacks.onLinkClicked(mRedditComment);
             }
         });
     }
@@ -34,12 +34,12 @@ public class SubmissionCommentViewHolder extends CommentViewHolder {
     public void setContent(Object comment) {
         super.setContent(comment);
 
-        mSubreddit.setText(mComment.getSubreddit());
-        mLinkTitle.setText(mComment.getLinkTitle());
-        mLinkMetaData.setText("by " + mComment.getLinkAuthor());
+        mSubreddit.setText(mRedditComment.getBulletin());
+        mLinkTitle.setText(mRedditComment.getLinkTitle());
+        mLinkMetaData.setText("by " + mRedditComment.getLinkAuthor());
     }
 
     public interface SubmissionCommentCallbacks extends CommentCallbacks {
-        public void onLinkClicked(Comment comment);
+        public void onLinkClicked(RedditComment redditComment);
     }
 }

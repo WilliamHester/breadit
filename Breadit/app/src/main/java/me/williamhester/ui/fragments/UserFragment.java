@@ -32,13 +32,13 @@ import java.util.ArrayList;
 import butterknife.Bind;
 import me.williamhester.knapsack.Save;
 import me.williamhester.models.AccountManager;
-import me.williamhester.models.Comment;
-import me.williamhester.models.GenericResponseRedditWrapper;
-import me.williamhester.models.Listing;
-import me.williamhester.models.ResponseRedditWrapper;
-import me.williamhester.models.Submission;
-import me.williamhester.models.User;
-import me.williamhester.models.Votable;
+import me.williamhester.models.reddit.RedditComment;
+import me.williamhester.models.reddit.RedditGenericResponseWrapper;
+import me.williamhester.models.reddit.RedditListing;
+import me.williamhester.models.reddit.RedditSubmission;
+import me.williamhester.models.reddit.RedditResponseWrapper;
+import me.williamhester.models.reddit.RedditUser;
+import me.williamhester.models.reddit.RedditVotable;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.activities.BrowseActivity;
@@ -73,9 +73,10 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
 
     @Save boolean mLoading;
     @Save boolean mRefreshing;
-    @Save ArrayList<Votable> mVotables = new ArrayList<>();
-    @Save String mFilterType = User.OVERVIEW;
-    @Save User mUser;
+    @Save ArrayList<RedditVotable> mRedditVotables = new ArrayList<>();
+    @Save String mFilterType = RedditUser.OVERVIEW;
+    @Save
+    RedditUser mRedditUser;
 
     public static UserFragment newInstance() {
         return new UserFragment();
@@ -106,9 +107,9 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
             mUsername = getArguments().getString("username");
         }
 
-        if (mUsername == null && mAccount != null) {
-            mUsername = mAccount.getUsername();
-        } else if (mAccount == null) {
+        if (mUsername == null && mRedditAccount != null) {
+            mUsername = mRedditAccount.getUsername();
+        } else if (mRedditAccount == null) {
             throw new IllegalStateException("A username must be provided.");
         }
     }
@@ -158,7 +159,7 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
             @Override
             public void onRefresh() {
                 mRefreshing = true;
-                mVotables.clear();
+                mRedditVotables.clear();
                 mAdapter.notifyDataSetChanged();
                 mScrollListener.resetState();
                 RedditApi.getUserContent(getActivity(), mUsername, null, mFilterType, mThingsCallback);
@@ -182,19 +183,19 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
                 getResources().getDrawable(R.drawable.card_divider)));
         votableRecyclerView.setAdapter(mAdapter);
         mScrollListener = new InfiniteLoadToolbarHideScrollListener(mAdapter, headerBar,
-                votableRecyclerView, mVotables, layoutManager, this);
+                votableRecyclerView, mRedditVotables, layoutManager, this);
         votableRecyclerView.addOnScrollListener(mScrollListener);
 
         final Spinner spinner = (Spinner) view.findViewById(R.id.user_spinner);
         int array = R.array.user_data_types;
-        if (mUser != null && mUser.isLoggedInAccount()) {
+        if (mRedditUser != null && mRedditUser.isLoggedInAccount()) {
             array = R.array.my_account_data_types;
         }
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(),
                 R.layout.spinner_item, R.id.spinner_text,
                 getResources().getStringArray(array));
         spinner.setAdapter(adapter);
-        if (mFilterType.equals(User.OVERVIEW)) {
+        if (mFilterType.equals(RedditUser.OVERVIEW)) {
             spinner.setSelection(0);
         } else {
             String type = mFilterType.substring(0, 1).toUpperCase() + mFilterType.substring(1);
@@ -206,34 +207,34 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
                 String type;
                 switch (position) {
                     case 1:
-                        type = User.COMMENTS;
+                        type = RedditUser.COMMENTS;
                         break;
                     case 2:
-                        type = User.SUBMITTED;
+                        type = RedditUser.SUBMITTED;
                         break;
                     case 3:
-                        type = User.GILDED;
+                        type = RedditUser.GILDED;
                         break;
                     case 4:
-                        type = User.LIKED;
+                        type = RedditUser.LIKED;
                         break;
                     case 5:
-                        type = User.DISLIKED;
+                        type = RedditUser.DISLIKED;
                         break;
                     case 6:
-                        type = User.HIDDEN;
+                        type = RedditUser.HIDDEN;
                         break;
                     case 7:
-                        type = User.SAVED;
+                        type = RedditUser.SAVED;
                         break;
                     default:
                     case 0:
-                        type = User.OVERVIEW;
+                        type = RedditUser.OVERVIEW;
                         break;
                 }
                 if (!type.equals(mFilterType)) {
                     mFilterType = type;
-                    mVotables.clear();
+                    mRedditVotables.clear();
                     mAdapter.notifyDataSetChanged();
                     RedditApi.getUserContent(getActivity(), mUsername, null, mFilterType, mThingsCallback);
                 }
@@ -246,18 +247,18 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
         });
 
         mLoading = true;
-        if (mVotables.size() == 0) {
+        if (mRedditVotables.size() == 0) {
             RedditApi.getUserContent(getActivity(), mUsername, null, mFilterType, mThingsCallback);
         }
-        if (mUser == null) {
-            RedditApi.getUserAbout(getActivity(), mUsername, new FutureCallback<GenericResponseRedditWrapper<User>>() {
+        if (mRedditUser == null) {
+            RedditApi.getUserAbout(getActivity(), mUsername, new FutureCallback<RedditGenericResponseWrapper<RedditUser>>() {
                 @Override
-                public void onCompleted(Exception e, GenericResponseRedditWrapper<User> result) {
+                public void onCompleted(Exception e, RedditGenericResponseWrapper<RedditUser> result) {
                     if (e != null) {
                         return;
                     }
-                    mUser = result.getData();
-                    if (mUser.isLoggedInAccount() && getActivity() != null) {
+                    mRedditUser = result.getData();
+                    if (mRedditUser.isLoggedInAccount() && getActivity() != null) {
                         ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(),
                                 R.layout.spinner_item, R.id.spinner_text,
                                 getResources().getStringArray(R.array.my_account_data_types));
@@ -322,17 +323,17 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
     }
 
     private void updateHeaderView() {
-        if (mUser != null) {
+        if (mRedditUser != null) {
             DecimalFormat format = new DecimalFormat("###,###,###,##0");
-            mLinkKarma.setText(format.format(mUser.getLinkKarma()));
-            mCommentKarma.setText(format.format(mUser.getCommentKarma()));
-            mCakeDay.setText(mUser.calculateCakeDay());
+            mLinkKarma.setText(format.format(mRedditUser.getSubmissionPoints()));
+            mCommentKarma.setText(format.format(mRedditUser.getCommentPoints()));
+            mCakeDay.setText(mRedditUser.calculateCakeDay());
 
             View message = mUserHeader.findViewById(R.id.message);
-            message.setVisibility(!mUser.isLoggedInAccount() && AccountManager.isLoggedIn() ?
+            message.setVisibility(!mRedditUser.isLoggedInAccount() && AccountManager.isLoggedIn() ?
                     View.VISIBLE : View.GONE);
             View friend = mUserHeader.findViewById(R.id.friends);
-            friend.setVisibility(!mUser.isLoggedInAccount() && AccountManager.isLoggedIn() ?
+            friend.setVisibility(!mRedditUser.isLoggedInAccount() && AccountManager.isLoggedIn() ?
                     View.VISIBLE : View.GONE);
         }
     }
@@ -349,11 +350,11 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
                 return;
             }
             Gson gson = new Gson();
-            ResponseRedditWrapper wrapper = new ResponseRedditWrapper(result, gson);
-            if (wrapper.getData() instanceof Listing) {
-                Listing listing = (Listing) wrapper.getData();
-                for (ResponseRedditWrapper wrap : listing.getChildren()) {
-                    mVotables.add((Votable) wrap.getData());
+            RedditResponseWrapper wrapper = new RedditResponseWrapper(result, gson);
+            if (wrapper.getData() instanceof RedditListing) {
+                RedditListing redditListing = (RedditListing) wrapper.getData();
+                for (RedditResponseWrapper wrap : redditListing.getChildren()) {
+                    mRedditVotables.add((RedditVotable) wrap.getData());
                 }
                 mAdapter.notifyDataSetChanged();
             }
@@ -361,12 +362,12 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
     };
 
     @Override
-    public void onCardClicked(Submission submission) {
+    public void onCardClicked(RedditSubmission redditSubmission) {
         Intent i = new Intent(getActivity(), BrowseActivity.class);
         Bundle args = new Bundle();
         args.putString("type", "comments");
-        args.putParcelable("submission", submission);
-        args.putParcelable("media", submission.getMedia());
+        args.putParcelable("redditSubmission", redditSubmission);
+        args.putParcelable("media", redditSubmission.getMedia());
         i.putExtras(args);
         startActivityForResult(i, VOTE_REQUEST_CODE);
     }
@@ -385,7 +386,7 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
     }
 
     @Override
-    public boolean onOptionsRowItemSelected(int itemId, Submission submission) {
+    public boolean onOptionsRowItemSelected(int itemId, RedditSubmission redditSubmission) {
         return false;
     }
 
@@ -395,10 +396,10 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
     }
 
     @Override
-    public void onBodyClick(CommentViewHolder viewHolder, Comment comment) {
-        String permalink = "/r/" + comment.getSubreddit() + "/comments/"
-                + comment.getLinkId().substring(3) + "/breadit/"
-                + comment.getParentId().substring(3) + "?context=3";
+    public void onBodyClick(CommentViewHolder viewHolder, RedditComment redditComment) {
+        String permalink = "/r/" + redditComment.getBulletin() + "/comments/"
+                + redditComment.getLinkId().substring(3) + "/breadit/"
+                + redditComment.getParentId().substring(3) + "?context=3";
         Bundle extras = new Bundle();
         extras.putString("type", "comments");
         extras.putString("permalink", permalink);
@@ -424,7 +425,7 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
     }
 
     @Override
-    public void onOptionsRowItemSelected(View view, Comment comment) {
+    public void onOptionsRowItemSelected(View view, RedditComment redditComment) {
 
     }
 
@@ -434,8 +435,8 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
     }
 
     @Override
-    public void onLinkClicked(Comment comment) {
-        String permalink = "/r/" + comment.getSubreddit() + "/comments/" + comment.getLinkId().substring(3);
+    public void onLinkClicked(RedditComment redditComment) {
+        String permalink = "/r/" + redditComment.getBulletin() + "/comments/" + redditComment.getLinkId().substring(3);
         Bundle extras = new Bundle();
         extras.putString("permalink", permalink);
         extras.putString("type", "comments");
@@ -448,10 +449,10 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
     public void onLoadMore() {
         mProgressBar.setVisibility(View.VISIBLE);
         String after;
-        if (mVotables.size() == 0) {
+        if (mRedditVotables.size() == 0) {
             after = null;
         } else {
-            after = mVotables.get(mVotables.size() - 1).getName();
+            after = mRedditVotables.get(mRedditVotables.size() - 1).getName();
         }
         RedditApi.getUserContent(getActivity(), mUsername, after, mFilterType, mThingsCallback);
     }
@@ -501,13 +502,13 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
             if (holder instanceof VotableViewHolder) {
-                ((VotableViewHolder) holder).setContent(mVotables.get(position - 2));
+                ((VotableViewHolder) holder).setContent(mRedditVotables.get(position - 2));
             }
         }
 
         @Override
         public int getItemCount() {
-            return mVotables.size() + 3;
+            return mRedditVotables.size() + 3;
         }
 
         @Override
@@ -521,7 +522,7 @@ public class UserFragment extends AccountFragment implements Toolbar.OnMenuItemC
             if (position == 1) {
                 return USER_HEADER;
             }
-            return mVotables.get(position - 2) instanceof Comment ? COMMENT : SUBMISSION;
+            return mRedditVotables.get(position - 2) instanceof RedditComment ? COMMENT : SUBMISSION;
         }
     }
 

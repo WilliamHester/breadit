@@ -1,0 +1,61 @@
+package me.williamhester.models.reddit;
+
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import com.google.gson.annotations.SerializedName;
+
+/**
+ * Created by william on 1/8/15.
+ */
+public class RedditFriend implements Parcelable {
+
+    @SerializedName("date")
+    private long mDate;
+    @SerializedName("name")
+    private String mName;
+    @SerializedName("id")
+    private String mId;
+
+    public RedditFriend() { }
+
+    public long getDate() {
+        return mDate;
+    }
+
+    public String getName() {
+        return mName;
+    }
+
+    public String getId() {
+        return mId;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(this.mDate);
+        dest.writeString(this.mName);
+        dest.writeString(this.mId);
+    }
+
+    private RedditFriend(Parcel in) {
+        this.mDate = in.readLong();
+        this.mName = in.readString();
+        this.mId = in.readString();
+    }
+
+    public static final Parcelable.Creator<RedditFriend> CREATOR = new Parcelable.Creator<RedditFriend>() {
+        public RedditFriend createFromParcel(Parcel source) {
+            return new RedditFriend(source);
+        }
+
+        public RedditFriend[] newArray(int size) {
+            return new RedditFriend[size];
+        }
+    };
+}

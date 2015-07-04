@@ -4,9 +4,11 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:1.2.3'
+        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'
     }
 }
 apply plugin: 'com.android.application'
+apply plugin: 'com.neenbedankt.android-apt'
 
 repositories {
     mavenCentral()
@@ -28,14 +30,39 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_7
         targetCompatibility JavaVersion.VERSION_1_7
     }
+
+    def INT = "int"
+    def BUILD_FLAVOR = "BUILD_FLAVOR"
+    def REDDIT = "REDDIT"
+    def VOAT = "VOAT"
+    def REDDIT_BUILD_FLAVOR = "0"
+    def VOAT_BUILD_FLAVOR = "1"
     buildTypes {
         release {
             debuggable false
             minifyEnabled false
+            buildConfigField INT, "REDDIT", REDDIT
+            buildConfigField INT, "VOAT", VOAT
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+        debug {
+            buildConfigField INT, "REDDIT", REDDIT
+            buildConfigField INT, "VOAT", VOAT
+            versionNameSuffix "voat"
+            applicationIdSuffix ".voat"
         }
     }
     productFlavors {
+        voat {
+//            versionNameSuffix "voat"
+//            applicationIdSuffix ".voat"
+            buildConfigField INT, BUILD_FLAVOR, VOAT_BUILD_FLAVOR
+        }
+        reddit {
+//            versionNameSuffix "reddit"
+//            applicationIdSuffix ".reddit"
+            buildConfigField INT, BUILD_FLAVOR, REDDIT_BUILD_FLAVOR
+        }
     }
 }
 
@@ -46,13 +73,17 @@ dependencies {
     compile 'com.github.chrisbanes.photoview:library:1.2.3'     // PhotoView
     compile 'com.koushikdutta.ion:ion:2.0.4'                    // Ion
     compile 'org.jsoup:jsoup:1.7.3'                             // Jsoup
-    compile 'com.google.code.gson:gson:2.2.4'                   // Gson
+    compile 'com.google.code.gson:gson:2.3'                     // Gson
     compile 'com.android.support:support-v4:+'                  // Support Library
     compile 'com.android.support:support-v13:+'                 // Support Library
-    compile 'com.android.support:appcompat-v7:22.1.1'
+    compile 'com.android.support:appcompat-v7:22.2.0'
     compile 'com.android.support:recyclerview-v7:22.2.0'        // Support Library
     compile 'com.android.support:cardview-v7:22.2.0'            // Support Library
     compile files('src/main/libs/YouTubeAndroidPlayerApi.jar')  // YouTube
     compile files('src/main/libs/knapsack.jar')                 // Knapsack
     compile 'com.jakewharton:butterknife:7.0.0'                 // Butterknife
+
+    compile 'com.google.dagger:dagger:2.0'                      // Dagger 2 API
+    apt 'com.google.dagger:dagger-compiler:2.0'                 // Dagger 2 Compiler
+    provided 'javax.annotation:jsr250-api:1.0'
 }

@@ -1,11 +1,8 @@
 package me.williamhester.network;
 
 import android.content.Context;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.view.View;
 import android.widget.ProgressBar;
-import android.widget.VideoView;
 
 import com.google.gson.reflect.TypeToken;
 import com.koushikdutta.async.AsyncServer;
@@ -18,16 +15,15 @@ import com.koushikdutta.async.http.cache.ResponseCacheMiddleware;
 import com.koushikdutta.ion.Ion;
 
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 
-import me.williamhester.models.GfycatResponse;
-import me.williamhester.models.ImgurImage;
-import me.williamhester.models.ResponseGfycatUrlCheck;
-import me.williamhester.models.ResponseGfycatUrlUpload;
+import me.williamhester.models.gfycat.GfycatResponse;
+import me.williamhester.models.imgur.ImgurImage;
+import me.williamhester.models.gfycat.GfycatUrlCheck;
+import me.williamhester.models.gfycat.GfycatUrlUpload;
 
 /**
  * Created by William on 6/14/14.
@@ -59,20 +55,20 @@ public class GfycatApi {
     }
 
     public static void checkIfLinkExists(Context context, String url,
-                                         FutureCallback<ResponseGfycatUrlCheck> callback) {
+                                         FutureCallback<GfycatUrlCheck> callback) {
         String checkUrl = "http://gfycat.com/cajax/checkUrl/" + encodeUrl(url);
         Ion.with(context)
                 .load(checkUrl)
-                .as(new TypeToken<ResponseGfycatUrlCheck>() {})
+                .as(new TypeToken<GfycatUrlCheck>() {})
                 .setCallback(callback);
     }
 
     public static void uploadOrConvertGif(Context context, String url,
-                                          FutureCallback<ResponseGfycatUrlUpload> callback) {
+                                          FutureCallback<GfycatUrlUpload> callback) {
         String uploadUrl = "http://upload.gfycat.com/transcode/0?fetchUrl=" + encodeUrl(url);
         Ion.with(context)
                 .load(uploadUrl)
-                .as(new TypeToken<ResponseGfycatUrlUpload>() {})
+                .as(new TypeToken<GfycatUrlUpload>() {})
                 .setCallback(callback);
     }
 

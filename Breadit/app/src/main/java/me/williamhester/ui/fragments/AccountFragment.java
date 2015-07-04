@@ -2,7 +2,7 @@ package me.williamhester.ui.fragments;
 
 import android.os.Bundle;
 
-import me.williamhester.models.Account;
+import me.williamhester.models.reddit.RedditAccount;
 import me.williamhester.models.AccountManager;
 
 /**
@@ -10,25 +10,25 @@ import me.williamhester.models.AccountManager;
  */
 public abstract class AccountFragment extends BaseFragment {
 
-    protected Account mAccount;
+    protected RedditAccount mRedditAccount;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mAccount = AccountManager.getAccount();
+        mRedditAccount = AccountManager.getAccount();
     }
 
     @Override
     public void onResume() {
         super.onResume();
 
-        Account account = AccountManager.getAccount();
-        if (!(account == null && mAccount == null)
-                && (mAccount == null
-                || account == null
-                || !account.equals(mAccount))) {
-            mAccount = AccountManager.getAccount();
+        RedditAccount redditAccount = AccountManager.getAccount();
+        if (!(redditAccount == null && mRedditAccount == null)
+                && (mRedditAccount == null
+                || redditAccount == null
+                || !redditAccount.equals(mRedditAccount))) {
+            mRedditAccount = AccountManager.getAccount();
             onAccountChanged();
         }
     }

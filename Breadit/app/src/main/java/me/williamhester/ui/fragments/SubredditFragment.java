@@ -19,10 +19,10 @@ import java.util.List;
 
 import butterknife.Bind;
 import me.williamhester.knapsack.Save;
-import me.williamhester.models.Listing;
-import me.williamhester.models.ResponseRedditWrapper;
-import me.williamhester.models.Submission;
-import me.williamhester.models.Subreddit;
+import me.williamhester.models.reddit.RedditListing;
+import me.williamhester.models.reddit.RedditSubmission;
+import me.williamhester.models.reddit.RedditResponseWrapper;
+import me.williamhester.models.reddit.RedditSubreddit;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.activities.SelectSubredditActivity;
@@ -33,7 +33,7 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
     private static final int SELECT_SUBREDDIT = 1;
 
     @Save String mSubredditName;
-    @Save ArrayList<Subreddit> mSubredditList = new ArrayList<>();
+    @Save ArrayList<RedditSubreddit> mRedditSubredditList = new ArrayList<>();
     @Save HashSet<String> mNames;
     @Save boolean mSubredditExists = true;
 
@@ -135,7 +135,7 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
             view.findViewById(R.id.loading_error).setVisibility(View.VISIBLE);
         }
 
-        if (mSubmissionList.size() == 0) {
+        if (mRedditSubmissionList.size() == 0) {
             onRefreshList();
         }
     }
@@ -185,22 +185,22 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
                             }
                             if (e == null) {
                                 mNames.clear();
-                                ResponseRedditWrapper wrapper = new ResponseRedditWrapper(result,
+                                RedditResponseWrapper wrapper = new RedditResponseWrapper(result,
                                         new Gson());
-                                if (wrapper.getData() instanceof Listing) {
-                                    ArrayList<Submission> submissions = new ArrayList<>();
-                                    List<ResponseRedditWrapper> children =
-                                            ((Listing) wrapper.getData()).getChildren();
-                                    for (ResponseRedditWrapper innerWrapper : children) {
-                                        if (innerWrapper.getData() instanceof Submission) {
-                                            mNames.add(((Submission) innerWrapper.getData())
+                                if (wrapper.getData() instanceof RedditListing) {
+                                    ArrayList<RedditSubmission> redditSubmissions = new ArrayList<>();
+                                    List<RedditResponseWrapper> children =
+                                            ((RedditListing) wrapper.getData()).getChildren();
+                                    for (RedditResponseWrapper innerWrapper : children) {
+                                        if (innerWrapper.getData() instanceof RedditSubmission) {
+                                            mNames.add(((RedditSubmission) innerWrapper.getData())
                                                     .getName());
-                                            submissions.add((Submission) innerWrapper.getData());
+                                            redditSubmissions.add((RedditSubmission) innerWrapper.getData());
                                         }
                                     }
-                                    if (submissions.size() > 0) {
-                                        mSubmissionList.clear();
-                                        mSubmissionList.addAll(submissions);
+                                    if (redditSubmissions.size() > 0) {
+                                        mRedditSubmissionList.clear();
+                                        mRedditSubmissionList.addAll(redditSubmissions);
                                         mSubmissionsAdapter.notifyDataSetChanged();
                                     }
                                 }
@@ -215,7 +215,7 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
 
     public void loadSubreddit(String subredditTitle) {
         mSubredditName = subredditTitle;
-        mSubmissionList.clear();
+        mRedditSubmissionList.clear();
         if (getView() == null) {
             return;
         }
@@ -240,10 +240,10 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
     public void onLoadMore() {
         mProgressBar.setVisibility(View.VISIBLE);
         String after;
-        if (mSubmissionList == null || mSubmissionList.size() == 0) {
+        if (mRedditSubmissionList == null || mRedditSubmissionList.size() == 0) {
             after = null;
         } else {
-            after = mSubmissionList.get(mSubmissionList.size() - 1).getName();
+            after = mRedditSubmissionList.get(mRedditSubmissionList.size() - 1).getName();
         }
 //        setFooterLoading();
         FutureCallback<JsonObject> callback = new FutureCallback<JsonObject>() {
@@ -251,24 +251,24 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
             public void onCompleted(Exception e, JsonObject result) {
                 mProgressBar.setVisibility(View.GONE);
                 if (e == null) {
-                    ResponseRedditWrapper wrapper = new ResponseRedditWrapper(result, new Gson());
-                    if (wrapper.getData() instanceof Listing) {
-                        ArrayList<Submission> submissions = new ArrayList<>();
-                        List<ResponseRedditWrapper> children = ((Listing) wrapper.getData())
+                    RedditResponseWrapper wrapper = new RedditResponseWrapper(result, new Gson());
+                    if (wrapper.getData() instanceof RedditListing) {
+                        ArrayList<RedditSubmission> redditSubmissions = new ArrayList<>();
+                        List<RedditResponseWrapper> children = ((RedditListing) wrapper.getData())
                                 .getChildren();
                         if (children.size() != 0) {
-                            for (ResponseRedditWrapper innerWrapper : children) {
-                                if (innerWrapper.getData() instanceof Submission &&
-                                        !mNames.contains(((Submission)innerWrapper.getData())
+                            for (RedditResponseWrapper innerWrapper : children) {
+                                if (innerWrapper.getData() instanceof RedditSubmission &&
+                                        !mNames.contains(((RedditSubmission)innerWrapper.getData())
                                                 .getName())) {
-                                    submissions.add((Submission) innerWrapper.getData());
-                                    mNames.add(((Submission) innerWrapper.getData()).getName());
+                                    redditSubmissions.add((RedditSubmission) innerWrapper.getData());
+                                    mNames.add(((RedditSubmission) innerWrapper.getData()).getName());
                                 }
                             }
-                            mSubmissionList.addAll(submissions);
+                            mRedditSubmissionList.addAll(redditSubmissions);
                             mSubmissionsAdapter.notifyItemRangeInserted(
-                                    mSubmissionList.size() - submissions.size() + 1,
-                                    submissions.size());
+                                    mRedditSubmissionList.size() - redditSubmissions.size() + 1,
+                                    redditSubmissions.size());
                         }
                     }
                 } else {

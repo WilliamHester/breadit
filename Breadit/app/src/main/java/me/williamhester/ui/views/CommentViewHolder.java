@@ -8,20 +8,20 @@ import android.view.View;
 import android.widget.TextView;
 
 import me.williamhester.models.AccountManager;
-import me.williamhester.models.Comment;
+import me.williamhester.models.reddit.RedditComment;
 import me.williamhester.reddit.R;
 import me.williamhester.tools.HtmlParser;
 import me.williamhester.ui.text.ClickableLinkMovementMethod;
 
 /**
  * CommentViewHolder is an extension of the VotableViewHolder and contains all of the necessary
- * information to display a Comment and call back to its parent upon an event.
+ * information to display a RedditComment and call back to its parent upon an event.
  *
  * Created by william on 8/1/14.
  */
 public class CommentViewHolder extends VotableViewHolder {
 
-    protected Comment mComment;
+    protected RedditComment mRedditComment;
     private CommentCallbacks mCallback;
     private TextView mAuthor;
     private TextView mFlairText;
@@ -52,7 +52,7 @@ public class CommentViewHolder extends VotableViewHolder {
         View.OnClickListener optionsRowClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mCallback.onOptionsRowItemSelected(v, mComment);
+                mCallback.onOptionsRowItemSelected(v, mRedditComment);
             }
         };
 
@@ -68,7 +68,7 @@ public class CommentViewHolder extends VotableViewHolder {
             @Override
             public void onClick(View v) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
-                builder.setMessage(Html.fromHtml((mComment).getFlairText()).toString());
+                builder.setMessage(Html.fromHtml((mRedditComment).getFlairText()).toString());
                 builder.setNegativeButton(R.string.close, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -85,7 +85,7 @@ public class CommentViewHolder extends VotableViewHolder {
                     mCallback.onCommentLongPressed(null);
                 } else if (!isHidden()) {
                     optionLinks.setVisibility(
-                            mComment.getLinks().size() > 0 ? View.VISIBLE : View.GONE);
+                            mRedditComment.getLinks().size() > 0 ? View.VISIBLE : View.GONE);
                     optionReply.setVisibility(AccountManager.isLoggedIn() ? View.VISIBLE : View.GONE);
 //                    optionSave.setVisibility(AccountManager.isLoggedIn() ? View.VISIBLE : View.GONE);
                     // TODO: Fix this so that it actually saves
@@ -93,7 +93,7 @@ public class CommentViewHolder extends VotableViewHolder {
                     optionOverflow.setVisibility(AccountManager.isLoggedIn() ? View.VISIBLE : View.GONE);
                     optionEdit.setVisibility(AccountManager.isLoggedIn()
                             && AccountManager.getAccount().getUsername()
-                            .equalsIgnoreCase(mComment.getAuthor()) ? View.VISIBLE : View.GONE);
+                            .equalsIgnoreCase(mRedditComment.getAuthor()) ? View.VISIBLE : View.GONE);
                     mCallback.onCommentLongPressed(CommentViewHolder.this);
                     expand(mOptionsRow);
                 }
@@ -119,13 +119,13 @@ public class CommentViewHolder extends VotableViewHolder {
 
     public void setContent(Object comment) {
         super.setContent(comment);
-        mComment = (Comment) comment;
+        mRedditComment = (RedditComment) comment;
         float dp = itemView.getResources().getDisplayMetrics().density;
-        itemView.setPadding(Math.round(4 * dp * mComment.getLevel()), 0, 0, 0);
+        itemView.setPadding(Math.round(4 * dp * mRedditComment.getLevel()), 0, 0, 0);
         mOptionsRow.setVisibility(View.GONE);
-        if (mComment.getLevel() > 0) {
+        if (mRedditComment.getLevel() > 0) {
             mLevelIndicator.setVisibility(View.VISIBLE);
-            switch (mComment.getLevel() % 4) {
+            switch (mRedditComment.getLevel() % 4) {
                 case 1:
                     mLevelIndicator.setBackgroundColor(mLevelIndicator.getResources().getColor(R.color.green));
                     break;
@@ -143,26 +143,26 @@ public class CommentViewHolder extends VotableViewHolder {
             mLevelIndicator.setBackgroundColor(mLevelIndicator.getResources().getColor(R.color.primary_dark));
         }
         mContent.setOnClickListener(mHideCommentsClickListener);
-        if (mComment.getSpannableBody() == null && mComment.getBodyHtml() != null) {
-            HtmlParser parser = new HtmlParser(Html.fromHtml(mComment.getBodyHtml()).toString());
-            mComment.setSpannableBody(parser.getSpannableString());
-            mComment.setLinks(parser.getLinks());
+        if (mRedditComment.getSpannableBody() == null && mRedditComment.getBodyHtml() != null) {
+            HtmlParser parser = new HtmlParser(Html.fromHtml(mRedditComment.getBodyHtml()).toString());
+            mRedditComment.setSpannableBody(parser.getSpannableString());
+            mRedditComment.setLinks(parser.getLinks());
         }
-        mBody.setText(mComment.getSpannableBody());
-        if (mComment.isHidden()) {
+        mBody.setText(mRedditComment.getSpannableBody());
+        if (mRedditComment.isHidden()) {
             mBody.setVisibility(View.GONE);
         } else {
             mBody.setVisibility(View.VISIBLE);
         }
 
-        mGoldIndicator.setVisibility(mComment.isGilded() ? View.VISIBLE : View.INVISIBLE);
+        mGoldIndicator.setVisibility(mRedditComment.isGilded() ? View.VISIBLE : View.INVISIBLE);
 
-        if (mComment.getAuthor().equals(mCallback.getSubmissionAuthor())
-                || mComment.getAuthor().equals(mComment.getLinkAuthor())) {
+        if (mRedditComment.getAuthor().equals(mCallback.getSubmissionAuthor())
+                || mRedditComment.getAuthor().equals(mRedditComment.getLinkAuthor())) {
             mAuthor.setBackgroundResource(R.drawable.author_background);
             mAuthor.setTextColor(itemView.getResources().getColor(R.color.ghostwhite));
-        } else if (mComment.getDistinguished() != null) {
-            switch (mComment.getDistinguished()) {
+        } else if (mRedditComment.getDistinguished() != null) {
+            switch (mRedditComment.getDistinguished()) {
                 case "moderator":
                     mAuthor.setBackgroundResource(R.drawable.mod_background);
                     mAuthor.setTextColor(itemView.getResources().getColor(R.color.ghostwhite));
@@ -179,38 +179,38 @@ public class CommentViewHolder extends VotableViewHolder {
             mAuthor.setBackground(null);
             mAuthor.setTextColor(itemView.getResources().getColor(R.color.comment_metadata_gray));
         }
-        mAuthor.setText(mComment.getAuthor());
+        mAuthor.setText(mRedditComment.getAuthor());
         StringBuilder sb = new StringBuilder();
-        sb.append(String.valueOf(mComment.getScore()))
+        sb.append(String.valueOf(mRedditComment.getScore()))
                 .append(' ')
-                .append(itemView.getResources().getQuantityString(R.plurals.points, mComment.getScore()))
+                .append(itemView.getResources().getQuantityString(R.plurals.points, mRedditComment.getScore()))
                 .append(' ')
-                .append(calculateTimeShort(mComment.getCreatedUtc()));
+                .append(calculateTimeShort(mRedditComment.getCreatedUtc()));
         mMetadata.setText(sb);
-        if (!TextUtils.isEmpty(mComment.getFlairText())) {
+        if (!TextUtils.isEmpty(mRedditComment.getFlairText())) {
             mFlairText.setVisibility(View.VISIBLE);
             mFlairText.setBackgroundResource(R.drawable.flair_background);
-            mFlairText.setText(Html.fromHtml(mComment.getFlairText()).toString());
+            mFlairText.setText(Html.fromHtml(mRedditComment.getFlairText()).toString());
         } else {
             mFlairText.setVisibility(View.GONE);
         }
     }
 
     public boolean isHidden() {
-        return mComment.isHidden();
+        return mRedditComment.isHidden();
     }
 
     private View.OnClickListener mHideCommentsClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            mCallback.onBodyClick(CommentViewHolder.this, mComment);
+            mCallback.onBodyClick(CommentViewHolder.this, mRedditComment);
         }
     };
 
     public interface CommentCallbacks {
-        public void onBodyClick(CommentViewHolder viewHolder, Comment comment);
+        public void onBodyClick(CommentViewHolder viewHolder, RedditComment redditComment);
         public void onCommentLongPressed(CommentViewHolder holder);
-        public void onOptionsRowItemSelected(View view, Comment comment);
+        public void onOptionsRowItemSelected(View view, RedditComment redditComment);
         public String getSubmissionAuthor();
     }
 }

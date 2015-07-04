@@ -14,7 +14,7 @@ import android.view.animation.ScaleAnimation;
 import android.widget.LinearLayout;
 
 import me.williamhester.models.AccountManager;
-import me.williamhester.models.Votable;
+import me.williamhester.models.reddit.RedditVotable;
 import me.williamhester.reddit.R;
 
 /**
@@ -39,7 +39,7 @@ public class SwipeView extends LinearLayout {
     private VelocityTracker mVelocityTracker;
     private View mBackgroundView;
     private View mForegroundView;
-    private Votable mVotable;
+    private RedditVotable mRedditVotable;
     private final Handler mHandler = new Handler();
 
     public SwipeView(Context context) {
@@ -68,8 +68,8 @@ public class SwipeView extends LinearLayout {
         setEnabled(AccountManager.isLoggedIn());
     }
 
-    public void recycle(Votable votable) {
-        mVotable = votable;
+    public void recycle(RedditVotable redditVotable) {
+        mRedditVotable = redditVotable;
         setEnabled(true);
     }
 
@@ -185,7 +185,7 @@ public class SwipeView extends LinearLayout {
                 return;
             }
             if (swipeDistanceX > 0) {
-                if (mVotable.getVoteStatus() == Votable.UPVOTED) {
+                if (mRedditVotable.getVoteValue() == RedditVotable.UPVOTED) {
                     if (mForegroundView.getVisibility() == VISIBLE) {
                         mForegroundView.setVisibility(GONE);
                         mForegroundView.invalidate();
@@ -200,7 +200,7 @@ public class SwipeView extends LinearLayout {
                     mForegroundView.setScaleY(percent);
                 }
             } else {
-                if (mVotable.getVoteStatus() == Votable.DOWNVOTED) {
+                if (mRedditVotable.getVoteValue() == RedditVotable.DOWNVOTED) {
                     if (mForegroundView.getVisibility() == VISIBLE) {
                         mForegroundView.setVisibility(GONE);
                         mForegroundView.invalidate();
@@ -252,23 +252,23 @@ public class SwipeView extends LinearLayout {
     }
 
     private void onRightToLeftSwipe() {
-        int oldVoteStatus = mVotable.getVoteStatus();
+        int oldVoteStatus = mRedditVotable.getVoteValue();
         if (mSwipeListener != null) {
             mSwipeListener.onRightToLeftSwipe();
         }
         mBackgroundColor = getResources().getColor(R.color.periwinkle);
-        if (oldVoteStatus == Votable.UPVOTED || oldVoteStatus == Votable.NEUTRAL) {
+        if (oldVoteStatus == RedditVotable.UPVOTED || oldVoteStatus == RedditVotable.NEUTRAL) {
             mHandler.postDelayed(mFinishVoteRunnable, ANIMATION_LENGTH);
         }
     }
 
     private void onLeftToRightSwipe() {
-        int oldVoteStatus = mVotable.getVoteStatus();
+        int oldVoteStatus = mRedditVotable.getVoteValue();
         if (mSwipeListener != null) {
             mSwipeListener.onLeftToRightSwipe();
         }
         mBackgroundColor = getResources().getColor(R.color.orangered);
-        if (oldVoteStatus == Votable.DOWNVOTED || oldVoteStatus == Votable.NEUTRAL) {
+        if (oldVoteStatus == RedditVotable.DOWNVOTED || oldVoteStatus == RedditVotable.NEUTRAL) {
             mHandler.postDelayed(mFinishVoteRunnable, ANIMATION_LENGTH);
         }
     }

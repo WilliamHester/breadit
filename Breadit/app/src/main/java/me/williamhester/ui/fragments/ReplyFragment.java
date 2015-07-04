@@ -16,8 +16,8 @@ import com.koushikdutta.async.future.FutureCallback;
 
 import java.util.ArrayList;
 
-import me.williamhester.models.Thing;
-import me.williamhester.models.Votable;
+import me.williamhester.models.reddit.RedditThing;
+import me.williamhester.models.reddit.RedditVotable;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 
@@ -28,18 +28,18 @@ public class ReplyFragment extends AsyncSendFragment {
 
     private boolean mIsEditing;
 
-    public static ReplyFragment newInstance(Thing thing) {
+    public static ReplyFragment newInstance(RedditThing redditThing) {
         Bundle b = new Bundle();
-        b.putParcelable("thing", thing);
+        b.putParcelable("redditThing", redditThing);
         ReplyFragment fragment = new ReplyFragment();
         fragment.setArguments(b);
         return fragment;
     }
 
-    public static ReplyFragment newInstance(Thing parent, Votable votable) {
+    public static ReplyFragment newInstance(RedditThing parent, RedditVotable redditVotable) {
         Bundle b = new Bundle();
         b.putParcelable("thing", parent);
-        b.putParcelable("votable", votable);
+        b.putParcelable("redditVotable", redditVotable);
         ReplyFragment fragment = new ReplyFragment();
         fragment.setArguments(b);
         return fragment;
@@ -47,7 +47,7 @@ public class ReplyFragment extends AsyncSendFragment {
 
     @Override
     protected String getBodyHint() {
-        Thing parent = getArguments().getParcelable("thing");
+        RedditThing parent = getArguments().getParcelable("thing");
         if (parent != null) {
             return getResources().getString(R.string.reply_hint) + " /u/" + parent.getAuthor();
         } else {
@@ -88,8 +88,8 @@ public class ReplyFragment extends AsyncSendFragment {
         onCreateOptionsMenu(mToolbar.getMenu(), getActivity().getMenuInflater());
 
         if (mIsEditing && savedInstanceState == null) {
-            Votable votable = getArguments().getParcelable("votable");
-            mMarkdownBody.setBody(votable.getRawMarkdown());
+            RedditVotable redditVotable = getArguments().getParcelable("redditVotable");
+            mMarkdownBody.setBody(redditVotable.getBodyMarkdown());
         }
     }
 
@@ -106,12 +106,12 @@ public class ReplyFragment extends AsyncSendFragment {
         dialog.setMessage(getResources().getString(R.string.sending_reply));
         dialog.setCancelable(false);
         dialog.show();
-        final Thing parent = getArguments().getParcelable("thing");
-        final Votable votable = getArguments().getParcelable("votable");
-        FutureCallback<ArrayList<Thing>> callback = new FutureCallback<ArrayList<Thing>>() {
+        final RedditThing parent = getArguments().getParcelable("thing");
+        final RedditVotable redditVotable = getArguments().getParcelable("redditVotable");
+        FutureCallback<ArrayList<RedditThing>> callback = new FutureCallback<ArrayList<RedditThing>>() {
             @Override
             public void onCompleted(final Exception e,
-                                    final ArrayList<Thing> result) {
+                                    final ArrayList<RedditThing> result) {
                 if (getView() != null)
                 getView().post(new Runnable() {
                     @Override
@@ -132,7 +132,7 @@ public class ReplyFragment extends AsyncSendFragment {
                         }
                         Intent i = new Intent();
                         Bundle resultBundle = new Bundle();
-                        resultBundle.putParcelable("oldThing", votable);
+                        resultBundle.putParcelable("oldThing", redditVotable);
                         resultBundle.putParcelable("newComment", result.get(0));
                         resultBundle.putParcelable("parentThing", parent);
                         i.putExtras(resultBundle);
@@ -153,8 +153,8 @@ public class ReplyFragment extends AsyncSendFragment {
             }
         };
         if (mIsEditing) {
-            votable.setRawMarkdown(mMarkdownBody.getBody());
-            RedditApi.editThing(votable, callback);
+            redditVotable.setBodyMarkdown(mMarkdownBody.getBody());
+            RedditApi.editThing(redditVotable, callback);
         } else {
             RedditApi.replyToComment(getActivity(), parent, mMarkdownBody.getBody(),
                     callback);

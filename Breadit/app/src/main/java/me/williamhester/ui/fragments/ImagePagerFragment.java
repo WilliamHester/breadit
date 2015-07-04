@@ -13,10 +13,10 @@ import android.widget.TextView;
 
 import com.koushikdutta.async.future.FutureCallback;
 
-import me.williamhester.models.ImgurAlbum;
-import me.williamhester.models.ImgurImage;
-import me.williamhester.models.ResponseImgurWrapper;
-import me.williamhester.models.Submission;
+import me.williamhester.models.imgur.ImgurAlbum;
+import me.williamhester.models.imgur.ImgurImage;
+import me.williamhester.models.reddit.RedditSubmission;
+import me.williamhester.models.imgur.ImgurResponseWrapper;
 import me.williamhester.network.ImgurApi;
 import me.williamhester.reddit.R;
 import me.williamhester.tools.Url;
@@ -76,11 +76,11 @@ public class ImagePagerFragment extends BaseFragment {
         return fragment;
     }
 
-    public static ImagePagerFragment newInstance(Submission submission) {
-        if (submission.getImgurData() != null) {
-            return newInstance(submission.getImgurData());
+    public static ImagePagerFragment newInstance(RedditSubmission redditSubmission) {
+        if (redditSubmission.getImgurData() != null) {
+            return newInstance(redditSubmission.getImgurData());
         }
-        return newInstance(submission.getUrl());
+        return newInstance(redditSubmission.getUrl());
     }
 
     public static ImagePagerFragment newInstance(Object object) {
@@ -153,18 +153,18 @@ public class ImagePagerFragment extends BaseFragment {
         if (getArguments().containsKey(IMGUR_ID)) {
             String imgurId = getArguments().getString(IMGUR_ID);
             if (getArguments().getBoolean(IMGUR_ALBUM)) {
-                ImgurApi.getAlbumDetails(imgurId, getActivity(), new FutureCallback<ResponseImgurWrapper<ImgurAlbum>>() {
+                ImgurApi.getAlbumDetails(imgurId, getActivity(), new FutureCallback<ImgurResponseWrapper<ImgurAlbum>>() {
                     @Override
-                    public void onCompleted(Exception e, ResponseImgurWrapper<ImgurAlbum> result) {
+                    public void onCompleted(Exception e, ImgurResponseWrapper<ImgurAlbum> result) {
                         if (e != null) return;
                         mAdapter = new ImgurAlbumAdapter(getChildFragmentManager(), result.getData());
                         setUpAdapter(view);
                     }
                 });
             } else {
-                ImgurApi.getImageDetails(imgurId, getActivity(), new FutureCallback<ResponseImgurWrapper<ImgurImage>>() {
+                ImgurApi.getImageDetails(imgurId, getActivity(), new FutureCallback<ImgurResponseWrapper<ImgurImage>>() {
                     @Override
-                    public void onCompleted(Exception e, ResponseImgurWrapper<ImgurImage> result) {
+                    public void onCompleted(Exception e, ImgurResponseWrapper<ImgurImage> result) {
                         if (e != null) return;
                         mAdapter = new ImgurAlbumAdapter(getChildFragmentManager(), result.getData());
                         setUpAdapter(view);

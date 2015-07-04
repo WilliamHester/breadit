@@ -19,7 +19,7 @@ import java.util.List;
 
 import me.williamhester.SettingsManager;
 import me.williamhester.databases.AccountDataSource;
-import me.williamhester.models.Account;
+import me.williamhester.models.reddit.RedditAccount;
 import me.williamhester.models.AccountManager;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
@@ -100,14 +100,14 @@ public class SettingsFragment extends PreferenceFragment {
             Intent i = new Intent(getActivity(), LogInActivity.class);
             getActivity().startActivityForResult(i, LOG_IN_REQUEST);
         } else if (preference == mLogOut) {
-            final List<Account> accounts;
+            final List<RedditAccount> redditAccounts;
             AccountDataSource dataSource = new AccountDataSource(getActivity());
             dataSource.open();
-            accounts = dataSource.getAllAccounts();
+            redditAccounts = dataSource.getAllAccounts();
             dataSource.close();
-            final String[] accountNames = new String[accounts.size() + 1];
-            for (int i = 0; i < accounts.size(); i++) {
-                accountNames[i] = accounts.get(i).getUsername();
+            final String[] accountNames = new String[redditAccounts.size() + 1];
+            for (int i = 0; i < redditAccounts.size(); i++) {
+                accountNames[i] = redditAccounts.get(i).getUsername();
             }
             final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(),
                     android.R.style.Theme_Holo_Dialog);
@@ -116,8 +116,8 @@ public class SettingsFragment extends PreferenceFragment {
                     .getSharedPreferences("preferences", Context.MODE_PRIVATE);
             long currentId = prefs.getLong("accountId", -1);
             if (currentId != -1) {
-                for (int i = 0; i < accounts.size(); i++) {
-                    if (currentId == accounts.get(i).getId()) {
+                for (int i = 0; i < redditAccounts.size(); i++) {
+                    if (currentId == redditAccounts.get(i).getId()) {
                         selection = i;
                     }
                 }
@@ -143,8 +143,8 @@ public class SettingsFragment extends PreferenceFragment {
                         public void onClick(DialogInterface dialogInterface, int i) {
                             int selection = ((AlertDialog)dialogInterface)
                                     .getListView().getCheckedItemPosition();
-                            if (selection < accounts.size()) {
-                                AccountManager.setAccount(accounts.get(selection));
+                            if (selection < redditAccounts.size()) {
+                                AccountManager.setAccount(redditAccounts.get(selection));
                             } else {
                                 AccountManager.setAccount(null);
                             }
@@ -154,16 +154,16 @@ public class SettingsFragment extends PreferenceFragment {
             d.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
             d.show();
         } else if (preference == mSwitchUsers) {
-            final List<Account> accounts;
+            final List<RedditAccount> redditAccounts;
             AccountDataSource dataSource = new AccountDataSource(getActivity());
             dataSource.open();
-            accounts = dataSource.getAllAccounts();
+            redditAccounts = dataSource.getAllAccounts();
             dataSource.close();
-            final String[] accountNames = new String[accounts.size() + 1];
-            for (int i = 0; i < accounts.size(); i++) {
-                accountNames[i] = accounts.get(i).getUsername();
+            final String[] accountNames = new String[redditAccounts.size() + 1];
+            for (int i = 0; i < redditAccounts.size(); i++) {
+                accountNames[i] = redditAccounts.get(i).getUsername();
             }
-            accountNames[accounts.size()] = "Log out";
+            accountNames[redditAccounts.size()] = "Log out";
             final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(),
                     android.R.style.Theme_Holo_Dialog);
             int selection = 0;
@@ -171,8 +171,8 @@ public class SettingsFragment extends PreferenceFragment {
                     .getSharedPreferences("preferences", Context.MODE_PRIVATE);
             long currentId = prefs.getLong("accountId", -1);
             if (currentId != -1) {
-                for (int i = 0; i < accounts.size(); i++) {
-                    if (currentId == accounts.get(i).getId()) {
+                for (int i = 0; i < redditAccounts.size(); i++) {
+                    if (currentId == redditAccounts.get(i).getId()) {
                         selection = i;
                     }
                 }
@@ -198,9 +198,9 @@ public class SettingsFragment extends PreferenceFragment {
                         public void onClick(DialogInterface dialogInterface, int i) {
                             int selection = ((AlertDialog)dialogInterface)
                                     .getListView().getCheckedItemPosition();
-                            if (selection < accounts.size()) {
+                            if (selection < redditAccounts.size()) {
                                 mClearHistory.setEnabled(true);
-                                AccountManager.setAccount(accounts.get(selection));
+                                AccountManager.setAccount(redditAccounts.get(selection));
                             } else {
                                 mClearHistory.setEnabled(false);
                                 AccountManager.setAccount(null);

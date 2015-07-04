@@ -18,9 +18,9 @@ import java.io.File;
 
 import butterknife.Bind;
 import me.williamhester.knapsack.Save;
-import me.williamhester.models.GfycatResponse;
-import me.williamhester.models.ImgurImage;
-import me.williamhester.models.ResponseGfycatUrlUpload;
+import me.williamhester.models.gfycat.GfycatResponse;
+import me.williamhester.models.imgur.ImgurImage;
+import me.williamhester.models.gfycat.GfycatUrlUpload;
 import me.williamhester.network.GfycatApi;
 import me.williamhester.reddit.R;
 import me.williamhester.tools.Url;
@@ -107,9 +107,9 @@ public class GifFragment extends BaseFragment implements TextureView.SurfaceText
             GfycatApi.downloadWebmGif(mParser.getUrl(), progressBar, mGifLoadedCallback);
         } else {
             progressBar.setIndeterminate(true);
-            GfycatApi.uploadOrConvertGif(getActivity(), mParser.getUrl(), new FutureCallback<ResponseGfycatUrlUpload>() {
+            GfycatApi.uploadOrConvertGif(getActivity(), mParser.getUrl(), new FutureCallback<GfycatUrlUpload>() {
                 @Override
-                public void onCompleted(Exception e, ResponseGfycatUrlUpload result) {
+                public void onCompleted(Exception e, GfycatUrlUpload result) {
                     if (e != null) {
                         e.printStackTrace();
                         return;
