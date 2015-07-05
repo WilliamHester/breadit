@@ -82,6 +82,8 @@ dependencies {
     compile files('src/main/libs/YouTubeAndroidPlayerApi.jar')  // YouTube
     compile files('src/main/libs/knapsack.jar')                 // Knapsack
     compile 'com.jakewharton:butterknife:7.0.0'                 // Butterknife
+    compile 'com.squareup.retrofit:retrofit:1.9.0'              // Retrofit
+    compile 'com.squareup.okhttp:okhttp:2.2.0'                  // OkHttp
 
     compile 'com.google.dagger:dagger:2.0'                      // Dagger 2 API
     apt 'com.google.dagger:dagger-compiler:2.0'                 // Dagger 2 Compiler

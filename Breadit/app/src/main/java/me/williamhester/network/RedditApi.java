@@ -45,7 +45,7 @@ import me.williamhester.models.reddit.RedditVotable;
 /**
  * Created by William on 6/14/14.
  */
-public class RedditApi {
+public class RedditApi implements BulletinBoardApi {
 
     private static final String USER_AGENT = "Breadit_Android_App";
 
