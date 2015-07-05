@@ -54,5 +54,5 @@ dependencies {
     compile 'com.android.support:cardview-v7:22.2.0'            // Support Library
     compile files('src/main/libs/YouTubeAndroidPlayerApi.jar')  // YouTube
     compile files('src/main/libs/knapsack.jar')                 // Knapsack
-    compile 'com.jakewharton:butterknife:7.0.0'                 // Butterknife
+    compile 'com.jakewharton:butterknife:7.0.1'                 // Butterknife
 }

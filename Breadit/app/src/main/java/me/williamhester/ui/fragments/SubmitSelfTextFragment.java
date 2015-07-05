@@ -38,9 +38,6 @@ public class SubmitSelfTextFragment extends SubmitFragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        if (mBody == null) {
-            mBody = (MarkdownBodyView) view.findViewById(R.id.markdown_body);
-        }
         mBody.setHint(getResources().getString(R.string.self_text));
     }
 
