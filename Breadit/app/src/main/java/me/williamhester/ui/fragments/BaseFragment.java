@@ -1,8 +1,10 @@
 package me.williamhester.ui.fragments;
 
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 
 import butterknife.Bind;
@@ -15,7 +17,9 @@ import me.williamhester.reddit.R;
  */
 public class BaseFragment extends Fragment {
 
-    @Bind(R.id.toolbar_actionbar) protected Toolbar mToolbar;
+    @Bind(R.id.toolbar_actionbar)
+    @Nullable
+    protected Toolbar mToolbar;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -31,6 +35,8 @@ public class BaseFragment extends Fragment {
         try {
             ButterKnife.bind(this, view);
         } catch (RuntimeException e) {
+            e.printStackTrace();
+            Log.d("BaseFragment", "caught a RuntimeException");
             // The class has no views to bind
         }
     }

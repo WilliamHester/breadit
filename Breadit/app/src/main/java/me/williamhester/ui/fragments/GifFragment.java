@@ -203,6 +203,11 @@ public class GifFragment extends BaseFragment implements TextureView.SurfaceText
 
     @Override
     public void onPrepared(MediaPlayer mp) {
+        if (getView() == null) {
+            mp.release();
+            mFile.delete();
+            return;
+        }
         mp.start();
         int height = mp.getVideoHeight();
         int width = mp.getVideoWidth();
