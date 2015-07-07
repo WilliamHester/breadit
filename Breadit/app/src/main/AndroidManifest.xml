@@ -27,7 +27,7 @@
             android:label="@string/title_activity_settings"
             android:screenOrientation="portrait">
         </activity>
-        <activity android:name="me.williamhester.ui.activities.LogInActivity"
+        <activity android:name="me.williamhester.ui.activities.LogInActivity2"
             android:label="@string/login">
         </activity>
         <activity android:name="me.williamhester.ui.activities.SubmitActivity"
@@ -45,12 +45,12 @@
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="http" android:host="www.reddit.com" android:pathPattern=".*"/>
-                <data android:scheme="http" android:host="api.reddit.com" android:pathPattern=".*"/>
-                <data android:scheme="http" android:host="np.reddit.com" android:pathPattern=".*"/>
-                <data android:scheme="https" android:host="www.reddit.com" android:pathPattern=".*"/>
-                <data android:scheme="https" android:host="api.reddit.com" android:pathPattern=".*"/>
-                <data android:scheme="https" android:host="np.reddit.com" android:pathPattern=".*"/>
+                <data android:scheme="http" android:host="www.reddit.com" android:pathPattern="/.*"/>
+                <data android:scheme="http" android:host="api.reddit.com" android:pathPattern="/.*"/>
+                <data android:scheme="http" android:host="np.reddit.com" android:pathPattern="/.*"/>
+                <data android:scheme="https" android:host="www.reddit.com" android:pathPattern="/.*"/>
+                <data android:scheme="https" android:host="api.reddit.com" android:pathPattern="/.*"/>
+                <data android:scheme="https" android:host="np.reddit.com" android:pathPattern="/.*"/>
             </intent-filter>
         </activity>
 
