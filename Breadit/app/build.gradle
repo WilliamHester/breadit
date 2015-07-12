@@ -10,6 +10,7 @@ apply plugin: 'com.android.application'
 
 repositories {
     mavenCentral()
+    jcenter()
 }
 
 android {
@@ -55,4 +56,5 @@ dependencies {
     compile files('src/main/libs/YouTubeAndroidPlayerApi.jar')  // YouTube
     compile files('src/main/libs/knapsack.jar')                 // Knapsack
     compile 'com.jakewharton:butterknife:7.0.1'                 // Butterknife
+    compile 'io.realm:realm-android:0.81.1'                     // Realm
 }

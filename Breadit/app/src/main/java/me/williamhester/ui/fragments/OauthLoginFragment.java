@@ -1,11 +1,11 @@
 package me.williamhester.ui.fragments;
 
+import android.app.Activity;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,11 +16,6 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import com.google.gson.JsonObject;
-import com.koushikdutta.async.future.FutureCallback;
-import com.koushikdutta.ion.Ion;
-
-import java.util.Set;
 import java.util.UUID;
 
 import me.williamhester.Auth;
@@ -34,12 +29,21 @@ public class OauthLoginFragment extends BaseFragment {
 
     private static final String OAUTH_URL = "https://www.reddit.com/api/v1/authorize.compact";
 
+    private OnRedirectListener mCallback;
+
     public static OauthLoginFragment newInstance() {
         Bundle args = new Bundle();
         args.putString("state", UUID.randomUUID().toString());
         OauthLoginFragment fragment = new OauthLoginFragment();
         fragment.setArguments(args);
         return fragment;
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        mCallback = (OnRedirectListener) activity;
     }
 
     @Override
@@ -80,28 +84,6 @@ public class OauthLoginFragment extends BaseFragment {
         webView.loadUrl(url);
     }
 
-    private void getToken(String code) {
-        String authString = Auth.REDDIT_CLIENT_ID + ":";
-        String encoded = Base64.encodeToString(authString.getBytes(), Base64.NO_WRAP);
-        Ion.with(getActivity())
-                .load("https://www.reddit.com/api/v1/access_token")
-                .setHeader("Authorization", "Basic " + encoded)
-                .setBodyParameter("grant_type", "authorization_code")
-                .setBodyParameter("code", code)
-                .setBodyParameter("redirect_uri", Auth.REDDIT_REDIRECT_URL)
-                .asJsonObject()
-                .setCallback(new FutureCallback<JsonObject>() {
-                    @Override
-                    public void onCompleted(Exception e, JsonObject result) {
-                        if (e != null) {
-                            Log.e("OauthLoginFragment", "Authorization failed");
-                            e.printStackTrace();
-                        }
-                        Log.d("OauthLoginFragment", result.toString());
-                    }
-                });
-    }
-
     public Uri buildUri() {
         Uri.Builder builder = Uri.parse(OAUTH_URL).buildUpon();
         builder.appendQueryParameter("client_id", Auth.REDDIT_CLIENT_ID)
@@ -124,16 +106,14 @@ public class OauthLoginFragment extends BaseFragment {
         private boolean interceptUrl(String url) {
             RedditApi.printOutLongString(url);
             if (url.startsWith(Auth.REDDIT_REDIRECT_URL)) {
-                Uri auth = Uri.parse(url);
-                Set<String> params = auth.getQueryParameterNames();
-                if (params.contains("error")) {
-                    Log.d("OauthLoginFragment", auth.getQueryParameter("error"));
-                } else {
-                    getToken(auth.getQueryParameter("code"));
-                }
+                mCallback.onRedirect(Uri.parse(url));
                 return true;
             }
             return false;
         }
+    }
+
+    public interface OnRedirectListener {
+        void onRedirect(Uri uri);
     }
 }

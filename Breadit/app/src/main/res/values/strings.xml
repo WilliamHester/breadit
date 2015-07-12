@@ -292,4 +292,8 @@
     <!-- SelectSubredditActivity -->
     <string name="select_subreddit">Select Subreddit</string>
 
+    <!-- OauthLoginCompleteFragment -->
+    <string name="personalizing_your_experience">Breadit is personalizing your Reddit experience.
+    </string>
+
 </resources>

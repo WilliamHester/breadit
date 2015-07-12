@@ -1,4 +1,6 @@
 <resources>
+    <dimen name="standard_gap">8dp</dimen>
+    <dimen name="two_standard_gaps">16dp</dimen>
     <dimen name="status_bar_height">0dp</dimen>
     <dimen name="headerbar_elevation">4dp</dimen>
     <dimen name="drawer_inset">48dp</dimen>
