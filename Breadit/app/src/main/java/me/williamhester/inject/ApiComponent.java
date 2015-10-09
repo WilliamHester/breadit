@@ -10,7 +10,7 @@ import me.williamhester.ui.fragments.BaseFragment;
  * Created by william on 7/4/15.
  */
 @Singleton
-@Component(modules = {ParentApiModule.class, ApiModule.class})
+@Component(modules = ApiModule.class)
 public interface ApiComponent {
     void inject(BaseFragment baseFragment);
     void inject(BaseActivity baseActivity);

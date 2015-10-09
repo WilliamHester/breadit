@@ -56,6 +56,6 @@ public class BaseFragment extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        Knapsack.save(this, outState);
+Knapsack.save(this, outState);
     }
 }

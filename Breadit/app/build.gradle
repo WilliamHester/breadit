@@ -67,24 +67,34 @@ android {
 }
 
 dependencies {
-    compile 'com.crittercism:crittercism-android-agent:5.0.6'   // Crittercism
-
-    compile 'com.koushikdutta.async:androidasync:2.+'           // AndroidAsync
-    compile 'com.github.chrisbanes.photoview:library:1.2.3'     // PhotoView
-    compile 'com.koushikdutta.ion:ion:2.0.4'                    // Ion
-    compile 'org.jsoup:jsoup:1.7.3'                             // Jsoup
-    compile 'com.google.code.gson:gson:2.3'                     // Gson
-    compile 'com.android.support:support-v4:+'                  // Support Library
-    compile 'com.android.support:support-v13:+'                 // Support Library
-    compile 'com.android.support:appcompat-v7:22.2.0'
+    // Support libs
+    compile 'com.android.support:support-v4:22.2.0'             // Support Library
+    compile 'com.android.support:appcompat-v7:22.2.0'           // AppCompat
     compile 'com.android.support:recyclerview-v7:22.2.0'        // Support Library
     compile 'com.android.support:cardview-v7:22.2.0'            // Support Library
-    compile files('src/main/libs/YouTubeAndroidPlayerApi.jar')  // YouTube
-    compile files('src/main/libs/knapsack.jar')                 // Knapsack
-    compile 'com.jakewharton:butterknife:7.0.1'                 // Butterknife
+
+    // Debugging
+    compile 'com.crittercism:crittercism-android-agent:5.0.6'   // Crittercism
+
+    // Networking
+    compile 'com.koushikdutta.async:androidasync:2.+'           // AndroidAsync
     compile 'com.squareup.retrofit:retrofit:1.9.0'              // Retrofit
     compile 'com.squareup.okhttp:okhttp:2.2.0'                  // OkHttp
+    compile 'com.koushikdutta.ion:ion:2.0.4'                    // Ion
 
+    // Content
+    compile 'com.github.chrisbanes.photoview:library:1.2.3'     // PhotoView
+    compile files('src/main/libs/YouTubeAndroidPlayerApi.jar')  // YouTube
+
+    // Parsing
+    compile 'org.jsoup:jsoup:1.7.3'                             // Jsoup
+    compile 'com.google.code.gson:gson:2.3'                     // Gson
+
+    // Helpers
+    compile files('src/main/libs/knapsack.jar')                 // Knapsack
+    compile 'com.jakewharton:butterknife:7.0.1'                 // Butterknife
+
+    // Dependency Injection
     compile 'com.google.dagger:dagger:2.0'                      // Dagger 2 API
     apt 'com.google.dagger:dagger-compiler:2.0'                 // Dagger 2 Compiler
     provided 'javax.annotation:jsr250-api:1.0'
