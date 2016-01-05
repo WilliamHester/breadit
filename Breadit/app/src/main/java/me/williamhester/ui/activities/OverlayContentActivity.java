@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 
-import me.williamhester.models.reddit.RedditSubmission;
+import me.williamhester.models.reddit.Submission;
 import me.williamhester.reddit.R;
 import me.williamhester.tools.Url;
 import me.williamhester.ui.fragments.ImagePagerFragment;
@@ -30,7 +30,7 @@ public class OverlayContentActivity extends FragmentActivity {
         if (f == null) {
             switch (extras.getInt("type")) {
                 case TYPE_SUBMISSION:
-                    f = getContentFragment((RedditSubmission) extras.getParcelable("submission"));
+                    f = getContentFragment((Submission) extras.getParcelable("submission"));
                     break;
                 case TYPE_LINK:
                     f = getContentFragment((Url) extras.getParcelable("url"));
@@ -43,12 +43,12 @@ public class OverlayContentActivity extends FragmentActivity {
     }
 
     /**
-     * Gets the proper fragment to display the content that the redditSubmission is showing.
+     * Gets the proper fragment to display the content that the submission is showing.
      *
      * @return returns the fragment needed to display the content
      */
-    private Fragment getContentFragment(RedditSubmission redditSubmission) {
-        return getContentFragment(redditSubmission.getLinkDetails());
+    private Fragment getContentFragment(Submission submission) {
+        return getContentFragment(submission.getLinkDetails());
     }
 
     private Fragment getContentFragment(Url url) {

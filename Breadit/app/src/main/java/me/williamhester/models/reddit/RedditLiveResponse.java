@@ -9,6 +9,7 @@ import com.google.gson.annotations.SerializedName;
  * Created by william on 7/29/14.
  */
 public class RedditLiveResponse implements Parcelable {
+
     @SerializedName("type")
     private String mType;
     @SerializedName("payload")

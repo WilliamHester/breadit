@@ -6,12 +6,10 @@ import android.text.Spannable;
 
 import com.google.gson.annotations.SerializedName;
 
-import me.williamhester.models.bulletin.Message;
-
 /**
  * Created by William on 4/12/14.
  */
-public class RedditMessage implements Message, RedditVotable, Parcelable {
+public class Message implements Votable, Parcelable {
 
     public static final String ALL = "inbox";
     public static final String UNREAD = "unread";
@@ -77,7 +75,6 @@ public class RedditMessage implements Message, RedditVotable, Parcelable {
         return mBody;
     }
 
-    @Override
     public String getHtmlBody() {
         return mBodyHtml;
     }
@@ -86,7 +83,6 @@ public class RedditMessage implements Message, RedditVotable, Parcelable {
         return mContext;
     }
 
-    @Override
     public String getRecipient() {
         return mDestination;
     }
@@ -103,42 +99,34 @@ public class RedditMessage implements Message, RedditVotable, Parcelable {
         return mReplies;
     }
 
-    @Override
     public String getSubject() {
         return mSubject;
     }
 
-    @Override
     public String getSentDate() {
         return "fixme: sentDate";
     }
 
-    @Override
     public String getMarkdownBody() {
         return mBody;
     }
 
-    @Override
     public Spannable getSpannableBody() {
         return mSpannable;
     }
 
-    @Override
     public String getBulletin() {
         return mSubreddit;
     }
 
-    @Override
     public boolean isUnread() {
         return mUnread;
     }
 
-    @Override
     public void setUnread(boolean unread) {
         mUnread = unread;
     }
 
-    @Override
     public boolean isComment() {
         return mWasComment;
     }
@@ -148,17 +136,14 @@ public class RedditMessage implements Message, RedditVotable, Parcelable {
         return mName;
     }
 
-    @Override
     public String getCommentId() {
         return mName;
     }
 
-    @Override
     public String getSubmissionId() {
         return "fixme: submissionId";
     }
 
-    @Override
     public String getSender() {
         return mAuthor;
     }
@@ -170,10 +155,10 @@ public class RedditMessage implements Message, RedditVotable, Parcelable {
 
     @Override
     public void setVoteValue(int status) {
-        if (status == RedditVotable.NEUTRAL) {
+        if (status == Votable.NEUTRAL) {
             mVoteStatus = null;
         } else {
-            mVoteStatus = status == RedditVotable.UPVOTED;
+            mVoteStatus = status == Votable.UPVOTED;
         }
     }
 
@@ -182,7 +167,6 @@ public class RedditMessage implements Message, RedditVotable, Parcelable {
         return mAuthor;
     }
 
-    @Override
     public void setSpannableBody(Spannable body) {
         mSpannable = body;
     }
@@ -212,7 +196,7 @@ public class RedditMessage implements Message, RedditVotable, Parcelable {
         dest.writeByte(mWasComment ? (byte) 1 : (byte) 0);
     }
 
-    private RedditMessage(Parcel in) {
+    private Message(Parcel in) {
         this.mCreated = in.readLong();
         this.mCreatedUtc = in.readLong();
         this.mAuthor = in.readString();
@@ -231,13 +215,13 @@ public class RedditMessage implements Message, RedditVotable, Parcelable {
         this.mWasComment = in.readByte() != 0;
     }
 
-    public static Parcelable.Creator<RedditMessage> CREATOR = new Parcelable.Creator<RedditMessage>() {
-        public RedditMessage createFromParcel(Parcel source) {
-            return new RedditMessage(source);
+    public static Parcelable.Creator<Message> CREATOR = new Parcelable.Creator<Message>() {
+        public Message createFromParcel(Parcel source) {
+            return new Message(source);
         }
 
-        public RedditMessage[] newArray(int size) {
-            return new RedditMessage[size];
+        public Message[] newArray(int size) {
+            return new Message[size];
         }
     };
 }

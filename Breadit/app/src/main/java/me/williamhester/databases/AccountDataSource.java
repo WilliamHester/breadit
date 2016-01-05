@@ -9,9 +9,9 @@ import android.util.Log;
 
 import java.util.ArrayList;
 
-import me.williamhester.models.reddit.RedditAccount;
+import me.williamhester.models.reddit.Account;
 import me.williamhester.models.AccountManager;
-import me.williamhester.models.reddit.RedditSubreddit;
+import me.williamhester.models.reddit.Subreddit;
 
 public class AccountDataSource {
 
@@ -34,59 +34,59 @@ public class AccountDataSource {
         mHelper.close();
     }
 
-    public void addAccount(RedditAccount redditAccount) {
+    public void addAccount(Account account) {
         ContentValues values = new ContentValues();
-        values.put(AccountSqlHelper.COLUMN_USERNAME, redditAccount.getUsername());
-        values.put(AccountSqlHelper.COLUMN_COOKIE, redditAccount.getCookie());
-        values.put(AccountSqlHelper.COLUMN_MODHASH, redditAccount.getModhash());
+        values.put(AccountSqlHelper.COLUMN_USERNAME, account.getUsername());
+        values.put(AccountSqlHelper.COLUMN_COOKIE, account.getCookie());
+        values.put(AccountSqlHelper.COLUMN_MODHASH, account.getModhash());
         long id = mDatabase.insert(AccountSqlHelper.TABLE_ACCOUNTS, null, values);
-        redditAccount.setId(id);
+        account.setId(id);
     }
 
-    public void addSubreddit(RedditSubreddit redditSubreddit) {
+    public void addSubreddit(Subreddit subreddit) {
         ContentValues values = new ContentValues();
 
-        values.put(AccountSqlHelper.COLUMN_DISPLAY_NAME, redditSubreddit.getDisplayName());
-        values.put(AccountSqlHelper.COLUMN_OVER_18, redditSubreddit.isNsfw() ? 1 : 0);
-        values.put(AccountSqlHelper.COLUMN_PUBLIC, redditSubreddit.isPublicTraffic() ? 1 : 0);
-        values.put(AccountSqlHelper.COLUMN_NAME, redditSubreddit.getName());
-        values.put(AccountSqlHelper.COLUMN_CREATED, redditSubreddit.getCreated());
-        values.put(AccountSqlHelper.COLUMN_SUBMISSION_TYPES, redditSubreddit.getSubmissionType());
+        values.put(AccountSqlHelper.COLUMN_DISPLAY_NAME, subreddit.getDisplayName());
+        values.put(AccountSqlHelper.COLUMN_OVER_18, subreddit.isNsfw() ? 1 : 0);
+        values.put(AccountSqlHelper.COLUMN_PUBLIC, subreddit.isPublicTraffic() ? 1 : 0);
+        values.put(AccountSqlHelper.COLUMN_NAME, subreddit.getName());
+        values.put(AccountSqlHelper.COLUMN_CREATED, subreddit.getCreated());
+        values.put(AccountSqlHelper.COLUMN_SUBMISSION_TYPES, subreddit.getSubmissionType());
 
         long id = mDatabase.insert(AccountSqlHelper.TABLE_SUBREDDITS, null, values);
-        redditSubreddit.setTableId(id);
+        subreddit.setTableId(id);
     }
 
-    public void addSubscriptionToCurrentAccount(RedditSubreddit redditSubreddit) {
-        addSubscriptionToAccount(redditSubreddit, AccountManager.getAccount());
+    public void addSubscriptionToCurrentAccount(Subreddit subreddit) {
+        addSubscriptionToAccount(subreddit, AccountManager.getAccount());
     }
 
-    public void addSubscriptionToAccount(RedditSubreddit redditSubreddit, RedditAccount redditAccount) {
-        if (redditSubreddit.getTableId() > 0) {
+    public void addSubscriptionToAccount(Subreddit subreddit, Account account) {
+        if (subreddit.getTableId() > 0) {
             ContentValues values = new ContentValues();
 
-            values.put(AccountSqlHelper.COLUMN_USER_IS_MOD, redditSubreddit.userIsModerator());
-            values.put(AccountSqlHelper.COLUMN_USER_IS_BANNED, redditSubreddit.userIsBanned());
-            values.put(AccountSqlHelper.COLUMN_SUBREDDIT_ID, redditSubreddit.getTableId());
-            values.put(AccountSqlHelper.COLUMN_USER_ID, redditAccount.getId());
+            values.put(AccountSqlHelper.COLUMN_USER_IS_MOD, subreddit.userIsModerator());
+            values.put(AccountSqlHelper.COLUMN_USER_IS_BANNED, subreddit.userIsBanned());
+            values.put(AccountSqlHelper.COLUMN_SUBREDDIT_ID, subreddit.getTableId());
+            values.put(AccountSqlHelper.COLUMN_USER_ID, account.getId());
 
             mDatabase.insert(AccountSqlHelper.TABLE_SUBSCRIPTIONS, null, values);
         } else {
-            throw new UnsupportedOperationException("Attempted to insert a redditSubreddit with id 0 into the table");
+            throw new UnsupportedOperationException("Attempted to insert a subreddit with id 0 into the table");
         }
     }
 
-    public RedditAccount getAccount(long id) {
+    public Account getAccount(long id) {
         if (!mDatabase.isOpen())
             return null;
         Cursor c = mDatabase.query(AccountSqlHelper.TABLE_ACCOUNTS, AccountSqlHelper.ALL_COLUMNS_ACCOUNT,
                 AccountSqlHelper.COLUMN_USER_ID + " = " + id, null, null, null, null);
         c.moveToFirst();
-        return new RedditAccount(c);
+        return new Account(c);
     }
 
-    public ArrayList<RedditSubreddit> getCurrentAccountSubreddits() {
-        ArrayList<RedditSubreddit> redditSubreddits = new ArrayList<>();
+    public ArrayList<Subreddit> getCurrentAccountSubreddits() {
+        ArrayList<Subreddit> subreddits = new ArrayList<>();
         String query = "SELECT "
                 + AccountSqlHelper.TABLE_SUBREDDITS + "." + AccountSqlHelper.COLUMN_SUBREDDIT_ID + ", "
                 + AccountSqlHelper.COLUMN_DISPLAY_NAME + ", "
@@ -109,41 +109,41 @@ public class AccountDataSource {
 
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
-            redditSubreddits.add(new RedditSubreddit(cursor));
+            subreddits.add(new Subreddit(cursor));
             cursor.moveToNext();
         }
         cursor.close();
 
-        return redditSubreddits;
+        return subreddits;
     }
 
-    public ArrayList<RedditAccount> getAllAccounts() {
-        ArrayList<RedditAccount> redditAccounts = new ArrayList<>();
+    public ArrayList<Account> getAllAccounts() {
+        ArrayList<Account> accounts = new ArrayList<>();
         Cursor cursor = mDatabase.query(AccountSqlHelper.TABLE_ACCOUNTS,
                 AccountSqlHelper.ALL_COLUMNS_ACCOUNT,
                 null, null, null, null, null);
 
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
-            RedditAccount redditAccount = new RedditAccount(cursor);
-            redditAccounts.add(redditAccount);
+            Account account = new Account(cursor);
+            accounts.add(account);
             cursor.moveToNext();
         }
 
         cursor.close();
-        return redditAccounts;
+        return accounts;
     }
 
-    public ArrayList<RedditSubreddit> getAllSubreddits() {
-        ArrayList<RedditSubreddit> redditSubreddits = new ArrayList<>();
+    public ArrayList<Subreddit> getAllSubreddits() {
+        ArrayList<Subreddit> subreddits = new ArrayList<>();
         Cursor cursor = mDatabase.query(AccountSqlHelper.TABLE_SUBREDDITS,
                 AccountSqlHelper.ALL_COLUMNS_SUBREDDITS,
                 null, null, null, null, null);
 
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
-            RedditSubreddit s = new RedditSubreddit(cursor);
-            redditSubreddits.add(s);
+            Subreddit s = new Subreddit(cursor);
+            subreddits.add(s);
             cursor.moveToNext();
             if (s.getDisplayName() == null) {
                 Log.d("AccountDataSource", "Created subreddit's display name is null.");
@@ -151,12 +151,12 @@ public class AccountDataSource {
         }
         cursor.close();
 
-        return redditSubreddits;
+        return subreddits;
     }
 
-    public void deleteAccount(RedditAccount redditAccount) {
+    public void deleteAccount(Account account) {
         mDatabase.delete(AccountSqlHelper.TABLE_ACCOUNTS, AccountSqlHelper.COLUMN_USER_ID
-                + " = " + redditAccount.getId(), null);
+                + " = " + account.getId(), null);
     }
 
 }

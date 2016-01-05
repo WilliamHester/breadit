@@ -19,11 +19,11 @@ import com.koushikdutta.async.future.FutureCallback;
 
 import java.util.ArrayList;
 
-import me.williamhester.models.reddit.RedditAccount;
+import me.williamhester.models.reddit.Account;
 import me.williamhester.models.AccountManager;
-import me.williamhester.models.reddit.RedditGenericListing;
-import me.williamhester.models.reddit.RedditGenericResponseWrapper;
-import me.williamhester.models.reddit.RedditMessage;
+import me.williamhester.models.reddit.GenericListing;
+import me.williamhester.models.reddit.GenericResponseWrapper;
+import me.williamhester.models.reddit.Message;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.activities.SettingsActivity;
@@ -72,7 +72,7 @@ public class NavigationDrawerFragment extends AccountFragment {
                         onAccountChanged();
                     }
                 } else {
-                    RedditAccount a = AccountManager.getAccounts().get(i);
+                    Account a = AccountManager.getAccounts().get(i);
                     if (!a.equals(AccountManager.getAccount())) {
                         AccountManager.setAccount(AccountManager.getAccounts().get(i));
                         mCallback.onAccountChanged();
@@ -141,7 +141,7 @@ public class NavigationDrawerFragment extends AccountFragment {
         });
 
         final TextView unreadCount = (TextView) view.findViewById(R.id.unread_count);
-        RedditApi.getMessages(getActivity(), RedditMessage.UNREAD, null, new FutureCallback<JsonObject>() {
+        RedditApi.getMessages(getActivity(), Message.UNREAD, null, new FutureCallback<JsonObject>() {
             @Override
             public void onCompleted(Exception e, JsonObject result) {
                 if (e != null) {
@@ -151,20 +151,20 @@ public class NavigationDrawerFragment extends AccountFragment {
                 Gson gson = new Gson();
 
                 // Generics are just beautiful.
-                TypeToken<RedditGenericResponseWrapper<RedditGenericListing<RedditMessage>>> token =
-                        new TypeToken<RedditGenericResponseWrapper<RedditGenericListing<RedditMessage>>>() {
+                TypeToken<GenericResponseWrapper<GenericListing<Message>>> token =
+                        new TypeToken<GenericResponseWrapper<GenericListing<Message>>>() {
                         };
 
-                RedditGenericResponseWrapper<RedditGenericListing<RedditMessage>> wrapper =
+                GenericResponseWrapper<GenericListing<Message>> wrapper =
                         gson.fromJson(result, token.getType());
-                RedditGenericListing<RedditMessage> listing = wrapper.getData();
-                ArrayList<RedditMessage> redditMessages = new ArrayList<>();
+                GenericListing<Message> listing = wrapper.getData();
+                ArrayList<Message> messages = new ArrayList<>();
 
-                for (RedditGenericResponseWrapper<RedditMessage> message : listing.getChildren()) {
-                    redditMessages.add(message.getData());
+                for (GenericResponseWrapper<Message> message : listing.getChildren()) {
+                    messages.add(message.getData());
                 }
 
-                unreadCount.setText(String.valueOf(redditMessages.size()));
+                unreadCount.setText(String.valueOf(messages.size()));
             }
         });
     }

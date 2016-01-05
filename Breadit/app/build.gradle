@@ -15,11 +15,11 @@ repositories {
 }
 
 android {
-    compileSdkVersion 22
+    compileSdkVersion 23
     buildToolsVersion '22.0.1'
     defaultConfig {
-        minSdkVersion 17
-        targetSdkVersion 22
+        minSdkVersion 21
+        targetSdkVersion 23
         versionCode 9
         versionName '0.5.1'
     }
@@ -30,56 +30,47 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_7
         targetCompatibility JavaVersion.VERSION_1_7
     }
-
-    def INT = "int"
-    def BUILD_FLAVOR = "BUILD_FLAVOR"
-    def REDDIT = "REDDIT"
-    def VOAT = "VOAT"
-    def REDDIT_BUILD_FLAVOR = "0"
-    def VOAT_BUILD_FLAVOR = "1"
+    def STRING = "String"
+    def propsFile = rootProject.file('auth.properties')
+    def props = new Properties()
+    props.load(new FileInputStream(propsFile))
     buildTypes {
         release {
             debuggable false
             minifyEnabled false
-            buildConfigField INT, "REDDIT", REDDIT
-            buildConfigField INT, "VOAT", VOAT
+            buildConfigField STRING, "CRITTERCISM_APP_ID", props["CRITTERCISM_APP_ID"]
+            buildConfigField STRING, "IMGUR_CLIENT_ID", props["IMGUR_CLIENT_ID"]
+            buildConfigField STRING, "REDDIT_CLIENT_ID", props["REDDIT_CLIENT_ID"]
+            buildConfigField STRING, "REDDIT_REDIRECT_URL", props["REDDIT_REDIRECT_URL"]
+            buildConfigField STRING, "YOUTUBE_AUTH", props["YOUTUBE_AUTH"]
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
         debug {
-            buildConfigField INT, "REDDIT", REDDIT
-            buildConfigField INT, "VOAT", VOAT
-            versionNameSuffix "voat"
-            applicationIdSuffix ".voat"
-        }
-    }
-    productFlavors {
-        voat {
-//            versionNameSuffix "voat"
-//            applicationIdSuffix ".voat"
-            buildConfigField INT, BUILD_FLAVOR, VOAT_BUILD_FLAVOR
-        }
-        reddit {
-//            versionNameSuffix "reddit"
-//            applicationIdSuffix ".reddit"
-            buildConfigField INT, BUILD_FLAVOR, REDDIT_BUILD_FLAVOR
+            buildConfigField STRING, "CRITTERCISM_APP_ID", props["CRITTERCISM_APP_ID"]
+            buildConfigField STRING, "IMGUR_CLIENT_ID", props["IMGUR_CLIENT_ID"]
+            buildConfigField STRING, "REDDIT_CLIENT_ID", props["REDDIT_CLIENT_ID"]
+            buildConfigField STRING, "REDDIT_REDIRECT_URL", props["REDDIT_REDIRECT_URL"]
+            buildConfigField STRING, "YOUTUBE_AUTH", props["YOUTUBE_AUTH"]
         }
     }
 }
 
 dependencies {
     // Support libs
-    compile 'com.android.support:support-v4:22.2.0'             // Support Library
-    compile 'com.android.support:appcompat-v7:22.2.0'           // AppCompat
-    compile 'com.android.support:recyclerview-v7:22.2.0'        // Support Library
-    compile 'com.android.support:cardview-v7:22.2.0'            // Support Library
+    compile 'com.android.support:support-v4:23.1.1'             // Support Library
+    compile 'com.android.support:appcompat-v7:23.1.1'           // AppCompat
+    compile 'com.android.support:recyclerview-v7:23.1.1'        // Support Library
+    compile 'com.android.support:cardview-v7:23.1.1'            // Support Library
 
     // Debugging
     compile 'com.crittercism:crittercism-android-agent:5.0.6'   // Crittercism
 
     // Networking
     compile 'com.koushikdutta.async:androidasync:2.+'           // AndroidAsync
-    compile 'com.squareup.retrofit:retrofit:1.9.0'              // Retrofit
-    compile 'com.squareup.okhttp:okhttp:2.2.0'                  // OkHttp
+    compile 'com.squareup.retrofit:retrofit:2.0.0-beta2'        // Retrofit
+    compile 'com.squareup.retrofit:converter-gson:2.0.0-beta2'  // Retrofit Gson Converter
+    compile 'com.squareup.okhttp:logging-interceptor:2.6.0'     // Retrofit logging
+    compile 'com.squareup.okhttp:okhttp:2.5.0'                  // OkHttp
     compile 'com.koushikdutta.ion:ion:2.0.4'                    // Ion
 
     // Content
@@ -88,7 +79,7 @@ dependencies {
 
     // Parsing
     compile 'org.jsoup:jsoup:1.7.3'                             // Jsoup
-    compile 'com.google.code.gson:gson:2.3'                     // Gson
+    compile 'com.google.code.gson:gson:2.4'                     // Gson
 
     // Helpers
     compile files('src/main/libs/knapsack.jar')                 // Knapsack

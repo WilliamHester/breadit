@@ -21,7 +21,7 @@ import java.util.Calendar;
 
 import butterknife.Bind;
 import me.williamhester.knapsack.Save;
-import me.williamhester.models.reddit.RedditFriend;
+import me.williamhester.models.reddit.Friend;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.activities.BrowseActivity;
@@ -39,7 +39,7 @@ public class FriendsFragment extends AccountFragment {
     @Bind(R.id.progress_bar) ProgressBar mProgressBar;
     @Bind(R.id.friends) RecyclerView mFriendsView;
 
-    @Save ArrayList<RedditFriend> mRedditFriends = new ArrayList<>();
+    @Save ArrayList<Friend> mFriends = new ArrayList<>();
     @Save boolean mHasFetchedFriends;
     @Save boolean mLoading;
 
@@ -85,7 +85,7 @@ public class FriendsFragment extends AccountFragment {
         mFriendsView.setLayoutManager(layoutManager);
         mFriendsView.setAdapter(mFriendsAdapter);
         mFriendsView.addOnScrollListener(new InfiniteLoadToolbarHideScrollListener(mFriendsAdapter,
-                mToolbar, mFriendsView, this.mRedditFriends, layoutManager, null));
+                mToolbar, mFriendsView, this.mFriends, layoutManager, null));
         mFriendsView.addItemDecoration(
                 new DividerItemDecoration(getResources().getDrawable(R.drawable.card_divider)));
 
@@ -99,16 +99,16 @@ public class FriendsFragment extends AccountFragment {
 
     public void loadFriends() {
         mLoading = true;
-        RedditApi.getFriends(new FutureCallback<ArrayList<RedditFriend>>() {
+        RedditApi.getFriends(new FutureCallback<ArrayList<Friend>>() {
             @Override
-            public void onCompleted(Exception e, ArrayList<RedditFriend> result) {
+            public void onCompleted(Exception e, ArrayList<Friend> result) {
                 mLoading = false;
                 mProgressBar.setVisibility(View.GONE);
                 if (e != null) {
                     return;
                 }
                 mHasFetchedFriends = true;
-                mRedditFriends.addAll(result);
+                mFriends.addAll(result);
                 mFriendsAdapter.notifyDataSetChanged();
             }
         });
@@ -116,7 +116,7 @@ public class FriendsFragment extends AccountFragment {
 
     @Override
     public void onAccountChanged() {
-        mRedditFriends.clear();
+        mFriends.clear();
         mFriendsAdapter.notifyDataSetChanged();
         loadFriends();
     }
@@ -150,13 +150,13 @@ public class FriendsFragment extends AccountFragment {
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
             if (getItemViewType(position) == VIEW_TYPE_FRIEND) {
-                ((FriendViewHolder) holder).setContent(mRedditFriends.get(position - 1));
+                ((FriendViewHolder) holder).setContent(mFriends.get(position - 1));
             }
         }
 
         @Override
         public int getItemCount() {
-            return mRedditFriends.size() + 2;
+            return mFriends.size() + 2;
         }
 
         @Override
@@ -173,7 +173,7 @@ public class FriendsFragment extends AccountFragment {
 
     private class FriendViewHolder extends RecyclerView.ViewHolder {
 
-        private RedditFriend mRedditFriend;
+        private Friend mFriend;
         private TextView mUsername;
         private TextView mFriendsSince;
 
@@ -186,7 +186,7 @@ public class FriendsFragment extends AccountFragment {
                 public void onClick(View v) {
                     Bundle b = new Bundle();
                     b.putString("type", "user");
-                    b.putString("username", mRedditFriend.getName());
+                    b.putString("username", mFriend.getName());
                     Intent i = new Intent(getActivity(), BrowseActivity.class);
                     i.putExtras(b);
                     getActivity().startActivity(i);
@@ -197,11 +197,11 @@ public class FriendsFragment extends AccountFragment {
             mFriendsSince = (TextView) itemView.findViewById(R.id.friends_since);
         }
 
-        public void setContent(RedditFriend redditFriend) {
-            mRedditFriend = redditFriend;
-            mUsername.setText(redditFriend.getName());
+        public void setContent(Friend friend) {
+            mFriend = friend;
+            mUsername.setText(friend.getName());
             Calendar date = Calendar.getInstance();
-            date.setTimeInMillis(mRedditFriend.getDate() * 1000);
+            date.setTimeInMillis(mFriend.getDate() * 1000);
             SimpleDateFormat sdf = new SimpleDateFormat("MMMM d, y");
             mFriendsSince.setText(getResources().getText(R.string.friends_since) + " "
                     + sdf.format(date.getTime()));

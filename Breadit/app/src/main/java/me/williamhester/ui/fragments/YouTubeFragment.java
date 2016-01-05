@@ -11,7 +11,7 @@ import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayerSupportFragment;
 
-import me.williamhester.Auth;
+import me.williamhester.reddit.BuildConfig;
 import me.williamhester.reddit.R;
 
 /**
@@ -54,7 +54,7 @@ public class YouTubeFragment extends BaseFragment implements YouTubePlayer.OnIni
         } else {
             mPlayerFragment = (YouTubePlayerSupportFragment) f;
         }
-        mPlayerFragment.initialize(Auth.YOUTUBE_AUTH, this);
+        mPlayerFragment.initialize(BuildConfig.YOUTUBE_AUTH, this);
 
         view.setOnClickListener(new View.OnClickListener() {
             @Override

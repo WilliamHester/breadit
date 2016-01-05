@@ -23,7 +23,7 @@ import com.koushikdutta.ion.Ion;
 import butterknife.Bind;
 import me.williamhester.databases.AccountDataSource;
 import me.williamhester.knapsack.Save;
-import me.williamhester.models.reddit.RedditAccount;
+import me.williamhester.models.reddit.Account;
 import me.williamhester.models.AccountManager;
 import me.williamhester.network.ImgurApi;
 import me.williamhester.network.RedditApi;
@@ -184,7 +184,7 @@ public class RegisterFragment extends BaseFragment {
                 return;
             }
             JsonObject data = result.get("json").getAsJsonObject().get("data").getAsJsonObject();
-            RedditAccount a = new RedditAccount(mUsername.getText().toString(),
+            Account a = new Account(mUsername.getText().toString(),
                     data.get("modhash").getAsString(),
                     data.get("cookie").getAsString());
             AccountDataSource dataSource = new AccountDataSource(getActivity());

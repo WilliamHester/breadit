@@ -6,15 +6,15 @@ import android.content.SharedPreferences;
 import java.util.ArrayList;
 
 import me.williamhester.databases.AccountDataSource;
-import me.williamhester.models.reddit.RedditAccount;
+import me.williamhester.models.reddit.Account;
 
 /**
  * Created by william on 9/5/14.
  */
 public class AccountManager {
 
-    private static RedditAccount mRedditAccount;
-    private static ArrayList<RedditAccount> mRedditAccounts;
+    private static Account mAccount;
+    private static ArrayList<Account> mAccounts;
     private static SharedPreferences mPrefs;
 
     private AccountManager() { }
@@ -25,29 +25,29 @@ public class AccountManager {
         AccountDataSource dataSource = new AccountDataSource(context);
         dataSource.open();
         if (id != -1) {
-            mRedditAccount = dataSource.getAccount(id);
+            mAccount = dataSource.getAccount(id);
         }
-        mRedditAccounts = dataSource.getAllAccounts();
+        mAccounts = dataSource.getAllAccounts();
         dataSource.close();
     }
 
     public static boolean isLoggedIn() {
-        return mRedditAccount != null;
+        return mAccount != null;
     }
 
-    public static RedditAccount getAccount() {
-        return mRedditAccount;
+    public static Account getAccount() {
+        return mAccount;
     }
 
-    public static ArrayList<RedditAccount> getAccounts() {
-        return mRedditAccounts;
+    public static ArrayList<Account> getAccounts() {
+        return mAccounts;
     }
 
-    public static void setAccount(RedditAccount redditAccount) {
-        mRedditAccount = redditAccount;
+    public static void setAccount(Account account) {
+        mAccount = account;
         long id = -1;
-        if (mRedditAccount != null) {
-            id = mRedditAccount.getId();
+        if (mAccount != null) {
+            id = mAccount.getId();
         }
         SharedPreferences.Editor editor = mPrefs.edit();
         editor.putLong("accountId", id);

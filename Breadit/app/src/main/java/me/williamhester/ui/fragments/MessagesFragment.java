@@ -36,9 +36,9 @@ import java.util.ArrayList;
 
 import butterknife.Bind;
 import me.williamhester.knapsack.Save;
-import me.williamhester.models.reddit.RedditGenericListing;
-import me.williamhester.models.reddit.RedditGenericResponseWrapper;
-import me.williamhester.models.reddit.RedditMessage;
+import me.williamhester.models.reddit.GenericListing;
+import me.williamhester.models.reddit.GenericResponseWrapper;
+import me.williamhester.models.reddit.Message;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 import me.williamhester.tools.HtmlParser;
@@ -57,7 +57,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
     private MessageViewHolder mFocusedViewHolder;
 
     @Save boolean mRefreshing;
-    @Save ArrayList<RedditMessage> mRedditMessages;
+    @Save ArrayList<Message> mMessages;
     @Save String mFilterType;
 
     @Bind(R.id.toolbar_actionbar) Toolbar mToolbar;
@@ -89,11 +89,11 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mRedditMessages = new ArrayList<>();
+        mMessages = new ArrayList<>();
         if (savedInstanceState != null && getArguments() != null) {
-            mFilterType = getArguments().getString("filter_by", RedditMessage.ALL);
+            mFilterType = getArguments().getString("filter_by", Message.ALL);
         } else {
-            mFilterType = RedditMessage.ALL;
+            mFilterType = Message.ALL;
         }
     }
 
@@ -154,7 +154,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
         mMessageAdapter = new MessageArrayAdapter();
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         mScrollListener = new InfiniteLoadToolbarHideScrollListener(mMessageAdapter, mToolbar,
-                mMessagesRecyclerView, mRedditMessages, layoutManager, this);
+                mMessagesRecyclerView, mMessages, layoutManager, this);
         mMessagesRecyclerView.setLayoutManager(layoutManager);
         mMessagesRecyclerView.setAdapter(mMessageAdapter);
         mMessagesRecyclerView.setOnScrollListener(mScrollListener);
@@ -172,25 +172,25 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
                 String filterType = null;
                 switch (i) {
                     case 0:
-                        filterType = RedditMessage.ALL;
+                        filterType = Message.ALL;
                         break;
                     case 1:
-                        filterType = RedditMessage.UNREAD;
+                        filterType = Message.UNREAD;
                         break;
                     case 2:
-                        filterType = RedditMessage.MESSAGES;
+                        filterType = Message.MESSAGES;
                         break;
                     case 3:
-                        filterType = RedditMessage.COMMENT_REPLIES;
+                        filterType = Message.COMMENT_REPLIES;
                         break;
                     case 4:
-                        filterType = RedditMessage.POST_REPLIES;
+                        filterType = Message.POST_REPLIES;
                         break;
                     case 5:
-                        filterType = RedditMessage.SENT;
+                        filterType = Message.SENT;
                         break;
                     case 6:
-                        filterType = RedditMessage.MOD_MAIL;
+                        filterType = Message.MOD_MAIL;
                         break;
                 }
                 if (filterType != null && !filterType.equals(mFilterType)) {
@@ -207,7 +207,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
             }
         });
 
-        if (mRedditMessages.size() == 0) {
+        if (mMessages.size() == 0) {
             mProgressBar.setVisibility(View.VISIBLE);
             RedditApi.getMessages(getActivity(), mFilterType, null, mMessageCallback);
         } else {
@@ -228,31 +228,31 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
             }
             if (mRefreshing) {
                 mRefreshing = false;
-                mRedditMessages.clear();
+                mMessages.clear();
                 mScrollListener.resetState();
             }
             Gson gson = new Gson();
 
             // Generics are just beautiful.
-            TypeToken<RedditGenericResponseWrapper<RedditGenericListing<RedditMessage>>> token =
-                    new TypeToken<RedditGenericResponseWrapper<RedditGenericListing<RedditMessage>>>() {};
+            TypeToken<GenericResponseWrapper<GenericListing<Message>>> token =
+                    new TypeToken<GenericResponseWrapper<GenericListing<Message>>>() {};
 
-            RedditGenericResponseWrapper<RedditGenericListing<RedditMessage>> wrapper =
+            GenericResponseWrapper<GenericListing<Message>> wrapper =
                     gson.fromJson(result, token.getType());
-            RedditGenericListing<RedditMessage> listing = wrapper.getData();
+            GenericListing<Message> listing = wrapper.getData();
             if (listing == null) {
                 return;
             }
-            ArrayList<RedditMessage> redditMessages = new ArrayList<>();
-            for (RedditGenericResponseWrapper<RedditMessage> message : listing.getChildren()) {
-                redditMessages.add(message.getData());
+            ArrayList<Message> messages = new ArrayList<>();
+            for (GenericResponseWrapper<Message> message : listing.getChildren()) {
+                messages.add(message.getData());
             }
-            mRedditMessages.addAll(redditMessages);
-            if (mRedditMessages.size() == redditMessages.size()) {
+            mMessages.addAll(messages);
+            if (mMessages.size() == messages.size()) {
                 mMessageAdapter.notifyDataSetChanged();
             } else {
-                mMessageAdapter.notifyItemRangeInserted(mRedditMessages.size() - redditMessages.size() + 1,
-                        redditMessages.size() + 1);
+                mMessageAdapter.notifyItemRangeInserted(mMessages.size() - messages.size() + 1,
+                        messages.size() + 1);
             }
         }
     };
@@ -283,7 +283,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
             return;
         }
         int count = 0;
-        for (RedditMessage m : mRedditMessages) {
+        for (Message m : mMessages) {
             if (m.isUnread()) {
                 count++;
             }
@@ -295,10 +295,10 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
     public void onLoadMore() {
         mProgressBar.setVisibility(View.VISIBLE);
         String after;
-        if (mRedditMessages == null || mRedditMessages.size() == 0) {
+        if (mMessages == null || mMessages.size() == 0) {
             after = null;
         } else {
-            after = mRedditMessages.get(mRedditMessages.size() - 1).getId();
+            after = mMessages.get(mMessages.size() - 1).getId();
         }
         RedditApi.getMessages(getActivity(), mFilterType, after, mMessageCallback);
     }
@@ -329,13 +329,13 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int position) {
             if (getItemViewType(position) == MESSAGE) {
-                ((MessageViewHolder) viewHolder).setContent(mRedditMessages.get(position - 1));
+                ((MessageViewHolder) viewHolder).setContent(mMessages.get(position - 1));
             }
         }
 
         @Override
         public int getItemCount() {
-            return mRedditMessages.size() + 2;
+            return mMessages.size() + 2;
         }
 
         @Override
@@ -351,7 +351,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
 
     private class MessageViewHolder extends VotableViewHolder {
 
-        private RedditMessage mRedditMessage;
+        private Message mMessage;
         private TextView mSubject;
         private TextView mToFrom;
         private TextView mBody;
@@ -383,7 +383,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
             mSwipeView.findViewById(R.id.message_content).setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
-                    if (!mRedditMessage.isUnread()) {
+                    if (!mMessage.isUnread()) {
                         expand(mOptionsRow);
                         if (mFocusedViewHolder != null) {
                             collapse(mFocusedViewHolder.mOptionsRow);
@@ -393,7 +393,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
                         } else {
                             mFocusedViewHolder = MessageViewHolder.this;
                         }
-                        subreddit.setVisibility(mRedditMessage.isComment() ? View.VISIBLE : View.GONE);
+                        subreddit.setVisibility(mMessage.isComment() ? View.VISIBLE : View.GONE);
                         return true;
                     }
                     return false;
@@ -402,11 +402,11 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
             mSwipeView.findViewById(R.id.message_content).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (mRedditMessage.isUnread()) {
-                        mRedditMessage.setUnread(false);
+                    if (mMessage.isUnread()) {
+                        mMessage.setUnread(false);
                         mReadStatus.setVisibility(View.GONE);
                         countUnreadAndNotify();
-                        RedditApi.markMessageRead(getActivity(), true, mRedditMessage.getId(),
+                        RedditApi.markMessageRead(getActivity(), true, mMessage.getId(),
                                 new FutureCallback<String>() {
                                     @Override
                                     public void onCompleted(Exception e, String result) {
@@ -417,12 +417,12 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
                                         // doesn't contain an error, we're good.
                                     }
                                 });
-                    } else if (mRedditMessage.isComment()) {
+                    } else if (mMessage.isComment()) {
                         Bundle extras = new Bundle();
                         Intent i = new Intent(getActivity(), BrowseActivity.class);
                         extras.putString("type", "comments");
                         extras.putBoolean("isSingleThread", true);
-                        extras.putString("permalink", mRedditMessage.getContext());
+                        extras.putString("permalink", mMessage.getContext());
                         i.putExtras(extras);
                         startActivity(i);
 //                    } else {
@@ -449,50 +449,50 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
 
         public void setContent(Object object) {
             super.setContent(object);
-            mRedditMessage = (RedditMessage) object;
+            mMessage = (Message) object;
             
             collapse(mOptionsRow);
-            mSwipeView.setEnabled(mRedditMessage.isComment());
-            mReadStatus.setVisibility(mRedditMessage.isUnread() ? View.VISIBLE : View.GONE);
+            mSwipeView.setEnabled(mMessage.isComment());
+            mReadStatus.setVisibility(mMessage.isUnread() ? View.VISIBLE : View.GONE);
 
             SpannableStringBuilder toFrom = new SpannableStringBuilder();
-            if (mRedditMessage.getAuthor().equalsIgnoreCase(mRedditAccount.getUsername())) {
+            if (mMessage.getAuthor().equalsIgnoreCase(mAccount.getUsername())) {
                 toFrom.append(getResources().getString(R.string.to))
                         .append(' ')
-                        .append(mRedditMessage.getRecipient());
+                        .append(mMessage.getRecipient());
             } else {
                 toFrom.append(getResources().getString(R.string.from))
                         .append(' ')
-                        .append(mRedditMessage.getAuthor());
+                        .append(mMessage.getAuthor());
             }
-            if (mRedditMessage.isComment()) {
+            if (mMessage.isComment()) {
                 toFrom.append(' ')
                         .append(getResources().getString(R.string.via))
                         .append(" /r/")
-                        .append(mRedditMessage.getBulletin());
+                        .append(mMessage.getBulletin());
             }
             toFrom.append(' ')
-                    .append(calculateTimeShort(mRedditMessage.getCreatedUtc()));
+                    .append(calculateTimeShort(mMessage.getCreatedUtc()));
             mToFrom.setText(toFrom);
 
-            String unescaped = Html.fromHtml(mRedditMessage.getHtmlBody()).toString();
+            String unescaped = Html.fromHtml(mMessage.getHtmlBody()).toString();
             HtmlParser parser = new HtmlParser(unescaped);
             mBody.setText(parser.getSpannableString());
 
             SpannableStringBuilder ssb = new SpannableStringBuilder();
-            if (mRedditMessage.isComment()) {
+            if (mMessage.isComment()) {
                 ssb.append(getResources().getString(R.string.comment_reply))
                         .setSpan(new StyleSpan(Typeface.BOLD), 0, ssb.length(),
                                 Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
                 ssb.append(' ')
                         .append(getResources().getString(R.string.on));
-                String linkTitle = Html.fromHtml(mRedditMessage.getLinkTitle()).toString();
+                String linkTitle = Html.fromHtml(mMessage.getLinkTitle()).toString();
                 ssb.append(' ')
                         .append(linkTitle)
                         .setSpan(new StyleSpan(Typeface.ITALIC), ssb.length() - linkTitle.length(),
                                 ssb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             } else {
-                ssb.append(Html.fromHtml(mRedditMessage.getSubject()).toString())
+                ssb.append(Html.fromHtml(mMessage.getSubject()).toString())
                         .setSpan(new StyleSpan(Typeface.BOLD), 0, ssb.length(),
                                 Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
@@ -504,7 +504,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
             public void onClick(View v) {
                 switch (v.getId()) {
                     case R.id.option_reply: {
-                        Fragment reply = ReplyFragment.newInstance(mRedditMessage);
+                        Fragment reply = ReplyFragment.newInstance(mMessage);
                         getFragmentManager().beginTransaction()
                                 .replace(R.id.main_container, reply, "ReplyFragment")
                                 .addToBackStack("ReplyFragment")
@@ -512,10 +512,10 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
                         break;
                     }
                     case R.id.option_mark_unread: {
-                        mRedditMessage.setUnread(true);
+                        mMessage.setUnread(true);
                         mReadStatus.setVisibility(View.VISIBLE);
                         countUnreadAndNotify();
-                        RedditApi.markMessageRead(getActivity(), false, mRedditMessage.getId(),
+                        RedditApi.markMessageRead(getActivity(), false, mMessage.getId(),
                                 new FutureCallback<String>() {
                                     @Override
                                     public void onCompleted(Exception e, String result) {
@@ -531,7 +531,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
                     case R.id.option_view_user: {
                         Bundle b = new Bundle();
                         b.putString("type", "user");
-                        b.putString("username", mRedditMessage.getAuthor());
+                        b.putString("username", mMessage.getAuthor());
                         Intent i = new Intent(getActivity(), BrowseActivity.class);
                         i.putExtras(b);
                         getActivity().startActivity(i);
@@ -542,7 +542,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
                         Bundle args = new Bundle();
                         i.setAction(Intent.ACTION_VIEW);
                         args.putString("type", "subreddit");
-                        args.putString("subreddit", mRedditMessage.getBulletin());
+                        args.putString("subreddit", mMessage.getBulletin());
                         i.putExtras(args);
                         startActivity(i);
                         break;

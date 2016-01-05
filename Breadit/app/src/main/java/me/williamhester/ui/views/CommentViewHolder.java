@@ -8,20 +8,20 @@ import android.view.View;
 import android.widget.TextView;
 
 import me.williamhester.models.AccountManager;
-import me.williamhester.models.reddit.RedditComment;
+import me.williamhester.models.reddit.Comment;
 import me.williamhester.reddit.R;
 import me.williamhester.tools.HtmlParser;
 import me.williamhester.ui.text.ClickableLinkMovementMethod;
 
 /**
  * CommentViewHolder is an extension of the VotableViewHolder and contains all of the necessary
- * information to display a RedditComment and call back to its parent upon an event.
+ * information to display a Comment and call back to its parent upon an event.
  *
  * Created by william on 8/1/14.
  */
 public class CommentViewHolder extends VotableViewHolder {
 
-    protected RedditComment mRedditComment;
+    protected Comment mRedditComment;
     private CommentCallbacks mCallback;
     private TextView mAuthor;
     private TextView mFlairText;
@@ -119,7 +119,7 @@ public class CommentViewHolder extends VotableViewHolder {
 
     public void setContent(Object comment) {
         super.setContent(comment);
-        mRedditComment = (RedditComment) comment;
+        mRedditComment = (Comment) comment;
         float dp = itemView.getResources().getDisplayMetrics().density;
         itemView.setPadding(Math.round(4 * dp * mRedditComment.getLevel()), 0, 0, 0);
         mOptionsRow.setVisibility(View.GONE);
@@ -208,9 +208,9 @@ public class CommentViewHolder extends VotableViewHolder {
     };
 
     public interface CommentCallbacks {
-        public void onBodyClick(CommentViewHolder viewHolder, RedditComment redditComment);
+        public void onBodyClick(CommentViewHolder viewHolder, Comment redditComment);
         public void onCommentLongPressed(CommentViewHolder holder);
-        public void onOptionsRowItemSelected(View view, RedditComment redditComment);
+        public void onOptionsRowItemSelected(View view, Comment redditComment);
         public String getSubmissionAuthor();
     }
 }

@@ -6,17 +6,17 @@ import java.util.Iterator;
 import java.util.Stack;
 
 /**
- * This class provides an abstraction of a Reddit comment, allowing for a RedditMoreComments class and a
- * standard RedditComment class.
+ * This class provides an abstraction of a Reddit comment, allowing for a MoreComments class and a
+ * standard Comment class.
  *
  * Created by William on 9/26/14.
  */
-public abstract class RedditAbsComment implements RedditThing {
+public abstract class AbsComment implements Thing {
 
     protected static final int COMMENT = 1;
     protected static final int MORE_COMMENTS = 2;
 
-    public RedditAbsComment(int level) {
+    public AbsComment(int level) {
         mLevel = level;
     }
 
@@ -32,11 +32,11 @@ public abstract class RedditAbsComment implements RedditThing {
 
     public abstract String getParentId();
 
-    public static class CommentIterator implements Iterator<RedditAbsComment> {
+    public static class CommentIterator implements Iterator<AbsComment> {
 
-        private Stack<RedditResponseWrapper> mStack;
+        private Stack<ResponseWrapper> mStack;
 
-        public CommentIterator(RedditResponseWrapper root) {
+        public CommentIterator(ResponseWrapper root) {
             mStack = new Stack<>();
             mStack.add(root);
         }
@@ -47,23 +47,23 @@ public abstract class RedditAbsComment implements RedditThing {
         }
 
         @Override
-        public RedditAbsComment next() {
+        public AbsComment next() {
             Object object = mStack.peek().getData();
-            if (object instanceof RedditMoreComments) {
-                return (RedditMoreComments) mStack.pop().getData();
+            if (object instanceof MoreComments) {
+                return (MoreComments) mStack.pop().getData();
             } else {
-                RedditComment redditComment = (RedditComment) object;
+                Comment redditComment = (Comment) object;
                 if (redditComment.getReplies() == null
-                        || redditComment.getReplies().getData() instanceof RedditMoreComments
-                        || ((RedditListing) redditComment.getReplies().getData()).size() == 0) {
-                    return (RedditComment) mStack.pop().getData();
+                        || redditComment.getReplies().getData() instanceof MoreComments
+                        || ((Listing) redditComment.getReplies().getData()).size() == 0) {
+                    return (Comment) mStack.pop().getData();
                 } else {
                     mStack.pop();
-                    RedditListing replies = (RedditListing) redditComment.getReplies().getData();
+                    Listing replies = (Listing) redditComment.getReplies().getData();
                     for (int i = replies.size() - 1; i >= 0; i--) {
-                        RedditResponseWrapper tempComment = replies.getChildren().get(i);
-                        if (tempComment.getData() instanceof RedditAbsComment) {
-                            ((RedditAbsComment) tempComment.getData()).setLevel(redditComment.getLevel() + 1);
+                        ResponseWrapper tempComment = replies.getChildren().get(i);
+                        if (tempComment.getData() instanceof AbsComment) {
+                            ((AbsComment) tempComment.getData()).setLevel(redditComment.getLevel() + 1);
                             mStack.add(tempComment);
                         }
                     }
@@ -90,7 +90,7 @@ public abstract class RedditAbsComment implements RedditThing {
         dest.writeInt(this.mLevel);
     }
 
-    protected RedditAbsComment(Parcel in) {
+    protected AbsComment(Parcel in) {
         this.mLevel = in.readInt();
     }
 }

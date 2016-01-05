@@ -3,7 +3,7 @@ package me.williamhester.models.reddit;
 /**
  * Created by William on 4/6/14.
  */
-public interface RedditVotable extends RedditThing {
+public interface Votable extends Thing {
 
     int UPVOTED = 1;
     int NEUTRAL = 0;

@@ -115,7 +115,7 @@
     <string name="subscribe">Subscribed</string>
     <string name="sort_by">Sorted by</string>
 
-    <!-- RedditSubreddit Drawer -->
+    <!-- Subreddit Drawer -->
     <string name="description">Description</string>
     <plurals name="subscribers">
         <item quantity="one">subscriber</item>
@@ -174,11 +174,11 @@
     <string name="year">This year</string>
     <string name="all">All time</string>
 
-    <!-- RedditComment Sorts -->
+    <!-- Comment Sorts -->
     <string name="best">Best</string>
     <string name="old">Old</string>
 
-    <!-- RedditSubmission Overflow Menu -->
+    <!-- Submission Overflow Menu -->
     <string name="hide">Hide</string>
     <string name="unhide">Unhide</string>
     <string name="mark_nsfw">Mark NSFW</string>
@@ -258,7 +258,7 @@
     <!-- ComposeMessageFragment -->
     <string name="compose_to">Compose to</string>
 
-    <!-- RedditMessage Notification -->
+    <!-- Message Notification -->
     <plurals name="new_messages">
         <item quantity="one">New Message</item>
         <item quantity="other">New Messages</item>

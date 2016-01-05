@@ -6,21 +6,21 @@ import android.os.Parcelable;
 
 import java.util.HashMap;
 
-public class RedditAccount implements Parcelable {
+public class Account implements Parcelable {
 
 	private String mUsername;
 	private String mModhash;
     private String mCookie;
-    private HashMap<String, RedditSubreddit> mSubscriptions = new HashMap<>();
+    private HashMap<String, Subreddit> mSubscriptions = new HashMap<>();
     private long mId;
 
-    public RedditAccount(String username, String modhash, String cookie) {
+    public Account(String username, String modhash, String cookie) {
         mUsername = username;
         mModhash = modhash;
         mCookie = cookie;
     }
 
-    public RedditAccount(Cursor c) {
+    public Account(Cursor c) {
         mId = c.getLong(0);
         mUsername = c.getString(1);
         mCookie = c.getString(2);
@@ -47,17 +47,17 @@ public class RedditAccount implements Parcelable {
         return mId;
     }
 
-    public void setSubscriptions(HashMap<String, RedditSubreddit> subs) {
+    public void setSubscriptions(HashMap<String, Subreddit> subs) {
         mSubscriptions = subs;
     }
 
-    public HashMap<String, RedditSubreddit> getSubscriptions() {
+    public HashMap<String, Subreddit> getSubscriptions() {
         return mSubscriptions;
     }
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof RedditAccount && ((RedditAccount) o).getUsername().equals(mUsername);
+        return o instanceof Account && ((Account) o).getUsername().equals(mUsername);
     }
 
     @Override
@@ -73,20 +73,20 @@ public class RedditAccount implements Parcelable {
         dest.writeLong(this.mId);
     }
 
-    private RedditAccount(Parcel in) {
+    private Account(Parcel in) {
         this.mUsername = in.readString();
         this.mModhash = in.readString();
         this.mCookie = in.readString();
         this.mId = in.readLong();
     }
 
-    public static final Creator<RedditAccount> CREATOR = new Creator<RedditAccount>() {
-        public RedditAccount createFromParcel(Parcel source) {
-            return new RedditAccount(source);
+    public static final Creator<Account> CREATOR = new Creator<Account>() {
+        public Account createFromParcel(Parcel source) {
+            return new Account(source);
         }
 
-        public RedditAccount[] newArray(int size) {
-            return new RedditAccount[size];
+        public Account[] newArray(int size) {
+            return new Account[size];
         }
     };
 }

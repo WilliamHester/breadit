@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Created by william on 8/15/14.
  */
-public class RedditMoreComments extends RedditAbsComment implements RedditThing {
+public class MoreComments extends AbsComment implements Thing {
 
     private int mCount;
     private String mParentName;
@@ -21,7 +21,7 @@ public class RedditMoreComments extends RedditAbsComment implements RedditThing 
     private String mName;
     private boolean mIsLoading;
 
-    public RedditMoreComments(JsonObject object) {
+    public MoreComments(JsonObject object) {
         super(0);
         mCount = object.get("count").getAsInt();
         mParentName = object.get("parent_id").getAsString();
@@ -32,10 +32,6 @@ public class RedditMoreComments extends RedditAbsComment implements RedditThing 
         for (JsonElement element : array) {
             mChildren.add(element.getAsString());
         }
-    }
-
-    public String getId() {
-        return mId;
     }
 
     @Override
@@ -65,7 +61,7 @@ public class RedditMoreComments extends RedditAbsComment implements RedditThing 
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof RedditMoreComments && ((RedditMoreComments) o).mId.equals(mId);
+        return o instanceof MoreComments && ((MoreComments) o).mId.equals(mId);
     }
 
     @Override
@@ -83,7 +79,7 @@ public class RedditMoreComments extends RedditAbsComment implements RedditThing 
         dest.writeString(this.mName);
     }
 
-    private RedditMoreComments(Parcel in) {
+    private MoreComments(Parcel in) {
         super(in);
         this.mCount = in.readInt();
         this.mParentName = in.readString();
@@ -93,13 +89,13 @@ public class RedditMoreComments extends RedditAbsComment implements RedditThing 
         this.mName = in.readString();
     }
 
-    public static final Creator<RedditMoreComments> CREATOR = new Creator<RedditMoreComments>() {
-        public RedditMoreComments createFromParcel(Parcel source) {
-            return new RedditMoreComments(source);
+    public static final Creator<MoreComments> CREATOR = new Creator<MoreComments>() {
+        public MoreComments createFromParcel(Parcel source) {
+            return new MoreComments(source);
         }
 
-        public RedditMoreComments[] newArray(int size) {
-            return new RedditMoreComments[size];
+        public MoreComments[] newArray(int size) {
+            return new MoreComments[size];
         }
     };
 }

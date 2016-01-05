@@ -11,14 +11,14 @@ import java.util.List;
 /**
  * Created by william on 8/3/14.
  */
-public class RedditListing {
+public class Listing {
 
     private String mModhash;
-    private ArrayList<RedditResponseWrapper> mChildren;
+    private ArrayList<ResponseWrapper> mChildren;
     private String mAfter;
     private String mBefore;
 
-    public RedditListing(JsonObject object, Gson gson) {
+    public Listing(JsonObject object, Gson gson) {
         mModhash = object.get("modhash").getAsString();
         if (!object.get("before").isJsonNull()) {
             mBefore = object.get("before").getAsString();
@@ -29,7 +29,7 @@ public class RedditListing {
         mChildren = new ArrayList<>();
         JsonArray children = object.get("children").getAsJsonArray();
         for (JsonElement element : children) {
-            mChildren.add(new RedditResponseWrapper(element.getAsJsonObject(), gson));
+            mChildren.add(new ResponseWrapper(element.getAsJsonObject(), gson));
         }
     }
 
@@ -52,7 +52,7 @@ public class RedditListing {
         return mChildren.size();
     }
 
-    public List<RedditResponseWrapper> getChildren() {
+    public List<ResponseWrapper> getChildren() {
         return mChildren;
     }
 }

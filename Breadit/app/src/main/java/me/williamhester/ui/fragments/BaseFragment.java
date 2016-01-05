@@ -7,15 +7,22 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 
+import javax.inject.Inject;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import me.williamhester.BreaditApplication;
 import me.williamhester.knapsack.Knapsack;
+import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 
 /**
  * Created by william on 6/20/15.
  */
 public class BaseFragment extends Fragment {
+
+    @Inject
+    protected RedditApi mApi;
 
     @Bind(R.id.toolbar_actionbar)
     @Nullable
@@ -24,6 +31,9 @@ public class BaseFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        BreaditApplication application = (BreaditApplication) getActivity().getApplicationContext();
+        application.getApiComponent().inject(this);
 
         Knapsack.restore(this, savedInstanceState);
     }
@@ -56,6 +66,6 @@ public class BaseFragment extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-Knapsack.save(this, outState);
+        Knapsack.save(this, outState);
     }
 }

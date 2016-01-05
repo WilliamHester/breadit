@@ -16,8 +16,8 @@ import com.koushikdutta.async.future.FutureCallback;
 
 import java.util.ArrayList;
 
-import me.williamhester.models.reddit.RedditThing;
-import me.williamhester.models.reddit.RedditVotable;
+import me.williamhester.models.reddit.Thing;
+import me.williamhester.models.reddit.Votable;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 
@@ -28,15 +28,15 @@ public class ReplyFragment extends AsyncSendFragment {
 
     private boolean mIsEditing;
 
-    public static ReplyFragment newInstance(RedditThing redditThing) {
+    public static ReplyFragment newInstance(Thing thing) {
         Bundle b = new Bundle();
-        b.putParcelable("redditThing", redditThing);
+        b.putParcelable("thing", thing);
         ReplyFragment fragment = new ReplyFragment();
         fragment.setArguments(b);
         return fragment;
     }
 
-    public static ReplyFragment newInstance(RedditThing parent, RedditVotable redditVotable) {
+    public static ReplyFragment newInstance(Thing parent, Votable redditVotable) {
         Bundle b = new Bundle();
         b.putParcelable("thing", parent);
         b.putParcelable("redditVotable", redditVotable);
@@ -47,7 +47,7 @@ public class ReplyFragment extends AsyncSendFragment {
 
     @Override
     protected String getBodyHint() {
-        RedditThing parent = getArguments().getParcelable("thing");
+        Thing parent = getArguments().getParcelable("thing");
         if (parent != null) {
             return getResources().getString(R.string.reply_hint) + " /u/" + parent.getAuthor();
         } else {
@@ -88,7 +88,7 @@ public class ReplyFragment extends AsyncSendFragment {
         onCreateOptionsMenu(mToolbar.getMenu(), getActivity().getMenuInflater());
 
         if (mIsEditing && savedInstanceState == null) {
-            RedditVotable redditVotable = getArguments().getParcelable("redditVotable");
+            Votable redditVotable = getArguments().getParcelable("redditVotable");
             mMarkdownBody.setBody(redditVotable.getBodyMarkdown());
         }
     }
@@ -106,12 +106,12 @@ public class ReplyFragment extends AsyncSendFragment {
         dialog.setMessage(getResources().getString(R.string.sending_reply));
         dialog.setCancelable(false);
         dialog.show();
-        final RedditThing parent = getArguments().getParcelable("thing");
-        final RedditVotable redditVotable = getArguments().getParcelable("redditVotable");
-        FutureCallback<ArrayList<RedditThing>> callback = new FutureCallback<ArrayList<RedditThing>>() {
+        final Thing parent = getArguments().getParcelable("thing");
+        final Votable redditVotable = getArguments().getParcelable("redditVotable");
+        FutureCallback<ArrayList<Thing>> callback = new FutureCallback<ArrayList<Thing>>() {
             @Override
             public void onCompleted(final Exception e,
-                                    final ArrayList<RedditThing> result) {
+                                    final ArrayList<Thing> result) {
                 if (getView() != null)
                 getView().post(new Runnable() {
                     @Override

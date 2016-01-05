@@ -19,9 +19,9 @@ import com.koushikdutta.async.future.FutureCallback;
 
 import java.util.ArrayList;
 
-import me.williamhester.models.reddit.RedditGenericListing;
-import me.williamhester.models.reddit.RedditGenericResponseWrapper;
-import me.williamhester.models.reddit.RedditMessage;
+import me.williamhester.models.reddit.GenericListing;
+import me.williamhester.models.reddit.GenericResponseWrapper;
+import me.williamhester.models.reddit.Message;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.activities.MainActivity;
@@ -35,7 +35,7 @@ public class MessageNotificationBroadcastReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(final Context context, Intent intent) {
-        RedditApi.getMessages(context, RedditMessage.UNREAD, null, new FutureCallback<JsonObject>() {
+        RedditApi.getMessages(context, Message.UNREAD, null, new FutureCallback<JsonObject>() {
             @Override
             public void onCompleted(Exception e, JsonObject result) {
                 if (e != null) {
@@ -45,33 +45,33 @@ public class MessageNotificationBroadcastReceiver extends BroadcastReceiver {
                 Gson gson = new Gson();
 
                 // Generics are just beautiful.
-                TypeToken<RedditGenericResponseWrapper<RedditGenericListing<RedditMessage>>> token =
-                        new TypeToken<RedditGenericResponseWrapper<RedditGenericListing<RedditMessage>>>() {};
+                TypeToken<GenericResponseWrapper<GenericListing<Message>>> token =
+                        new TypeToken<GenericResponseWrapper<GenericListing<Message>>>() {};
 
-                RedditGenericResponseWrapper<RedditGenericListing<RedditMessage>> wrapper =
+                GenericResponseWrapper<GenericListing<Message>> wrapper =
                         gson.fromJson(result, token.getType());
-                RedditGenericListing<RedditMessage> listing = wrapper.getData();
-                ArrayList<RedditMessage> redditMessages = new ArrayList<>();
+                GenericListing<Message> listing = wrapper.getData();
+                ArrayList<Message> messages = new ArrayList<>();
 
                 SharedPreferences prefs = context.getSharedPreferences("preferences", Context.MODE_PRIVATE);
                 long oldLatestTime = prefs.getLong("latestMessage", 0);
                 long latestTime = 0;
-                for (RedditGenericResponseWrapper<RedditMessage> message : listing.getChildren()) {
+                for (GenericResponseWrapper<Message> message : listing.getChildren()) {
                     if (message.getData().getCreatedUtc() > latestTime) {
                         latestTime = message.getData().getCreatedUtc();
                     }
-                    redditMessages.add(message.getData());
+                    messages.add(message.getData());
                 }
 
-                if (redditMessages.size() > 0 && latestTime > oldLatestTime) {
+                if (messages.size() > 0 && latestTime > oldLatestTime) {
                     SharedPreferences.Editor editor = prefs.edit();
                     editor.putLong("latestMessage", latestTime);
                     editor.apply();
                     NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
                             .setSmallIcon(R.drawable.ic_breadit)
-                            .setContentTitle(redditMessages.size() + " " + context.getResources()
-                                    .getQuantityString(R.plurals.new_messages, redditMessages.size()))
-                            .setContentText(redditMessages.size() + " " + context.getString(R.string.unread_messages))
+                            .setContentTitle(messages.size() + " " + context.getResources()
+                                    .getQuantityString(R.plurals.new_messages, messages.size()))
+                            .setContentText(messages.size() + " " + context.getString(R.string.unread_messages))
                             .setCategory(NotificationCompat.CATEGORY_MESSAGE)
                             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                             .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
@@ -82,23 +82,23 @@ public class MessageNotificationBroadcastReceiver extends BroadcastReceiver {
                             .setAutoCancel(true)
                             .setPublicVersion(new NotificationCompat.Builder(context)
                                     .setSmallIcon(R.drawable.ic_breadit)
-                                    .setContentTitle(redditMessages.size() + " " + context.getResources()
-                                            .getQuantityString(R.plurals.new_messages, redditMessages.size()))
-                                    .setContentText(redditMessages.size() + " " + context.getString(R.string.unread_messages))
+                                    .setContentTitle(messages.size() + " " + context.getResources()
+                                            .getQuantityString(R.plurals.new_messages, messages.size()))
+                                    .setContentText(messages.size() + " " + context.getString(R.string.unread_messages))
                                     .setColor(context.getResources().getColor(R.color.app_highlight))
                                     .build());
 
                     NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
-                    String[] messageTexts = new String[Math.min(6, redditMessages.size())];
-                    for (int i = 0; i < Math.min(6, redditMessages.size()); i++) {
-                        RedditMessage m = redditMessages.get(i);
+                    String[] messageTexts = new String[Math.min(6, messages.size())];
+                    for (int i = 0; i < Math.min(6, messages.size()); i++) {
+                        Message m = messages.get(i);
                         messageTexts[i] = m.getAuthor() + ": "
                                 + Html.fromHtml(Html.fromHtml(m.getHtmlBody()).toString()).toString();
                     }
                     // Sets a title for the Inbox in expanded layout
-                    inboxStyle.setBigContentTitle(redditMessages.size() + " "
+                    inboxStyle.setBigContentTitle(messages.size() + " "
                             + context.getResources()
-                                    .getQuantityString(R.plurals.new_messages, redditMessages.size()));
+                                    .getQuantityString(R.plurals.new_messages, messages.size()));
                     // Moves messageTexts into the expanded layout
                     for (String message : messageTexts) {
                         inboxStyle.addLine(message);

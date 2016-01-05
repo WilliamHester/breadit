@@ -7,18 +7,18 @@ import java.util.ArrayList;
 /**
  * Created by william on 12/20/14.
  */
-public class RedditGenericListing<T> {
+public class GenericListing<T> {
 
     @SerializedName("modhash")
     private String mModhash;
     @SerializedName("children")
-    private ArrayList<RedditGenericResponseWrapper<T>> mChildren;
+    private ArrayList<GenericResponseWrapper<T>> mChildren;
     @SerializedName("after")
     private String mAfter;
     @SerializedName("before")
     private String mBefore;
 
-    public ArrayList<RedditGenericResponseWrapper<T>> getChildren() {
+    public ArrayList<GenericResponseWrapper<T>> getChildren() {
         return mChildren;
     }
 }

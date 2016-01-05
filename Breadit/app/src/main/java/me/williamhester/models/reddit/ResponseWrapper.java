@@ -9,36 +9,36 @@ import me.williamhester.tools.Url;
 /**
  * Created by william on 7/30/14.
  */
-public class RedditResponseWrapper {
+public class ResponseWrapper {
 
     private String mKind;
     private Object mData;
     private boolean mError;
 
-    public RedditResponseWrapper(JsonObject object, Gson gson) {
+    public ResponseWrapper(JsonObject object, Gson gson) {
         if (object != null) {
             try {
                 mKind = object.get("kind").getAsString();
                 if (mKind.equals("t1")) {
-                    mData = new RedditComment(object.get("data").getAsJsonObject(), gson);
+                    mData = new Comment(object.get("data").getAsJsonObject(), gson);
                 } else if (mKind.equals("more")) {
-                    mData = new RedditMoreComments(object.get("data").getAsJsonObject());
-                } else if (mKind.equals("RedditListing")) {
-                    mData = new RedditListing(object.get("data").getAsJsonObject(), gson);
+                    mData = new MoreComments(object.get("data").getAsJsonObject());
+                } else if (mKind.equals("Listing")) {
+                    mData = new Listing(object.get("data").getAsJsonObject(), gson);
                 } else if (mKind.equals("t2")) {
                     // Account
                 } else if (mKind.equals("t3")) {
-                    RedditSubmission s = gson.fromJson(object.get("data"), RedditSubmission.class);
+                    Submission s = gson.fromJson(object.get("data"), Submission.class);
                     if (!s.isSelf()) {
                         s.setLinkDetails(new Url(s.getUrl()));
                     }
                     mData = s;
                 } else if (mKind.equals("t4")) {
-                    TypeToken<RedditMessage> token = new TypeToken<RedditMessage>() {
+                    TypeToken<Message> token = new TypeToken<Message>() {
                     };
                     mData = gson.fromJson(object.get("data"), token.getType());
                 } else if (mKind.equals("t5")) {
-                    mData = gson.fromJson(object.get("data"), RedditSubreddit.class);
+                    mData = gson.fromJson(object.get("data"), Subreddit.class);
                 } else if (mKind.equals("t6")) {
                     // Award
                 } else if (mKind.equals("t8")) {

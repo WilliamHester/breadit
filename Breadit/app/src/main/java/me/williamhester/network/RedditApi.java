@@ -27,32 +27,37 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import me.williamhester.models.reddit.RedditAbsComment;
-import me.williamhester.models.reddit.RedditAccount;
 import me.williamhester.models.AccountManager;
-import me.williamhester.models.reddit.RedditComment;
-import me.williamhester.models.reddit.RedditFriend;
-import me.williamhester.models.reddit.RedditGenericListing;
-import me.williamhester.models.reddit.RedditGenericResponseWrapper;
-import me.williamhester.models.reddit.RedditListing;
-import me.williamhester.models.reddit.RedditSubmission;
-import me.williamhester.models.reddit.RedditResponseWrapper;
-import me.williamhester.models.reddit.RedditSubreddit;
-import me.williamhester.models.reddit.RedditThing;
-import me.williamhester.models.reddit.RedditUser;
-import me.williamhester.models.reddit.RedditVotable;
+import me.williamhester.models.reddit.AbsComment;
+import me.williamhester.models.reddit.Account;
+import me.williamhester.models.reddit.Comment;
+import me.williamhester.models.reddit.Friend;
+import me.williamhester.models.reddit.GenericListing;
+import me.williamhester.models.reddit.GenericResponseWrapper;
+import me.williamhester.models.reddit.Listing;
+import me.williamhester.models.reddit.ResponseWrapper;
+import me.williamhester.models.reddit.Submission;
+import me.williamhester.models.reddit.Subreddit;
+import me.williamhester.models.reddit.Success;
+import me.williamhester.models.reddit.Thing;
+import me.williamhester.models.reddit.User;
+import me.williamhester.models.reddit.Votable;
+import retrofit.Call;
+import retrofit.Callback;
+import retrofit.Response;
+import retrofit.Retrofit;
 
 /**
  * Created by William on 6/14/14.
  */
-public class RedditApi implements BulletinBoardApi {
+public class RedditApi {
 
     private static final String USER_AGENT = "Breadit_Android_App";
 
     public static final String REDDIT_URL = "https://api.reddit.com";
     public static final String PUBLIC_REDDIT_URL = "https://www.reddit.com";
 
-    public static String SORT_TYPE_HOT = "";
+    public static String SORT_TYPE_HOT = "hot";
     public static String SORT_TYPE_NEW = "new";
     public static String SORT_TYPE_RISING = "rising";
     public static String SORT_TYPE_CONTROVERSIAL = "controversial";
@@ -72,6 +77,12 @@ public class RedditApi implements BulletinBoardApi {
     public static String COMMENT_SORT_TOP = "top";
     public static String COMMENT_SORT_BEST = "best";
 
+    private RedditService mRedditService;
+
+    public RedditApi(RedditService redditService) {
+        mRedditService = redditService;
+    }
+
     public static void logIn(Context context, String username, String password,
                              FutureCallback<JsonObject> callback) {
         Ion.with(context)
@@ -84,19 +95,15 @@ public class RedditApi implements BulletinBoardApi {
                 .setCallback(callback);
     }
 
-    public static void vote(Context context, RedditVotable v) {
-        Ion.with(context)
-                .load(REDDIT_URL + "/api/vote")
-                .addHeaders(getStandardHeaders())
-                .setBodyParameter("dir", String.valueOf(v.getVoteValue()))
-                .setBodyParameter("id", v.getId())
-                .asString();
+    public void vote(Votable v) {
+        Call<Success> call = mRedditService.postVote(v.getId(), v.getVoteValue());
+        call.enqueue(NO_OP_CALLBACK);
     }
 
-    public static void getRedditLiveData(Context context, RedditSubmission redditSubmission,
-                                         final FutureCallback<RedditResponseWrapper> callback) {
+    public static void getRedditLiveData(Context context, Submission submission,
+                                         final FutureCallback<ResponseWrapper> callback) {
         Ion.with(context)
-                .load(redditSubmission.getUrl() + "/about.json")
+                .load(submission.getUrl() + "/about.json")
                 .addHeaders(getStandardHeaders())
                 .asJsonObject()
                 .setCallback(new FutureCallback<JsonObject>() {
@@ -108,24 +115,22 @@ public class RedditApi implements BulletinBoardApi {
                             return;
                         }
                         Gson gson = new Gson();
-                        RedditResponseWrapper wrapper = new RedditResponseWrapper(result, gson);
+                        ResponseWrapper wrapper = new ResponseWrapper(result, gson);
                         callback.onCompleted(null, wrapper);
                     }
                 });
     }
 
-    public static void getSubmissions(Context context, String subredditName, String sortType,
-                                      String secondarySort, String before, String after,
-                                      FutureCallback<JsonObject> callback) {
+    public void getSubmissions(String subredditName, String sortType,
+                               String secondarySort, String after,
+                               Callback<GenericResponseWrapper<GenericListing<Submission>>> callback) {
+        Call<GenericResponseWrapper<GenericListing<Submission>>> call;
         if (!subredditName.equals("")) {
-            subredditName = "/r/" + subredditName;
+            call = mRedditService.getSubredditSubmissions(subredditName, sortType, secondarySort, after);
+        } else {
+            call = mRedditService.getFrontpageSubmissions(sortType, secondarySort, after);
         }
-        Ion.with(context)
-                .load(REDDIT_URL + subredditName + "/" + sortType + "/.json")
-                .addQueries(generateSubmissionQueries(secondarySort, before, after))
-                .addHeaders(getStandardHeaders())
-                .asJsonObject()
-                .setCallback(callback);
+        call.enqueue(callback);
     }
 
     public static void getSubredditDetails(Context context, String subredditName,
@@ -140,25 +145,25 @@ public class RedditApi implements BulletinBoardApi {
                 .setCallback(callback);
     }
 
-    public static void getDefaultSubreddits(FutureCallback<ArrayList<RedditSubreddit>> callback) {
-        getSubreddits(callback, "default", null, new ArrayList<RedditSubreddit>(), new Gson());
+    public static void getDefaultSubreddits(FutureCallback<ArrayList<Subreddit>> callback) {
+        getSubreddits(callback, "default", null, new ArrayList<Subreddit>(), new Gson());
     }
 
-    public static void getSubscribedSubreddits(FutureCallback<ArrayList<RedditSubreddit>> callback) {
-        getSubreddits(callback, "mine", "", new ArrayList<RedditSubreddit>(), new Gson());
+    public static void getSubscribedSubreddits(FutureCallback<ArrayList<Subreddit>> callback) {
+        getSubreddits(callback, "mine", "", new ArrayList<Subreddit>(), new Gson());
     }
 
-    private static void getSubreddits(final FutureCallback<ArrayList<RedditSubreddit>> callback,
+    private static void getSubreddits(final FutureCallback<ArrayList<Subreddit>> callback,
                                       final String type, String after,
-                                      final ArrayList<RedditSubreddit> redditSubreddits, final Gson gson) {
-        String requestUrl = String.format(REDDIT_URL + "/redditSubreddits/%s/?after=%s", type, after);
+                                      final ArrayList<Subreddit> subreddits, final Gson gson) {
+        String requestUrl = String.format(REDDIT_URL + "/subreddits/%s/?after=%s", type, after);
         AsyncHttpRequest request = new AsyncHttpGet(requestUrl);
         if (AccountManager.isLoggedIn()) {
-            RedditAccount redditAccount = AccountManager.getAccount();
-            request.addHeader("Cookie", "reddit_session=\"" + redditAccount.getCookie() + "\"");
-            request.addHeader("X-Modhash", redditAccount.getModhash());
+            Account account = AccountManager.getAccount();
+            request.addHeader("Cookie", "reddit_session=\"" + account.getCookie() + "\"");
+            request.addHeader("X-Modhash", account.getModhash());
         }
-        request.addHeader("RedditUser-Agent", USER_AGENT);
+        request.addHeader("User-Agent", USER_AGENT);
         request.addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
 
         AsyncHttpClient.getDefaultInstance().executeString(request, new AsyncHttpClient.StringCallback() {
@@ -170,18 +175,18 @@ public class RedditApi implements BulletinBoardApi {
                 }
                 try {
                     JsonObject object = new JsonParser().parse(result).getAsJsonObject();
-                    RedditResponseWrapper wrapper = new RedditResponseWrapper(object, gson);
-                    if (wrapper.getData() instanceof RedditListing) {
-                        RedditListing redditListing = (RedditListing) wrapper.getData();
-                        for (RedditResponseWrapper wrapper1 : redditListing.getChildren()) {
-                            if (wrapper1.getData() instanceof RedditSubreddit) {
-                                redditSubreddits.add((RedditSubreddit) wrapper1.getData());
+                    ResponseWrapper wrapper = new ResponseWrapper(object, gson);
+                    if (wrapper.getData() instanceof Listing) {
+                        Listing listing = (Listing) wrapper.getData();
+                        for (ResponseWrapper wrapper1 : listing.getChildren()) {
+                            if (wrapper1.getData() instanceof Subreddit) {
+                                subreddits.add((Subreddit) wrapper1.getData());
                             }
                         }
-                        if (redditListing.getAfter() != null) {
-                            getSubreddits(callback, type, redditListing.getAfter(), redditSubreddits, gson);
+                        if (listing.getAfter() != null) {
+                            getSubreddits(callback, type, listing.getAfter(), subreddits, gson);
                         } else {
-                            callback.onCompleted(null, redditSubreddits);
+                            callback.onCompleted(null, subreddits);
                         }
                     }
                 } catch (Exception e2) {
@@ -191,61 +196,40 @@ public class RedditApi implements BulletinBoardApi {
         });
     }
 
-    public static void subscribeSubreddit(Context context, boolean sub, RedditSubreddit redditSubreddit,
+    public static void subscribeSubreddit(Context context, boolean sub, Subreddit subreddit,
                                           FutureCallback<String> callback) {
         Ion.with(context)
                 .load(REDDIT_URL + "/api/subscribe/")
                 .addHeaders(getStandardHeaders())
                 .setBodyParameter("action", sub ? "sub" : "unsub")
-                .setBodyParameter("sr", redditSubreddit.getName())
+                .setBodyParameter("sr", subreddit.getName())
                 .asString()
                 .setCallback(callback);
     }
 
-    private static Map<String, List<String>> generateSubmissionQueries(String secondarySort,
-                                                                         String before, String after) {
-        Map<String, List<String>> queries = new HashMap<>();
-        if (secondarySort != null) {
-            ArrayList<String> query = new ArrayList<>();
-            query.add(secondarySort);
-            queries.put("t", query);
-        }
-        if (before != null) {
-            ArrayList<String> query = new ArrayList<>();
-            query.add(before);
-            queries.put("before", query);
-        }
-        if (after != null) {
-            ArrayList<String> query = new ArrayList<>();
-            query.add(after);
-            queries.put("after", query);
-        }
-        return queries;
-    }
-
     private static Map<String, List<String>> getStandardHeaders() {
-        RedditAccount redditAccount = AccountManager.getAccount();
+        Account account = AccountManager.getAccount();
         Map<String, List<String>> headers = new HashMap<>();
         ArrayList<String> userAgent = new ArrayList<>(1);
         userAgent.add(USER_AGENT);
-        headers.put("RedditUser-Agent", userAgent);
+        headers.put("User-Agent", userAgent);
         ArrayList<String> contentType = new ArrayList<>(1);
         userAgent.add("application/x-www-form-urlencoded; charset=UTF-8");
         headers.put("Content-Type", contentType);
-        if (redditAccount != null) {
+        if (account != null) {
             ArrayList<String> list1 = new ArrayList<>(1);
-            list1.add("reddit_session=\"" + redditAccount.getCookie() + "\"");
+            list1.add("reddit_session=\"" + account.getCookie() + "\"");
             headers.put("Cookie", list1);
             ArrayList<String> list2 = new ArrayList<>(1);
-            list2.add(redditAccount.getModhash());
+            list2.add(account.getModhash());
             headers.put("X-Modhash", list2);
         }
         return headers;
     }
 
     public static void getSubmissionData(Context context, String permalink, String sortType,
-                                         final FutureCallback<RedditSubmission> submissionCallback,
-                                         final FutureCallback<List<RedditAbsComment>> commentCallback) {
+                                         final FutureCallback<Submission> submissionCallback,
+                                         final FutureCallback<List<AbsComment>> commentCallback) {
         Ion.with(context)
                 .load(REDDIT_URL + permalink)
                 .addQuery("sort", sortType)
@@ -263,28 +247,28 @@ public class RedditApi implements BulletinBoardApi {
                         try {
                             Gson gson = new Gson();
                             JsonArray array = new JsonParser().parse(result).getAsJsonArray();
-                            TypeToken<RedditSubmission> sub = new TypeToken<RedditSubmission>() {
+                            TypeToken<Submission> sub = new TypeToken<Submission>() {
                             };
-                            RedditSubmission redditSubmission = gson.fromJson(array.get(0).getAsJsonObject()
+                            Submission submission = gson.fromJson(array.get(0).getAsJsonObject()
                                             .get("data").getAsJsonObject()
                                             .get("children").getAsJsonArray().get(0).getAsJsonObject()
                                             .get("data"),
                                     sub.getType());
 
-                            RedditResponseWrapper wrapper = new RedditResponseWrapper(array.get(1).getAsJsonObject(), gson);
-                            RedditListing redditListing = null;
-                            if (wrapper.getData() instanceof RedditListing) {
-                                redditListing = (RedditListing) wrapper.getData();
+                            ResponseWrapper wrapper = new ResponseWrapper(array.get(1).getAsJsonObject(), gson);
+                            Listing listing = null;
+                            if (wrapper.getData() instanceof Listing) {
+                                listing = (Listing) wrapper.getData();
                             }
 
-                            List<RedditAbsComment> comments = new ArrayList<>();
-                            for (RedditResponseWrapper wrap : redditListing.getChildren()) {
-                                RedditComment.CommentIterator iterator = new RedditComment.CommentIterator(wrap);
+                            List<AbsComment> comments = new ArrayList<>();
+                            for (ResponseWrapper wrap : listing.getChildren()) {
+                                Comment.CommentIterator iterator = new Comment.CommentIterator(wrap);
                                 while (iterator.hasNext()) {
                                     comments.add(iterator.next());
                                 }
                             }
-                            submissionCallback.onCompleted(null, redditSubmission);
+                            submissionCallback.onCompleted(null, submission);
                             commentCallback.onCompleted(null, comments);
                         } catch (Exception e2) {
                             submissionCallback.onCompleted(e2, null);
@@ -310,7 +294,7 @@ public class RedditApi implements BulletinBoardApi {
      */
     public static void getMoreChildren(String linkId, String sortType,
                                        List<String> children, final int baseLevel,
-                                       final FutureCallback<ArrayList<RedditThing>> callback) {
+                                       final FutureCallback<ArrayList<Thing>> callback) {
         // Build the list of children separated by commas
         StringBuilder stringBuilder = new StringBuilder();
         for (String s : children) {
@@ -342,7 +326,7 @@ public class RedditApi implements BulletinBoardApi {
     }
 
     private static void getVotableDataFromNames(String result, int baseLevel,
-                                                final FutureCallback<ArrayList<RedditThing>> callback) {
+                                                final FutureCallback<ArrayList<Thing>> callback) {
         // Just in case Reddit gives us a weird response, this will be wrapped in a try-catch
         try {
             JsonObject object = new JsonParser().parse(result).getAsJsonObject();
@@ -361,62 +345,62 @@ public class RedditApi implements BulletinBoardApi {
             }
 
             JsonArray array = json.get("data").getAsJsonObject()
-                    .get("redditThings").getAsJsonArray();
-            ArrayList<RedditThing> redditThings = new ArrayList<>();
+                    .get("things").getAsJsonArray();
+            ArrayList<Thing> things = new ArrayList<>();
             Gson gson = new Gson();
             for (int i = 0; i < array.size(); i++) {
-                RedditResponseWrapper wrapper =
-                        new RedditResponseWrapper(array.get(i).getAsJsonObject(), gson);
-                RedditThing data = (RedditThing) wrapper.getData();
+                ResponseWrapper wrapper =
+                        new ResponseWrapper(array.get(i).getAsJsonObject(), gson);
+                Thing data = (Thing) wrapper.getData();
 
                 // if it's a comment, we need to get its relative depth in the tree
-                if (data instanceof RedditAbsComment) {
+                if (data instanceof AbsComment) {
                     boolean foundParent = false;
-                    for (RedditThing redditThing : redditThings) {
-                        if (!(redditThing instanceof RedditComment)) {
+                    for (Thing thing : things) {
+                        if (!(thing instanceof Comment)) {
                             continue;
                         }
-                        RedditComment c = (RedditComment) redditThing;
-                        if (c.getId().equals(((RedditAbsComment) data).getParentId())) {
-                            ((RedditAbsComment) data).setLevel(c.getLevel() + 1);
+                        Comment c = (Comment) thing;
+                        if (c.getId().equals(((AbsComment) data).getParentId())) {
+                            ((AbsComment) data).setLevel(c.getLevel() + 1);
                             foundParent = true;
                         }
                     }
                     if (!foundParent) {
-                        ((RedditAbsComment) data).setLevel(baseLevel);
+                        ((AbsComment) data).setLevel(baseLevel);
                     }
                 }
-                redditThings.add(data);
+                things.add(data);
             }
 
-            callback.onCompleted(null, redditThings);
+            callback.onCompleted(null, things);
         } catch (Exception e2) {
             printOutLongString(result.toString());
             callback.onCompleted(e2, null);
         }
     }
 
-    public static void hide(Context context, RedditSubmission redditSubmission,
+    public static void hide(Context context, Submission submission,
                             FutureCallback<String> callback) {
         Ion.with(context)
                 .load(REDDIT_URL + "/api/hide")
                 .addHeaders(getStandardHeaders())
-                .setBodyParameter("id", redditSubmission.getId())
+                .setBodyParameter("id", submission.getId())
                 .asString()
                 .setCallback(callback);
     }
 
-    public static void unhide(Context context, RedditSubmission redditSubmission,
+    public static void unhide(Context context, Submission submission,
                               FutureCallback<String> callback) {
         Ion.with(context)
                 .load(REDDIT_URL + "/api/unhide")
                 .addHeaders(getStandardHeaders())
-                .setBodyParameter("id", redditSubmission.getId())
+                .setBodyParameter("id", submission.getId())
                 .asString()
                 .setCallback(callback);
     }
 
-    public static void delete(Context context, RedditVotable redditVotable, FutureCallback<String> callback) {
+    public static void delete(Context context, Votable redditVotable, FutureCallback<String> callback) {
         Ion.with(context)
                 .load(REDDIT_URL + "/api/del")
                 .addHeaders(getStandardHeaders())
@@ -425,82 +409,82 @@ public class RedditApi implements BulletinBoardApi {
                 .setCallback(callback);
     }
 
-    public static void markNsfw(Context context, RedditSubmission redditSubmission,
+    public static void markNsfw(Context context, Submission submission,
                                 FutureCallback<String> callback) {
         Ion.with(context)
                 .load(REDDIT_URL + "/api/marknsfw")
                 .addHeaders(getStandardHeaders())
-                .setBodyParameter("id", redditSubmission.getId())
+                .setBodyParameter("id", submission.getId())
                 .asString()
                 .setCallback(callback);
     }
 
-    public static void unmarkNsfw(Context context, RedditSubmission redditSubmission,
+    public static void unmarkNsfw(Context context, Submission submission,
                                   FutureCallback<String> callback) {
         Ion.with(context)
                 .load(REDDIT_URL + "/api/unmarknsfw")
                 .addHeaders(getStandardHeaders())
-                .setBodyParameter("id", redditSubmission.getId())
+                .setBodyParameter("id", submission.getId())
                 .asString()
                 .setCallback(callback);
     }
 
-    public static void approve(Context context, RedditSubmission redditSubmission,
+    public static void approve(Context context, Submission submission,
                                   FutureCallback<String> callback) {
         Ion.with(context)
                 .load(REDDIT_URL + "/api/approve")
                 .addHeaders(getStandardHeaders())
-                .setBodyParameter("id", redditSubmission.getId())
+                .setBodyParameter("id", submission.getId())
                 .asString()
                 .setCallback(callback);
     }
 
-    public static void remove(Context context, RedditSubmission redditSubmission, boolean spam,
+    public static void remove(Context context, Submission submission, boolean spam,
                               FutureCallback<String> callback) {
         Ion.with(context)
                 .load(REDDIT_URL + "/api/remove")
                 .addHeaders(getStandardHeaders())
-                .setBodyParameter("id", redditSubmission.getId())
+                .setBodyParameter("id", submission.getId())
                 .setBodyParameter("spam", String.valueOf(spam))
                 .asString()
                 .setCallback(callback);
     }
 
-    public static void setContestMode(Context context, boolean isContest, RedditSubmission redditSubmission,
+    public static void setContestMode(Context context, boolean isContest, Submission submission,
                                       FutureCallback<String> callback) {
         Ion.with(context)
                 .load(REDDIT_URL + "/api/set_contest_mode")
                 .addHeaders(getStandardHeaders())
                 .setBodyParameter("api_type", "json")
-                .setBodyParameter("id", redditSubmission.getId())
+                .setBodyParameter("id", submission.getId())
                 .setBodyParameter("state", String.valueOf(isContest))
                 .asString()
                 .setCallback(callback);
     }
 
-    public static void setSubredditSticky(Context context, boolean isSticky, RedditSubmission redditSubmission,
+    public static void setSubredditSticky(Context context, boolean isSticky, Submission submission,
                                           FutureCallback<String> callback) {
         Ion.with(context)
                 .load(REDDIT_URL + "/api/set_subreddit_sticky")
                 .addHeaders(getStandardHeaders())
                 .setBodyParameter("api_type", "json")
-                .setBodyParameter("id", redditSubmission.getId())
+                .setBodyParameter("id", submission.getId())
                 .setBodyParameter("state", String.valueOf(isSticky))
                 .asString()
                 .setCallback(callback);
     }
 
-    public static void replyToComment(final Context context, final RedditThing redditThing, String text,
-                             final FutureCallback<ArrayList<RedditThing>> callback) {
+    public static void replyToComment(final Context context, final Thing thing, String text,
+                                      final FutureCallback<ArrayList<Thing>> callback) {
         MultipartFormDataBody body = new MultipartFormDataBody();
         body.addStringPart("api_type", "json");
-        body.addStringPart("parent", redditThing.getId());
+        body.addStringPart("parent", thing.getId());
         body.addStringPart("text", text);
 
         AsyncHttpRequest request = new AsyncHttpPost(REDDIT_URL + "/api/comment/");
-        RedditAccount redditAccount = AccountManager.getAccount();
-        request.addHeader("Cookie", "reddit_session=\"" + redditAccount.getCookie() + "\"");
-        request.addHeader("X-Modhash", redditAccount.getModhash());
+        Account account = AccountManager.getAccount();
+        request.addHeader("Cookie", "reddit_session=\"" + account.getCookie() + "\"");
+        request.addHeader("X-Modhash", account.getModhash());
         request.setBody(body);
         AsyncHttpClient.getDefaultInstance().executeString(request, new AsyncHttpClient.StringCallback() {
             @Override
@@ -509,23 +493,23 @@ public class RedditApi implements BulletinBoardApi {
                     callback.onCompleted(e, null);
                     return;
                 }
-                int level = redditThing instanceof RedditComment ? ((RedditComment) redditThing).getLevel() + 1 : 0;
+                int level = thing instanceof Comment ? ((Comment) thing).getLevel() + 1 : 0;
                 getVotableDataFromNames(result, level, callback);
             }
         });
     }
 
-    public static void editThing(final RedditVotable redditVotable,
-                                 final FutureCallback<ArrayList<RedditThing>> callback) {
+    public static void editThing(final Votable redditVotable,
+                                 final FutureCallback<ArrayList<Thing>> callback) {
         MultipartFormDataBody body = new MultipartFormDataBody();
         body.addStringPart("api_type", "json");
         body.addStringPart("thing_id", redditVotable.getId());
         body.addStringPart("text", redditVotable.getBodyMarkdown());
 
         AsyncHttpRequest request = new AsyncHttpPost(REDDIT_URL + "/api/editusertext/");
-        RedditAccount redditAccount = AccountManager.getAccount();
-        request.addHeader("Cookie", "reddit_session=\"" + redditAccount.getCookie() + "\"");
-        request.addHeader("X-Modhash", redditAccount.getModhash());
+        Account account = AccountManager.getAccount();
+        request.addHeader("Cookie", "reddit_session=\"" + account.getCookie() + "\"");
+        request.addHeader("X-Modhash", account.getModhash());
         request.setBody(body);
         AsyncHttpClient.getDefaultInstance().executeString(request, new AsyncHttpClient.StringCallback() {
             @Override
@@ -534,7 +518,7 @@ public class RedditApi implements BulletinBoardApi {
                     callback.onCompleted(e, null);
                     return;
                 }
-                int level = redditVotable instanceof RedditComment ? ((RedditComment) redditVotable).getLevel() : 0;
+                int level = redditVotable instanceof Comment ? ((Comment) redditVotable).getLevel() : 0;
                 getVotableDataFromNames(result, level, callback);
             }
         });
@@ -551,11 +535,11 @@ public class RedditApi implements BulletinBoardApi {
     }
 
     public static void getUserAbout(Context context, String username,
-                                    FutureCallback<RedditGenericResponseWrapper<RedditUser>> callback) {
+                                    FutureCallback<GenericResponseWrapper<User>> callback) {
         Ion.with(context)
                 .load(REDDIT_URL + "/user/" + username + "/about.json")
                 .addHeaders(getStandardHeaders())
-                .as(new TypeToken<RedditGenericResponseWrapper<RedditUser>>() {
+                .as(new TypeToken<GenericResponseWrapper<User>>() {
                 })
                 .setCallback(callback);
     }
@@ -655,10 +639,10 @@ public class RedditApi implements BulletinBoardApi {
 
     public static void getMe(final FutureCallback<JsonObject> callback) {
         AsyncHttpRequest request = new AsyncHttpGet(REDDIT_URL + "/api/me.json");
-        RedditAccount redditAccount = AccountManager.getAccount();
-        request.addHeader("Cookie", "reddit_session=\"" + redditAccount.getCookie() + "\"");
-        request.addHeader("X-Modhash", redditAccount.getModhash());
-        request.addHeader("RedditUser-Agent", USER_AGENT);
+        Account account = AccountManager.getAccount();
+        request.addHeader("Cookie", "reddit_session=\"" + account.getCookie() + "\"");
+        request.addHeader("X-Modhash", account.getModhash());
+        request.addHeader("User-Agent", USER_AGENT);
         request.addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
 
         AsyncHttpClient.getDefaultInstance().executeString(request, new AsyncHttpClient.StringCallback() {
@@ -674,12 +658,12 @@ public class RedditApi implements BulletinBoardApi {
         });
     }
 
-    public static void getFriends(final FutureCallback<ArrayList<RedditFriend>> callback) {
+    public static void getFriends(final FutureCallback<ArrayList<Friend>> callback) {
         AsyncHttpRequest request = new AsyncHttpGet(REDDIT_URL + "/api/v1/me/friends");
-        RedditAccount redditAccount = AccountManager.getAccount();
-        request.addHeader("Cookie", "reddit_session=\"" + redditAccount.getCookie() + "\"");
-        request.addHeader("X-Modhash", redditAccount.getModhash());
-        request.addHeader("RedditUser-Agent", USER_AGENT);
+        Account account = AccountManager.getAccount();
+        request.addHeader("Cookie", "reddit_session=\"" + account.getCookie() + "\"");
+        request.addHeader("X-Modhash", account.getModhash());
+        request.addHeader("User-Agent", USER_AGENT);
         request.addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
 
         AsyncHttpClient.getDefaultInstance().executeString(request, new AsyncHttpClient.StringCallback() {
@@ -703,18 +687,18 @@ public class RedditApi implements BulletinBoardApi {
                         .get("children")
                         .getAsJsonArray();
 
-                final ArrayList<RedditFriend> redditFriends = new ArrayList<>();
+                final ArrayList<Friend> friends = new ArrayList<>();
                 for (JsonElement element : children) {
-                    TypeToken<RedditFriend> token = new TypeToken<RedditFriend>() {
+                    TypeToken<Friend> token = new TypeToken<Friend>() {
                     };
-                    RedditFriend f = gson.fromJson(element, token.getType());
-                    redditFriends.add(f);
+                    Friend f = gson.fromJson(element, token.getType());
+                    friends.add(f);
                 }
 
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        callback.onCompleted(null, redditFriends);
+                        callback.onCompleted(null, friends);
                     }
                 });
             }
@@ -725,15 +709,15 @@ public class RedditApi implements BulletinBoardApi {
                                              final FutureCallback<ArrayList<String>> callback) {
         Ion.with(context)
                 .load(REDDIT_URL + "/r/trendingsubreddits/?limit=1")
-                .as(new TypeToken<RedditGenericResponseWrapper<RedditGenericListing<RedditSubmission>>>() { })
-                .setCallback(new FutureCallback<RedditGenericResponseWrapper<RedditGenericListing<RedditSubmission>>>() {
+                .as(new TypeToken<GenericResponseWrapper<GenericListing<Submission>>>() { })
+                .setCallback(new FutureCallback<GenericResponseWrapper<GenericListing<Submission>>>() {
                     @Override
-                    public void onCompleted(Exception e, RedditGenericResponseWrapper<RedditGenericListing<RedditSubmission>> result) {
+                    public void onCompleted(Exception e, GenericResponseWrapper<GenericListing<Submission>> result) {
                         if (e != null) {
                             callback.onCompleted(e, null);
                         } else {
                             ArrayList<String> trendingSubs = new ArrayList<>();
-                            RedditSubmission trending = result.getData().getChildren().get(0).getData();
+                            Submission trending = result.getData().getChildren().get(0).getData();
                             String title = trending.getTitle();
                             Pattern subreddit = Pattern.compile("/r/\\w+");
                             Matcher m = subreddit.matcher(title);
@@ -754,8 +738,16 @@ public class RedditApi implements BulletinBoardApi {
 
     public static class ArchivedSubmissionException extends Exception {
         public ArchivedSubmissionException() {
-            super("RedditSubmission is archived. Commenting is disallowed.");
+            super("Submission is archived. Commenting is disallowed.");
         }
     }
+
+    private static final Callback<Success> NO_OP_CALLBACK = new Callback<Success>() {
+        @Override
+        public void onResponse(Response<Success> response, Retrofit retrofit) { }
+
+        @Override
+        public void onFailure(Throwable t) { }
+    };
 
 }

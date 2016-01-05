@@ -9,8 +9,7 @@ import com.google.gson.annotations.SerializedName;
  * Created by william on 7/30/14.
  */
 public class RedditLive implements Parcelable {
-    private static final long serialVersionUID = 4655722592749339956L;
-    
+
     @SerializedName("name")
     private String mName;
     @SerializedName("description_html")

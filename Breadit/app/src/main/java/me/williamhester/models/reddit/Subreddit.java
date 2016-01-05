@@ -2,13 +2,12 @@ package me.williamhester.models.reddit;
 
 import android.database.Cursor;
 import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 
 import com.google.gson.annotations.SerializedName;
 
-import me.williamhester.models.bulletin.Bulletin;
-
-public class RedditSubreddit implements Bulletin, Comparable<RedditSubreddit> {
+public class Subreddit implements Comparable<Subreddit>, Parcelable {
 
     protected String id;
     protected String name;
@@ -62,7 +61,7 @@ public class RedditSubreddit implements Bulletin, Comparable<RedditSubreddit> {
 
     private long mTableId;
 
-    public RedditSubreddit(Cursor cursor) {
+    public Subreddit(Cursor cursor) {
         mTableId = cursor.getLong(0);
         mDisplayName = cursor.getString(1);
         mOver18 = cursor.getInt(2) == 1;
@@ -76,10 +75,10 @@ public class RedditSubreddit implements Bulletin, Comparable<RedditSubreddit> {
         }
     }
 
-    private RedditSubreddit(boolean userIsBanned, String displayName, String title, boolean isNsfw,
-                            boolean userIsModerator, String descriptionHtml, int subscriberCount,
-                            String url, long created, String submissionType, boolean userIsSubscriber,
-                            long tableId, String name) {
+    private Subreddit(boolean userIsBanned, String displayName, String title, boolean isNsfw,
+                      boolean userIsModerator, String descriptionHtml, int subscriberCount,
+                      String url, long created, String submissionType, boolean userIsSubscriber,
+                      long tableId, String name) {
         mUserIsBanned = userIsBanned;
         mDisplayName = displayName;
         mTitle = title;
@@ -95,7 +94,7 @@ public class RedditSubreddit implements Bulletin, Comparable<RedditSubreddit> {
         this.name = name;
     }
 
-    public static final RedditSubreddit FRONT_PAGE = new RedditSubreddit(false, "Front Page", "Front Page",
+    public static final Subreddit FRONT_PAGE = new Subreddit(false, "Front Page", "Front Page",
             false, false, "", -1, "", -1, "", false, -1, "Front Page");
 
     public boolean userIsBanned() {
@@ -178,42 +177,34 @@ public class RedditSubreddit implements Bulletin, Comparable<RedditSubreddit> {
         mTableId = id;
     }
 
-    @Override
     public int getSubscriberCount() {
         return mSubscribers;
     }
 
-    @Override
     public boolean isNsfw() {
         return mOver18;
     }
 
-    @Override
     public String getName() {
         return name;
     }
 
-    @Override
     public String getTitle() {
         return mTitle;
     }
 
-    @Override
     public String getDescription() {
         return mDescription;
     }
 
-    @Override
     public String getCreatedDate() {
         return "fixme: created date";
     }
 
-    @Override
     public String getSidebar() {
         return "";
     }
 
-    @Override
     public String getType() {
         return mSubmissionType;
     }
@@ -221,18 +212,16 @@ public class RedditSubreddit implements Bulletin, Comparable<RedditSubreddit> {
 
     @Override
     public boolean equals(Object o) {
-        if (o instanceof RedditSubreddit && ((RedditSubreddit) o).name == null) {
-            Log.d("RedditSubreddit", "breakpoint");
+        if (o instanceof Subreddit && ((Subreddit) o).name == null) {
+            Log.d("Subreddit", "breakpoint");
         }
-        return o instanceof RedditSubreddit && name != null && (((RedditSubreddit) o).name).equals(name);
+        return o instanceof Subreddit && name != null && (((Subreddit) o).name).equals(name);
     }
 
-    @Override
     public int describeContents() {
         return 0;
     }
 
-    @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(this.mAccountsActive);
         dest.writeInt(this.mCommentScoreHideMins);
@@ -261,7 +250,7 @@ public class RedditSubreddit implements Bulletin, Comparable<RedditSubreddit> {
         dest.writeString(this.name);
     }
 
-    private RedditSubreddit(Parcel in) {
+    private Subreddit(Parcel in) {
         this.mAccountsActive = in.readInt();
         this.mCommentScoreHideMins = in.readInt();
         this.mSubscribers = in.readInt();
@@ -289,20 +278,20 @@ public class RedditSubreddit implements Bulletin, Comparable<RedditSubreddit> {
         this.name = in.readString();
     }
 
-    public static Creator<RedditSubreddit> CREATOR = new Creator<RedditSubreddit>() {
-        public RedditSubreddit createFromParcel(Parcel source) {
-            return new RedditSubreddit(source);
+    public static Parcelable.Creator<Subreddit> CREATOR = new Parcelable.Creator<Subreddit>() {
+        public Subreddit createFromParcel(Parcel source) {
+            return new Subreddit(source);
         }
 
-        public RedditSubreddit[] newArray(int size) {
-            return new RedditSubreddit[size];
+        public Subreddit[] newArray(int size) {
+            return new Subreddit[size];
         }
     };
 
     @Override
-    public int compareTo(RedditSubreddit redditSubreddit) {
-        if (mDisplayName == null || redditSubreddit == null || redditSubreddit.mDisplayName == null)
+    public int compareTo(Subreddit subreddit) {
+        if (mDisplayName == null || subreddit == null || subreddit.mDisplayName == null)
             return -1;
-        return mDisplayName.toLowerCase().compareTo(redditSubreddit.mDisplayName.toLowerCase());
+        return mDisplayName.toLowerCase().compareTo(subreddit.mDisplayName.toLowerCase());
     }
 }

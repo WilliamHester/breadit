@@ -7,18 +7,23 @@ import android.view.animation.Transformation;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
-import me.williamhester.models.reddit.RedditVotable;
+import javax.inject.Inject;
+
+import me.williamhester.BreaditApplication;
+import me.williamhester.models.reddit.Votable;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 
 /**
- * This is an abstraction of the ViewHolder that is needed for both the RedditComment and RedditSubmission
+ * This is an abstraction of the ViewHolder that is needed for both the Comment and Submission
  * objects. It sets up the SwipeView and prepares some of the other Views so that others can
  * use them.
  *
  * Created by william on 8/1/14.
  */
 public abstract class VotableViewHolder extends RecyclerView.ViewHolder {
+
+    @Inject RedditApi mApi;
 
     // The mBody TextView is protected so that it can be modified by its children.
     protected TextView mBody;
@@ -28,10 +33,14 @@ public abstract class VotableViewHolder extends RecyclerView.ViewHolder {
     private View mBackgroundVoteView;
     private View mForegroundVoteView;
     protected SwipeView mSwipeView;
-    private RedditVotable mRedditVotable;
+    private Votable mRedditVotable;
 
     public VotableViewHolder(final View itemView) {
         super(itemView);
+
+        BreaditApplication application = (BreaditApplication)
+                itemView.getContext().getApplicationContext();
+        application.getApiComponent().inject(this);
 
         mBody = (TextView) itemView.findViewById(R.id.markdown_body);
         mTime = (TextView) itemView.findViewById(R.id.time);
@@ -42,15 +51,15 @@ public abstract class VotableViewHolder extends RecyclerView.ViewHolder {
         mSwipeView.setUp(mBackgroundVoteView, mForegroundVoteView, new SwipeView.SwipeListener() {
             @Override
             public void onRightToLeftSwipe() {
-                mRedditVotable.setVoteValue(mRedditVotable.getVoteValue() == RedditVotable.DOWNVOTED ? RedditVotable.NEUTRAL : RedditVotable.DOWNVOTED);
-                RedditApi.vote(itemView.getContext(), mRedditVotable);
+                mRedditVotable.setVoteValue(mRedditVotable.getVoteValue() == Votable.DOWNVOTED ? Votable.NEUTRAL : Votable.DOWNVOTED);
+                mApi.vote(mRedditVotable);
                 onVoted();
             }
 
             @Override
             public void onLeftToRightSwipe() {
-                mRedditVotable.setVoteValue(mRedditVotable.getVoteValue() == RedditVotable.UPVOTED ? RedditVotable.NEUTRAL : RedditVotable.UPVOTED);
-                RedditApi.vote(itemView.getContext(), mRedditVotable);
+                mRedditVotable.setVoteValue(mRedditVotable.getVoteValue() == Votable.UPVOTED ? Votable.NEUTRAL : Votable.UPVOTED);
+                mApi.vote(mRedditVotable);
                 onVoted();
             }
         });
@@ -66,8 +75,8 @@ public abstract class VotableViewHolder extends RecyclerView.ViewHolder {
     public abstract void collapseOptions();
 
     public void setContent(Object object) {
-        if (object instanceof RedditVotable) {
-            mRedditVotable = (RedditVotable) object;
+        if (object instanceof Votable) {
+            mRedditVotable = (Votable) object;
             mSwipeView.recycle(mRedditVotable);
             if (mTime != null) {
                 mTime.setText(calculateTimeShort(mRedditVotable.getCreatedUtc()));
@@ -80,13 +89,13 @@ public abstract class VotableViewHolder extends RecyclerView.ViewHolder {
 
     private void setVoteStatus() {
         switch (mRedditVotable.getVoteValue()) {
-            case RedditVotable.DOWNVOTED:
+            case Votable.DOWNVOTED:
                 mForegroundVoteView.setScaleY(0f);
                 mBackgroundVoteView.setVisibility(View.VISIBLE);
                 mBackgroundVoteView.setBackgroundColor(
                         mBackgroundVoteView.getResources().getColor(R.color.periwinkle));
                 break;
-            case RedditVotable.UPVOTED:
+            case Votable.UPVOTED:
                 mForegroundVoteView.setScaleY(0f);
                 mBackgroundVoteView.setVisibility(View.VISIBLE);
                 mBackgroundVoteView.setBackgroundColor(

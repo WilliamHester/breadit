@@ -7,12 +7,10 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.Calendar;
 
-import me.williamhester.models.bulletin.User;
-
 /**
  * Created by William on 4/13/14.
  */
-public class RedditUser implements User, Parcelable {
+public class User implements Parcelable {
 
     public static final String OVERVIEW = "";
     public static final String COMMENTS = "comments";
@@ -56,7 +54,7 @@ public class RedditUser implements User, Parcelable {
     @SerializedName("has_mod_mail")
     private boolean mHasModMail;
 
-    public RedditUser() { }
+    public User() { }
 
     public long getCreated() {
         return mCreated;
@@ -86,17 +84,14 @@ public class RedditUser implements User, Parcelable {
         return mUsername;
     }
 
-    @Override
     public String getCreatedDate() {
         return "fixme: created date";
     }
 
-    @Override
     public int getCommentPoints() {
         return mCommentKarma;
     }
 
-    @Override
     public int getSubmissionPoints() {
         return mLinkKarma;
     }
@@ -187,7 +182,7 @@ public class RedditUser implements User, Parcelable {
         dest.writeByte(mHasModMail ? (byte) 1 : (byte) 0);
     }
 
-    private RedditUser(Parcel in) {
+    private User(Parcel in) {
         this.mUsername = in.readString();
         this.mModhash = in.readString();
         this.mId = in.readString();
@@ -206,13 +201,13 @@ public class RedditUser implements User, Parcelable {
         this.mHasModMail = in.readByte() != 0;
     }
 
-    public static final Creator<RedditUser> CREATOR = new Creator<RedditUser>() {
-        public RedditUser createFromParcel(Parcel source) {
-            return new RedditUser(source);
+    public static final Creator<User> CREATOR = new Creator<User>() {
+        public User createFromParcel(Parcel source) {
+            return new User(source);
         }
 
-        public RedditUser[] newArray(int size) {
-            return new RedditUser[size];
+        public User[] newArray(int size) {
+            return new User[size];
         }
     };
 }

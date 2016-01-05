@@ -10,15 +10,14 @@ import com.google.gson.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.williamhester.models.bulletin.Comment;
 import me.williamhester.tools.HtmlParser;
 
-public class RedditComment extends RedditAbsComment implements Comment, RedditVotable, Parcelable {
+public class Comment extends AbsComment implements Votable, Parcelable {
 
     private static final int DOES_NOT_HAVE_CHILDREN = 0;
     private static final int HAS_CHILDREN = 1;
 
-    private RedditResponseWrapper mReplies;
+    private ResponseWrapper mReplies;
     private String mApprovedBy;
     private String mAuthor;
     private String mAuthorFlairCss;
@@ -44,7 +43,7 @@ public class RedditComment extends RedditAbsComment implements Comment, RedditVo
     private int mScore;
     private int mGilded;
     private Spannable mSpannableBody;
-    private ArrayList<RedditAbsComment> mChildren;
+    private ArrayList<AbsComment> mChildren;
     private List<HtmlParser.Link> mLinks;
 
     private boolean mIsHidden = false;
@@ -59,7 +58,7 @@ public class RedditComment extends RedditAbsComment implements Comment, RedditVo
      * @param object the JsonObject that holds the comment
      * @param gson the Gson object
      */
-    public RedditComment(JsonObject object, Gson gson) {
+    public Comment(JsonObject object, Gson gson) {
         super(0);
         if (!object.get("approved_by").isJsonNull()) {
             mApprovedBy = object.get("approved_by").getAsString();
@@ -121,16 +120,16 @@ public class RedditComment extends RedditAbsComment implements Comment, RedditVo
         }
         try {
             JsonObject replies = object.get("replies").getAsJsonObject();
-            mReplies = new RedditResponseWrapper(replies, gson);
+            mReplies = new ResponseWrapper(replies, gson);
         } catch (IllegalStateException e) {
             mReplies = null;
         }
     }
 
     // For use when replying to comments
-    public RedditComment(RedditAccount redditAccount, int level) {
+    public Comment(Account account, int level) {
         super(level);
-        mAuthor = redditAccount.getUsername();
+        mAuthor = account.getUsername();
         mUps = "";
         mCreatedUtc = System.currentTimeMillis() / 1000;
         mBodyHtml = "";
@@ -143,7 +142,6 @@ public class RedditComment extends RedditAbsComment implements Comment, RedditVo
         return mAuthor;
     }
 
-    @Override
     public String getFlair() {
         return mAuthorFlairText;
     }
@@ -153,22 +151,18 @@ public class RedditComment extends RedditAbsComment implements Comment, RedditVo
         return mBodyMarkdown;
     }
 
-    @Override
     public String getBodyHtml() {
         return mBodyHtml;
     }
 
-    @Override
-    public String getBulletin() {
+    public String getSubreddit() {
         return mSubreddit;
     }
 
-    @Override
     public String getFormattedRelativeTime() {
         return "5 days ago";
     }
 
-    @Override
     public int getScore() {
         return mScore;
     }
@@ -188,7 +182,6 @@ public class RedditComment extends RedditAbsComment implements Comment, RedditVo
         mBodyMarkdown = markdown;
     }
 
-    @Override
     public void setBodyHtml(String html) {
         mBodyHtml = html;
     }
@@ -198,12 +191,10 @@ public class RedditComment extends RedditAbsComment implements Comment, RedditVo
         return mName;
     }
 
-    @Override
     public void setSpannableBody(Spannable body) {
         mSpannableBody = body;
     }
 
-    @Override
     public Spannable getSpannableBody() {
         return mSpannableBody;
     }
@@ -212,7 +203,7 @@ public class RedditComment extends RedditAbsComment implements Comment, RedditVo
         mVoteStatus = status;
     }
 
-    public RedditResponseWrapper getReplies() {
+    public ResponseWrapper getReplies() {
         return mReplies;
     }
 
@@ -268,7 +259,7 @@ public class RedditComment extends RedditAbsComment implements Comment, RedditVo
         return mIsHidden;
     }
 
-    public void setReplies(RedditResponseWrapper replies) {
+    public void setReplies(ResponseWrapper replies) {
         mReplies = replies;
     }
 
@@ -284,21 +275,21 @@ public class RedditComment extends RedditAbsComment implements Comment, RedditVo
         return mGilded > 0;
     }
 
-    public void hide(ArrayList<RedditAbsComment> children) {
+    public void hide(ArrayList<AbsComment> children) {
         mIsHidden = true;
         mChildren = children;
     }
 
-    public ArrayList<RedditAbsComment> unhideComment() {
+    public ArrayList<AbsComment> unhideComment() {
         mIsHidden = false;
-        ArrayList<RedditAbsComment> children = mChildren;
+        ArrayList<AbsComment> children = mChildren;
         mChildren = null;
         return children;
     }
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof RedditComment && ((RedditComment) o).getId().equals(mName);
+        return o instanceof Comment && ((Comment) o).getId().equals(mName);
     }
 
     @Override
@@ -335,8 +326,8 @@ public class RedditComment extends RedditAbsComment implements Comment, RedditVo
         if (mChildren != null) {
             dest.writeInt(HAS_CHILDREN);
             dest.writeInt(mChildren.size());
-            for (RedditAbsComment c : mChildren) {
-                if (c instanceof RedditComment) {
+            for (AbsComment c : mChildren) {
+                if (c instanceof Comment) {
                     dest.writeInt(COMMENT);
                     dest.writeParcelable(c, COMMENT);
                 } else {
@@ -349,7 +340,7 @@ public class RedditComment extends RedditAbsComment implements Comment, RedditVo
         }
     }
 
-    private RedditComment(Parcel in) {
+    private Comment(Parcel in) {
         super(in);
         this.mApprovedBy = in.readString();
         this.mAuthor = in.readString();
@@ -379,21 +370,21 @@ public class RedditComment extends RedditAbsComment implements Comment, RedditVo
             int count = in.readInt();
             for (int i = 0; i < count; i++) {
                 if (in.readInt() == COMMENT) {
-                    mChildren.add((RedditComment) in.readParcelable(RedditComment.class.getClassLoader()));
+                    mChildren.add((Comment) in.readParcelable(Comment.class.getClassLoader()));
                 } else {
-                    mChildren.add((RedditAbsComment) in.readParcelable(RedditMoreComments.class.getClassLoader()));
+                    mChildren.add((AbsComment) in.readParcelable(MoreComments.class.getClassLoader()));
                 }
             }
         }
     }
 
-    public static final Creator<RedditComment> CREATOR = new Creator<RedditComment>() {
-        public RedditComment createFromParcel(Parcel source) {
-            return new RedditComment(source);
+    public static final Creator<Comment> CREATOR = new Creator<Comment>() {
+        public Comment createFromParcel(Parcel source) {
+            return new Comment(source);
         }
 
-        public RedditComment[] newArray(int size) {
-            return new RedditComment[size];
+        public Comment[] newArray(int size) {
+            return new Comment[size];
         }
     };
 }

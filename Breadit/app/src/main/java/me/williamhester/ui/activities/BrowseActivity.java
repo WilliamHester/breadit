@@ -3,7 +3,7 @@ package me.williamhester.ui.activities;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 
-import me.williamhester.models.reddit.RedditSubmission;
+import me.williamhester.models.reddit.Submission;
 import me.williamhester.reddit.R;
 import me.williamhester.tools.Url;
 import me.williamhester.ui.fragments.CommentFragment;
@@ -75,7 +75,7 @@ public class BrowseActivity extends BaseActivity {
                             getIntent().getExtras().getBoolean("isSingleThread");
                     return CommentFragment.newInstance(extras.getString("permalink"), isSingleThread);
                 } else {
-                    return CommentFragment.newInstance((RedditSubmission) extras.getParcelable("submission"));
+                    return CommentFragment.newInstance((Submission) extras.getParcelable("submission"));
                 }
         }
         return null;

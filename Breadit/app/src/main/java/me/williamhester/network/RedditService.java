@@ -4,12 +4,13 @@ import com.google.gson.JsonObject;
 
 import java.util.List;
 
-import me.williamhester.models.reddit.RedditGenericListing;
-import me.williamhester.models.reddit.RedditGenericResponseWrapper;
-import me.williamhester.models.reddit.RedditSubmission;
-import me.williamhester.models.reddit.RedditSubreddit;
-import me.williamhester.models.reddit.RedditSuccess;
-import me.williamhester.models.reddit.RedditUser;
+import me.williamhester.models.reddit.GenericListing;
+import me.williamhester.models.reddit.GenericResponseWrapper;
+import me.williamhester.models.reddit.Submission;
+import me.williamhester.models.reddit.Subreddit;
+import me.williamhester.models.reddit.Success;
+import me.williamhester.models.reddit.User;
+import retrofit.Call;
 import retrofit.Callback;
 import retrofit.http.Field;
 import retrofit.http.FormUrlEncoded;
@@ -28,17 +29,21 @@ public interface RedditService {
 
     @FormUrlEncoded
     @POST("/api/vote/.json")
-    void postVote(@Field("id") String id,
-                  @Field("dir") int voteDirection,
-                  Callback<RedditSuccess> callback);
+    Call<Success> postVote(@Field("id") String id,
+                           @Field("dir") int voteDirection);
 
-    @GET("/{subredditName}/{sortType}/.json")
-    void getSubmissions(@Path("subredditName") String subredditName,
-                        @Path("sortType") String sortType,
-                        @Query("t") String secondarySort,
-                        @Query("after") String after,
-                        // Who doesn't love generics?
-                        Callback<RedditGenericResponseWrapper<RedditGenericListing<RedditSubmission>>> submissionCallback);
+    @GET("{sortType}/.json")
+    Call<GenericResponseWrapper<GenericListing<Submission>>> getFrontpageSubmissions(
+            @Path("sortType") String sortType,
+            @Query("t") String secondarySort,
+            @Query("after") String after);
+
+    @GET("r/{subredditName}/{sortType}.json")
+    Call<GenericResponseWrapper<GenericListing<Submission>>> getSubredditSubmissions(
+            @Path("subredditName") String subredditName,
+            @Path("sortType") String sortType,
+            @Query("t") String secondarySort,
+            @Query("after") String after);
 
     @FormUrlEncoded
     @POST("/api/subscribe/.json")
@@ -48,7 +53,7 @@ public interface RedditService {
 
     @GET("/{subredditName}/about.json")
     void getSubreddit(@Path("subredditName") String subredditName,
-                      Callback<RedditGenericResponseWrapper<RedditSubreddit>> subredditCallback);
+                      Callback<GenericResponseWrapper<Subreddit>> subredditCallback);
 
     @FormUrlEncoded
     @POST("/api/hide/.json")
@@ -74,11 +79,11 @@ public interface RedditService {
     void getUserContent(@Path("username") String username,
                         @Path("type") String type,
                         @Query("after") String after,
-                        Callback<List<RedditSubmission>> callback);
+                        Callback<List<Submission>> callback);
 
     @GET("/user/{username}/about.json")
     void getUserAbout(@Path("username") String username,
-                      Callback<RedditGenericResponseWrapper<RedditUser>> callback);
+                      Callback<GenericResponseWrapper<User>> callback);
 
     @POST("/api/needs_captcha/.json")
     void postNeedsCaptcha(Callback<Boolean> booleanCallback);

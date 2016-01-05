@@ -8,7 +8,7 @@ import com.google.gson.annotations.SerializedName;
 /**
  * Created by william on 1/8/15.
  */
-public class RedditFriend implements Parcelable {
+public class Friend implements Parcelable {
 
     @SerializedName("date")
     private long mDate;
@@ -17,7 +17,7 @@ public class RedditFriend implements Parcelable {
     @SerializedName("id")
     private String mId;
 
-    public RedditFriend() { }
+    public Friend() { }
 
     public long getDate() {
         return mDate;
@@ -43,19 +43,19 @@ public class RedditFriend implements Parcelable {
         dest.writeString(this.mId);
     }
 
-    private RedditFriend(Parcel in) {
+    private Friend(Parcel in) {
         this.mDate = in.readLong();
         this.mName = in.readString();
         this.mId = in.readString();
     }
 
-    public static final Parcelable.Creator<RedditFriend> CREATOR = new Parcelable.Creator<RedditFriend>() {
-        public RedditFriend createFromParcel(Parcel source) {
-            return new RedditFriend(source);
+    public static final Parcelable.Creator<Friend> CREATOR = new Parcelable.Creator<Friend>() {
+        public Friend createFromParcel(Parcel source) {
+            return new Friend(source);
         }
 
-        public RedditFriend[] newArray(int size) {
-            return new RedditFriend[size];
+        public Friend[] newArray(int size) {
+            return new Friend[size];
         }
     };
 }

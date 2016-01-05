@@ -20,7 +20,7 @@ import java.util.List;
 
 import butterknife.Bind;
 import me.williamhester.databases.AccountDataSource;
-import me.williamhester.models.reddit.RedditAccount;
+import me.williamhester.models.reddit.Account;
 import me.williamhester.models.AccountManager;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
@@ -60,7 +60,7 @@ public class LogInFragment extends BaseFragment {
         confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                List<RedditAccount> redditAccounts = AccountManager.getAccounts();
+                List<Account> accounts = AccountManager.getAccounts();
                 String username = mUsername.getText().toString();
                 String password = mPassword.getText().toString();
                 if (TextUtils.isEmpty(username)) {
@@ -73,9 +73,9 @@ public class LogInFragment extends BaseFragment {
                             Toast.LENGTH_SHORT).show();
                     return;
                 }
-                for (RedditAccount redditAccount : redditAccounts) {
-                    if (redditAccount.getUsername().equalsIgnoreCase(username)) {
-                        AccountManager.setAccount(redditAccount);
+                for (Account account : accounts) {
+                    if (account.getUsername().equalsIgnoreCase(username)) {
+                        AccountManager.setAccount(account);
                         return;
                     }
                 }
@@ -126,12 +126,12 @@ public class LogInFragment extends BaseFragment {
                         String username = mUsername.getText().toString();
                         String cookie = data.get("cookie").getAsString();
                         String modhash = data.get("modhash").getAsString();
-                        RedditAccount redditAccount = new RedditAccount(username, modhash, cookie);
+                        Account account = new Account(username, modhash, cookie);
                         AccountDataSource dataSource = new AccountDataSource(getActivity());
                         dataSource.open();
-                        dataSource.addAccount(redditAccount);
+                        dataSource.addAccount(account);
                         dataSource.close();
-                        AccountManager.setAccount(redditAccount);
+                        AccountManager.setAccount(account);
                         ((LogInActivity) getActivity()).onLoggedIn();
                     }
                 });

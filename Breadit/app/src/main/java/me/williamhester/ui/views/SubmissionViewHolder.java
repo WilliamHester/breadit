@@ -26,12 +26,12 @@ import java.util.List;
 import java.util.Map;
 
 import me.williamhester.SettingsManager;
-import me.williamhester.models.reddit.RedditAccount;
+import me.williamhester.models.reddit.Account;
 import me.williamhester.models.AccountManager;
 import me.williamhester.models.imgur.ImgurAlbum;
 import me.williamhester.models.imgur.ImgurImage;
-import me.williamhester.models.reddit.RedditSubmission;
-import me.williamhester.models.reddit.RedditSubreddit;
+import me.williamhester.models.reddit.Submission;
+import me.williamhester.models.reddit.Subreddit;
 import me.williamhester.network.ImgurApi;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
@@ -65,7 +65,7 @@ public class SubmissionViewHolder extends VotableViewHolder {
     private View mShowSelfText;
 
     private OnVotedListener mOnVotedListener;
-    protected RedditSubmission mRedditSubmission;
+    protected Submission mSubmission;
     protected SubmissionCallbacks mCallback;
 
     public SubmissionViewHolder(final View itemView, SubmissionCallbacks callbacks) {
@@ -89,10 +89,10 @@ public class SubmissionViewHolder extends VotableViewHolder {
         View.OnClickListener mOptionsOnClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mCallback.onOptionsRowItemSelected(v.getId(), mRedditSubmission)) {
+                if (mCallback.onOptionsRowItemSelected(v.getId(), mSubmission)) {
                     return;
                 }
-                onOptionsRowItemSelected(v, mRedditSubmission);
+                onOptionsRowItemSelected(v, mSubmission);
             }
         };
         optionShare.setOnClickListener(mOptionsOnClickListener);
@@ -112,7 +112,7 @@ public class SubmissionViewHolder extends VotableViewHolder {
         submissionData.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mCallback.onCardClicked(mRedditSubmission);
+                mCallback.onCardClicked(mSubmission);
             }
         });
         submissionData.setOnLongClickListener(new View.OnLongClickListener() {
@@ -151,7 +151,7 @@ public class SubmissionViewHolder extends VotableViewHolder {
             @Override
             public void onClick(final View view) {
                 ObjectAnimator objectAnimator;
-                if (mRedditSubmission.isSelftextOpen()) {
+                if (mSubmission.isSelftextOpen()) {
                     objectAnimator =
                             ObjectAnimator.ofFloat(view, "rotation", view.getRotation(), 0F);
                     collapse(mSelfText);
@@ -162,7 +162,7 @@ public class SubmissionViewHolder extends VotableViewHolder {
                 }
                 objectAnimator.setDuration(300);
                 objectAnimator.start();
-                mRedditSubmission.setSelftextOpen(!mRedditSubmission.isSelftextOpen());
+                mSubmission.setSelftextOpen(!mSubmission.isSelftextOpen());
             }
         };
         mExpandButton.setOnClickListener(expandListener);
@@ -171,23 +171,23 @@ public class SubmissionViewHolder extends VotableViewHolder {
     @Override
     public void setContent(Object object) {
         super.setContent(object);
-        mRedditSubmission = (RedditSubmission) object;
+        mSubmission = (Submission) object;
 
         mOptionsRow.setVisibility(View.GONE);
-        mBody.setText(Html.fromHtml(mRedditSubmission.getTitle()).toString());
-        mDomain.setText(mRedditSubmission.getDomain());
-        mCommentData.setText(mRedditSubmission.getNumberOfComments() + " "
+        mBody.setText(Html.fromHtml(mSubmission.getTitle()).toString());
+        mDomain.setText(mSubmission.getDomain());
+        mCommentData.setText(mSubmission.getNumberOfComments() + " "
                 + itemView.getResources().getQuantityString(R.plurals.comments,
-                mRedditSubmission.getNumberOfComments()));
-        mSubreddit.setText(mRedditSubmission.getBulletinName().toLowerCase());
-        mMetadata.setText(mRedditSubmission.getAuthor() + " " + mRedditSubmission.getScore() + " "
+                mSubmission.getNumberOfComments()));
+        mSubreddit.setText(mSubmission.getSubreddit().toLowerCase());
+        mMetadata.setText(mSubmission.getAuthor() + " " + mSubmission.getScore() + " "
                 + itemView.getResources().getQuantityString(R.plurals.points,
-                mRedditSubmission.getScore()));
+                mSubmission.getScore()));
 
         setUpNsfw();
 
-        if (mRedditSubmission.isSelf()) {
-            if (TextUtils.isEmpty(mRedditSubmission.getBodyMarkdown())) {
+        if (mSubmission.isSelf()) {
+            if (TextUtils.isEmpty(mSubmission.getBodyMarkdown())) {
                 setUpBasic();
             } else {
                 setUpSelfText();
@@ -195,10 +195,10 @@ public class SubmissionViewHolder extends VotableViewHolder {
         } else if (SettingsManager.isLowBandwidth()) {
             setUpLink();
         } else {
-            if (mRedditSubmission.getLinkDetails() == null) {
-                mRedditSubmission.setLinkDetails(new Url(mRedditSubmission.getUrl()));
+            if (mSubmission.getLinkDetails() == null) {
+                mSubmission.setLinkDetails(new Url(mSubmission.getUrl()));
             }
-            switch (mRedditSubmission.getLinkDetails().getType()) {
+            switch (mSubmission.getLinkDetails().getType()) {
                 case Url.IMGUR_IMAGE:
                 case Url.IMGUR_ALBUM:
                 case Url.NORMAL_IMAGE:
@@ -223,17 +223,17 @@ public class SubmissionViewHolder extends VotableViewHolder {
     }
 
     public void setUpNsfw() {
-        mNsfwWarning.setVisibility(mRedditSubmission.isNsfw() ? View.VISIBLE : View.GONE);
+        mNsfwWarning.setVisibility(mSubmission.isNsfw() ? View.VISIBLE : View.GONE);
     }
 
     @Override
     protected void onVoted() {
         if (mOnVotedListener != null) {
-            mOnVotedListener.onVoted(mRedditSubmission);
+            mOnVotedListener.onVoted(mSubmission);
         }
-        mMetadata.setText(mRedditSubmission.getAuthor() + " " + mRedditSubmission.getScore() + " "
+        mMetadata.setText(mSubmission.getAuthor() + " " + mSubmission.getScore() + " "
                 + itemView.getResources().getQuantityString(R.plurals.points,
-                mRedditSubmission.getScore()));
+                mSubmission.getScore()));
     }
 
     public void setOnVotedListener(OnVotedListener listener) {
@@ -252,17 +252,17 @@ public class SubmissionViewHolder extends VotableViewHolder {
         mSelfTextView.setVisibility(View.GONE);
 
         if ((!SettingsManager.isLowBandwidth() || SettingsManager.isShowingThumbnails())
-                && !TextUtils.isEmpty(mRedditSubmission.getThumbnailUrl())) {
+                && !TextUtils.isEmpty(mSubmission.getThumbnailUrl())) {
             Ion.with(mThumbnail)
                     .animateIn(android.R.anim.fade_in)
                     .placeholder(R.drawable.ic_action_web_site)
-                    .load(mRedditSubmission.getThumbnailUrl());
+                    .load(mSubmission.getThumbnailUrl());
         } else {
             mThumbnail.setImageDrawable(mThumbnail.getResources().getDrawable(
                     R.drawable.ic_action_web_site));
         }
 
-        mUrl.setText(mRedditSubmission.getUrl());
+        mUrl.setText(mSubmission.getUrl());
     }
 
     private void setUpSelfText() {
@@ -270,16 +270,16 @@ public class SubmissionViewHolder extends VotableViewHolder {
         mImagePreviewView.setVisibility(View.GONE);
         mSelfTextView.setVisibility(View.VISIBLE);
 
-        if (mRedditSubmission.getBodyHtml() != null) {
+        if (mSubmission.getBodyHtml() != null) {
             mShowSelfText.setVisibility(View.VISIBLE);
-            if (mRedditSubmission.isSelftextOpen()) {
+            if (mSubmission.isSelftextOpen()) {
                 mExpandButton.setRotation(180f);
                 mSelfText.setVisibility(View.VISIBLE);
             } else {
                 mExpandButton.setRotation(0f);
                 mSelfText.setVisibility(View.GONE);
             }
-            HtmlParser parser = new HtmlParser(Html.fromHtml(mRedditSubmission.getBodyHtml()).toString());
+            HtmlParser parser = new HtmlParser(Html.fromHtml(mSubmission.getBodyHtml()).toString());
             mSelfText.setText(parser.getSpannableString());
             mSelfText.setMovementMethod(new LinkMovementMethod());
         }
@@ -290,15 +290,15 @@ public class SubmissionViewHolder extends VotableViewHolder {
         mImagePreviewView.setVisibility(View.VISIBLE);
         mSelfTextView.setVisibility(View.GONE);
 
-        final Url linkDetails = mRedditSubmission.getLinkDetails();
+        final Url linkDetails = mSubmission.getLinkDetails();
         String id = linkDetails.getLinkId();
         switch (linkDetails.getType()) {
             case Url.IMGUR_IMAGE: {
                 mImageView.setVisibility(View.VISIBLE);
                 mImageButton.setVisibility(View.GONE);
-                if (mRedditSubmission.getImgurData() == null) {
+                if (mSubmission.getImgurData() == null) {
                     mImageView.setImageDrawable(null);
-                    ImgurApi.getImageDetails(id, itemView.getContext(), mRedditSubmission, mImgurCallback);
+                    ImgurApi.getImageDetails(id, itemView.getContext(), mSubmission, mImgurCallback);
                 } else {
                     setImagePreview();
                 }
@@ -307,9 +307,9 @@ public class SubmissionViewHolder extends VotableViewHolder {
             case Url.IMGUR_ALBUM: {
                 mImageView.setVisibility(View.VISIBLE);
                 mImageButton.setVisibility(View.GONE);
-                if (mRedditSubmission.getImgurData() == null) {
+                if (mSubmission.getImgurData() == null) {
                     mImageView.setImageDrawable(null);
-                    ImgurApi.getAlbumDetails(id, itemView.getContext(), mRedditSubmission, mImgurCallback);
+                    ImgurApi.getAlbumDetails(id, itemView.getContext(), mSubmission, mImgurCallback);
                 } else {
                     setImagePreview();
                 }
@@ -343,12 +343,12 @@ public class SubmissionViewHolder extends VotableViewHolder {
         }
     }
 
-    private FutureCallback<RedditSubmission> mImgurCallback = new FutureCallback<RedditSubmission>() {
+    private FutureCallback<Submission> mImgurCallback = new FutureCallback<Submission>() {
         @Override
-        public void onCompleted(Exception e, RedditSubmission result) {
+        public void onCompleted(Exception e, Submission result) {
             if (e != null) {
                 e.printStackTrace();
-            } else if (mRedditSubmission == result) {
+            } else if (mSubmission == result) {
                 setImagePreview();
             }
         }
@@ -359,15 +359,15 @@ public class SubmissionViewHolder extends VotableViewHolder {
      */
     private void setImagePreview() {
         final ImgurImage image;
-        if (mRedditSubmission.getImgurData() instanceof ImgurAlbum) {
-            List<ImgurImage> images = ((ImgurAlbum) mRedditSubmission.getImgurData()).getImages();
+        if (mSubmission.getImgurData() instanceof ImgurAlbum) {
+            List<ImgurImage> images = ((ImgurAlbum) mSubmission.getImgurData()).getImages();
             if (images != null) {
                 image = images.get(0);
             } else {
                 image = null;
             }
-        } else if (mRedditSubmission.getImgurData() instanceof ImgurImage) {
-            image = (ImgurImage) mRedditSubmission.getImgurData();
+        } else if (mSubmission.getImgurData() instanceof ImgurImage) {
+            image = (ImgurImage) mSubmission.getImgurData();
         } else {
             image = null;
         }
@@ -387,7 +387,7 @@ public class SubmissionViewHolder extends VotableViewHolder {
     private void onImageViewClicked() {
         Bundle args = new Bundle();
         args.putInt("type", OverlayContentActivity.TYPE_SUBMISSION);
-        args.putParcelable("submission", mRedditSubmission);
+        args.putParcelable("submission", mSubmission);
         Intent i = new Intent(mCallback.getActivity(), OverlayContentActivity.class);
         i.putExtras(args);
         Bundle anim;
@@ -397,7 +397,7 @@ public class SubmissionViewHolder extends VotableViewHolder {
     }
 
     private void onLinkClicked() {
-        Url link = mRedditSubmission.getLinkDetails();
+        Url link = mSubmission.getLinkDetails();
         Bundle args = new Bundle();
         args.putString("permalink", link.getUrl());
         Intent i;
@@ -422,7 +422,7 @@ public class SubmissionViewHolder extends VotableViewHolder {
                 // TODO: add content transition using VersionUtils.isAtLeastL()
             default:
                 args.putInt("type", OverlayContentActivity.TYPE_SUBMISSION);
-                args.putParcelable("submission", mRedditSubmission);
+                args.putParcelable("submission", mSubmission);
                 i = new Intent(mCallback.getActivity(), OverlayContentActivity.class);
                 break;
         }
@@ -432,12 +432,12 @@ public class SubmissionViewHolder extends VotableViewHolder {
         mCallback.getActivity().startActivity(i, anim);
     }
 
-    private void onOptionsRowItemSelected(final View view, final RedditSubmission redditSubmission) {
+    private void onOptionsRowItemSelected(final View view, final Submission submission) {
         switch (view.getId()) {
             case R.id.option_go_to_subreddit: {
                 Bundle b = new Bundle();
                 b.putString("type", "subreddit");
-                b.putString("subreddit", redditSubmission.getBulletinName());
+                b.putString("subreddit", submission.getSubreddit());
                 Intent i = new Intent(mCallback.getActivity(), BrowseActivity.class);
                 i.putExtras(b);
                 mCallback.getActivity().startActivity(i);
@@ -446,7 +446,7 @@ public class SubmissionViewHolder extends VotableViewHolder {
             case R.id.option_view_user: {
                 Bundle b = new Bundle();
                 b.putString("type", "user");
-                b.putString("username", redditSubmission.getAuthor());
+                b.putString("username", submission.getAuthor());
                 Intent i = new Intent(mCallback.getActivity(), BrowseActivity.class);
                 i.putExtras(b);
                 mCallback.getActivity().startActivity(i);
@@ -461,9 +461,9 @@ public class SubmissionViewHolder extends VotableViewHolder {
                         Intent sendIntent = new Intent();
                         sendIntent.setAction(Intent.ACTION_SEND);
                         if (item.getItemId() == R.id.share_link) {
-                            sendIntent.putExtra(Intent.EXTRA_TEXT, redditSubmission.getUrl());
+                            sendIntent.putExtra(Intent.EXTRA_TEXT, submission.getUrl());
                         } else {
-                            String link = RedditApi.PUBLIC_REDDIT_URL + redditSubmission.getPermalink();
+                            String link = RedditApi.PUBLIC_REDDIT_URL + submission.getPermalink();
                             sendIntent.putExtra(Intent.EXTRA_TEXT, link);
                         }
                         sendIntent.setType("text/plain");
@@ -480,25 +480,25 @@ public class SubmissionViewHolder extends VotableViewHolder {
                 break;
             }
             case R.id.option_overflow: {
-                inflateOverflowPopupMenu(view, redditSubmission);
+                inflateOverflowPopupMenu(view, submission);
                 break;
             }
         }
     }
 
-    private void inflateOverflowPopupMenu(View view, final RedditSubmission redditSubmission) {
+    private void inflateOverflowPopupMenu(View view, final Submission submission) {
         PopupMenu popupMenu = new PopupMenu(mCallback.getActivity(), view);
 
-        RedditAccount redditAccount = AccountManager.getAccount();
-        Map<String, RedditSubreddit> subscriptions = redditAccount.getSubscriptions();
-        boolean isMod = subscriptions.containsKey(redditSubmission.getBulletinName().toLowerCase())
-                && subscriptions.get(redditSubmission.getBulletinName().toLowerCase()).userIsModerator();
-        boolean isOp = redditSubmission.getAuthor().equalsIgnoreCase(redditAccount.getUsername());
+        Account account = AccountManager.getAccount();
+        Map<String, Subreddit> subscriptions = account.getSubscriptions();
+        boolean isMod = subscriptions.containsKey(submission.getSubreddit().toLowerCase())
+                && subscriptions.get(submission.getSubreddit().toLowerCase()).userIsModerator();
+        boolean isOp = submission.getAuthor().equalsIgnoreCase(account.getUsername());
 
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                if (mCallback.onOptionsRowItemSelected(item.getItemId(), mRedditSubmission)) {
+                if (mCallback.onOptionsRowItemSelected(item.getItemId(), mSubmission)) {
                     return true;
                 }
                 switch (item.getItemId()) {
@@ -509,14 +509,14 @@ public class SubmissionViewHolder extends VotableViewHolder {
                                 if (e != null) {
                                     e.printStackTrace();
                                 }
-                                redditSubmission.setIsNsfw(!redditSubmission.isNsfw());
+                                submission.setIsNsfw(!submission.isNsfw());
                                 setUpNsfw();
                             }
                         };
-                        if (redditSubmission.isNsfw()) {
-                            RedditApi.unmarkNsfw(mCallback.getActivity(), redditSubmission, callback);
+                        if (submission.isNsfw()) {
+                            RedditApi.unmarkNsfw(mCallback.getActivity(), submission, callback);
                         } else {
-                            RedditApi.markNsfw(mCallback.getActivity(), redditSubmission, callback);
+                            RedditApi.markNsfw(mCallback.getActivity(), submission, callback);
                         }
                         break;
                     }
@@ -531,7 +531,7 @@ public class SubmissionViewHolder extends VotableViewHolder {
                                 }
                             }
                         };
-                        RedditApi.approve(mCallback.getActivity(), redditSubmission, callback);
+                        RedditApi.approve(mCallback.getActivity(), submission, callback);
                         break;
                     }
                 }
@@ -541,10 +541,10 @@ public class SubmissionViewHolder extends VotableViewHolder {
         popupMenu.inflate(R.menu.submission_overflow);
 
         Menu menu = popupMenu.getMenu();
-        if ((isOp || isMod) && redditSubmission.isNsfw()) {
+        if ((isOp || isMod) && submission.isNsfw()) {
             menu.findItem(R.id.overflow_mark_nsfw).setTitle(R.string.unmark_nsfw);
         }
-        if (redditSubmission.isHidden()) {
+        if (submission.isHidden()) {
             menu.findItem(R.id.overflow_hide).setTitle(R.string.unhide);
         }
         menu.findItem(R.id.overflow_report).setVisible(!isMod);
@@ -576,7 +576,7 @@ public class SubmissionViewHolder extends VotableViewHolder {
                 itemView.findViewById(R.id.option_overflow));
         itemView.findViewById(R.id.option_edit).setVisibility(AccountManager.isLoggedIn()
                 && AccountManager.getAccount().getUsername()
-                .equalsIgnoreCase(mRedditSubmission.getAuthor()) ? View.VISIBLE : View.GONE);
+                .equalsIgnoreCase(mSubmission.getAuthor()) ? View.VISIBLE : View.GONE);
     }
 
     public void expandOptionsForComments() {
@@ -588,7 +588,7 @@ public class SubmissionViewHolder extends VotableViewHolder {
                 ? View.VISIBLE : View.GONE);
         itemView.findViewById(R.id.option_edit).setVisibility(AccountManager.isLoggedIn()
                 && AccountManager.getAccount().getUsername()
-                .equalsIgnoreCase(mRedditSubmission.getAuthor()) ? View.VISIBLE : View.GONE);
+                .equalsIgnoreCase(mSubmission.getAuthor()) ? View.VISIBLE : View.GONE);
     }
 
     protected void expandOptions(View optionSubreddit, View optionSave, View optionOverflow) {
@@ -598,16 +598,16 @@ public class SubmissionViewHolder extends VotableViewHolder {
 //        optionSave.setVisibility(AccountManager.isLoggedIn() ? View.VISIBLE : View.GONE);
     }
 
-    public static interface OnVotedListener {
-        public void onVoted(RedditSubmission redditSubmission);
+    public interface OnVotedListener {
+        void onVoted(Submission submission);
     }
 
-    public static interface SubmissionCallbacks {
-        public FragmentManager getFragmentManager();
-        public Activity getActivity();
-        public void onCardClicked(RedditSubmission redditSubmission);
-        public void onCardLongPressed(SubmissionViewHolder holder);
-        public boolean onOptionsRowItemSelected(int itemId, RedditSubmission redditSubmission);
-        public boolean isFrontPage();
+    public interface SubmissionCallbacks {
+        FragmentManager getFragmentManager();
+        Activity getActivity();
+        void onCardClicked(Submission submission);
+        void onCardLongPressed(SubmissionViewHolder holder);
+        boolean onOptionsRowItemSelected(int itemId, Submission submission);
+        boolean isFrontPage();
     }
 }

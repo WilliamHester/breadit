@@ -14,7 +14,7 @@ import android.view.animation.ScaleAnimation;
 import android.widget.LinearLayout;
 
 import me.williamhester.models.AccountManager;
-import me.williamhester.models.reddit.RedditVotable;
+import me.williamhester.models.reddit.Votable;
 import me.williamhester.reddit.R;
 
 /**
@@ -39,7 +39,7 @@ public class SwipeView extends LinearLayout {
     private VelocityTracker mVelocityTracker;
     private View mBackgroundView;
     private View mForegroundView;
-    private RedditVotable mRedditVotable;
+    private Votable mRedditVotable;
     private final Handler mHandler = new Handler();
 
     public SwipeView(Context context) {
@@ -68,7 +68,7 @@ public class SwipeView extends LinearLayout {
         setEnabled(AccountManager.isLoggedIn());
     }
 
-    public void recycle(RedditVotable redditVotable) {
+    public void recycle(Votable redditVotable) {
         mRedditVotable = redditVotable;
         setEnabled(true);
     }
@@ -185,7 +185,7 @@ public class SwipeView extends LinearLayout {
                 return;
             }
             if (swipeDistanceX > 0) {
-                if (mRedditVotable.getVoteValue() == RedditVotable.UPVOTED) {
+                if (mRedditVotable.getVoteValue() == Votable.UPVOTED) {
                     if (mForegroundView.getVisibility() == VISIBLE) {
                         mForegroundView.setVisibility(GONE);
                         mForegroundView.invalidate();
@@ -200,7 +200,7 @@ public class SwipeView extends LinearLayout {
                     mForegroundView.setScaleY(percent);
                 }
             } else {
-                if (mRedditVotable.getVoteValue() == RedditVotable.DOWNVOTED) {
+                if (mRedditVotable.getVoteValue() == Votable.DOWNVOTED) {
                     if (mForegroundView.getVisibility() == VISIBLE) {
                         mForegroundView.setVisibility(GONE);
                         mForegroundView.invalidate();
@@ -257,7 +257,7 @@ public class SwipeView extends LinearLayout {
             mSwipeListener.onRightToLeftSwipe();
         }
         mBackgroundColor = getResources().getColor(R.color.periwinkle);
-        if (oldVoteStatus == RedditVotable.UPVOTED || oldVoteStatus == RedditVotable.NEUTRAL) {
+        if (oldVoteStatus == Votable.UPVOTED || oldVoteStatus == Votable.NEUTRAL) {
             mHandler.postDelayed(mFinishVoteRunnable, ANIMATION_LENGTH);
         }
     }
@@ -268,7 +268,7 @@ public class SwipeView extends LinearLayout {
             mSwipeListener.onLeftToRightSwipe();
         }
         mBackgroundColor = getResources().getColor(R.color.orangered);
-        if (oldVoteStatus == RedditVotable.DOWNVOTED || oldVoteStatus == RedditVotable.NEUTRAL) {
+        if (oldVoteStatus == Votable.DOWNVOTED || oldVoteStatus == Votable.NEUTRAL) {
             mHandler.postDelayed(mFinishVoteRunnable, ANIMATION_LENGTH);
         }
     }

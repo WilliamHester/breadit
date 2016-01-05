@@ -15,7 +15,7 @@ import com.koushikdutta.async.future.FutureCallback;
 
 import me.williamhester.models.imgur.ImgurAlbum;
 import me.williamhester.models.imgur.ImgurImage;
-import me.williamhester.models.reddit.RedditSubmission;
+import me.williamhester.models.reddit.Submission;
 import me.williamhester.models.imgur.ImgurResponseWrapper;
 import me.williamhester.network.ImgurApi;
 import me.williamhester.reddit.R;
@@ -76,11 +76,11 @@ public class ImagePagerFragment extends BaseFragment {
         return fragment;
     }
 
-    public static ImagePagerFragment newInstance(RedditSubmission redditSubmission) {
-        if (redditSubmission.getImgurData() != null) {
-            return newInstance(redditSubmission.getImgurData());
+    public static ImagePagerFragment newInstance(Submission submission) {
+        if (submission.getImgurData() != null) {
+            return newInstance(submission.getImgurData());
         }
-        return newInstance(redditSubmission.getUrl());
+        return newInstance(submission.getUrl());
     }
 
     public static ImagePagerFragment newInstance(Object object) {

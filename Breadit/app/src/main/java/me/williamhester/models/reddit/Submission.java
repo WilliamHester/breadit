@@ -6,13 +6,12 @@ import android.text.Spannable;
 
 import com.google.gson.annotations.SerializedName;
 
-import me.williamhester.models.bulletin.Submission;
 import me.williamhester.models.imgur.ImgurAlbum;
 import me.williamhester.models.imgur.ImgurImage;
 import me.williamhester.tools.Url;
 
 @SuppressWarnings("unused")
-public class RedditSubmission implements Submission, RedditVotable, Parcelable {
+public class Submission implements Votable, Parcelable {
 
     private static final int NO_IMGUR_DATA = 0;
     private static final int IMGUR_ALBUM = 1;
@@ -60,24 +59,20 @@ public class RedditSubmission implements Submission, RedditVotable, Parcelable {
     private int mImgurDataType = NO_IMGUR_DATA;
     private Spannable spannableBody;
 
-    public RedditSubmission() { }
+    public Submission() { }
 
-    @Override
     public String getUrl() { 
         return url;
     }
 
-    @Override
     public String getThumbnail() {
         return thumbnail;
     }
 
-    @Override
     public int getCommentCount() {
         return num_comments;
     }
 
-    @Override
     public int getScore() {
         return score;
     }
@@ -87,7 +82,6 @@ public class RedditSubmission implements Submission, RedditVotable, Parcelable {
         selftext = markdown;
     }
 
-    @Override
     public void setBodyHtml(String html) {
         this.selftext_html = html;
     }
@@ -97,7 +91,6 @@ public class RedditSubmission implements Submission, RedditVotable, Parcelable {
         return author;
     }
 
-    @Override
     public String getFlair() {
         return author_flair_text;
     }
@@ -107,7 +100,6 @@ public class RedditSubmission implements Submission, RedditVotable, Parcelable {
         return selftext;
     }
 
-    @Override
     public String getTitle() { 
         return title;
     }
@@ -120,7 +112,6 @@ public class RedditSubmission implements Submission, RedditVotable, Parcelable {
         return permalink;
     }
 
-    @Override
     public String getBodyHtml() {
         return selftext_html;
     }
@@ -133,7 +124,6 @@ public class RedditSubmission implements Submission, RedditVotable, Parcelable {
         return mSelftextIsOpen;
     }
 
-    @Override
     public void setSpannableBody(Spannable body) {
         spannableBody = body;
     }
@@ -143,17 +133,14 @@ public class RedditSubmission implements Submission, RedditVotable, Parcelable {
         return name;
     }
 
-    @Override
-    public String getBulletin() {
+    public String getSubreddit() {
         return subreddit;
     }
 
-    @Override
     public String getFormattedRelativeTime() {
         return "5 days ago";
     }
 
-    @Override
     public Spannable getSpannableBody() {
         return spannableBody;
     }
@@ -273,11 +260,11 @@ public class RedditSubmission implements Submission, RedditVotable, Parcelable {
         return mImgurData;
     }
 
-    public void update(RedditSubmission redditSubmission) {
-        num_comments = redditSubmission.num_comments;
-        created = redditSubmission.created;
-        created_utc = redditSubmission.created_utc;
-        score = redditSubmission.score;
+    public void update(Submission submission) {
+        num_comments = submission.num_comments;
+        created = submission.created;
+        created_utc = submission.created_utc;
+        score = submission.score;
     }
 
     public static class Media implements Parcelable {
@@ -383,7 +370,7 @@ public class RedditSubmission implements Submission, RedditVotable, Parcelable {
         }
     }
 
-    private RedditSubmission(Parcel in) {
+    private Submission(Parcel in) {
         this.author = in.readString();
         this.author_flair_css_class = in.readString();
         this.author_flair_text = in.readString();
@@ -430,13 +417,13 @@ public class RedditSubmission implements Submission, RedditVotable, Parcelable {
         }
     }
 
-    public static final Creator<RedditSubmission> CREATOR = new Creator<RedditSubmission>() {
-        public RedditSubmission createFromParcel(Parcel source) {
-            return new RedditSubmission(source);
+    public static final Creator<Submission> CREATOR = new Creator<Submission>() {
+        public Submission createFromParcel(Parcel source) {
+            return new Submission(source);
         }
 
-        public RedditSubmission[] newArray(int size) {
-            return new RedditSubmission[size];
+        public Submission[] newArray(int size) {
+            return new Submission[size];
         }
     };
 }

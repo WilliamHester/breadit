@@ -3,7 +3,7 @@ package me.williamhester.ui.views;
 import android.view.View;
 import android.widget.TextView;
 
-import me.williamhester.models.reddit.RedditComment;
+import me.williamhester.models.reddit.Comment;
 import me.williamhester.reddit.R;
 
 /**
@@ -34,12 +34,12 @@ public class SubmissionCommentViewHolder extends CommentViewHolder {
     public void setContent(Object comment) {
         super.setContent(comment);
 
-        mSubreddit.setText(mRedditComment.getBulletin());
+        mSubreddit.setText(mRedditComment.getSubreddit());
         mLinkTitle.setText(mRedditComment.getLinkTitle());
         mLinkMetaData.setText("by " + mRedditComment.getLinkAuthor());
     }
 
     public interface SubmissionCommentCallbacks extends CommentCallbacks {
-        public void onLinkClicked(RedditComment redditComment);
+        public void onLinkClicked(Comment redditComment);
     }
 }

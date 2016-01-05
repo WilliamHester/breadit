@@ -7,10 +7,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.text.TextUtils;
-import android.view.Gravity;
 import android.view.View;
 
 import com.google.gson.Gson;
@@ -19,8 +19,8 @@ import com.koushikdutta.async.future.FutureCallback;
 
 import me.williamhester.SettingsManager;
 import me.williamhester.models.AccountManager;
-import me.williamhester.models.reddit.RedditResponseWrapper;
-import me.williamhester.models.reddit.RedditSubreddit;
+import me.williamhester.models.reddit.ResponseWrapper;
+import me.williamhester.models.reddit.Subreddit;
 import me.williamhester.network.RedditApi;
 import me.williamhester.notifications.MessageNotificationBroadcastReceiver;
 import me.williamhester.reddit.R;
@@ -186,7 +186,7 @@ public class MainActivity extends BaseActivity implements
         }
 
         if (mDrawerLayout != null) {
-            mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, Gravity.END);
+            mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, GravityCompat.END);
         }
 
         mSubredditFragment.loadSubreddit(subreddit);
@@ -199,11 +199,11 @@ public class MainActivity extends BaseActivity implements
                         e.printStackTrace();
                         return;
                     }
-                    RedditResponseWrapper response = new RedditResponseWrapper(result, new Gson());
-                    if (response.getData() instanceof RedditSubreddit) {
-                        mSidebarFragment.setSubreddit((RedditSubreddit) response.getData());
+                    ResponseWrapper response = new ResponseWrapper(result, new Gson());
+                    if (response.getData() instanceof Subreddit) {
+                        mSidebarFragment.setSubreddit((Subreddit) response.getData());
                         mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED,
-                                Gravity.END);
+                                GravityCompat.END);
                     } else {
                         mSubredditFragment.showSubredditDoesNotExist();
                     }
@@ -214,10 +214,11 @@ public class MainActivity extends BaseActivity implements
 
     @Override
     public void onHomeClicked() {
-        if (mDrawerLayout.isDrawerOpen(Gravity.START | Gravity.END)) {
+        if (mDrawerLayout.isDrawerOpen(GravityCompat.START)
+                || mDrawerLayout.isDrawerOpen(GravityCompat.END)) {
             mDrawerLayout.closeDrawers();
         } else {
-            mDrawerLayout.openDrawer(Gravity.START);
+            mDrawerLayout.openDrawer(GravityCompat.START);
         }
     }
 
@@ -240,7 +241,7 @@ public class MainActivity extends BaseActivity implements
                     .detach(mCurrentFragment)
                     .commit();
         }
-        mDrawerLayout.closeDrawer(Gravity.START);
+        mDrawerLayout.closeDrawer(GravityCompat.START);
         mCurrentFragment = mSubredditFragment;
     }
 
@@ -256,7 +257,7 @@ public class MainActivity extends BaseActivity implements
                     .detach(mCurrentFragment)
                     .commit();
         }
-        mDrawerLayout.closeDrawer(Gravity.START);
+        mDrawerLayout.closeDrawer(GravityCompat.START);
         mCurrentFragment = mMessagesFragment;
     }
 
@@ -272,7 +273,7 @@ public class MainActivity extends BaseActivity implements
                     .detach(mCurrentFragment)
                     .commit();
         }
-        mDrawerLayout.closeDrawer(Gravity.START);
+        mDrawerLayout.closeDrawer(GravityCompat.START);
         mCurrentFragment = mMyAccountFragment;
     }
 
@@ -288,13 +289,14 @@ public class MainActivity extends BaseActivity implements
                     .detach(mCurrentFragment)
                     .commit();
         }
-        mDrawerLayout.closeDrawer(Gravity.START);
+        mDrawerLayout.closeDrawer(GravityCompat.START);
         mCurrentFragment = mFriendsFragment;
     }
 
     @Override
     public void onBackPressed()  {
-        if (mDrawerLayout.isDrawerOpen(Gravity.HORIZONTAL_GRAVITY_MASK)) {
+        if (mDrawerLayout.isDrawerOpen(GravityCompat.START)
+                || mDrawerLayout.isDrawerOpen(GravityCompat.END)) {
             mDrawerLayout.closeDrawers();
         } else {
             super.onBackPressed();

@@ -20,8 +20,8 @@ import java.util.ArrayList;
 
 import me.williamhester.models.reddit.RedditLiveResponse;
 import me.williamhester.models.reddit.RedditLive;
-import me.williamhester.models.reddit.RedditSubmission;
-import me.williamhester.models.reddit.RedditResponseWrapper;
+import me.williamhester.models.reddit.Submission;
+import me.williamhester.models.reddit.ResponseWrapper;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 
@@ -32,13 +32,13 @@ public class RedditLiveFragment extends BaseFragment {
 
     private static final String SUBMISSION = "submission";
 
-    private RedditSubmission mRedditSubmission;
+    private Submission mSubmission;
     private LiveAdapter mAdapter;
     private final ArrayList<RedditLiveResponse> mRedditLiveResponses = new ArrayList<>();
 
-    public static RedditLiveFragment newInstance(RedditSubmission redditSubmission) {
+    public static RedditLiveFragment newInstance(Submission submission) {
         Bundle args = new Bundle();
-        args.putParcelable(SUBMISSION, redditSubmission);
+        args.putParcelable(SUBMISSION, submission);
         RedditLiveFragment fragment = new RedditLiveFragment();
         fragment.setArguments(args);
         return fragment;
@@ -49,7 +49,7 @@ public class RedditLiveFragment extends BaseFragment {
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
-            mRedditSubmission = getArguments().getParcelable(SUBMISSION);
+            mSubmission = getArguments().getParcelable(SUBMISSION);
         }
     }
 
@@ -61,7 +61,7 @@ public class RedditLiveFragment extends BaseFragment {
         ListView liveComments = (ListView) v.findViewById(R.id.live_comments);
         liveComments.setAdapter(mAdapter);
 
-        RedditApi.getRedditLiveData(getActivity(), mRedditSubmission, mLiveCallback);
+        RedditApi.getRedditLiveData(getActivity(), mSubmission, mLiveCallback);
         return v;
     }
 
@@ -102,10 +102,10 @@ public class RedditLiveFragment extends BaseFragment {
         });
     }
 
-    private FutureCallback<RedditResponseWrapper> mLiveCallback =
-            new FutureCallback<RedditResponseWrapper>() {
+    private FutureCallback<ResponseWrapper> mLiveCallback =
+            new FutureCallback<ResponseWrapper>() {
         @Override
-        public void onCompleted(Exception e, RedditResponseWrapper result) {
+        public void onCompleted(Exception e, ResponseWrapper result) {
             if (e != null) {
                 e.printStackTrace();
                 return;

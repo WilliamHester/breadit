@@ -9,23 +9,21 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.koushikdutta.async.future.FutureCallback;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
 import butterknife.Bind;
 import me.williamhester.knapsack.Save;
-import me.williamhester.models.reddit.RedditListing;
-import me.williamhester.models.reddit.RedditSubmission;
-import me.williamhester.models.reddit.RedditResponseWrapper;
-import me.williamhester.models.reddit.RedditSubreddit;
-import me.williamhester.network.RedditApi;
+import me.williamhester.models.reddit.GenericListing;
+import me.williamhester.models.reddit.GenericResponseWrapper;
+import me.williamhester.models.reddit.Submission;
+import me.williamhester.models.reddit.Subreddit;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.activities.SelectSubredditActivity;
+import retrofit.Callback;
+import retrofit.Response;
+import retrofit.Retrofit;
 
 public class SubredditFragment extends AbsSubmissionListFragment implements
         Toolbar.OnMenuItemClickListener {
@@ -33,7 +31,7 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
     private static final int SELECT_SUBREDDIT = 1;
 
     @Save String mSubredditName;
-    @Save ArrayList<RedditSubreddit> mRedditSubredditList = new ArrayList<>();
+    @Save ArrayList<Subreddit> mSubredditList = new ArrayList<>();
     @Save HashSet<String> mNames;
     @Save boolean mSubredditExists = true;
 
@@ -135,7 +133,7 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
             view.findViewById(R.id.loading_error).setVisibility(View.VISIBLE);
         }
 
-        if (mRedditSubmissionList.size() == 0) {
+        if (mSubmissionList.size() == 0) {
             onRefreshList();
         }
     }
@@ -174,40 +172,37 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
 
     private void loadAndClear() {
         if (getActivity() != null) {
-            RedditApi.getSubmissions(getActivity(), mSubredditName, mPrimarySortType,
-                    mSecondarySortType, null, null, new FutureCallback<JsonObject>() {
+            mApi.getSubmissions(mSubredditName, mPrimarySortType,
+                    mSecondarySortType, null,
+                    new Callback<GenericResponseWrapper<GenericListing<Submission>>>() {
                         @Override
-                        public void onCompleted(Exception e, JsonObject result) {
+                        public void onResponse(
+                                Response<GenericResponseWrapper<GenericListing<Submission>>> response,
+                                Retrofit retrofit) {
                             mLoading = false;
                             if (getView() != null) {
                                 mProgressBar.setVisibility(View.GONE);
                                 mSwipeRefreshLayout.setRefreshing(false);
                             }
-                            if (e == null) {
-                                mNames.clear();
-                                RedditResponseWrapper wrapper = new RedditResponseWrapper(result,
-                                        new Gson());
-                                if (wrapper.getData() instanceof RedditListing) {
-                                    ArrayList<RedditSubmission> redditSubmissions = new ArrayList<>();
-                                    List<RedditResponseWrapper> children =
-                                            ((RedditListing) wrapper.getData()).getChildren();
-                                    for (RedditResponseWrapper innerWrapper : children) {
-                                        if (innerWrapper.getData() instanceof RedditSubmission) {
-                                            mNames.add(((RedditSubmission) innerWrapper.getData())
-                                                    .getId());
-                                            redditSubmissions.add((RedditSubmission) innerWrapper.getData());
-                                        }
-                                    }
-                                    if (redditSubmissions.size() > 0) {
-                                        mRedditSubmissionList.clear();
-                                        mRedditSubmissionList.addAll(redditSubmissions);
-                                        mSubmissionsAdapter.notifyDataSetChanged();
-                                    }
-                                }
-                                mScrollListener.resetState();
-                            } else {
-                                e.printStackTrace();
+
+                            mNames.clear();
+                            mSubmissionList.clear();
+                            mSubmissionList.addAll(unwrap(response.body().getData().getChildren()));
+                            mSubmissionsAdapter.notifyDataSetChanged();
+                            for (Submission s : mSubmissionList) {
+                                mNames.add(s.getId());
                             }
+                            mScrollListener.resetState();
+                        }
+
+                        @Override
+                        public void onFailure(Throwable t) {
+                            mLoading = false;
+                            if (getView() != null) {
+                                mProgressBar.setVisibility(View.GONE);
+                                mSwipeRefreshLayout.setRefreshing(false);
+                            }
+                            t.printStackTrace();
                         }
                     });
         }
@@ -215,7 +210,7 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
 
     public void loadSubreddit(String subredditTitle) {
         mSubredditName = subredditTitle;
-        mRedditSubmissionList.clear();
+        mSubmissionList.clear();
         if (getView() == null) {
             return;
         }
@@ -240,44 +235,48 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
     public void onLoadMore() {
         mProgressBar.setVisibility(View.VISIBLE);
         String after;
-        if (mRedditSubmissionList == null || mRedditSubmissionList.size() == 0) {
+        if (mSubmissionList == null || mSubmissionList.size() == 0) {
             after = null;
         } else {
-            after = mRedditSubmissionList.get(mRedditSubmissionList.size() - 1).getId();
+            after = mSubmissionList.get(mSubmissionList.size() - 1).getId();
         }
-//        setFooterLoading();
-        FutureCallback<JsonObject> callback = new FutureCallback<JsonObject>() {
+        Callback<GenericResponseWrapper<GenericListing<Submission>>> callback1 =
+                new Callback<GenericResponseWrapper<GenericListing<Submission>>>() {
             @Override
-            public void onCompleted(Exception e, JsonObject result) {
-                mProgressBar.setVisibility(View.GONE);
-                if (e == null) {
-                    RedditResponseWrapper wrapper = new RedditResponseWrapper(result, new Gson());
-                    if (wrapper.getData() instanceof RedditListing) {
-                        ArrayList<RedditSubmission> redditSubmissions = new ArrayList<>();
-                        List<RedditResponseWrapper> children = ((RedditListing) wrapper.getData())
-                                .getChildren();
-                        if (children.size() != 0) {
-                            for (RedditResponseWrapper innerWrapper : children) {
-                                if (innerWrapper.getData() instanceof RedditSubmission &&
-                                        !mNames.contains(((RedditSubmission)innerWrapper.getData())
-                                                .getId())) {
-                                    redditSubmissions.add((RedditSubmission) innerWrapper.getData());
-                                    mNames.add(((RedditSubmission) innerWrapper.getData()).getId());
-                                }
-                            }
-                            mRedditSubmissionList.addAll(redditSubmissions);
-                            mSubmissionsAdapter.notifyItemRangeInserted(
-                                    mRedditSubmissionList.size() - redditSubmissions.size() + 1,
-                                    redditSubmissions.size());
-                        }
-                    }
-                } else {
-                    e.printStackTrace();
-//                    mSubmissionsAdapter.setFooterFailedToLoad();
+            public void onResponse(
+                    Response<GenericResponseWrapper<GenericListing<Submission>>> response,
+                    Retrofit retrofit) {
+                mLoading = false;
+                if (getView() != null) {
+                    mProgressBar.setVisibility(View.GONE);
+                    mSwipeRefreshLayout.setRefreshing(false);
                 }
+                mSubmissionList.addAll(unwrap(response.body().getData().getChildren()));
+                mSubmissionsAdapter.notifyDataSetChanged();
+                for (Submission s : mSubmissionList) {
+                    mNames.add(s.getId());
+                }
+                mScrollListener.resetState();
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                mLoading = false;
+                if (getView() != null) {
+                    mProgressBar.setVisibility(View.GONE);
+                    mSwipeRefreshLayout.setRefreshing(false);
+                }
+                t.printStackTrace();
             }
         };
-        RedditApi.getSubmissions(getActivity(), mSubredditName, mPrimarySortType,
-                mSecondarySortType, null, after, callback);
+        mApi.getSubmissions(mSubredditName, mPrimarySortType, mSecondarySortType, after, callback1);
+    }
+
+    private static <T> List<T> unwrap(List<GenericResponseWrapper<T>> listing) {
+        ArrayList<T> list = new ArrayList<>(listing.size());
+        for (GenericResponseWrapper<T> item : listing) {
+            list.add(item.getData());
+        }
+        return list;
     }
 }

@@ -24,7 +24,7 @@ import java.util.Map;
 
 import butterknife.Bind;
 import me.williamhester.models.AccountManager;
-import me.williamhester.models.reddit.RedditSubmission;
+import me.williamhester.models.reddit.Submission;
 import me.williamhester.reddit.R;
 
 public class WebViewFragment extends ContentFragment implements Toolbar.OnMenuItemClickListener,
@@ -44,9 +44,9 @@ public class WebViewFragment extends ContentFragment implements Toolbar.OnMenuIt
         return fragment;
     }
 
-    public static WebViewFragment newInstance(RedditSubmission redditSubmission) {
+    public static WebViewFragment newInstance(Submission submission) {
         Bundle args = new Bundle();
-        args.putString(URI, redditSubmission.getUrl());
+        args.putString(URI, submission.getUrl());
         WebViewFragment fragment = new WebViewFragment();
         fragment.setArguments(args);
         return fragment;

@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName;
 /**
  * Created by william on 12/20/14.
  */
-public class RedditGenericResponseWrapper<T> {
+public class GenericResponseWrapper<T> {
 
     @SerializedName("kind")
     private String mKind;
