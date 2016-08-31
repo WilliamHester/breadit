@@ -2,6 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/foreground"
     android:layout_gravity="end">
 
@@ -18,7 +19,8 @@
             android:gravity="center"
             android:textSize="24sp"
             android:fontFamily="sans-serif-thin"
-            android:layout_marginBottom="8dp"/>
+            android:layout_marginBottom="8dp"
+            tools:text="/r/test"/>
 
         <Button android:id="@+id/submit"
             android:layout_width="match_parent"

@@ -1,13 +1,6 @@
 package me.williamhester.inject;
 
-import android.util.Log;
-
 import com.google.gson.Gson;
-import com.squareup.okhttp.Interceptor;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
-import com.squareup.okhttp.logging.HttpLoggingInterceptor;
 
 import java.io.IOException;
 
@@ -15,10 +8,17 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
+import me.williamhester.models.AccountManager;
+import me.williamhester.models.reddit.Account;
 import me.williamhester.network.RedditApi;
 import me.williamhester.network.RedditService;
-import retrofit.GsonConverterFactory;
-import retrofit.Retrofit;
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.GsonConverterFactory;
+import retrofit2.Retrofit;
 
 @Module
 public class ApiModule {
@@ -32,27 +32,36 @@ public class ApiModule {
     @Provides
     @Singleton
     OkHttpClient provideOkClient() {
-        OkHttpClient client = new OkHttpClient();
-        client.interceptors().add(new Interceptor() {
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+        Interceptor headerInterceptor = new Interceptor() {
             @Override
-            public Response intercept(Interceptor.Chain chain) throws IOException {
+            public Response intercept(Chain chain) throws IOException {
                 Request original = chain.request();
-//
-                Log.d("ApiModule", original.urlString());
+
+                Account account = AccountManager.getAccount();
 
                 // Customize the request
-                Request request = original.newBuilder()
-                        .header("Authorization", "auth-token")
-                        .method(original.method(), original.body())
-                        .build();
+                Request.Builder builder = original.newBuilder()
+                        .addHeader("User-Agent", RedditApi.USER_AGENT)
+                        .addHeader("Content-Type",
+                                "application/x-www-form-urlencoded; charset=UTF-8")
+                        .method(original.method(), original.body());
 
-                return chain.proceed(request);
+                if (AccountManager.isLoggedIn()) {
+                    builder.addHeader("Cookie", "reddit_session=\"" + account.getCookie() + "\"")
+                            .addHeader("X-Modhash", account.getModhash());
+                }
+
+                return chain.proceed(builder.build());
             }
-        });
-        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-        client.interceptors().add(interceptor);
-        return client;
+        };
+
+        return new OkHttpClient.Builder()
+//                .addInterceptor(logging)
+                .addInterceptor(headerInterceptor)
+                .build();
     }
 
     @Provides

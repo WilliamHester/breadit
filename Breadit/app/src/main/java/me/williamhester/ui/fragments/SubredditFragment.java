@@ -15,15 +15,11 @@ import java.util.List;
 
 import butterknife.Bind;
 import me.williamhester.knapsack.Save;
-import me.williamhester.models.reddit.GenericListing;
-import me.williamhester.models.reddit.GenericResponseWrapper;
 import me.williamhester.models.reddit.Submission;
 import me.williamhester.models.reddit.Subreddit;
+import me.williamhester.network.Callback;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.activities.SelectSubredditActivity;
-import retrofit.Callback;
-import retrofit.Response;
-import retrofit.Retrofit;
 
 public class SubredditFragment extends AbsSubmissionListFragment implements
         Toolbar.OnMenuItemClickListener {
@@ -174,37 +170,29 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
         if (getActivity() != null) {
             mApi.getSubmissions(mSubredditName, mPrimarySortType,
                     mSecondarySortType, null,
-                    new Callback<GenericResponseWrapper<GenericListing<Submission>>>() {
+                    new Callback<List<Submission>>() {
                         @Override
-                        public void onResponse(
-                                Response<GenericResponseWrapper<GenericListing<Submission>>> response,
-                                Retrofit retrofit) {
+                        public void onCompleted() {
                             mLoading = false;
                             if (getView() != null) {
                                 mProgressBar.setVisibility(View.GONE);
                                 mSwipeRefreshLayout.setRefreshing(false);
                             }
+                        }
 
+                        @Override
+                        public void onSuccess(List<Submission> data) {
                             mNames.clear();
                             mSubmissionList.clear();
-                            mSubmissionList.addAll(unwrap(response.body().getData().getChildren()));
+                            mSubmissionList.addAll(data);
                             mSubmissionsAdapter.notifyDataSetChanged();
                             for (Submission s : mSubmissionList) {
                                 mNames.add(s.getId());
                             }
                             mScrollListener.resetState();
                         }
-
-                        @Override
-                        public void onFailure(Throwable t) {
-                            mLoading = false;
-                            if (getView() != null) {
-                                mProgressBar.setVisibility(View.GONE);
-                                mSwipeRefreshLayout.setRefreshing(false);
-                            }
-                            t.printStackTrace();
-                        }
-                    });
+                    }
+            );
         }
     }
 
@@ -240,43 +228,26 @@ public class SubredditFragment extends AbsSubmissionListFragment implements
         } else {
             after = mSubmissionList.get(mSubmissionList.size() - 1).getId();
         }
-        Callback<GenericResponseWrapper<GenericListing<Submission>>> callback1 =
-                new Callback<GenericResponseWrapper<GenericListing<Submission>>>() {
+        Callback<List<Submission>> callback = new Callback<List<Submission>>() {
             @Override
-            public void onResponse(
-                    Response<GenericResponseWrapper<GenericListing<Submission>>> response,
-                    Retrofit retrofit) {
+            public void onCompleted() {
                 mLoading = false;
                 if (getView() != null) {
                     mProgressBar.setVisibility(View.GONE);
                     mSwipeRefreshLayout.setRefreshing(false);
                 }
-                mSubmissionList.addAll(unwrap(response.body().getData().getChildren()));
+            }
+
+            @Override
+            public void onSuccess(List<Submission> data) {
+                mSubmissionList.addAll(data);
                 mSubmissionsAdapter.notifyDataSetChanged();
                 for (Submission s : mSubmissionList) {
                     mNames.add(s.getId());
                 }
                 mScrollListener.resetState();
             }
-
-            @Override
-            public void onFailure(Throwable t) {
-                mLoading = false;
-                if (getView() != null) {
-                    mProgressBar.setVisibility(View.GONE);
-                    mSwipeRefreshLayout.setRefreshing(false);
-                }
-                t.printStackTrace();
-            }
         };
-        mApi.getSubmissions(mSubredditName, mPrimarySortType, mSecondarySortType, after, callback1);
-    }
-
-    private static <T> List<T> unwrap(List<GenericResponseWrapper<T>> listing) {
-        ArrayList<T> list = new ArrayList<>(listing.size());
-        for (GenericResponseWrapper<T> item : listing) {
-            list.add(item.getData());
-        }
-        return list;
+        mApi.getSubmissions(mSubredditName, mPrimarySortType, mSecondarySortType, after, callback);
     }
 }

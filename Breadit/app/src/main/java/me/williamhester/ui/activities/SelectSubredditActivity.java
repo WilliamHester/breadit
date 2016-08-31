@@ -1,22 +1,24 @@
 package me.williamhester.ui.activities;
 
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
-
-import com.koushikdutta.async.future.FutureCallback;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 
+import javax.inject.Inject;
+
+import me.williamhester.BreaditApplication;
 import me.williamhester.databases.AccountDataSource;
 import me.williamhester.knapsack.Knapsack;
 import me.williamhester.knapsack.Save;
 import me.williamhester.models.AccountManager;
 import me.williamhester.models.reddit.Subreddit;
+import me.williamhester.network.Callback;
 import me.williamhester.network.RedditApi;
 import me.williamhester.reddit.R;
 import me.williamhester.ui.fragments.SubredditListFragment;
@@ -26,6 +28,8 @@ import me.williamhester.ui.fragments.SubredditListFragment;
  */
 public class SelectSubredditActivity extends AppCompatActivity {
 
+    @Inject RedditApi mApi;
+
     @Save ArrayList<Subreddit> mSubreddits = new ArrayList<>();
 
     @Override
@@ -33,6 +37,8 @@ public class SelectSubredditActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         Knapsack.restore(this, savedInstanceState);
+        BreaditApplication application = (BreaditApplication) getApplicationContext();
+        application.getApiComponent().inject(this);
 
         setContentView(R.layout.activity_container);
 
@@ -62,68 +68,61 @@ public class SelectSubredditActivity extends AppCompatActivity {
             }
             Collections.sort(subredditList);
 
-            RedditApi.getSubscribedSubreddits(new FutureCallback<ArrayList<Subreddit>>() {
-                @Override
-                public void onCompleted(Exception e, final ArrayList<Subreddit> result) {
-                    if (e != null) {
-                        e.printStackTrace();
-                        return;
-                    }
-                    AccountDataSource dataSource = new AccountDataSource(SelectSubredditActivity.this);
-                    dataSource.open();
-                    ArrayList<Subreddit> allSubs = dataSource.getAllSubreddits();
-                    ArrayList<Subreddit> savedSubscriptions = dataSource.getCurrentAccountSubreddits();
+            mApi.getSubscribedSubreddits(new Callback<List<Subreddit>>() {
+                    @Override
+                    public void onCompleted() {
 
-                    for (Subreddit s : result) {
-                        int index = allSubs.indexOf(s); // Get the subreddit WITH the table id
-                        if (index < 0) { // if it doesn't exist, create one with a table id
-                            dataSource.addSubreddit(s);
-                            dataSource.addSubscriptionToCurrentAccount(s);
-                        } else if (!savedSubscriptions.contains(s)) {
-                            dataSource.addSubscriptionToCurrentAccount(allSubs.get(index));
-                        }
                     }
 
-                    dataSource.close();
+                    @Override
+                    public void onSuccess(final List<Subreddit> data) {
+                        Log.d("SelectSubredditActivity", "" + data.size());
 
-                    final boolean isNew = !result.equals(savedSubscriptions);
+                        AccountDataSource dataSource = new AccountDataSource(SelectSubredditActivity.this);
+                        dataSource.open();
+                        ArrayList<Subreddit> allSubs = dataSource.getAllSubreddits();
+                        ArrayList<Subreddit> savedSubscriptions = dataSource.getCurrentAccountSubreddits();
 
-                    if (isNew) {
-                        subredditList.clear();
-                        subredditList.addAll(result);
-                    }
-
-                    Handler handler = new Handler(Looper.getMainLooper());
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            Fragment f = getSupportFragmentManager().findFragmentById(R.id.main_container);
-                            if (f instanceof SubredditListFragment) {
-                                mSubreddits.addAll(result);
-                                ((SubredditListFragment) f).setSubreddits(mSubreddits);
+                        for (Subreddit s : data) {
+                            int index = allSubs.indexOf(s); // Get the subreddit WITH the table id
+                            if (index < 0) { // if it doesn't exist, create one with a table id
+                                dataSource.addSubreddit(s);
+                                dataSource.addSubscriptionToCurrentAccount(s);
+                            } else if (!savedSubscriptions.contains(s)) {
+                                dataSource.addSubscriptionToCurrentAccount(allSubs.get(index));
                             }
                         }
-                    });
-                }
-            });
+
+                        dataSource.close();
+
+                        boolean isNew = !data.equals(savedSubscriptions);
+
+                        if (isNew) {
+                            subredditList.clear();
+                            subredditList.addAll(data);
+                        }
+
+                        Fragment f = getSupportFragmentManager().findFragmentById(R.id.main_container);
+                        if (f instanceof SubredditListFragment) {
+                            mSubreddits.addAll(data);
+                            ((SubredditListFragment) f).setSubreddits(mSubreddits);
+                        }
+                    }
+                });
         } else {
-            RedditApi.getDefaultSubreddits(new FutureCallback<ArrayList<Subreddit>>() {
+            mApi.getDefaultSubreddits(new Callback<List<Subreddit>>() {
                 @Override
-                public void onCompleted(Exception e, final ArrayList<Subreddit> result) {
-                    if (e != null) {
-                        return;
+                public void onCompleted() {
+
+                }
+
+                @Override
+                public void onSuccess(List<Subreddit> data) {
+                    Fragment f = getSupportFragmentManager().findFragmentById(R.id.main_container);
+                    if (f instanceof SubredditListFragment) {
+                        mSubreddits.addAll(data);
+                        ((SubredditListFragment) f).setSubreddits(mSubreddits);
                     }
-                    Handler handler = new Handler(Looper.getMainLooper());
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            Fragment f = getSupportFragmentManager().findFragmentById(R.id.main_container);
-                            if (f instanceof SubredditListFragment) {
-                                mSubreddits.addAll(result);
-                                ((SubredditListFragment) f).setSubreddits(mSubreddits);
-                            }
-                        }
-                    });
                 }
             });
         }

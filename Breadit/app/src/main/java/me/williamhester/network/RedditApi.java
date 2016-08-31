@@ -3,6 +3,7 @@ package me.williamhester.network;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -42,17 +43,14 @@ import me.williamhester.models.reddit.Success;
 import me.williamhester.models.reddit.Thing;
 import me.williamhester.models.reddit.User;
 import me.williamhester.models.reddit.Votable;
-import retrofit.Call;
-import retrofit.Callback;
-import retrofit.Response;
-import retrofit.Retrofit;
+import retrofit2.Call;
 
 /**
  * Created by William on 6/14/14.
  */
 public class RedditApi {
 
-    private static final String USER_AGENT = "Breadit_Android_App";
+    public static final String USER_AGENT = "Breadit_Android_App";
 
     public static final String REDDIT_URL = "https://api.reddit.com";
     public static final String PUBLIC_REDDIT_URL = "https://www.reddit.com";
@@ -123,88 +121,66 @@ public class RedditApi {
 
     public void getSubmissions(String subredditName, String sortType,
                                String secondarySort, String after,
-                               Callback<GenericResponseWrapper<GenericListing<Submission>>> callback) {
+                               Callback<List<Submission>> callback) {
         Call<GenericResponseWrapper<GenericListing<Submission>>> call;
-        if (!subredditName.equals("")) {
+        if (!TextUtils.isEmpty(subredditName)) {
             call = mRedditService.getSubredditSubmissions(subredditName, sortType, secondarySort, after);
         } else {
             call = mRedditService.getFrontpageSubmissions(sortType, secondarySort, after);
         }
-        call.enqueue(callback);
+        call.enqueue(new ListingCallbackWrapper<>(callback));
     }
 
-    public static void getSubredditDetails(Context context, String subredditName,
-                                           final FutureCallback<JsonObject> callback) {
+    public void getSubredditDetails(String subredditName, Callback<Subreddit> callback) {
         if (subredditName != null && subredditName.length() > 0) {
-            subredditName = "/r/" + subredditName;
+            Call<GenericResponseWrapper<Subreddit>> call
+                    = mRedditService.getSubreddit(subredditName);
+            call.enqueue(new GenericCallbackWrapper<>(callback));
         }
-        Ion.with(context)
-                .load(REDDIT_URL + subredditName + "/about.json")
-                .addHeaders(getStandardHeaders())
-                .asJsonObject()
-                .setCallback(callback);
     }
 
-    public static void getDefaultSubreddits(FutureCallback<ArrayList<Subreddit>> callback) {
-        getSubreddits(callback, "default", null, new ArrayList<Subreddit>(), new Gson());
+    public void getDefaultSubreddits(Callback<List<Subreddit>> callback) {
+        getSubreddits(callback, "default", null, new ArrayList<Subreddit>());
     }
 
-    public static void getSubscribedSubreddits(FutureCallback<ArrayList<Subreddit>> callback) {
-        getSubreddits(callback, "mine", "", new ArrayList<Subreddit>(), new Gson());
+    public void getSubscribedSubreddits(Callback<List<Subreddit>> callback) {
+        getSubreddits(callback, "mine", "", new ArrayList<Subreddit>());
     }
 
-    private static void getSubreddits(final FutureCallback<ArrayList<Subreddit>> callback,
-                                      final String type, String after,
-                                      final ArrayList<Subreddit> subreddits, final Gson gson) {
-        String requestUrl = String.format(REDDIT_URL + "/subreddits/%s/?after=%s", type, after);
-        AsyncHttpRequest request = new AsyncHttpGet(requestUrl);
-        if (AccountManager.isLoggedIn()) {
-            Account account = AccountManager.getAccount();
-            request.addHeader("Cookie", "reddit_session=\"" + account.getCookie() + "\"");
-            request.addHeader("X-Modhash", account.getModhash());
-        }
-        request.addHeader("User-Agent", USER_AGENT);
-        request.addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+    private void getSubreddits(final Callback<List<Subreddit>> callback,
+                               final String type, final String after,
+                               final ArrayList<Subreddit> subreddits) {
+        final Call<GenericResponseWrapper<GenericListing<Subreddit>>> call
+                = mRedditService.getSubreddits(type, after);
 
-        AsyncHttpClient.getDefaultInstance().executeString(request, new AsyncHttpClient.StringCallback() {
+        call.enqueue(new ListingCallbackWrapper<>(new Callback<List<Subreddit>>() {
             @Override
-            public void onCompleted(Exception e, AsyncHttpResponse source, String result) {
-                if (e != null) {
-                    callback.onCompleted(e, null);
+            public void onCompleted() { }
+
+            @Override
+            public void onSuccess(List<Subreddit> data) {
+                if (data.isEmpty()) {
+                    callback.onCompleted();
+                    callback.onSuccess(subreddits);
                     return;
                 }
-                try {
-                    JsonObject object = new JsonParser().parse(result).getAsJsonObject();
-                    ResponseWrapper wrapper = new ResponseWrapper(object, gson);
-                    if (wrapper.getData() instanceof Listing) {
-                        Listing listing = (Listing) wrapper.getData();
-                        for (ResponseWrapper wrapper1 : listing.getChildren()) {
-                            if (wrapper1.getData() instanceof Subreddit) {
-                                subreddits.add((Subreddit) wrapper1.getData());
-                            }
-                        }
-                        if (listing.getAfter() != null) {
-                            getSubreddits(callback, type, listing.getAfter(), subreddits, gson);
-                        } else {
-                            callback.onCompleted(null, subreddits);
-                        }
-                    }
-                } catch (Exception e2) {
-                    callback.onCompleted(e2, null);
-                }
+                subreddits.addAll(data);
+                getSubreddits(callback, type, subreddits.get(subreddits.size() - 1).getName(),
+                        subreddits);
             }
-        });
+
+            @Override
+            public void onFailure() {
+                callback.onFailure();
+            }
+        }));
     }
 
-    public static void subscribeSubreddit(Context context, boolean sub, Subreddit subreddit,
+    public void subscribeSubreddit(boolean sub, Subreddit subreddit,
                                           FutureCallback<String> callback) {
-        Ion.with(context)
-                .load(REDDIT_URL + "/api/subscribe/")
-                .addHeaders(getStandardHeaders())
-                .setBodyParameter("action", sub ? "sub" : "unsub")
-                .setBodyParameter("sr", subreddit.getName())
-                .asString()
-                .setCallback(callback);
+        Call<Success> call = mRedditService.postSubscribeToSubreddit(sub ? "sub" : "unsub",
+                subreddit.getName());
+        call.enqueue(NO_OP_CALLBACK);
     }
 
     private static Map<String, List<String>> getStandardHeaders() {
@@ -375,7 +351,6 @@ public class RedditApi {
 
             callback.onCompleted(null, things);
         } catch (Exception e2) {
-            printOutLongString(result.toString());
             callback.onCompleted(e2, null);
         }
     }
@@ -744,10 +719,62 @@ public class RedditApi {
 
     private static final Callback<Success> NO_OP_CALLBACK = new Callback<Success>() {
         @Override
-        public void onResponse(Response<Success> response, Retrofit retrofit) { }
+        public void onCompleted() { }
+        @Override
+        public void onSuccess(Success data) { }
+    };
+
+    static class ListingCallbackWrapper<T>
+            extends Callback<GenericResponseWrapper<GenericListing<T>>> {
+
+        private Callback<List<T>> mCallback;
+
+        ListingCallbackWrapper(Callback<List<T>> callback) {
+            mCallback = callback;
+        }
 
         @Override
-        public void onFailure(Throwable t) { }
-    };
+        public void onCompleted() {
+            mCallback.onCompleted();
+        }
+
+        @Override
+        public void onSuccess(GenericResponseWrapper<GenericListing<T>> data) {
+            List<GenericResponseWrapper<T>> listing = data.getData().getChildren();
+            List<T> unwrapped= new ArrayList<>(listing.size());
+            for (GenericResponseWrapper<T> item : listing) {
+                unwrapped.add(item.getData());
+            }
+            mCallback.onSuccess(unwrapped);
+        }
+
+        @Override
+        public void onFailure() {
+            mCallback.onFailure();
+        }
+    }
+
+    static class GenericCallbackWrapper<T> extends Callback<GenericResponseWrapper<T>> {
+        private Callback<T> mCallback;
+
+        GenericCallbackWrapper(Callback<T> callback) {
+            mCallback = callback;
+        }
+
+        @Override
+        public void onCompleted() {
+            mCallback.onCompleted();
+        }
+
+        @Override
+        public void onSuccess(GenericResponseWrapper<T> data) {
+            mCallback.onSuccess(data.getData());
+        }
+
+        @Override
+        public void onFailure() {
+            mCallback.onFailure();
+        }
+    }
 
 }

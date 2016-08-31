@@ -10,14 +10,14 @@ import me.williamhester.models.reddit.Submission;
 import me.williamhester.models.reddit.Subreddit;
 import me.williamhester.models.reddit.Success;
 import me.williamhester.models.reddit.User;
-import retrofit.Call;
-import retrofit.Callback;
-import retrofit.http.Field;
-import retrofit.http.FormUrlEncoded;
-import retrofit.http.GET;
-import retrofit.http.POST;
-import retrofit.http.Path;
-import retrofit.http.Query;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.http.Field;
+import retrofit2.http.FormUrlEncoded;
+import retrofit2.http.GET;
+import retrofit2.http.POST;
+import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 /**
  * This service is used by Retrofit to wrap Reddit's API. It can only wrap most of the endpoints
@@ -32,13 +32,13 @@ public interface RedditService {
     Call<Success> postVote(@Field("id") String id,
                            @Field("dir") int voteDirection);
 
-    @GET("{sortType}/.json")
+    @GET("/{sortType}/.json")
     Call<GenericResponseWrapper<GenericListing<Submission>>> getFrontpageSubmissions(
             @Path("sortType") String sortType,
             @Query("t") String secondarySort,
             @Query("after") String after);
 
-    @GET("r/{subredditName}/{sortType}.json")
+    @GET("/r/{subredditName}/{sortType}.json")
     Call<GenericResponseWrapper<GenericListing<Submission>>> getSubredditSubmissions(
             @Path("subredditName") String subredditName,
             @Path("sortType") String sortType,
@@ -47,13 +47,15 @@ public interface RedditService {
 
     @FormUrlEncoded
     @POST("/api/subscribe/.json")
-    void postSubscribeToSubreddit(@Field("action") String sub,
-                                  @Field("sr") String sr,
-                                  Callback<String> stringCallback);
+    Call<Success> postSubscribeToSubreddit(@Field("action") String sub, @Field("sr") String sr);
 
     @GET("/{subredditName}/about.json")
-    void getSubreddit(@Path("subredditName") String subredditName,
-                      Callback<GenericResponseWrapper<Subreddit>> subredditCallback);
+    Call<GenericResponseWrapper<Subreddit>> getSubreddit(
+            @Path("subredditName") String subredditName);
+
+    @GET("/subreddits/{type}")
+    Call<GenericResponseWrapper<GenericListing<Subreddit>>> getSubreddits(@Path("type") String type,
+            @Query("after") String after);
 
     @FormUrlEncoded
     @POST("/api/hide/.json")

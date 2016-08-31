@@ -13,14 +13,13 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.text.TextUtils;
 import android.view.View;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.koushikdutta.async.future.FutureCallback;
+import javax.inject.Inject;
 
+import me.williamhester.BreaditApplication;
 import me.williamhester.SettingsManager;
 import me.williamhester.models.AccountManager;
-import me.williamhester.models.reddit.ResponseWrapper;
 import me.williamhester.models.reddit.Subreddit;
+import me.williamhester.network.Callback;
 import me.williamhester.network.RedditApi;
 import me.williamhester.notifications.MessageNotificationBroadcastReceiver;
 import me.williamhester.reddit.R;
@@ -38,6 +37,8 @@ public class MainActivity extends BaseActivity implements
         NavigationDrawerFragment.NavigationDrawerCallbacks,
         ContentFragment.ContentFragmentCallbacks {
 
+    @Inject RedditApi mApi;
+
     private ActionBarDrawerToggle mDrawerToggle;
     private DrawerLayout mDrawerLayout;
     private Fragment mCurrentFragment;
@@ -52,6 +53,9 @@ public class MainActivity extends BaseActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        BreaditApplication application = (BreaditApplication) getApplicationContext();
+        application.getApiComponent().inject(this);
 
         String startFrom;
         if (getIntent().getExtras() != null) {
@@ -192,21 +196,20 @@ public class MainActivity extends BaseActivity implements
         mSubredditFragment.loadSubreddit(subreddit);
 
         if (!TextUtils.isEmpty(subreddit)) {
-            RedditApi.getSubredditDetails(this, subreddit, new FutureCallback<JsonObject>() {
+            mApi.getSubredditDetails(subreddit, new Callback<Subreddit>() {
                 @Override
-                public void onCompleted(Exception e, JsonObject result) {
-                    if (e != null) {
-                        e.printStackTrace();
-                        return;
-                    }
-                    ResponseWrapper response = new ResponseWrapper(result, new Gson());
-                    if (response.getData() instanceof Subreddit) {
-                        mSidebarFragment.setSubreddit((Subreddit) response.getData());
-                        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED,
-                                GravityCompat.END);
-                    } else {
-                        mSubredditFragment.showSubredditDoesNotExist();
-                    }
+                public void onCompleted() { }
+
+                @Override
+                public void onSuccess(Subreddit data) {
+                    mSidebarFragment.setSubreddit(data);
+                    mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED,
+                            GravityCompat.END);
+                }
+
+                @Override
+                public void onFailure() {
+                    mSubredditFragment.showSubredditDoesNotExist();
                 }
             });
         }

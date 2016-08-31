@@ -68,7 +68,7 @@ public class ImageFragment extends BaseFragment {
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
+    public void onViewCreated(final View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         final ImageView imageView = (ImageView) view.findViewById(R.id.image);
@@ -82,7 +82,7 @@ public class ImageFragment extends BaseFragment {
             loadHq.setVisibility(View.VISIBLE);
             loadHq.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View view) {
+                public void onClick(View view1) {
                     mUrl = mImgurImage.getUrl();
                     ProgressBar progressBar = (ProgressBar) view.findViewById(R.id.progress_bar);
                     progressBar.setVisibility(View.VISIBLE);
