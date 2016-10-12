@@ -22,7 +22,7 @@ public class SettingsActivity extends ActionBarActivity {
         setContentView(R.layout.activity_settings);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
-        toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
+        toolbar.setNavigationIcon(R.drawable.ic_arrow_back_white);
         setSupportActionBar(toolbar);
         toolbar.setTitle(R.string.title_activity_settings);
         // Display the fragment as the main content.

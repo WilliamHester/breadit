@@ -50,7 +50,7 @@ public class SubmitActivity extends ActionBarActivity implements
         setContentView(R.layout.activity_submit);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
-        toolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
+        toolbar.setNavigationIcon(R.drawable.ic_arrow_back_white);
         setSupportActionBar(toolbar);
         toolbar.setTitle(R.string.submit);
         mViewPager = (ViewPager) findViewById(R.id.view_pager);

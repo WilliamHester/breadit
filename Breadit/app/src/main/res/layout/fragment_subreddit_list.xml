@@ -17,7 +17,7 @@
             android:background="@null"
             breadit:titleTextAppearance="@style/ActionBar.TitleText"
             breadit:contentInsetStart="@dimen/drawer_inset"
-            breadit:navigationIcon="@drawable/abc_ic_ab_back_mtrl_am_alpha"
+            breadit:navigationIcon="@drawable/ic_arrow_back_white"
             android:layout_width="match_parent"
             android:layout_height="?actionBarSize">
 

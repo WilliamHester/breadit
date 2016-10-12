@@ -113,7 +113,7 @@ public class MessagesFragment extends AccountFragment implements Toolbar.OnMenuI
         super.onViewCreated(view, savedInstanceState);
 
         if (mCallback == null) {
-            mToolbar.setNavigationIcon(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
+            mToolbar.setNavigationIcon(R.drawable.ic_arrow_back_white);
             mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
